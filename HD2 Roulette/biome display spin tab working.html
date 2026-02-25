@@ -1784,7 +1784,6 @@ END MASTER DIRECTIVE
 
 
 
-        document.addEventListener('DOMContentLoaded', () => { initApp(); wireOnce(); });
         function uid() {
             return Math.random().toString(16).slice(2) + "-" + Date.now().toString(16);
         }
@@ -5130,18 +5129,10 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         loadState();
         saveState();      // ensures pills show correct saved count
         wireOnce();
+        initApp();
         switchTab("spin");
         renderSpin();
-
-
-        document.addEventListener("DOMContentLoaded", () => {
-            initApp();
-            wireOnce();
-
-            // FORCE INITIAL RESULTS RENDER
-            // Fix: cards existed in localStorage but Results tab never rendered on load.
-            setTimeout(() => { renderResults(); }, 0);
-        });
+        setTimeout(() => { renderResults(); }, 0);
 
         /* ===== AUTO COMPARE RADAR WIRING ===== */
         function updateCompareRadar() {
@@ -5360,7 +5351,6 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             // Attempt auto-load first (works on localhost/GitHub)
             tryAutoLoadLocalBiomeTxt();
         });
-        setTimeout(() => wireOnce(), 0);
     </script>
 
 
@@ -5456,50 +5446,6 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             window.addEventListener("load", () => setTimeout(sync, 200));
         })();
 
-        loadBiomes();
-
-        /* ==============================
-           CROSSWAVEOMEGA BIOME MAP (v12)
-        ================================ */
-        let PLANET_BIOME_MAP = {};
-
-        async function loadCrosswaveBiomeMap() {
-            try {
-                const res = await fetch("https://crosswaveomega.github.io/helldiversplanettable/planet_table");
-                const htmlText = await res.text();
-                const doc = new DOMParser().parseFromString(htmlText, "text/html");
-
-                doc.querySelectorAll("table tr").forEach(row => {
-                    const cols = row.querySelectorAll("td");
-                    if (cols.length < 3) return;
-                    const planet = cols[0].textContent.trim().toLowerCase();
-                    const biome = cols[2].textContent.trim();
-                    if (planet && biome) {
-                        PLANET_BIOME_MAP[planet] = biome;
-                    }
-                });
-
-                console.log("[BiomeMap] Crosswave loaded:", Object.keys(PLANET_BIOME_MAP).length);
-            } catch (e) {
-                console.warn("[BiomeMap] Crosswave load failed", e);
-            }
-        }
-
-        const __oldGetPlanetBiome = window.getPlanetBiome;
-        window.getPlanetBiome = function (p) {
-            if (!p) return "Unknown";
-            const key = (p.name || "").toLowerCase();
-            if (PLANET_BIOME_MAP[key]) return PLANET_BIOME_MAP[key];
-            if (__oldGetPlanetBiome) return __oldGetPlanetBiome(p);
-            return "Unknown";
-        };
-
-        document.addEventListener("DOMContentLoaded", () => {
-            loadCrosswaveBiomeMap();
-        });
-
-
-        setTimeout(() => wireOnce(), 0);
     </script>
 
 
@@ -5567,51 +5513,6 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             mo.observe(document.documentElement, { childList: true, subtree: true });
             window.addEventListener("load", () => setTimeout(patchAll, 50));
         })();
-
-        loadBiomes();
-
-        /* ==============================
-           CROSSWAVEOMEGA BIOME MAP (v12)
-        ================================ */
-        let PLANET_BIOME_MAP = {};
-
-        async function loadCrosswaveBiomeMap() {
-            try {
-                const res = await fetch("https://crosswaveomega.github.io/helldiversplanettable/planet_table");
-                const htmlText = await res.text();
-                const doc = new DOMParser().parseFromString(htmlText, "text/html");
-
-                doc.querySelectorAll("table tr").forEach(row => {
-                    const cols = row.querySelectorAll("td");
-                    if (cols.length < 3) return;
-                    const planet = cols[0].textContent.trim().toLowerCase();
-                    const biome = cols[2].textContent.trim();
-                    if (planet && biome) {
-                        PLANET_BIOME_MAP[planet] = biome;
-                    }
-                });
-
-                console.log("[BiomeMap] Crosswave loaded:", Object.keys(PLANET_BIOME_MAP).length);
-            } catch (e) {
-                console.warn("[BiomeMap] Crosswave load failed", e);
-            }
-        }
-
-        const __oldGetPlanetBiome = window.getPlanetBiome;
-        window.getPlanetBiome = function (p) {
-            if (!p) return "Unknown";
-            const key = (p.name || "").toLowerCase();
-            if (PLANET_BIOME_MAP[key]) return PLANET_BIOME_MAP[key];
-            if (__oldGetPlanetBiome) return __oldGetPlanetBiome(p);
-            return "Unknown";
-        };
-
-        document.addEventListener("DOMContentLoaded", () => {
-            loadCrosswaveBiomeMap();
-        });
-
-
-        setTimeout(() => wireOnce(), 0);
     </script>
 
 </body>
