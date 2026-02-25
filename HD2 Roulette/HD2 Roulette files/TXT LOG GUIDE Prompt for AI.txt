@@ -195,3 +195,47 @@ END MASTER LOG DIRECTIVE
 ===========================
 LOG HISTORY STARTS BELOW
 ===========================
+
+============================================================
+AI MAINTENANCE LOG UPDATE v1
+============================================================
+
+PROBLEM GIVEN:
+User requested a real fix after QA findings: verify intended behavior, repair broken initialization/biome wiring in HTML, and update continuity progress logs in this TXT file.
+
+CURRENT HTML STATE:
+Before this fix, the HTML contained duplicate boot/patch blocks appended near the end of file. The same Crosswave biome globals and wrapper were declared multiple times (`let PLANET_BIOME_MAP`, `const __oldGetPlanetBiome`, and `loadCrosswaveBiomeMap`). The file also had repeated init hooks and delayed re-wiring calls. This could trigger global redeclaration runtime errors and stop later scripts from executing reliably.
+
+ROOT CAUSE ANALYSIS:
+The root issue was cumulative append-only patching in script tail sections (Session 12/13 style additions) without consolidating global declarations. Because `let`/`const` are block-scoped and cannot be redeclared in the same global scope, duplicate declarations would throw and short-circuit script execution. Duplicate boot flow also increased lifecycle noise (extra listeners/calls), making behavior nondeterministic.
+
+PROPOSED SOLUTION:
+Apply minimum-safe consolidation:
+1) Keep exactly one canonical Crosswave biome map declaration and one wrapper for `getPlanetBiome`.
+2) Keep one deterministic boot flow in the main script area (`loadState`/`wireOnce`/`initApp`/initial renders).
+3) Remove duplicate tail-end biome/boot fragments from appended script sections while preserving compare-tier and overlay patch functionality.
+
+RISK ANALYSIS:
+- spin system: LOW risk (state and spin render flow retained)
+- results rendering: LOW risk (explicit initial `renderResults` kept)
+- ranking: LOW risk (no rank formulas changed)
+- compare tab: LOW-MEDIUM risk (overlay/tier scripts preserved; duplicate bootstrap removed)
+- event lifecycle: MEDIUM positive impact (less duplicate listener/boot churn)
+- data persistence: LOW risk (localStorage logic untouched)
+
+IMPLEMENTATION:
+- Removed duplicate `DOMContentLoaded` boot listener that repeated `initApp` + `wireOnce`.
+- Consolidated startup by calling `initApp()` once in the existing boot section after `wireOnce()` and preserved initial `renderResults()` scheduling.
+- Removed duplicate trailing block containing repeated `loadBiomes`, Crosswave biome globals/functions, `getPlanetBiome` wrapper reassignment, duplicate `DOMContentLoaded` biome loader, and extra delayed `wireOnce` call.
+- Left one canonical Crosswave biome patch block in place so fallback order remains intact (Crosswave map -> prior resolver -> "Unknown").
+
+VERIFICATION EXPECTATION:
+- Page boots without `Identifier has already been declared` errors for biome globals.
+- Planet biome lookup still works using Crosswave/local fallback path.
+- Compare overlay button behavior remains intact and no duplicate bootstrap side-effects occur.
+- Initial results render still occurs on startup when cards exist.
+
+STATUS:
+APPLIED
+
+next AI, please review the file and continue this same protocol
