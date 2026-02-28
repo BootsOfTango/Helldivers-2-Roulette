@@ -3827,6 +3827,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
                 const planetWeatherText = card.planet ? getPlanetWeatherText(card.planet) : "None";
                 const planetWeatherTags = splitWeatherTags(planetWeatherText);
+                const cardBiome = card.planet ? (card.planetBiome || getPlanetBiomeFromPlanet(card.planet) || "—") : "—";
 
                 const tier = tierMap.get(card.id) || "";
 
@@ -3861,6 +3862,11 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                           <div class="planetMiniCard">
                             <div class="planetMiniLabel">Sector</div>
                             <div class="planetMiniValue">${escapeHtml(card.planet.sector || "—")}</div>
+                          </div>
+
+                          <div class="planetMiniCard">
+                            <div class="planetMiniLabel">Biome</div>
+                            <div class="planetMiniValue">${escapeHtml(cardBiome)}</div>
                           </div>
 
                           <div class="planetMiniCard">
