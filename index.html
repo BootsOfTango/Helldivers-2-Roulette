@@ -861,6 +861,22 @@ END MASTER DIRECTIVE
             gap: 10px;
         }
 
+        .statsGrid {
+            align-items: start;
+        }
+
+            .statsGrid > div {
+                display: flex;
+                flex-direction: column;
+            }
+
+            .statsGrid > div .label {
+                min-height: 30px;
+                line-height: 1.2;
+                display: flex;
+                align-items: flex-end;
+            }
+
         .formGrid4 {
             display: grid;
             grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -1494,7 +1510,7 @@ END MASTER DIRECTIVE
             <div class="row">
                 <div class="col">
                     <div class="label">Mission Results Entry</div>
-                    <div class="formGrid3">
+                    <div class="formGrid3 statsGrid">
                         <div>
                             <div class="label">Kills</div>
                             <input id="resKills" type="number" min="0">
@@ -3866,7 +3882,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
                       <div class="hr"></div>
 
-                      <div class="formGrid4">
+                      <div class="formGrid4 statsGrid">
                         <div>
                           <div class="label">Kills</div>
                           <input type="number" min="0" value="${Number(card.stats?.kills || 0)}" data-k="kills" data-id="${card.id}">
@@ -3885,7 +3901,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                         </div>
                       </div>
 
-                      <div class="formGrid4" style="margin-top:10px;">
+                      <div class="formGrid4 statsGrid" style="margin-top:10px;">
                         <div>
                           <div class="label">Distance (km)</div>
                           <input type="number" min="0" step="0.1" value="${Number(card.stats?.distanceKm || 0)}" data-k="distanceKm" data-id="${card.id}">
