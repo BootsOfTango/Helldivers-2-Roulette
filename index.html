@@ -3835,8 +3835,9 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
                 const planetWeatherText = card.planet ? getPlanetWeatherText(card.planet) : "None";
                 const planetWeatherTags = splitWeatherTags(planetWeatherText);
-                const cardBiome = card.planet ? (card.planetBiome || card.planet?.biome || getPlanetBiomeFromPlanet(card.planet) || "—") : "—";
-                if (card.planet && !card.planetBiome && cardBiome && cardBiome !== "—") card.planetBiome = cardBiome;
+                const cardBiome = card.planet
+                    ? (card.planetBiome || card.planet.biome || getPlanetBiomeFromPlanet(card.planet) || "—")
+                    : "—";
 
                 const tier = tierMap.get(card.id) || "";
 
