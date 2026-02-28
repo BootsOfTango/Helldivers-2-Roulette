@@ -861,6 +861,22 @@ END MASTER DIRECTIVE
             gap: 10px;
         }
 
+        .statsGrid {
+            align-items: start;
+        }
+
+            .statsGrid > div {
+                display: flex;
+                flex-direction: column;
+            }
+
+            .statsGrid > div .label {
+                min-height: 30px;
+                line-height: 1.2;
+                display: flex;
+                align-items: flex-end;
+            }
+
         .formGrid4 {
             display: grid;
             grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -1116,10 +1132,18 @@ END MASTER DIRECTIVE
             font-weight: 600;
             display: flex;
             align-items: center;
-            white-space: nowrap;
+            white-space: normal;
+            line-height: 1.35;
+            max-width: 460px;
             /* make room for the arrow to sit on the left side */
             position: relative;
             padding-left: 22px;
+        }
+
+        .ytPromo .emph {
+            display: inline-block;
+            margin: 0 .18em;
+            font-weight: 800;
         }
 
         .arrow {
@@ -1346,7 +1370,7 @@ END MASTER DIRECTIVE
 
                     <div class="ytPromo">
                         <span class="arrow">➜</span>
-                        Come to my channel for <strong>FUN</strong>  and  <strong>EPIC</strong>  Helldivers 2 videos!!
+                        Come to my channel for <span class="emph">FUN</span> and <span class="emph">EPIC</span> Helldivers 2 videos!!
                     </div>
 
                 </div>
@@ -1494,7 +1518,7 @@ END MASTER DIRECTIVE
             <div class="row">
                 <div class="col">
                     <div class="label">Mission Results Entry</div>
-                    <div class="formGrid3">
+                    <div class="formGrid3 statsGrid">
                         <div>
                             <div class="label">Kills</div>
                             <input id="resKills" type="number" min="0">
@@ -3811,6 +3835,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
                 const planetWeatherText = card.planet ? getPlanetWeatherText(card.planet) : "None";
                 const planetWeatherTags = splitWeatherTags(planetWeatherText);
+                const cardBiome = card.planet ? (card.planetBiome || card.planet?.biome || getPlanetBiomeFromPlanet(card.planet) || "—") : "—";
+                if (card.planet && !card.planetBiome && cardBiome && cardBiome !== "—") card.planetBiome = cardBiome;
 
                 const tier = tierMap.get(card.id) || "";
 
@@ -3848,6 +3874,11 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                           </div>
 
                           <div class="planetMiniCard">
+                            <div class="planetMiniLabel">Biome</div>
+                            <div class="planetMiniValue">${escapeHtml(cardBiome)}</div>
+                          </div>
+
+                          <div class="planetMiniCard">
                             <div class="planetMiniLabel">Environment</div>
                             <div class="planetMiniValue">${escapeHtml(planetWeatherTags.length ? planetWeatherTags.slice(0, 3).join(" / ") : (planetWeatherText || "None"))}${planetWeatherTags.length > 3 ? ` (+${planetWeatherTags.length - 3})` : ""}</div>
                             <div class="planetTagRow">
@@ -3866,7 +3897,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
                       <div class="hr"></div>
 
-                      <div class="formGrid4">
+                      <div class="formGrid4 statsGrid">
                         <div>
                           <div class="label">Kills</div>
                           <input type="number" min="0" value="${Number(card.stats?.kills || 0)}" data-k="kills" data-id="${card.id}">
@@ -3885,7 +3916,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                         </div>
                       </div>
 
-                      <div class="formGrid4" style="margin-top:10px;">
+                      <div class="formGrid4 statsGrid" style="margin-top:10px;">
                         <div>
                           <div class="label">Distance (km)</div>
                           <input type="number" min="0" step="0.1" value="${Number(card.stats?.distanceKm || 0)}" data-k="distanceKm" data-id="${card.id}">
