@@ -877,6 +877,23 @@ END MASTER DIRECTIVE
                 align-items: flex-end;
             }
 
+        .cardInputGrid {
+            grid-template-columns: repeat(3, minmax(140px, 1fr));
+        }
+
+        .cardInputGrid .label {
+            min-height: 32px;
+            white-space: nowrap;
+        }
+
+        .cardMetaGrid {
+            margin-top: 10px;
+            display: grid;
+            grid-template-columns: repeat(2, minmax(220px, 1fr));
+            gap: 10px;
+            align-items: start;
+        }
+
         .formGrid4 {
             display: grid;
             grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -893,6 +910,14 @@ END MASTER DIRECTIVE
         @media (max-width: 820px) {
             .formGrid3, .formGrid4 {
                 grid-template-columns: repeat(2, minmax(140px, 1fr));
+            }
+
+            .cardInputGrid {
+                grid-template-columns: repeat(2, minmax(140px, 1fr));
+            }
+
+            .cardMetaGrid {
+                grid-template-columns: 1fr;
             }
         }
 
@@ -915,19 +940,35 @@ END MASTER DIRECTIVE
             display: flex;
             flex-direction: column;
             gap: 12px;
-            align-items: center;
+            align-items: stretch;
+        }
+
+        .cmpRadarRow {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(260px, 1fr));
+            gap: 12px;
         }
 
         .cmpRadar,
         .cmpRadarOverlay {
-            width: 260px;
-            height: 260px;
+            min-height: 290px;
             display: flex;
             justify-content: center;
             align-items: center;
             background: rgba(0,0,0,.2);
             border: 1px solid var(--line2);
             border-radius: 14px;
+            padding: 10px;
+        }
+
+        .cmpRadarOverlay svg title {
+            pointer-events: none;
+        }
+
+        @media (max-width: 960px) {
+            .cmpRadarRow {
+                grid-template-columns: 1fr;
+            }
         }
         /* Overlay radar colors are set dynamically per compared card (tier colors) */
         .overlayA .radarValue {
@@ -1503,41 +1544,6 @@ END MASTER DIRECTIVE
                 </div>
             </div>
 
-            <div class="divider"></div>
-
-
-            <div class="divider"></div>
-            <div class="row">
-                <div class="col">
-                    <div class="label">Mission Results Entry</div>
-                    <div class="formGrid3 statsGrid">
-                        <div>
-                            <div class="label">Kills</div>
-                            <input id="resKills" type="number" min="0">
-                        </div>
-                        <div>
-                            <div class="label">Accuracy (%)</div>
-                            <input id="resAccuracy" type="number" step="0.1">
-                        </div>
-                        <div>
-                            <div class="label">Deaths</div>
-                            <input id="resDeaths" type="number" min="0">
-                        </div>
-                        <div>
-                            <div class="label">Stims Used</div>
-                            <input id="resStims" type="number" min="0">
-                        </div>
-                        <div>
-                            <div class="label">Distance Traveled (km)</div>
-                            <input id="resDistance" type="number" step="0.01">
-                        </div>
-                        <div>
-                            <div class="label">Stratagem Uses</div>
-                            <input id="resStratUses" type="number" min="0">
-                        </div>
-                    </div>
-                </div>
-            </div>
             <div id="resultsScroll">
                 <div id="resultsGrid" class="cardGrid"></div>
             </div>
@@ -1585,11 +1591,15 @@ END MASTER DIRECTIVE
 
             <div class="row">
                 <div class="col">
-                    <div class="label">Graph (X vs Y)</div>
+                    <div class="label">Radar comparison</div>
                     <div class="radarCompareWrap">
-                        <div id="cmpRadarA" class="cmpRadar"></div>
-                        <div id="cmpRadarB" class="cmpRadar"></div>
-                        <button id="btnOverlayRadar" class="btnPrimary" disabled>OVERLAY COMPARISON</button>
+                        <div class="cmpRadarRow">
+                            <div id="cmpRadarA" class="cmpRadar"></div>
+                            <div id="cmpRadarB" class="cmpRadar"></div>
+                        </div>
+                        <div class="miniRow" style="justify-content:center;">
+                            <button id="btnOverlayRadar" class="btnPrimary" disabled>STACK RADARS</button>
+                        </div>
                         <div id="cmpRadarOverlay" class="cmpRadarOverlay"></div>
                         <div id="cmpInsight" class="smallHelp"></div>
                     </div>
@@ -3423,29 +3433,24 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const insight = document.querySelector("#cmpInsight");
             const btn = document.querySelector("#btnOverlayRadar");
 
-
-            // Reset readiness whenever we rebuild compare radars
             cmpRadarReadyA = false;
             cmpRadarReadyB = false;
             if (btn) btn.disabled = true;
 
             if (!wrapA || !wrapB) return;
 
-            const maxes = (typeof getRadarMaxes === "function") ? getRadarMaxes(state.cards) : null;
+            const maxes = getRadarMaxes(state.cards || []);
 
-            // Determine tier for each card so compare titles + radars match rank colors
             const tierMap = (typeof buildTierMap === "function") ? buildTierMap() : null;
             const tA = tierMap ? (tierMap.get(cardA.id) || "") : ((cardA && cardA.tier) || "");
             const tB = tierMap ? (tierMap.get(cardB.id) || "") : ((cardB && cardB.tier) || "");
 
-            // Persist tier on card objects (used by getTierRadarColor and overlay styling)
             if (cardA) cardA.tier = tA || cardA.tier || "";
             if (cardB) cardB.tier = tB || cardB.tier || "";
 
             const titleStyleA = (tA && typeof tierColor === "function") ? ` style="color:${tierColor(tA)}"` : "";
             const titleStyleB = (tB && typeof tierColor === "function") ? ` style="color:${tierColor(tB)}"` : "";
 
-            // Store compare context for deterministic overlay builds (Session 13 patch calls window.buildOverlayRadar()).
             window.__cmpCtx = {
                 idA: cardA.id,
                 idB: cardB.id,
@@ -3453,132 +3458,148 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             };
 
             const safeMaxes = maxes || { maxKills: 1, maxAccuracy: 1, maxDistanceKm: 1, maxStratUses: 1, minDeathsPlusStims: 0, maxDeathsPlusStims: 1 };
-
-            // IMPORTANT: wrap radar inside a virtual .card tier container so CSS vars apply
             const cardClassA = `card${tA ? ` tier-${tA}` : ""}`.trim();
             const cardClassB = `card${tB ? ` tier-${tB}` : ""}`.trim();
 
             wrapA.innerHTML = `
             <div class="${cardClassA}">
-                <div class="cmpTitle"${titleStyleA}>${cardA.seed || "—"}</div>
+                <div class="cmpTitle"${titleStyleA}>${escapeHtml(cardA.seed || "—")}</div>
                 ${buildRadarSVG(cardA, safeMaxes)}
-            </div>
-        `;
+            </div>`;
+
             wrapB.innerHTML = `
             <div class="${cardClassB}">
-                <div class="cmpTitle"${titleStyleB}>${cardB.seed || "—"}</div>
+                <div class="cmpTitle"${titleStyleB}>${escapeHtml(cardB.seed || "—")}</div>
                 ${buildRadarSVG(cardB, safeMaxes)}
-            </div>
+            </div>`;
 
-
-        // Mark both compare radars as ready on next paint so overlay cannot race the SVG inject.
-        requestAnimationFrame(() => {
-            cmpRadarReadyA = true;
-            cmpRadarReadyB = true;
-            tryEnableOverlay();
-        });
-
-        `;
-
-            // Clear overlay + insight whenever selections change (overlay is built on button click)
-            if (overlay) overlay.innerHTML = "";
+            if (overlay) {
+                overlay.innerHTML = '<div class="tiny muted">Click <strong>STACK RADARS</strong> to view overlap + highlighted advantages.</div>';
+            }
             if (insight) insight.textContent = "";
 
-            // DO NOT assign btn.onclick here.
-            // Overlay ordering is enforced by Session 13 patch (double requestAnimationFrame) which calls window.buildOverlayRadar().
+            requestAnimationFrame(() => {
+                cmpRadarReadyA = true;
+                cmpRadarReadyB = true;
+                tryEnableOverlay();
+            });
+        }
+
+        function getCompareVals(card, maxes) {
+            const s = card?.stats || {};
+            const combo = Number(s.deaths || 0) + Number(s.stims || 0);
+            const moScale = card?.majorOrderDone ? 1 : 0.75;
+            return [
+                normPos(s.kills, maxes.maxKills) * moScale,
+                normPos(s.accuracy, maxes.maxAccuracy) * moScale,
+                normInverse(combo, maxes.minDeathsPlusStims, maxes.maxDeathsPlusStims) * moScale,
+                normPos(s.distanceKm, maxes.maxDistanceKm) * moScale,
+                normPos(s.stratUses, maxes.maxStratUses) * moScale,
+            ].map(v => clamp(v, 0, 1));
         }
 
         function buildOverlayRadar() {
             const overlay = document.querySelector("#cmpRadarOverlay");
             const insight = document.querySelector("#cmpInsight");
             if (!overlay) return;
-            overlay.innerHTML = "";
 
             const ctx = window.__cmpCtx || {};
             const idA = ctx.idA || (document.querySelector("#cmpA")?.value || "");
             const idB = ctx.idB || (document.querySelector("#cmpB")?.value || "");
             const cardA = (state.cards || []).find(c => c.id === idA);
             const cardB = (state.cards || []).find(c => c.id === idB);
+            const maxes = ctx.maxes || getRadarMaxes(state.cards || []);
 
-            const maxes = ctx.maxes || (typeof getRadarMaxes === "function" ? getRadarMaxes(state.cards) : null);
             if (!cardA || !cardB || !maxes) {
                 overlay.innerHTML = "";
                 if (insight) insight.textContent = "Overlay needs two valid cards.";
                 return;
             }
 
-            // Use the same generator so geometry is guaranteed identical
-            const wrapA = buildRadarSVG(cardA, maxes);
-            const wrapB = buildRadarSVG(cardB, maxes);
+            const size = 240, cx = 120, cy = 120, rOuter = 86;
+            const axes = [
+                { label: "Power", metric: "Kills" },
+                { label: "Agility", metric: "Accuracy" },
+                { label: "Endurance", metric: "Deaths + Stims" },
+                { label: "Mobility", metric: "Distance" },
+                { label: "Utility", metric: "Strat uses" },
+            ];
+            const angles = axes.map((_, i) => (-Math.PI / 2) + (i * (Math.PI * 2 / axes.length)));
+            const pt = (r, a) => ({ x: cx + r * Math.cos(a), y: cy + r * Math.sin(a) });
+            const fmt = (p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`;
 
-            const extractSvgInner = (htmlStr) => {
-                const m = String(htmlStr || "").match(/<svg[^>]*>([\s\S]*?)<\/svg>/i);
-                return m ? m[1] : "";
+            const valsA = getCompareVals(cardA, maxes);
+            const valsB = getCompareVals(cardB, maxes);
+
+            const ptsOuter = angles.map(a => pt(rOuter, a));
+            const ptsA = angles.map((a, i) => pt(rOuter * valsA[i], a));
+            const ptsB = angles.map((a, i) => pt(rOuter * valsB[i], a));
+
+            const ring = (k) => {
+                const rr = rOuter * k;
+                const pts = angles.map(a => pt(rr, a)).map(fmt).join(" ");
+                return `<polygon points="${pts}" />`;
             };
+            const spokes = angles.map(a => {
+                const p2 = pt(rOuter, a);
+                return `<line x1="${cx}" y1="${cy}" x2="${p2.x.toFixed(1)}" y2="${p2.y.toFixed(1)}" />`;
+            }).join("");
 
-            const innerA = extractSvgInner(wrapA);
-            const innerB = extractSvgInner(wrapB);
+            const polyA = ptsA.map(fmt).join(" ");
+            const polyB = ptsB.map(fmt).join(" ");
 
-            const pick = (inner, re) => {
-                const m = String(inner || "").match(re);
-                return m ? m[0] : "";
-            };
-
-            const grid = pick(innerA, /<g class="radarGrid">[\s\S]*?<\/g>/i) || pick(innerB, /<g class="radarGrid">[\s\S]*?<\/g>/i);
-            const dot = pick(innerA, /<circle class="radarDot"[^>]*\/>/i) || pick(innerB, /<circle class="radarDot"[^>]*\/>/i);
-
-            const valA = pick(innerA, /<polygon class="radarValue"[\s\S]*?\/>/i);
-            const valB = pick(innerB, /<polygon class="radarValue"[\s\S]*?\/>/i);
-
-            // If tiers weren't resolved yet, fall back to their existing tier values
             const colA = getTierRadarColor(cardA);
             const colB = getTierRadarColor(cardB);
 
-            overlay.innerHTML = `
-            <svg width="240" height="240" viewBox="0 0 160 160" aria-label="Overlay radar comparison">
-                ${grid}
-                <g class="overlayA" style="--ovFill:${colA.fill};--ovStroke:${colA.stroke};">${valA}</g>
-                <g class="overlayB" style="--ovFill:${colB.fill};--ovStroke:${colB.stroke};">${valB}</g>
-                ${dot}
-            </svg>
-        `;
+            const highlights = [];
+            const insightLines = [];
+            for (let i = 0; i < axes.length; i++) {
+                const a = valsA[i], b = valsB[i];
+                if (Math.abs(a - b) < 0.01) continue;
 
-            // Insight lines (simple + deterministic)
-            const sA = cardA.stats || {};
-            const sB = cardB.stats || {};
+                const winner = a > b ? "A" : "B";
+                const high = Math.max(a, b);
+                const low = Math.min(a, b);
+                const pct = low <= 0 ? 100 : ((high - low) / low) * 100;
+                const pctText = `${Math.max(1, pct).toFixed(1)}%`;
 
-            const axes = [
-                ["Kills", "kills", true],
-                ["Accuracy", "accuracy", true],
-                ["Mobility", "distanceKm", true],
-                ["Utility", "stratUses", true],
-            ];
+                const ang = angles[i];
+                const da = 0.14;
+                const p1 = pt(rOuter * high, ang - da);
+                const p2 = pt(rOuter * high, ang + da);
+                const p3 = pt(rOuter * low, ang + da);
+                const p4 = pt(rOuter * low, ang - da);
+                const winnerSeed = winner === "A" ? (cardA.seed || "Card A") : (cardB.seed || "Card B");
+                const loserSeed = winner === "A" ? (cardB.seed || "Card B") : (cardA.seed || "Card A");
+                const winnerColor = winner === "A" ? colA.stroke : colB.stroke;
+                const label = axes[i].label.toUpperCase();
+                const tip = `${winnerSeed} is ${pctText} better on ${label} than ${loserSeed}`;
 
-            const lines = [];
-            axes.forEach(([name, key]) => {
-                const a = Number(sA[key] || 0);
-                const b = Number(sB[key] || 0);
-                if (a === 0 && b === 0) return;
-                const d = percentDiff(a, b);
-                if (Math.abs(d) < 1) return;
-                const better = d > 0 ? "A" : "B";
-                lines.push(`${name}: Card ${better} ~${Math.abs(d).toFixed(1)}% better`);
-            });
-
-            const comboA = Number(sA.deaths || 0) + Number(sA.stims || 0);
-            const comboB = Number(sB.deaths || 0) + Number(sB.stims || 0);
-            if (comboA || comboB) {
-                const d = percentDiff(comboB, comboA); // invert since low is better
-                if (Math.abs(d) >= 1) {
-                    const better = d > 0 ? "A" : "B";
-                    lines.push(`Endurance (Deaths+Stims): Card ${better} ~${Math.abs(d).toFixed(1)}% better`);
-                }
+                highlights.push(`<polygon points="${fmt(p1)} ${fmt(p2)} ${fmt(p3)} ${fmt(p4)}" fill="${winnerColor}" fill-opacity="0.26" stroke="${winnerColor}" stroke-width="1.2"><title>${escapeHtml(tip)}</title></polygon>`);
+                insightLines.push(`<span style="color:${winnerColor};font-weight:700;">${escapeHtml(label)}</span>: ${escapeHtml(tip)}`);
             }
 
-            if (insight) insight.innerHTML = lines.length ? lines.join("<br>") : "Pretty even.";
+            overlay.innerHTML = `
+            <svg width="240" height="240" viewBox="0 0 240 240" aria-label="Stacked radar comparison" role="img">
+                <g class="radarGrid">
+                    ${ring(0.33)}
+                    ${ring(0.66)}
+                    <polygon points="${ptsOuter.map(fmt).join(" ")}" />
+                    ${spokes}
+                </g>
+                <polygon points="${polyB}" fill="${colB.fill}" stroke="${colB.stroke}" stroke-width="2" opacity="0.8"><title>${escapeHtml(cardB.seed || "Card B")}</title></polygon>
+                <polygon points="${polyA}" fill="${colA.fill}" stroke="${colA.stroke}" stroke-width="2" opacity="0.8"><title>${escapeHtml(cardA.seed || "Card A")}</title></polygon>
+                ${highlights.join("")}
+                <circle class="radarDot" cx="${cx}" cy="${cy}" r="2.2" />
+            </svg>`;
+
+            if (insight) {
+                insight.innerHTML = insightLines.length
+                    ? insightLines.join("<br>")
+                    : "Both cards are nearly identical on the stacked radar.";
+            }
         }
 
-        ;
 
         /***********************
                  * Tiering (based on rank position)
@@ -3888,7 +3909,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
                       <div class="hr"></div>
 
-                      <div class="formGrid4 statsGrid">
+                      <div class="formGrid3 statsGrid cardInputGrid">
                         <div>
                           <div class="label">Kills</div>
                           <input type="number" min="0" value="${Number(card.stats?.kills || 0)}" data-k="kills" data-id="${card.id}">
@@ -3905,9 +3926,6 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                           <div class="label">Stims</div>
                           <input type="number" min="0" value="${Number(card.stats?.stims || 0)}" data-k="stims" data-id="${card.id}">
                         </div>
-                      </div>
-
-                      <div class="formGrid4 statsGrid" style="margin-top:10px;">
                         <div>
                           <div class="label">Distance (km)</div>
                           <input type="number" min="0" step="0.1" value="${Number(card.stats?.distanceKm || 0)}" data-k="distanceKm" data-id="${card.id}">
@@ -3916,6 +3934,9 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                           <div class="label">Strat uses</div>
                           <input type="number" min="0" value="${Number(card.stats?.stratUses || 0)}" data-k="stratUses" data-id="${card.id}">
                         </div>
+                      </div>
+
+                      <div class="cardMetaGrid">
                         <div>
                           <div class="label">Deaths + Stims</div>
                           <div class="tiny"><strong>${Number(card.stats?.deaths || 0) + Number(card.stats?.stims || 0)}</strong> (lower = better endurance)</div>
@@ -4853,14 +4874,14 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
                 planetBiome: c.planetBiome || null,
 
-                // user-entered mission stats (raw only)
+                // user-entered mission stats are filled on each individual card.
                 stats: {
-                    kills: Number($("#resKills")?.value || 0),
-                    accuracy: Number($("#resAccuracy")?.value || 0),
-                    deaths: Number($("#resDeaths")?.value || 0),
-                    stims: Number($("#resStims")?.value || 0),
-                    distanceKm: Number($("#resDistance")?.value || 0),
-                    stratUses: Number($("#resStratUses")?.value || 0),
+                    kills: 0,
+                    accuracy: 0,
+                    deaths: 0,
+                    stims: 0,
+                    distanceKm: 0,
+                    stratUses: 0,
                 },
 
                 majorOrderDone: false,
@@ -4929,6 +4950,10 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             $("#cmpA").addEventListener("change", renderCompare);
             $("#cmpB").addEventListener("change", renderCompare);
+            $("#btnOverlayRadar").addEventListener("click", () => {
+                if (!cmpRadarReadyA || !cmpRadarReadyB) return;
+                buildOverlayRadar();
+            });
             $("#cmpSortMetric").addEventListener("change", refreshCompareOptions);
             $("#cmpSortDir").addEventListener("change", refreshCompareOptions);
             $("#cmpSearch").addEventListener("input", refreshCompareOptions);
@@ -5375,167 +5400,6 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         });
     </script>
 
-
-    <!-- ===== COMPARE TAB TIER SYNC (SESSION 12) ===== -->
-    <script>
-        (function () {
-            function extractTierClass(el) {
-                if (!el) return "";
-                const cls = Array.from(el.classList).find(c => c.startsWith("tier-"));
-                return cls || "";
-            }
-
-            function findCardBySeed(seed) {
-                const cards = document.querySelectorAll(".card");
-                for (const c of cards) {
-                    const t = c.textContent || "";
-                    if (t.includes(seed)) return c;
-                }
-                return null;
-            }
-
-            function wrapRadarWithTier(container, seed) {
-                if (!container) return;
-                const svg = container.querySelector("svg");
-                if (!svg) return;
-
-                const srcCard = findCardBySeed(seed);
-                const tier = extractTierClass(srcCard);
-
-                if (!tier) return;
-
-                // avoid double wrapping
-                if (container.firstElementChild && container.firstElementChild.classList &&
-                    container.firstElementChild.classList.contains("card")) return;
-
-                const wrap = document.createElement("div");
-                wrap.className = "card " + tier;
-                wrap.appendChild(svg.cloneNode(true));
-
-                container.innerHTML = "";
-                container.appendChild(wrap);
-            }
-
-            function getSelectedSeed(select) {
-                if (!select) return "";
-                const txt = select.options[select.selectedIndex]?.text || "";
-                const m = txt.match(/Seed:\s*([^•]+)/);
-                return m ? m[1].trim() : "";
-            }
-
-            function colorSeedTitle(container, seed) {
-                const title = container.closest(".compareBox")?.querySelector(".seedTitle, .big, .label");
-                if (!title) return;
-                const srcCard = findCardBySeed(seed);
-                if (!srcCard) return;
-                const cs = getComputedStyle(srcCard);
-                const col = cs.getPropertyValue("--radarStroke") || "#e8eef7";
-                title.style.color = col;
-            }
-
-            function sync() {
-                const selA = document.querySelector("#cmpSelectA, #cmpA, select[name='cmpA']");
-                const selB = document.querySelector("#cmpSelectB, #cmpB, select[name='cmpB']");
-
-                const seedA = getSelectedSeed(selA);
-                const seedB = getSelectedSeed(selB);
-
-                const a = document.querySelector("#cmpRadarA");
-                const b = document.querySelector("#cmpRadarB");
-
-                wrapRadarWithTier(a, seedA);
-                wrapRadarWithTier(b, seedB);
-
-                colorSeedTitle(a, seedA);
-                colorSeedTitle(b, seedB);
-            }
-
-            const targets = ["#cmpRadarA", "#cmpRadarB"];
-            targets.forEach(id => {
-                const el = document.querySelector(id);
-                if (!el) return;
-                const mo = new MutationObserver(() => requestAnimationFrame(sync));
-                mo.observe(el, { childList: true, subtree: true });
-            });
-
-            document.addEventListener("change", e => {
-                if (e.target && (e.target.id?.includes("cmp") || e.target.name?.includes("cmp"))) {
-                    requestAnimationFrame(sync);
-                }
-            });
-
-            // initial
-            window.addEventListener("load", () => setTimeout(sync, 200));
-        })();
-
-    </script>
-
-
-    <!-- ===== COMPARE OVERLAY DETERMINISTIC RENDER (SESSION 13) ===== -->
-    <script>
-        (function () {
-            // Ensure overlay build runs AFTER tier wrappers + CSS vars are applied.
-            function afterTierSync(fn) {
-                requestAnimationFrame(() => requestAnimationFrame(fn));
-            }
-
-            function safeCall(name) {
-                try {
-                    const f = window[name];
-                    if (typeof f === "function") return f();
-                } catch (e) { }
-            }
-
-            function patchOverlayButton(btn) {
-                if (!btn || btn.__hd2_patched) return;
-                btn.__hd2_patched = true;
-
-                btn.addEventListener("click", function (ev) {
-                    // If there is an existing onclick handler, prevent double-run order issues.
-                    ev.preventDefault();
-                    ev.stopPropagation();
-
-                    // 1) Force compare radars to (re)render first.
-                    safeCall("updateCompareRadar");
-
-                    // 2) Wait 2 frames so:
-                    //    - virtual tier wrappers are inserted (Session 12)
-                    //    - CSS vars resolve
-                    //    - SVGs exist in DOM
-                    afterTierSync(() => {
-                        // Safety: if radars are not ready yet, do nothing.
-                        if (!(cmpRadarReadyA && cmpRadarReadyB)) return;
-                        const ov = document.querySelector("#cmpRadarOverlay");
-                        if (ov) ov.innerHTML = "";
-                        // Prefer the project’s overlay function if it exists
-                        if (typeof window.buildOverlayRadar === "function") return window.buildOverlayRadar();
-                        if (typeof window.renderOverlay === "function") return window.renderOverlay();
-                        if (typeof window.updateOverlay === "function") return window.updateOverlay();
-                        if (typeof window.overlayCompare === "function") return window.overlayCompare();
-
-                        // Fallback: if legacy handler exists as attribute, call it
-                        const attr = btn.getAttribute("data-onclick") || btn.getAttribute("onclick");
-                        if (attr) {
-                            try { (new Function(attr)).call(btn); } catch (e) { }
-                        }
-                    });
-                }, true); // capture: run before older bubbling listeners
-            }
-
-            function patchAll() {
-                // common label button
-                document.querySelectorAll("button, a").forEach(el => {
-                    const txt = (el.textContent || "").trim().toUpperCase();
-                    if (txt === "OVERLAY COMPARISON") patchOverlayButton(el);
-                });
-            }
-
-            // patch now and whenever DOM changes
-            const mo = new MutationObserver(() => patchAll());
-            mo.observe(document.documentElement, { childList: true, subtree: true });
-            window.addEventListener("load", () => setTimeout(patchAll, 50));
-        })();
-    </script>
 
 </body>
 </html>
