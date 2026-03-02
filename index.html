@@ -654,6 +654,7 @@ END MASTER DIRECTIVE
             display: flex;
             flex-direction: column;
             gap: 10px;
+            overflow: hidden;
         }
 
         /* Pentagon / radar mini chart (Results cards) */
@@ -897,6 +898,21 @@ END MASTER DIRECTIVE
             grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: 10px;
             align-items: start;
+        }
+
+        .card .formGrid3,
+        .card .formGrid4,
+        .cardInputGrid,
+        .cardMetaGrid,
+        .statsGrid {
+            width: 100%;
+            max-width: 100%;
+        }
+
+        .statsGrid input,
+        .statsGrid select,
+        .statsGrid textarea {
+            min-width: 0;
         }
 
         .formGrid4 {
