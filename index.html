@@ -1503,41 +1503,6 @@ END MASTER DIRECTIVE
                 </div>
             </div>
 
-            <div class="divider"></div>
-
-
-            <div class="divider"></div>
-            <div class="row">
-                <div class="col">
-                    <div class="label">Mission Results Entry</div>
-                    <div class="formGrid3 statsGrid">
-                        <div>
-                            <div class="label">Kills</div>
-                            <input id="resKills" type="number" min="0">
-                        </div>
-                        <div>
-                            <div class="label">Accuracy (%)</div>
-                            <input id="resAccuracy" type="number" step="0.1">
-                        </div>
-                        <div>
-                            <div class="label">Deaths</div>
-                            <input id="resDeaths" type="number" min="0">
-                        </div>
-                        <div>
-                            <div class="label">Stims Used</div>
-                            <input id="resStims" type="number" min="0">
-                        </div>
-                        <div>
-                            <div class="label">Distance Traveled (km)</div>
-                            <input id="resDistance" type="number" step="0.01">
-                        </div>
-                        <div>
-                            <div class="label">Stratagem Uses</div>
-                            <input id="resStratUses" type="number" min="0">
-                        </div>
-                    </div>
-                </div>
-            </div>
             <div id="resultsScroll">
                 <div id="resultsGrid" class="cardGrid"></div>
             </div>
@@ -4853,14 +4818,14 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
                 planetBiome: c.planetBiome || null,
 
-                // user-entered mission stats (raw only)
+                // user-entered mission stats are filled on each individual card.
                 stats: {
-                    kills: Number($("#resKills")?.value || 0),
-                    accuracy: Number($("#resAccuracy")?.value || 0),
-                    deaths: Number($("#resDeaths")?.value || 0),
-                    stims: Number($("#resStims")?.value || 0),
-                    distanceKm: Number($("#resDistance")?.value || 0),
-                    stratUses: Number($("#resStratUses")?.value || 0),
+                    kills: 0,
+                    accuracy: 0,
+                    deaths: 0,
+                    stims: 0,
+                    distanceKm: 0,
+                    stratUses: 0,
                 },
 
                 majorOrderDone: false,
