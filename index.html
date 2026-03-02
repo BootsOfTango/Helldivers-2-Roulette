@@ -879,40 +879,20 @@ END MASTER DIRECTIVE
             }
 
         .cardInputGrid {
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-        }
-
-        .cardInputGrid > div,
-        .cardMetaGrid > div {
-            min-width: 0;
+            grid-template-columns: repeat(3, minmax(140px, 1fr));
         }
 
         .cardInputGrid .label {
             min-height: 32px;
-            white-space: normal;
+            white-space: nowrap;
         }
 
         .cardMetaGrid {
             margin-top: 10px;
             display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
+            grid-template-columns: repeat(2, minmax(220px, 1fr));
             gap: 10px;
             align-items: start;
-        }
-
-        .card .formGrid3,
-        .card .formGrid4,
-        .cardInputGrid,
-        .cardMetaGrid,
-        .statsGrid {
-            width: 100%;
-            max-width: 100%;
-        }
-
-        .statsGrid input,
-        .statsGrid select,
-        .statsGrid textarea {
-            min-width: 0;
         }
 
         .formGrid4 {
@@ -934,7 +914,7 @@ END MASTER DIRECTIVE
             }
 
             .cardInputGrid {
-                grid-template-columns: repeat(2, minmax(0, 1fr));
+                grid-template-columns: repeat(2, minmax(140px, 1fr));
             }
 
             .cardMetaGrid {
