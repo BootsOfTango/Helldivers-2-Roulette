@@ -1182,10 +1182,18 @@ END MASTER DIRECTIVE
             font-weight: 600;
             display: flex;
             align-items: center;
-            white-space: nowrap;
+            white-space: normal;
+            line-height: 1.35;
+            max-width: 460px;
             /* make room for the arrow to sit on the left side */
             position: relative;
             padding-left: 22px;
+        }
+
+        .ytPromo .emph {
+            display: inline-block;
+            margin: 0 .18em;
+            font-weight: 800;
         }
 
         .arrow {
@@ -1412,7 +1420,7 @@ END MASTER DIRECTIVE
 
                     <div class="ytPromo">
                         <span class="arrow">➜</span>
-                        Come to my channel for <strong>FUN</strong>  and  <strong>EPIC</strong>  Helldivers 2 videos!!
+                        Come to my channel for <span class="emph">FUN</span> and <span class="emph">EPIC</span> Helldivers 2 videos!!
                     </div>
 
                 </div>
