@@ -3425,10 +3425,18 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 return `<line x1="${cx}" y1="${cy}" x2="${p2.x.toFixed(1)}" y2="${p2.y.toFixed(1)}" />`;
             }).join("");
 
+            const labelNudge = {
+                AGI: { x: -8, y: 0 },
+                END: { x: 8, y: 0 },
+            };
+
             const tipLabels = angles.map((a, i) => {
-                const p = pt(labelRadius, a);
+                const base = pt(labelRadius, a);
+                const label = axisLabels[i];
+                const nudge = labelNudge[label] || { x: 0, y: 0 };
+                const p = { x: base.x + nudge.x, y: base.y + nudge.y };
                 const anchor = i === 0 ? "middle" : (Math.cos(a) > 0.25 ? "start" : (Math.cos(a) < -0.25 ? "end" : "middle"));
-                return `<text class="radarAxisLabel" x="${p.x.toFixed(1)}" y="${p.y.toFixed(1)}" text-anchor="${anchor}" dominant-baseline="middle">${axisLabels[i]}</text>`;
+                return `<text class="radarAxisLabel" x="${p.x.toFixed(1)}" y="${p.y.toFixed(1)}" text-anchor="${anchor}" dominant-baseline="middle">${label}</text>`;
             }).join("");
 
             // grid rings (3 rings)
