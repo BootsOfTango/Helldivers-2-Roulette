@@ -899,7 +899,7 @@ END MASTER DIRECTIVE
         .cardMetaGrid {
             margin-top: 10px;
             display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
+            grid-template-columns: minmax(140px, .9fr) minmax(0, 1.6fr);
             gap: 10px;
             align-items: start;
         }
@@ -907,6 +907,18 @@ END MASTER DIRECTIVE
         .radarWrap svg {
             max-width: 100%;
             height: auto;
+        }
+
+        .radarAxisLabel {
+            fill: rgba(234, 234, 234, 0.95);
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: .5px;
+            text-transform: uppercase;
+            paint-order: stroke;
+            stroke: rgba(0,0,0,.8);
+            stroke-width: 2px;
+            stroke-linejoin: round;
         }
 
         .formGrid4 {
@@ -3385,10 +3397,10 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             const moScale = card.majorOrderDone ? 1.0 : 0.75;
 
-            const size = 160;
+            const size = 220;
             const cx = size / 2;
             const cy = size / 2;
-            const rOuter = 62;
+            const rOuter = 74;
             const r = rOuter * moScale;
 
             const angles = [-90, -18, 54, 126, 198].map(a => a * Math.PI / 180);
@@ -3400,6 +3412,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             const outerPts = angles.map(a => pt(rOuter, a));
             const valuePts = angles.map((a, i) => pt(r * vals[i], a));
+            const labelRadius = rOuter + 28;
+            const axisLabels = ["POWER", "AGILITY", "UTILITY", "MOBILITY", "ENDURANCE"];
 
             const fmt = (p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`;
             const polyOuter = outerPts.map(fmt).join(" ");
@@ -3409,6 +3423,12 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const spokes = angles.map((a) => {
                 const p2 = pt(rOuter, a);
                 return `<line x1="${cx}" y1="${cy}" x2="${p2.x.toFixed(1)}" y2="${p2.y.toFixed(1)}" />`;
+            }).join("");
+
+            const tipLabels = angles.map((a, i) => {
+                const p = pt(labelRadius, a);
+                const anchor = i === 0 ? "middle" : (Math.cos(a) > 0.25 ? "start" : (Math.cos(a) < -0.25 ? "end" : "middle"));
+                return `<text class="radarAxisLabel" x="${p.x.toFixed(1)}" y="${p.y.toFixed(1)}" text-anchor="${anchor}" dominant-baseline="middle">${axisLabels[i]}</text>`;
             }).join("");
 
             // grid rings (3 rings)
@@ -3433,6 +3453,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
                       <polygon class="radarValue" points="${polyVal}" fill="${col.fill}" stroke="${col.stroke}" stroke-width="2" />
                       <circle class="radarDot" cx="${cx}" cy="${cy}" r="2.2" />
+                      ${tipLabels}
                     </svg>
                   </div>
                 `;
@@ -3965,13 +3986,9 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                           <div class="tiny"><strong>${Number(card.stats?.deaths || 0) + Number(card.stats?.stims || 0)}</strong> (lower = better endurance)</div>
                         </div>
                         <div>
-                          <div class="label">Pentagon</div>
+                          <div class="label">Pentagon${card.majorOrderDone ? "" : " (MO FAIL: -25% size)"}</div>
                           ${buildRadarSVG(card, radarMaxes)}
                         </div>
-                      </div>
-
-                      <div class="tiny" style="margin-top:8px;">
-                        POWER=kills • AGILITY=accuracy • ENDURANCE=deaths+stims (lower) • MOBILITY=km • UTILITY=strat uses${card.majorOrderDone ? "" : " • MO FAIL: -25% size"}
                       </div>
 
                       <div class="formGrid" style="margin-top:10px;">
