@@ -887,20 +887,26 @@ END MASTER DIRECTIVE
             }
 
         .cardInputGrid {
-            grid-template-columns: repeat(3, minmax(140px, 1fr));
+            grid-template-columns: repeat(3, minmax(0, 1fr));
         }
 
         .cardInputGrid .label {
             min-height: 32px;
-            white-space: nowrap;
+            white-space: normal;
+            overflow-wrap: anywhere;
         }
 
         .cardMetaGrid {
             margin-top: 10px;
             display: grid;
-            grid-template-columns: repeat(2, minmax(220px, 1fr));
+            grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: 10px;
             align-items: start;
+        }
+
+        .radarWrap svg {
+            max-width: 100%;
+            height: auto;
         }
 
         .formGrid4 {
