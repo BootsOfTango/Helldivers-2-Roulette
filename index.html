@@ -3397,9 +3397,10 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             const moScale = card.majorOrderDone ? 1.0 : 0.75;
 
-            const size = 240;
-            const cx = size / 2;
-            const cy = size / 2;
+            const renderSize = 240;
+            const viewSize = 260;
+            const cx = viewSize / 2;
+            const cy = viewSize / 2;
             const rOuter = 74;
             const r = rOuter * moScale;
 
@@ -3451,7 +3452,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             return `
                   <div class="radarWrap">
-                    <svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}" aria-label="Performance pentagon${penaltyNote}">
+                    <svg viewBox="0 0 ${viewSize} ${viewSize}" width="${renderSize}" height="${renderSize}" aria-label="Performance pentagon${penaltyNote}">
                       <g class="radarGrid">
                         ${ring(0.33)}
                         ${ring(0.66)}
