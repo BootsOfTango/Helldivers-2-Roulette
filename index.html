@@ -3413,7 +3413,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const outerPts = angles.map(a => pt(rOuter, a));
             const valuePts = angles.map((a, i) => pt(r * vals[i], a));
             const labelRadius = rOuter + 28;
-            const axisLabels = ["POW", "AGI", "UTI", "MOB", "END"];
+            const axisLabels = ["POW", "AGI", "END", "MOB", "UTI"];
 
             const fmt = (p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`;
             const polyOuter = outerPts.map(fmt).join(" ");
