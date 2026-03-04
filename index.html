@@ -840,17 +840,23 @@ END MASTER DIRECTIVE
             color: #eaeaea;
             background: #111;
             border: 1px solid #444;
+            -webkit-appearance: none;
+            appearance: none;
         }
 
             /* Open dropdown options */
-            select option {
-                color: #000;
-                background: #fff;
+            select option,
+            select optgroup {
+                color: #eaeaea;
+                background: #111;
             }
 
-            select optgroup {
-                color: #000;
-                background: #fff;
+            /* Keep selected row consistent with theme (avoid bright native blue) */
+            select option:checked,
+            select option:hover,
+            select option:focus {
+                color: #111;
+                background: #ffd400;
             }
 
         textarea {
