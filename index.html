@@ -998,6 +998,30 @@ END MASTER DIRECTIVE
             pointer-events: none;
         }
 
+        .cmpOverlayAxisHit {
+            fill: transparent;
+            cursor: pointer;
+        }
+
+        .cmpOverlayPoly {
+            transition: filter .16s ease, opacity .16s ease;
+        }
+
+        .cmpOverlayPoly.is-glow {
+            filter: drop-shadow(0 0 8px currentColor) drop-shadow(0 0 16px currentColor);
+            opacity: 0.95 !important;
+        }
+
+        .cmpOverlaySlice {
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity .14s ease;
+        }
+
+        .cmpOverlaySlice.is-visible {
+            opacity: 0.45;
+        }
+
         @media (max-width: 960px) {
             .cmpRadarRow {
                 grid-template-columns: 1fr;
@@ -3532,7 +3556,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             </div>`;
 
             if (overlay) {
-                overlay.innerHTML = '<div class="tiny muted">Click <strong>STACK RADARS</strong> to view overlap + highlighted advantages.</div>';
+                overlay.innerHTML = '<div class="tiny muted">Click <strong>STACK RADARS</strong> to overlap both pentagons, then hover each stat wedge to see who wins.</div>';
             }
             if (insight) insight.textContent = "";
 
@@ -3576,11 +3600,11 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             const size = 240, cx = 120, cy = 120, rOuter = 86;
             const axes = [
-                { label: "Power", metric: "Kills" },
-                { label: "Agility", metric: "Accuracy" },
-                { label: "Endurance", metric: "Deaths + Stims" },
-                { label: "Mobility", metric: "Distance" },
-                { label: "Utility", metric: "Strat uses" },
+                { key: "POW", label: "Power", metric: "Kills" },
+                { key: "AGI", label: "Agility", metric: "Accuracy" },
+                { key: "END", label: "Endurance", metric: "Deaths + Stims" },
+                { key: "MOB", label: "Mobility", metric: "Distance" },
+                { key: "UTI", label: "Utility", metric: "Strat uses" },
             ];
             const angles = axes.map((_, i) => (-Math.PI / 2) + (i * (Math.PI * 2 / axes.length)));
             const pt = (r, a) => ({ x: cx + r * Math.cos(a), y: cy + r * Math.sin(a) });
@@ -3609,32 +3633,38 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const colA = getTierRadarColor(cardA);
             const colB = getTierRadarColor(cardB);
 
-            const highlights = [];
-            const insightLines = [];
+            const hoverRows = [];
+            const hitAreas = [];
+            const hoverSlices = [];
             for (let i = 0; i < axes.length; i++) {
-                const a = valsA[i], b = valsB[i];
-                if (Math.abs(a - b) < 0.01) continue;
+                const prevA = angles[(i - 1 + axes.length) % axes.length];
+                const nextA = angles[(i + 1) % axes.length];
+                const hit1 = pt(rOuter, prevA);
+                const hit2 = pt(rOuter, angles[i]);
+                const hit3 = pt(rOuter, nextA);
+                hitAreas.push(`<polygon class="cmpOverlayAxisHit" data-axis="${i}" points="${fmt({ x: cx, y: cy })} ${fmt(hit1)} ${fmt(hit2)} ${fmt(hit3)}" />`);
 
-                const winner = a > b ? "A" : "B";
+                const a = valsA[i], b = valsB[i];
+                const winner = (Math.abs(a - b) < 0.01) ? "tie" : (a > b ? "A" : "B");
                 const high = Math.max(a, b);
                 const low = Math.min(a, b);
-                const pct = low <= 0 ? 100 : ((high - low) / low) * 100;
-                const pctText = `${Math.max(1, pct).toFixed(1)}%`;
-
-                const ang = angles[i];
-                const da = 0.14;
-                const p1 = pt(rOuter * high, ang - da);
-                const p2 = pt(rOuter * high, ang + da);
-                const p3 = pt(rOuter * low, ang + da);
-                const p4 = pt(rOuter * low, ang - da);
-                const winnerSeed = winner === "A" ? (cardA.seed || "Card A") : (cardB.seed || "Card B");
-                const loserSeed = winner === "A" ? (cardB.seed || "Card B") : (cardA.seed || "Card A");
+                const pct = low <= 0 ? (high > 0 ? 100 : 0) : ((high - low) / low) * 100;
+                const pctInt = Math.max(0, Math.round(pct));
+                const winnerSeed = winner === "A" ? (cardA.seed || "Card A") : (winner === "B" ? (cardB.seed || "Card B") : "Tied");
                 const winnerColor = winner === "A" ? colA.stroke : colB.stroke;
-                const label = axes[i].label.toUpperCase();
-                const tip = `${winnerSeed} is ${pctText} better on ${label} than ${loserSeed}`;
+                const arrow = winner === "A" ? "↑" : (winner === "B" ? "↑" : "↔");
+                const msg = winner === "tie"
+                    ? `${axes[i].key} — TIE`
+                    : `${winnerSeed}, ${axes[i].key} ${pctInt}% ${arrow}`;
 
-                highlights.push(`<polygon points="${fmt(p1)} ${fmt(p2)} ${fmt(p3)} ${fmt(p4)}" fill="${winnerColor}" fill-opacity="0.26" stroke="${winnerColor}" stroke-width="1.2"><title>${escapeHtml(tip)}</title></polygon>`);
-                insightLines.push(`<span style="color:${winnerColor};font-weight:700;">${escapeHtml(label)}</span>: ${escapeHtml(tip)}`);
+                hoverRows.push({ axis: i, winner, message: msg });
+
+                const da = 0.16;
+                const p1 = pt(rOuter * high, angles[i] - da);
+                const p2 = pt(rOuter * high, angles[i] + da);
+                const p3 = pt(rOuter * low, angles[i] + da);
+                const p4 = pt(rOuter * low, angles[i] - da);
+                hoverSlices.push(`<polygon id="cmpSlice${i}" class="cmpOverlaySlice" points="${fmt(p1)} ${fmt(p2)} ${fmt(p3)} ${fmt(p4)}" fill="${winnerColor}" stroke="${winnerColor}" stroke-width="1.5"/>`);
             }
 
             overlay.innerHTML = `
@@ -3645,18 +3675,42 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                     <polygon points="${ptsOuter.map(fmt).join(" ")}" />
                     ${spokes}
                 </g>
-                <polygon points="${polyB}" fill="${colB.fill}" stroke="${colB.stroke}" stroke-width="2" opacity="0.8"><title>${escapeHtml(cardB.seed || "Card B")}</title></polygon>
-                <polygon points="${polyA}" fill="${colA.fill}" stroke="${colA.stroke}" stroke-width="2" opacity="0.8"><title>${escapeHtml(cardA.seed || "Card A")}</title></polygon>
-                ${highlights.join("")}
+                <polygon id="cmpPolyB" class="cmpOverlayPoly" points="${polyB}" fill="${colB.fill}" stroke="${colB.stroke}" stroke-width="2" opacity="0.78" style="color:${colB.stroke};"><title>${escapeHtml(cardB.seed || "Card B")}</title></polygon>
+                <polygon id="cmpPolyA" class="cmpOverlayPoly" points="${polyA}" fill="${colA.fill}" stroke="${colA.stroke}" stroke-width="2" opacity="0.78" style="color:${colA.stroke};"><title>${escapeHtml(cardA.seed || "Card A")}</title></polygon>
+                ${hoverSlices.join("")}
+                <g>${hitAreas.join("")}</g>
                 <circle class="radarDot" cx="${cx}" cy="${cy}" r="2.2" />
             </svg>`;
 
-            if (insight) {
-                insight.innerHTML = insightLines.length
-                    ? insightLines.join("<br>")
-                    : "Both cards are nearly identical on the stacked radar.";
-            }
+            if (insight) insight.textContent = "Hover a stat section to glow the stronger card area and view % difference.";
+
+            const polyNodeA = overlay.querySelector("#cmpPolyA");
+            const polyNodeB = overlay.querySelector("#cmpPolyB");
+            const hits = overlay.querySelectorAll(".cmpOverlayAxisHit");
+
+            const clearHover = () => {
+                polyNodeA?.classList.remove("is-glow");
+                polyNodeB?.classList.remove("is-glow");
+                overlay.querySelectorAll(".cmpOverlaySlice").forEach(el => el.classList.remove("is-visible"));
+                if (insight) insight.textContent = "Hover a stat section to glow the stronger card area and view % difference.";
+            };
+
+            hits.forEach((el) => {
+                el.addEventListener("mouseenter", () => {
+                    const axis = Number(el.getAttribute("data-axis") || -1);
+                    const row = hoverRows.find(r => r.axis === axis);
+                    clearHover();
+                    if (!row) return;
+                    if (row.winner === "A") polyNodeA?.classList.add("is-glow");
+                    if (row.winner === "B") polyNodeB?.classList.add("is-glow");
+                    const slice = overlay.querySelector(`#cmpSlice${axis}`);
+                    slice?.classList.add("is-visible");
+                    if (insight) insight.textContent = row.message;
+                });
+                el.addEventListener("mouseleave", clearHover);
+            });
         }
+
 
 
         /***********************
