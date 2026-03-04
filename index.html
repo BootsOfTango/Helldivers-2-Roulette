@@ -3656,10 +3656,10 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const moScale = card?.majorOrderDone ? 1 : 0.75;
             return [
                 normPos(s.kills, maxes.maxKills) * moScale,
+                normPos(s.accuracy, maxes.maxAccuracy) * moScale,
                 normInverse(combo, maxes.minDeathsPlusStims, maxes.maxDeathsPlusStims) * moScale,
                 normPos(s.distanceKm, maxes.maxDistanceKm) * moScale,
                 normPos(s.stratUses, maxes.maxStratUses) * moScale,
-                normPos(s.accuracy, maxes.maxAccuracy) * moScale,
             ].map(v => clamp(v, 0, 1));
         }
 
@@ -3692,10 +3692,10 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const size = 240, cx = 120, cy = 120, rOuter = 86;
             const axes = [
                 { key: "POW", label: "Power", metric: "Kills" },
+                { key: "AGI", label: "Agility", metric: "Accuracy" },
                 { key: "END", label: "Endurance", metric: "Deaths + Stims" },
                 { key: "MOB", label: "Mobility", metric: "Distance" },
                 { key: "UTI", label: "Utility", metric: "Strat uses" },
-                { key: "AGI", label: "Agility", metric: "Accuracy" },
             ];
             const angles = axes.map((_, i) => (-Math.PI / 2) + (i * (Math.PI * 2 / axes.length)));
             const pt = (r, a) => ({ x: cx + r * Math.cos(a), y: cy + r * Math.sin(a) });
