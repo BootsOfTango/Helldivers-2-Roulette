@@ -995,6 +995,21 @@ END MASTER DIRECTIVE
             padding: 10px;
         }
 
+        #cmpHoverBanner {
+            order: 1;
+            margin-top: 0;
+            margin-bottom: -4px;
+        }
+
+        #cmpRadarOverlay {
+            order: 2;
+        }
+
+        .cmpRadarOverlay .radarAxisLabel {
+            fill: #ffe600;
+            stroke: rgba(0,0,0,.9);
+        }
+
         .cmpAxisFocus {
             fill: rgba(255,255,255,.15);
             stroke: currentColor;
@@ -1014,7 +1029,7 @@ END MASTER DIRECTIVE
         }
 
         .cmpOverlayAxisHit {
-            fill: transparent;
+            fill: rgba(255,255,255,0.001);
             cursor: pointer;
         }
 
@@ -1033,7 +1048,7 @@ END MASTER DIRECTIVE
             gap: 12px;
             min-height: 92px;
             align-items: stretch;
-            margin-top: -6px;
+            margin-top: 0;
         }
 
         .cmpHoverBannerSide {
@@ -1051,7 +1066,7 @@ END MASTER DIRECTIVE
             line-height: 1.15;
             color: #ffe600;
             text-shadow: 0 0 8px rgba(255,230,0,.65), 0 0 16px rgba(255,230,0,.35);
-            opacity: .9;
+            opacity: 1;
             transition: opacity .12s ease, border-color .12s ease, box-shadow .12s ease, color .12s ease;
         }
 
