@@ -1012,8 +1012,65 @@ END MASTER DIRECTIVE
             opacity: 0.95 !important;
         }
 
+        .cmpHoverBanner {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+            min-height: 72px;
+            align-items: stretch;
+        }
+
+        .cmpHoverBannerSide {
+            border: 1px solid var(--line2);
+            border-radius: 12px;
+            background: rgba(0,0,0,.25);
+            padding: 10px 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            font-size: clamp(18px, 2.3vw, 26px);
+            font-weight: 900;
+            letter-spacing: .02em;
+            line-height: 1.15;
+            color: var(--muted);
+            opacity: .25;
+            transition: opacity .12s ease, border-color .12s ease, box-shadow .12s ease, color .12s ease;
+        }
+
+        .cmpHoverBanner.winner-a .cmpHoverBannerSide.left,
+        .cmpHoverBanner.winner-b .cmpHoverBannerSide.right,
+        .cmpHoverBanner.winner-tie .cmpHoverBannerSide {
+            opacity: 1;
+            color: #fff;
+            border-color: rgba(255,255,255,.45);
+            box-shadow: 0 0 18px rgba(255,255,255,.18);
+        }
+
+        .cmpHoverBanner.winner-a .cmpHoverBannerSide.left {
+            color: #7dffb2;
+            border-color: rgba(46,204,113,.7);
+            box-shadow: 0 0 22px rgba(46,204,113,.26);
+        }
+
+        .cmpHoverBanner.winner-b .cmpHoverBannerSide.right {
+            color: #ffb4b4;
+            border-color: rgba(255,90,90,.72);
+            box-shadow: 0 0 22px rgba(255,90,90,.25);
+        }
+
+        .cmpHoverBanner.winner-tie .cmpHoverBannerSide {
+            color: #ffe28a;
+            border-color: rgba(255,212,0,.68);
+            box-shadow: 0 0 22px rgba(255,212,0,.22);
+        }
+
         @media (max-width: 960px) {
             .cmpRadarRow {
+                grid-template-columns: 1fr;
+            }
+
+            .cmpHoverBanner {
                 grid-template-columns: 1fr;
             }
         }
@@ -1655,6 +1712,10 @@ END MASTER DIRECTIVE
                             <button id="btnOverlayRadar" class="btnPrimary" disabled>STACK RADARS</button>
                         </div>
                         <div id="cmpRadarOverlay" class="cmpRadarOverlay"></div>
+                        <div id="cmpHoverBanner" class="cmpHoverBanner">
+                            <div class="cmpHoverBannerSide left" data-side="left">Hover a stat section</div>
+                            <div class="cmpHoverBannerSide right" data-side="right">to see who is stronger</div>
+                        </div>
                         <div id="cmpInsight" class="smallHelp"></div>
                     </div>
 
@@ -3573,6 +3634,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         function buildOverlayRadar() {
             const overlay = document.querySelector("#cmpRadarOverlay");
             const insight = document.querySelector("#cmpInsight");
+            const hoverBanner = document.querySelector("#cmpHoverBanner");
             if (!overlay) return;
 
             const ctx = window.__cmpCtx || {};
@@ -3585,6 +3647,13 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             if (!cardA || !cardB || !maxes) {
                 overlay.innerHTML = "";
                 if (insight) insight.textContent = "Overlay needs two valid cards.";
+                if (hoverBanner) {
+                    hoverBanner.className = "cmpHoverBanner";
+                    const left = hoverBanner.querySelector('[data-side="left"]');
+                    const right = hoverBanner.querySelector('[data-side="right"]');
+                    if (left) left.textContent = "Select two cards";
+                    if (right) right.textContent = "to compare";
+                }
                 return;
             }
 
@@ -3652,13 +3721,16 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 const pct = low <= 0 ? (high > 0 ? 100 : 0) : ((high - low) / low) * 100;
                 const pctInt = Math.max(0, Math.round(pct));
                 const winnerSeed = winner === "A" ? (cardA.seed || "Card A") : (winner === "B" ? (cardB.seed || "Card B") : "Tied");
-                const winnerColor = winner === "A" ? colA.stroke : colB.stroke;
                 const arrow = winner === "A" ? "↑" : (winner === "B" ? "↑" : "↔");
                 const msg = winner === "tie"
                     ? `${axes[i].key} — TIE`
                     : `${winnerSeed}, ${axes[i].key} ${pctInt}% ${arrow}`;
 
-                hoverRows.push({ axis: i, winner, message: msg });
+                const bannerText = winner === "tie"
+                    ? `${axes[i].key} TIE`
+                    : `${axes[i].key} ${pctInt}% HIGHER`;
+
+                hoverRows.push({ axis: i, winner, message: msg, bannerText });
             }
 
             overlay.innerHTML = `
@@ -3676,6 +3748,13 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             </svg>`;
 
             if (insight) insight.textContent = "Hover a stat section to glow the stronger card area and view % difference.";
+            if (hoverBanner) {
+                hoverBanner.className = "cmpHoverBanner";
+                const left = hoverBanner.querySelector('[data-side="left"]');
+                const right = hoverBanner.querySelector('[data-side="right"]');
+                if (left) left.textContent = "Hover a stat section";
+                if (right) right.textContent = "for POW/AGI/END/MOB/UTI winner";
+            }
 
             const polyNodeA = overlay.querySelector("#cmpPolyA");
             const polyNodeB = overlay.querySelector("#cmpPolyB");
@@ -3685,6 +3764,13 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 polyNodeA?.classList.remove("is-glow");
                 polyNodeB?.classList.remove("is-glow");
                 if (insight) insight.textContent = "Hover a stat section to glow the stronger card area and view % difference.";
+                if (hoverBanner) {
+                    hoverBanner.className = "cmpHoverBanner";
+                    const left = hoverBanner.querySelector('[data-side="left"]');
+                    const right = hoverBanner.querySelector('[data-side="right"]');
+                    if (left) left.textContent = "Hover a stat section";
+                    if (right) right.textContent = "for POW/AGI/END/MOB/UTI winner";
+                }
             };
 
             hits.forEach((el) => {
@@ -3696,6 +3782,21 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                     if (row.winner === "A") polyNodeA?.classList.add("is-glow");
                     if (row.winner === "B") polyNodeB?.classList.add("is-glow");
                     if (insight) insight.textContent = row.message;
+                    if (hoverBanner) {
+                        const left = hoverBanner.querySelector('[data-side="left"]');
+                        const right = hoverBanner.querySelector('[data-side="right"]');
+                        hoverBanner.className = `cmpHoverBanner winner-${row.winner}`;
+                        if (row.winner === "A") {
+                            if (left) left.textContent = row.bannerText;
+                            if (right) right.textContent = "";
+                        } else if (row.winner === "B") {
+                            if (left) left.textContent = "";
+                            if (right) right.textContent = row.bannerText;
+                        } else {
+                            if (left) left.textContent = row.bannerText;
+                            if (right) right.textContent = row.bannerText;
+                        }
+                    }
                 });
                 el.addEventListener("mouseleave", clearHover);
             });
