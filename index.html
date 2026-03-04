@@ -3510,7 +3510,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const moScale = card.majorOrderDone ? 1.0 : 0.75;
 
             const renderSize = 240;
-            const viewSize = 260;
+            const viewSize = 280;
             const cx = viewSize / 2;
             const cy = viewSize / 2;
             const rOuter = 74;
@@ -3525,7 +3525,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             const outerPts = angles.map(a => pt(rOuter, a));
             const valuePts = angles.map((a, i) => pt(r * vals[i], a));
-            const labelRadius = rOuter + 28;
+            const labelRadius = rOuter + 26;
             const axisLabels = ["POW", "AGI", "END", "MOB", "UTI"];
 
             const fmt = (p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`;
@@ -3541,6 +3541,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const labelNudge = {
                 AGI: { x: -8, y: 0 },
                 END: { x: 8, y: 0 },
+                UTI: { x: 6, y: 0 },
             };
 
             const tipLabels = angles.map((a, i) => {
@@ -3689,7 +3690,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 return;
             }
 
-            const size = 240, cx = 120, cy = 120, rOuter = 86;
+            const size = 260, cx = 130, cy = 130, rOuter = 86;
             const axes = [
                 { key: "POW", label: "Power", metric: "Kills" },
                 { key: "AGI", label: "Agility", metric: "Accuracy" },
@@ -3723,10 +3724,11 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             const colA = getTierRadarColor(cardA);
             const colB = getTierRadarColor(cardB);
-            const labelRadius = rOuter + 20;
+            const labelRadius = rOuter + 18;
             const labelNudge = {
                 END: { x: 8, y: 0 },
-                UTI: { x: -8, y: 0 },
+                UTI: { x: 6, y: 0 },
+                POW: { x: 0, y: 3 },
             };
             const tipLabels = axes.map((axis, i) => {
                 const base = pt(labelRadius, angles[i]);
@@ -3742,7 +3744,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             for (let i = 0; i < axes.length; i++) {
                 const prevA = angles[(i - 1 + axes.length) % axes.length];
                 const nextA = angles[(i + 1) % axes.length];
-                const hitRadius = rOuter * 1.08;
+                const hitRadius = rOuter * 1.14;
                 const hit1 = pt(hitRadius, prevA);
                 const hit2 = pt(hitRadius, angles[i]);
                 const hit3 = pt(hitRadius, nextA);
@@ -3771,7 +3773,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             }
 
             overlay.innerHTML = `
-            <svg width="240" height="240" viewBox="0 0 240 240" aria-label="Stacked radar comparison" role="img">
+            <svg width="240" height="240" viewBox="0 0 260 260" aria-label="Stacked radar comparison" role="img">
                 <g class="radarGrid">
                     ${ring(0.33)}
                     ${ring(0.66)}
