@@ -3698,6 +3698,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 { key: "MOB", label: "Mobility", metric: "Distance" },
                 { key: "UTI", label: "Utility", metric: "Strat uses" },
             ];
+            const axisStep = (Math.PI * 2) / axes.length;
             const angles = axes.map((_, i) => (-Math.PI / 2) + (i * (Math.PI * 2 / axes.length)));
             const pt = (r, a) => ({ x: cx + r * Math.cos(a), y: cy + r * Math.sin(a) });
             const fmt = (p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`;
@@ -3742,8 +3743,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const hitAreas = [];
             const focusDots = [];
             for (let i = 0; i < axes.length; i++) {
-                const prevA = angles[(i - 1 + axes.length) % axes.length];
-                const nextA = angles[(i + 1) % axes.length];
+                const prevA = angles[i] - (axisStep / 2);
+                const nextA = angles[i] + (axisStep / 2);
                 const hitRadius = rOuter * 1.14;
                 const hit1 = pt(hitRadius, prevA);
                 const hit2 = pt(hitRadius, angles[i]);
