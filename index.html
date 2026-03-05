@@ -1830,6 +1830,20 @@ END MASTER DIRECTIVE
 
                     <div class="hr"></div>
 
+                    <div class="row" style="margin-top:0;">
+                        <div class="col">
+                            <div class="label">CURRENT ACTIVE PLANETS (LIVE API)</div>
+                            <div class="smallHelp">Live data from api.helldivers2.dev campaigns endpoint. Use this to verify your editable planet pool matches the current war map.</div>
+                        </div>
+                        <div class="col right">
+                            <button id="btnRefreshApiPlanets" class="btnGhost">REFRESH LIVE PLANETS</button>
+                        </div>
+                    </div>
+                    <div id="apiPlanetStatus" class="tiny muted" style="margin-bottom:8px;">Loading live planets...</div>
+                    <div id="apiActivePlanetsList"></div>
+
+                    <div class="hr"></div>
+
                     <div class="formGrid3">
                         <input id="pName" placeholder="Planet name" />
                         <select id="pFaction">
@@ -4905,6 +4919,96 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             box.appendChild(wrap);
         }
 
+        function normalizeFactionFromOwner(owner) {
+            const raw = String(owner || "").toLowerCase().trim();
+            if (raw === "terminids") return "Terminids";
+            if (raw === "automatons") return "Automatons";
+            if (raw === "illuminate") return "Illuminate";
+            if (raw === "humans" || raw === "super earth") return "Super Earth";
+            return owner || "Unknown";
+        }
+
+        function renderApiActivePlanetsRows(active) {
+            const box = $("#apiActivePlanetsList");
+            if (!box) return;
+
+            box.innerHTML = "";
+            if (!active.length) {
+                box.innerHTML = `<div class="tiny">No active planets returned by API.</div>`;
+                return;
+            }
+
+            const ownedNames = new Set((state.items.planets || []).map(p => normalizeText(p.name)));
+            const wrap = document.createElement("div");
+            wrap.style.display = "flex";
+            wrap.style.flexDirection = "column";
+            wrap.style.gap = "8px";
+
+            active.forEach(p => {
+                const row = document.createElement("div");
+                row.className = "miniRow";
+                row.style.justifyContent = "space-between";
+                row.style.border = "1px solid rgba(255,255,255,.06)";
+                row.style.borderRadius = "12px";
+                row.style.padding = "8px 10px";
+                row.style.background = "rgba(0,0,0,.18)";
+
+                const existsInPool = ownedNames.has(normalizeText(p.name));
+                row.innerHTML = `
+                    <div>
+                        <div style="font-weight:900; font-size:12px;">${escapeHtml(p.name)}</div>
+                        <div class="tiny">${escapeHtml(p.faction)} • ${escapeHtml(p.sector)} • <span class="muted">${escapeHtml(p.biome)}</span></div>
+                    </div>
+                    <div class="tiny" style="font-weight:800; color:${existsInPool ? "#8ef7b2" : "#ffb3b3"};">
+                        ${existsInPool ? "IN YOUR ITEM LIST" : "MISSING FROM ITEM LIST"}
+                    </div>
+                `;
+                wrap.appendChild(row);
+            });
+
+            box.appendChild(wrap);
+        }
+
+        async function loadAndRenderApiActivePlanets() {
+            const status = $("#apiPlanetStatus");
+            const box = $("#apiActivePlanetsList");
+            if (!status || !box) return;
+
+            status.textContent = "Loading live planets from API...";
+            box.innerHTML = "";
+
+            try {
+                const res = await fetch("https://api.helldivers2.dev/api/v1/campaigns", {
+                    headers: {
+                        "X-Super-Client": "helldivers-2-roulette",
+                        "X-Super-Contact": "https://github.com/"
+                    }
+                });
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+                const data = await res.json();
+                const active = (Array.isArray(data) ? data : [])
+                    .map(c => c?.planet)
+                    .filter(Boolean)
+                    .filter(p => !p.disabled)
+                    .map(p => ({
+                        name: p.name || "Unknown",
+                        sector: p.sector || "—",
+                        faction: normalizeFactionFromOwner(p.currentOwner || p.owner),
+                        biome: p.biome?.name || "—"
+                    }))
+                    .sort((a, b) => a.name.localeCompare(b.name));
+
+                status.textContent = `Live API returned ${active.length} active planets.`;
+                window.__apiActivePlanetsCache = active;
+                renderApiActivePlanetsRows(active);
+            } catch (err) {
+                console.warn("[API planets] failed", err);
+                status.textContent = "Unable to load live planets from API right now.";
+                box.innerHTML = `<div class="tiny">Check internet connection, CORS policy, or try refresh again.</div>`;
+            }
+        }
+
         function renderItems() {
             renderItemList("listPrimaries", state.items.primaries,
                 (i) => { state.items.primaries[i].enabled = !state.items.primaries[i].enabled; saveState(); renderItems(); },
@@ -4923,6 +5027,15 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 (i) => { state.items.stratagems.splice(i, 1); saveState(); renderItems(); }
             );
             renderPlanets();
+
+            if (Array.isArray(window.__apiActivePlanetsCache) && window.__apiActivePlanetsCache.length) {
+                renderApiActivePlanetsRows(window.__apiActivePlanetsCache);
+            }
+
+            if (!window.__apiPlanetsLoadedOnce) {
+                window.__apiPlanetsLoadedOnce = true;
+                loadAndRenderApiActivePlanets();
+            }
         }
 
         /***********************
@@ -5308,6 +5421,10 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             $("#btnSaveItems").addEventListener("click", () => {
                 saveState();
                 alert("Items saved.");
+            });
+
+            $("#btnRefreshApiPlanets").addEventListener("click", () => {
+                loadAndRenderApiActivePlanets();
             });
 
             // Add item buttons
