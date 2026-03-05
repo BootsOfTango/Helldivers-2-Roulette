@@ -4928,6 +4928,29 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             return owner || "Unknown";
         }
 
+        function syncEditablePlanetsToLiveActive(active) {
+            if (!Array.isArray(active) || !active.length) return;
+
+            const existingByName = new Map(
+                (state.items.planets || []).map(p => [normalizeText(p.name), p])
+            );
+
+            state.items.planets = active.map(p => {
+                const prev = existingByName.get(normalizeText(p.name));
+                return {
+                    name: p.name,
+                    faction: p.faction || prev?.faction || "Unknown",
+                    sector: p.sector || prev?.sector || "—",
+                    biome: p.biome || prev?.biome || "—",
+                    weather: prev?.weather || "—",
+                    enabled: (typeof prev?.enabled === "boolean") ? prev.enabled : true
+                };
+            });
+
+            saveState();
+            renderPlanets();
+        }
+
         function renderApiActivePlanetsRows(active) {
             const box = $("#apiActivePlanetsList");
             if (!box) return;
@@ -5001,6 +5024,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
                 status.textContent = `Live API returned ${active.length} active planets.`;
                 window.__apiActivePlanetsCache = active;
+                syncEditablePlanetsToLiveActive(active);
                 renderApiActivePlanetsRows(active);
             } catch (err) {
                 console.warn("[API planets] failed", err);
