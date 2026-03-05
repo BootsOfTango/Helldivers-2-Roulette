@@ -4475,8 +4475,11 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 payload.embeds[0].image = { url: "attachment://card-loadout.png" };
                 form.append("file", cardPng, "card-loadout.png");
             } catch (err) {
-                if (!isCanvasTaintedError(err)) throw err;
-                payload.content += "\n⚠️ Image export was blocked by browser canvas security; sent without card image.";
+                const msg = String(err?.message || err || "unknown error");
+                const blockedByCanvas = isCanvasTaintedError(err);
+                payload.content += blockedByCanvas
+                    ? "\n⚠️ Image export was blocked by browser canvas security; sent without card image."
+                    : `\n⚠️ Card image export failed (${msg}); sent without card image.`;
             }
 
             form.append("payload_json", JSON.stringify(payload));
