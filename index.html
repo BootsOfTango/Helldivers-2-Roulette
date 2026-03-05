@@ -1647,6 +1647,11 @@ END MASTER DIRECTIVE
             <div class="row">
                 <div class="col">
                     <div class="label">Saved loadout cards</div>
+                    <div class="formGrid" style="margin-top:8px;">
+                        <input id="discordWebhookUrl" type="password" placeholder="Discord webhook URL (for #card-results)" autocomplete="off" />
+                        <button id="btnSaveDiscordWebhook" class="btnGhost">SAVE WEBHOOK</button>
+                    </div>
+                    <div class="smallHelp">Create this in Discord: Channel Settings → Integrations → Webhooks. In your channel permissions, disable <strong>Send Messages</strong> for everyone except you, keep <strong>Add Reactions</strong> enabled so people can still react.</div>
                 </div>
                 <div class="col right">
                     <div class="miniRow" style="justify-content:flex-end;">
@@ -3146,6 +3151,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
          * App State
          ***********************/
         const STORAGE_KEY = "hd2_chaos_roulette_v1";
+        const DISCORD_WEBHOOK_KEY = "hd2_discord_webhook_url";
 
         const state = {
             items: null,
@@ -3166,6 +3172,10 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 specialActive: false,
                 rerollsLeft: 0,
                 spinning: false
+            },
+
+            settings: {
+                discordWebhookUrl: ""
             }
         };
 
@@ -3178,6 +3188,9 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             // Normalize default faction strings immediately
             sanitizeFactionData();
+
+            // webhook URL is stored separately so clear-data does not delete it
+            state.settings.discordWebhookUrl = localStorage.getItem(DISCORD_WEBHOOK_KEY) || "";
 
             if (!raw) return;
 
@@ -3228,6 +3241,12 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 items: state.items,
                 cards: state.cards
             }));
+
+            try {
+                const webhook = String(state.settings?.discordWebhookUrl || "").trim();
+                if (webhook) localStorage.setItem(DISCORD_WEBHOOK_KEY, webhook);
+            } catch (e) { }
+
             updateHeaderPills();
         }
 
@@ -4274,6 +4293,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                         <div class="tiny">Raw: <strong>${Number(card.scoreRaw || 0).toFixed(1)}</strong></div>
                         <div class="miniRow">
                           <button class="btnPrimary" data-act="saveCard" data-id="${card.id}">SAVE</button>
+                          <button class="btnGhost" data-act="sendDiscord" data-id="${card.id}">SEND TO DISCORD</button>
                           <button class="btnGhost" data-act="deleteCard" data-id="${card.id}">DELETE</button>
                         </div>
                       </div>
@@ -4297,6 +4317,73 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             refreshCompareOptions();
             renderRank();
+        }
+
+        function getDiscordWebhookUrl() {
+            return String(state.settings?.discordWebhookUrl || "").trim();
+        }
+
+        function getCardById(id) {
+            return state.cards.find(c => c.id === id) || null;
+        }
+
+        function cardDiscordDescription(card) {
+            const s = card.stats || {};
+            const combo = Number(s.deaths || 0) + Number(s.stims || 0);
+            return [
+                `**Mode:** ${card.mode || "—"} | **Faction:** ${card.faction || "—"}`,
+                `**Primary:** ${card.primary || "—"}`,
+                `**Sidearm:** ${card.sidearm || "—"}`,
+                `**Throwable:** ${card.throwable || "—"}`,
+                `**Stratagems:** ${(card.stratagems || []).join(" • ") || "—"}`,
+                `**Planet:** ${card.planet?.name || "—"} (${card.planet?.sector || "—"})`,
+                `**Stats:** K ${Number(s.kills || 0)} | A ${Number(s.accuracy || 0)}% | D ${Number(s.deaths || 0)} | S ${Number(s.stims || 0)} | DS ${combo}`,
+                `**Grade:** ${Number(card.grade || 0)} | **Raw:** ${Number(card.scoreRaw || 0).toFixed(1)} | **MO:** ${card.majorOrderDone ? "DONE" : "NO"}`
+            ].join("\n");
+        }
+
+        function radarSvgForDiscord(card) {
+            const maxes = getRadarMaxes(state.cards || []);
+            const html = buildRadarSVG(card, maxes);
+            const m = html.match(/<svg[\s\S]*?<\/svg>/i);
+            if (!m) return null;
+            return m[0];
+        }
+
+        async function sendCardToDiscord(card, sourceLabel) {
+            const webhookUrl = getDiscordWebhookUrl();
+            if (!webhookUrl) {
+                alert("Please save your Discord webhook URL first.");
+                return;
+            }
+
+            recalcGrades();
+
+            const payload = {
+                username: "Helldivers 2 Roulette",
+                embeds: [{
+                    title: `${formatSeedWithPlayer(card)} (${sourceLabel})`,
+                    description: cardDiscordDescription(card),
+                    color: 0xFFD447,
+                    footer: { text: "Helldivers 2 Roulette" },
+                    timestamp: new Date().toISOString(),
+                    image: { url: "attachment://card-radar.svg" }
+                }]
+            };
+
+            const form = new FormData();
+            form.append("payload_json", JSON.stringify(payload));
+
+            const radarSvg = radarSvgForDiscord(card);
+            if (radarSvg) {
+                form.append("files[0]", new Blob([radarSvg], { type: "image/svg+xml" }), "card-radar.svg");
+            }
+
+            const res = await fetch(webhookUrl, { method: "POST", body: form });
+            if (!res.ok) {
+                const msg = await res.text();
+                throw new Error(`Discord returned ${res.status}: ${msg}`);
+            }
         }
 
         function onCardFieldChange(e) {
@@ -4330,7 +4417,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             // keep results view stable, no full redraw per keystroke except textarea input is fine
         }
 
-        function onCardAction(e) {
+        async function onCardAction(e) {
             const act = e.target.getAttribute("data-act");
             const id = e.target.getAttribute("data-id");
             const card = state.cards.find(c => c.id === id);
@@ -4371,7 +4458,35 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 return;
             }
 
+            if (act === "sendDiscord") {
+                try {
+                    await sendCardToDiscord(card, "RESULTS");
+                    alert("Sent to Discord ✅");
+                } catch (err) {
+                    console.error("[discord] send failed", err);
+                    alert(`Discord send failed: ${err.message || err}`);
+                }
+                return;
+            }
 
+
+        }
+
+        async function onRankCardAction(e) {
+            const act = e.target.getAttribute("data-rank-act");
+            const id = e.target.getAttribute("data-id");
+            if (act !== "sendDiscord" || !id) return;
+
+            const card = getCardById(id);
+            if (!card) return;
+
+            try {
+                await sendCardToDiscord(card, "RANK");
+                alert("Sent to Discord ✅");
+            } catch (err) {
+                console.error("[discord] send failed", err);
+                alert(`Discord send failed: ${err.message || err}`);
+            }
         }
 
         /***********************
@@ -5110,14 +5225,19 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                             <div style="font-weight:900;">#${place} • ${escapeHtml(formatSeedWithPlayer(c))}</div>
                             <div class="tiny">${escapeHtml(c.mode)} • ${escapeHtml(c.faction)} • ${escapeHtml(getPlayerName(c))} • <span class="muted">${escapeHtml(c.primary)}</span></div>
                           </div>
-                          <div style="text-align:right;">
+                          <div style="text-align:right; display:flex; flex-direction:column; align-items:flex-end; gap:6px;">
                             <div class="badge yellow">Grade ${Number(c.grade || 0)}</div>
                             <div class="tiny">Raw ${Number(c.scoreRaw || 0).toFixed(1)}</div>
+                            <button class="btnGhost" data-rank-act="sendDiscord" data-id="${c.id}">SEND TO DISCORD</button>
                           </div>
                         `;
 
                 outer.appendChild(row);
                 box.appendChild(outer);
+            });
+
+            box.querySelectorAll("button[data-rank-act]").forEach(btn => {
+                btn.addEventListener("click", onRankCardAction);
             });
         }
 
@@ -5405,6 +5525,19 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
 
 
+            $("#btnSaveDiscordWebhook").addEventListener("click", () => {
+                const input = $("#discordWebhookUrl");
+                const webhook = String(input?.value || "").trim();
+                if (!webhook) {
+                    alert("Paste a Discord webhook URL first.");
+                    return;
+                }
+                state.settings.discordWebhookUrl = webhook;
+                localStorage.setItem(DISCORD_WEBHOOK_KEY, webhook);
+                saveState();
+                alert("Discord webhook saved ✅");
+            });
+
             $("#btnExport").addEventListener("click", exportJSON);
             $("#btnImport").addEventListener("click", () => $("#importFile").click());
             $("#importFile").addEventListener("change", (e) => {
@@ -5629,6 +5762,10 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
          * Boot
          ***********************/
         loadState();
+        const discordWebhookInput = $("#discordWebhookUrl");
+        if (discordWebhookInput) {
+            discordWebhookInput.value = state.settings.discordWebhookUrl || "";
+        }
         saveState();      // ensures pills show correct saved count
         wireOnce();
         initApp();
