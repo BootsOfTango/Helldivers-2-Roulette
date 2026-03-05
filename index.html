@@ -4342,12 +4342,124 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             ].join("\n");
         }
 
-        function radarSvgForDiscord(card) {
-            const maxes = getRadarMaxes(state.cards || []);
-            const html = buildRadarSVG(card, maxes);
-            const m = html.match(/<svg[\s\S]*?<\/svg>/i);
-            if (!m) return null;
-            return m[0];
+        function getCardTierClass(card) {
+            const tierMap = buildTierMap();
+            return tierMap.get(card.id) || "";
+        }
+
+        function discordCardMarkup(card) {
+            const s = card.stats || {};
+            const combo = Number(s.deaths || 0) + Number(s.stims || 0);
+            const radar = buildRadarSVG(card, getRadarMaxes(state.cards || []));
+            const tier = getCardTierClass(card);
+            const borderColor = {
+                gold: "#ffcc4d",
+                silver: "#cfd6e6",
+                bronze: "#d59a67",
+                darkbronze: "#8b5a3c",
+                rainbow: "#8c7bff"
+            }[tier] || "#2b3549";
+            const planetWeatherText = card.planet ? getPlanetWeatherText(card.planet) : "None";
+            const planetWeatherTags = splitWeatherTags(planetWeatherText);
+            const createdAt = card.createdAt ? new Date(card.createdAt).toLocaleString() : "—";
+
+            return `
+<div xmlns="http://www.w3.org/1999/xhtml" style="width:860px;padding:20px;box-sizing:border-box;background:linear-gradient(180deg,#060912,#04070e);font-family:Inter,Segoe UI,Arial,sans-serif;color:#e7edf8;">
+  <div style="border:1px solid ${borderColor};border-radius:18px;padding:18px;background:linear-gradient(180deg,#0b101b,#070b14);box-shadow:0 0 0 1px rgba(255,255,255,.05) inset;">
+    <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;">
+      <div>
+        <div style="font-size:38px;font-weight:800;line-height:1.08;">${escapeHtml(formatSeedWithPlayer(card))}</div>
+        <div style="color:#9aa8bf;font-size:22px;margin-top:6px;">${escapeHtml(card.mode || "—")} • <span style="color:${(card.faction || "").toLowerCase().includes("automat") ? "#ff5f5f" : "#8ac7ff"};font-weight:700;">${escapeHtml(card.faction || "—")}</span> • ${escapeHtml(createdAt)}</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="display:inline-block;padding:8px 14px;border-radius:999px;border:1px solid #ffe05b;color:#ffe05b;font-weight:800;font-size:24px;">Grade ${Number(card.grade || 0)}</div>
+        <div style="margin-top:8px;display:inline-block;padding:7px 12px;border-radius:999px;border:1px solid ${card.majorOrderDone ? "#33d69f" : "#ff5f5f"};color:${card.majorOrderDone ? "#33d69f" : "#ff5f5f"};font-weight:700;font-size:22px;">${card.majorOrderDone ? "MO DONE" : "MO NO"}</div>
+      </div>
+    </div>
+
+    <div style="margin-top:14px;font-size:29px;line-height:1.35;">
+      <div><span style="color:#f5dc54;font-weight:800;">Primary:</span> ${escapeHtml(card.primary || "—")}</div>
+      <div><span style="color:#f5dc54;font-weight:800;">Sidearm:</span> ${escapeHtml(card.sidearm || "—")}</div>
+      <div><span style="color:#f5dc54;font-weight:800;">Throwable:</span> ${escapeHtml(card.throwable || "—")}</div>
+      <div><span style="color:#f5dc54;font-weight:800;">Strats:</span> ${escapeHtml((card.stratagems || []).join(" • ") || "—")}</div>
+      <div><span style="color:#f5dc54;font-weight:800;">Planet:</span> ${escapeHtml(card.planet?.name || "—")} (${escapeHtml(card.planet?.sector || "—")})</div>
+      <div style="margin-top:8px;color:#aab8ce;">Environment: ${escapeHtml(planetWeatherTags.length ? planetWeatherTags.join(" / ") : (planetWeatherText || "None"))}</div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:16px;">
+      <div style="border:1px solid #263146;border-radius:12px;padding:12px;">
+        <div style="font-size:18px;color:#9fb0cb;text-transform:uppercase;letter-spacing:.06em;">Kills</div>
+        <div style="font-size:38px;font-weight:800;">${Number(s.kills || 0)}</div>
+      </div>
+      <div style="border:1px solid #263146;border-radius:12px;padding:12px;">
+        <div style="font-size:18px;color:#9fb0cb;text-transform:uppercase;letter-spacing:.06em;">Accuracy (%)</div>
+        <div style="font-size:38px;font-weight:800;">${Number(s.accuracy || 0)}</div>
+      </div>
+      <div style="border:1px solid #263146;border-radius:12px;padding:12px;">
+        <div style="font-size:18px;color:#9fb0cb;text-transform:uppercase;letter-spacing:.06em;">Deaths</div>
+        <div style="font-size:38px;font-weight:800;">${Number(s.deaths || 0)}</div>
+      </div>
+      <div style="border:1px solid #263146;border-radius:12px;padding:12px;">
+        <div style="font-size:18px;color:#9fb0cb;text-transform:uppercase;letter-spacing:.06em;">Stims</div>
+        <div style="font-size:38px;font-weight:800;">${Number(s.stims || 0)}</div>
+      </div>
+      <div style="border:1px solid #263146;border-radius:12px;padding:12px;">
+        <div style="font-size:18px;color:#9fb0cb;text-transform:uppercase;letter-spacing:.06em;">Distance (km)</div>
+        <div style="font-size:38px;font-weight:800;">${Number(s.distanceKm || 0)}</div>
+      </div>
+      <div style="border:1px solid #263146;border-radius:12px;padding:12px;">
+        <div style="font-size:18px;color:#9fb0cb;text-transform:uppercase;letter-spacing:.06em;">Strat Uses</div>
+        <div style="font-size:38px;font-weight:800;">${Number(s.stratUses || 0)}</div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:18px;align-items:center;">
+      <div>
+        <div style="font-size:20px;color:#9fb0cb;text-transform:uppercase;letter-spacing:.06em;">Deaths + Stims</div>
+        <div style="font-size:28px;">${combo} <span style="color:#9fb0cb;">(lower = better endurance)</span></div>
+        <div style="margin-top:6px;font-size:24px;">Raw Score: <strong>${Number(card.scoreRaw || 0).toFixed(1)}</strong></div>
+      </div>
+      <div style="border:1px solid #263146;border-radius:14px;padding:8px;display:flex;justify-content:center;align-items:center;min-height:250px;">
+        ${radar}
+      </div>
+    </div>
+  </div>
+</div>`;
+        }
+
+        async function cardPngBlobForDiscord(card) {
+            const width = 860;
+            const markup = discordCardMarkup(card);
+            const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="1400" viewBox="0 0 ${width} 1400"><foreignObject width="100%" height="100%">${markup}</foreignObject></svg>`;
+            const blob = new Blob([svg], { type: "image/svg+xml;charset=utf-8" });
+            const url = URL.createObjectURL(blob);
+
+            try {
+                const img = await new Promise((resolve, reject) => {
+                    const i = new Image();
+                    i.onload = () => resolve(i);
+                    i.onerror = reject;
+                    i.src = url;
+                });
+
+                const canvas = document.createElement("canvas");
+                canvas.width = width;
+                canvas.height = img.height || 1400;
+                const ctx = canvas.getContext("2d");
+                if (!ctx) throw new Error("Canvas context unavailable");
+                ctx.fillStyle = "#04070e";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+                return await new Promise((resolve, reject) => {
+                    canvas.toBlob((pngBlob) => {
+                        if (!pngBlob) return reject(new Error("Failed to export PNG"));
+                        resolve(pngBlob);
+                    }, "image/png");
+                });
+            } finally {
+                URL.revokeObjectURL(url);
+            }
         }
 
         async function sendCardToDiscord(card, sourceLabel) {
@@ -4367,17 +4479,15 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                     color: 0xFFD447,
                     footer: { text: "Helldivers 2 Roulette" },
                     timestamp: new Date().toISOString(),
-                    image: { url: "attachment://card-radar.svg" }
+                    image: { url: "attachment://card-loadout.png" }
                 }]
             };
 
             const form = new FormData();
             form.append("payload_json", JSON.stringify(payload));
 
-            const radarSvg = radarSvgForDiscord(card);
-            if (radarSvg) {
-                form.append("files[0]", new Blob([radarSvg], { type: "image/svg+xml" }), "card-radar.svg");
-            }
+            const cardPng = await cardPngBlobForDiscord(card);
+            form.append("files[0]", cardPng, "card-loadout.png");
 
             const res = await fetch(webhookUrl, { method: "POST", body: form });
             if (!res.ok) {
