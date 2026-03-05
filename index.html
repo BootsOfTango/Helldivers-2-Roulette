@@ -1008,6 +1008,7 @@ END MASTER DIRECTIVE
         .cmpRadarOverlay .radarAxisLabel {
             fill: #ffe600;
             stroke: rgba(0,0,0,.9);
+            pointer-events: none;
         }
 
         .cmpAxisFocus {
@@ -3745,7 +3746,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             for (let i = 0; i < axes.length; i++) {
                 const prevA = angles[i] - (axisStep / 2);
                 const nextA = angles[i] + (axisStep / 2);
-                const hitRadius = rOuter * 1.14;
+                const hitRadius = rOuter * 1.28;
                 const hit1 = pt(hitRadius, prevA);
                 const hit2 = pt(hitRadius, angles[i]);
                 const hit3 = pt(hitRadius, nextA);
