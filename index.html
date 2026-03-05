@@ -1678,11 +1678,16 @@ END MASTER DIRECTIVE
                         <select id="resSort">
                             <option value="new">Sort: newest</option>
                             <option value="old">Sort: oldest</option>
+                            <option value="player_asc">Player (A → Z)</option>
+                            <option value="player_desc">Player (Z → A)</option>
                             <option value="kills_desc">Kills (high → low)</option>
                             <option value="deaths_asc">Deaths (low → high)</option>
                             <option value="stims_asc">Stims (low → high)</option>
                             <option value="grade_desc">Grade (high → low)</option>
                         </select>
+                    </div>
+                    <div class="formGrid" style="margin-top:10px;">
+                        <input id="resSearch" placeholder="Search by player, seed, weapon, strat, planet..." />
                     </div>
                     <div class="smallHelp">Cards only exist if you hit “USE THIS RUN” from SPIN. Because your viewers don’t care about your indecision.</div>
                 </div>
@@ -1712,12 +1717,13 @@ END MASTER DIRECTIVE
                             <option value="kills">Sort by Kills</option>
                             <option value="deaths">Sort by Deaths</option>
                             <option value="stims">Sort by Stims</option>
+                            <option value="playerName">Sort by Player</option>
                         </select>
                         <select id="cmpSortDir">
                             <option value="desc">High → Low</option>
                             <option value="asc">Low → High</option>
                         </select>
-                        <input id="cmpSearch" placeholder="Search by seed, weapon, strat, planet..." />
+                        <input id="cmpSearch" placeholder="Search by player, seed, weapon, strat, planet..." />
                     </div>
                 </div>
             </div>
@@ -1858,6 +1864,12 @@ END MASTER DIRECTIVE
                 </div>
                 <div class="col right">
                     <button id="btnRecalcRanks" class="btnPrimary">RECALCULATE</button>
+                </div>
+            </div>
+
+            <div class="row" style="margin-top:10px;">
+                <div class="col">
+                    <input id="rankSearch" placeholder="Search rank by player name..." />
                 </div>
             </div>
 
@@ -2289,6 +2301,18 @@ END MASTER DIRECTIVE
         }
 
 function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
+
+        const DEFAULT_PLAYER_NAME = "Boots of Tango";
+
+        function getPlayerName(card) {
+            return String(card?.playerName || "").trim() || DEFAULT_PLAYER_NAME;
+        }
+
+        function formatSeedWithPlayer(card) {
+            const seed = String(card?.seed || "—");
+            const player = getPlayerName(card);
+            return `${seed} • ${player}`;
+        }
 
         // Canonicalize faction names so filters/colors don't silently fail.
         function normalizeFactionName(f) {
@@ -3170,6 +3194,11 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
                 state.cards = parsed.cards || [];
 
+                state.cards.forEach(c => {
+                    if (!c) return;
+                    c.playerName = getPlayerName(c);
+                });
+
             } catch {
                 state.items = deepClone(DEFAULTS.items);
                 state.cards = [];
@@ -3630,13 +3659,13 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             wrapA.innerHTML = `
             <div class="${cardClassA}">
-                <div class="cmpTitle"${titleStyleA}>${escapeHtml(cardA.seed || "—")}</div>
+                <div class="cmpTitle"${titleStyleA}>${escapeHtml(formatSeedWithPlayer(cardA))}</div>
                 ${buildRadarSVG(cardA, safeMaxes)}
             </div>`;
 
             wrapB.innerHTML = `
             <div class="${cardClassB}">
-                <div class="cmpTitle"${titleStyleB}>${escapeHtml(cardB.seed || "—")}</div>
+                <div class="cmpTitle"${titleStyleB}>${escapeHtml(formatSeedWithPlayer(cardB))}</div>
                 ${buildRadarSVG(cardB, safeMaxes)}
             </div>`;
 
@@ -3761,7 +3790,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 const low = Math.min(a, b);
                 const pct = low <= 0 ? (high > 0 ? 100 : 0) : ((high - low) / low) * 100;
                 const pctInt = Math.max(0, Math.round(pct));
-                const winnerSeed = winner === "A" ? (cardA.seed || "Card A") : (winner === "B" ? (cardB.seed || "Card B") : "Tied");
+                const winnerSeed = winner === "A" ? formatSeedWithPlayer(cardA) : (winner === "B" ? formatSeedWithPlayer(cardB) : "Tied");
                 const arrow = winner === "A" ? "↑" : (winner === "B" ? "↑" : "↔");
                 const msg = winner === "tie"
                     ? `${axes[i].key} — TIE`
@@ -3782,8 +3811,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                     <polygon points="${ptsOuter.map(fmt).join(" ")}" />
                     ${spokes}
                 </g>
-                <polygon id="cmpPolyB" class="cmpOverlayPoly" points="${polyB}" fill="${colB.fill}" stroke="${colB.stroke}" stroke-width="2" opacity="0.78" style="color:${colB.stroke};"><title>${escapeHtml(cardB.seed || "Card B")}</title></polygon>
-                <polygon id="cmpPolyA" class="cmpOverlayPoly" points="${polyA}" fill="${colA.fill}" stroke="${colA.stroke}" stroke-width="2" opacity="0.78" style="color:${colA.stroke};"><title>${escapeHtml(cardA.seed || "Card A")}</title></polygon>
+                <polygon id="cmpPolyB" class="cmpOverlayPoly" points="${polyB}" fill="${colB.fill}" stroke="${colB.stroke}" stroke-width="2" opacity="0.78" style="color:${colB.stroke};"><title>${escapeHtml(formatSeedWithPlayer(cardB))}</title></polygon>
+                <polygon id="cmpPolyA" class="cmpOverlayPoly" points="${polyA}" fill="${colA.fill}" stroke="${colA.stroke}" stroke-width="2" opacity="0.78" style="color:${colA.stroke};"><title>${escapeHtml(formatSeedWithPlayer(cardA))}</title></polygon>
                 <g>${focusDots.join("")}</g>
                 <g>${hitAreas.join("")}</g>
                 ${tipLabels}
@@ -4065,15 +4094,29 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const modeFilter = $("#resFilterMode").value;
             const factionFilter = $("#resFilterFaction").value;
             const sort = $("#resSort").value;
+            const query = normalizeText($("#resSearch")?.value || "");
 
             let list = state.cards.slice();
 
             if (modeFilter) list = list.filter(c => c.mode === modeFilter);
             if (factionFilter) list = list.filter(c => c.faction === factionFilter);
+            if (query) {
+                list = list.filter(c => {
+                    const hay = normalizeText([
+                        getPlayerName(c), c.seed, c.title, c.mode, c.faction,
+                        c.primary, c.sidearm, c.throwable,
+                        (c.stratagems || []).join(" "),
+                        c.planet?.name, c.planet?.sector, (c.planet?.weatherText || c.planet?.weather)
+                    ].join(" "));
+                    return hay.includes(query);
+                });
+            }
 
             const sorter = {
                 new: (a, b) => (b.createdAt || "").localeCompare(a.createdAt || ""),
                 old: (a, b) => (a.createdAt || "").localeCompare(b.createdAt || ""),
+                player_asc: (a, b) => getPlayerName(a).localeCompare(getPlayerName(b)) || (b.createdAt || "").localeCompare(a.createdAt || ""),
+                player_desc: (a, b) => getPlayerName(b).localeCompare(getPlayerName(a)) || (b.createdAt || "").localeCompare(a.createdAt || ""),
                 kills_desc: (a, b) => (Number(b.stats.kills || 0) - Number(a.stats.kills || 0)),
                 deaths_asc: (a, b) => (Number(a.stats.deaths || 0) - Number(b.stats.deaths || 0)),
                 stims_asc: (a, b) => (Number(a.stats.stims || 0) - Number(b.stats.stims || 0)),
@@ -4110,7 +4153,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 el.innerHTML = `
                       <div class="cardTop">
                         <div>
-                          <div class="cardTitle">${escapeHtml(card.seed)}</div>
+                          <div class="cardTitle">${escapeHtml(formatSeedWithPlayer(card))}</div>
                           <div class="cardMeta">
                             ${escapeHtml(card.mode)} •
 <span class="${getFactionClass(card.faction)}">${escapeHtml(card.faction)}</span> •
@@ -4339,7 +4382,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const opts = state.cards
                 .slice()
                 .sort((x, y) => (y.createdAt || "").localeCompare(x.createdAt || ""))
-                .map(c => ({ id: c.id, text: `${c.seed} • ${c.mode} • ${c.faction} • Grade ${c.grade || 0}` }));
+                .map(c => ({ id: c.id, text: `${getPlayerName(c)} • ${c.seed} • ${c.mode} • ${c.faction} • Grade ${c.grade || 0}` }));
 
             const build = (sel) => {
                 sel.innerHTML = "";
@@ -4422,8 +4465,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const header = `
                             <tr>
                               <th>Metric</th>
-                              <th>${ca ? escapeHtml(ca.title || ca.seed) : "Card A"}</th>
-                              <th>${cb ? escapeHtml(cb.title || cb.seed) : "Card B"}</th>
+                              <th>${ca ? escapeHtml(formatSeedWithPlayer(ca)) : "Card A"}</th>
+                              <th>${cb ? escapeHtml(formatSeedWithPlayer(cb)) : "Card B"}</th>
                             </tr>
                           `;
             table.insertAdjacentHTML("beforeend", header);
@@ -4888,22 +4931,28 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         function renderRank() {
             recalcGrades();
 
+            const rankQuery = normalizeText($("#rankSearch")?.value || "");
             const list = state.cards.slice().sort((a, b) => {
                 const g = Number(b.grade || 0) - Number(a.grade || 0);
                 if (g !== 0) return g;
                 return (b.createdAt || "").localeCompare(a.createdAt || "");
             });
 
+            let filtered = list;
+            if (rankQuery) {
+                filtered = list.filter(c => normalizeText(getPlayerName(c)).includes(rankQuery));
+            }
+
             const box = $("#rankList");
             box.innerHTML = "";
 
-            if (!list.length) {
+            if (!filtered.length) {
                 box.innerHTML = `<div class="tiny">No cards to rank yet.</div>`;
                 return;
             }
 
-            list.forEach((c, idx) => {
-                const place = idx + 1;
+            filtered.forEach((c) => {
+                const place = list.findIndex(x => x.id === c.id) + 1;
 
                 const outer = document.createElement("div");
                 outer.className = "rankOuter";
@@ -4921,8 +4970,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
                 row.innerHTML = `
                           <div>
-                            <div style="font-weight:900;">#${place} • ${escapeHtml(c.title || c.seed)}</div>
-                            <div class="tiny">${escapeHtml(c.mode)} • ${escapeHtml(c.faction)} • <span class="muted">${escapeHtml(c.primary)}</span></div>
+                            <div style="font-weight:900;">#${place} • ${escapeHtml(formatSeedWithPlayer(c))}</div>
+                            <div class="tiny">${escapeHtml(c.mode)} • ${escapeHtml(c.faction)} • ${escapeHtml(getPlayerName(c))} • <span class="muted">${escapeHtml(c.primary)}</span></div>
                           </div>
                           <div style="text-align:right;">
                             <div class="badge yellow">Grade ${Number(c.grade || 0)}</div>
@@ -5135,10 +5184,20 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 notes: "",
 
                 scoreRaw: 0,
-                grade: 0
+                grade: 0,
+                playerName: ""
             };
             // persist biome at confirmation time
             try { card.planetBiome = (card.planetBiome || getPlanetBiomeFromPlanet(card.planet)); } catch (e) { }
+
+            const existingName = getPlayerName(card);
+            const typedName = window.prompt("Enter player name for this run:", existingName) || "";
+            const cleanName = typedName.trim();
+            if (!cleanName) {
+                alert("Card not created. Player name is required.");
+                return;
+            }
+            card.playerName = cleanName;
 
             state.cards.unshift(card);
             recalcGrades();
@@ -5162,7 +5221,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                     const parsed = JSON.parse(String(reader.result || ""));
                     if (!parsed || typeof parsed !== "object") throw new Error("bad");
                     if (parsed.items) state.items = parsed.items;
-                    if (parsed.cards) state.cards = parsed.cards;
+                    if (parsed.cards) { state.cards = parsed.cards; state.cards.forEach(c => { if (c) c.playerName = getPlayerName(c); }); }
                     recalcGrades();
                     saveState();
                     renderItems();
@@ -5194,6 +5253,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             $("#resFilterMode").addEventListener("change", renderResults);
             $("#resFilterFaction").addEventListener("change", renderResults);
             $("#resSort").addEventListener("change", renderResults);
+            $("#resSearch").addEventListener("input", renderResults);
 
             $("#cmpA").addEventListener("change", renderCompare);
             $("#cmpB").addEventListener("change", renderCompare);
@@ -5204,6 +5264,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             $("#cmpSortMetric").addEventListener("change", refreshCompareOptions);
             $("#cmpSortDir").addEventListener("change", refreshCompareOptions);
             $("#cmpSearch").addEventListener("input", refreshCompareOptions);
+            $("#rankSearch").addEventListener("input", renderRank);
 
 
 
@@ -5335,7 +5396,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             if (q) {
                 list = list.filter(c => {
                     const hay = normalizeText([
-                        c.seed, c.title, c.mode, c.faction,
+                        getPlayerName(c), c.seed, c.title, c.mode, c.faction,
                         c.primary, c.sidearm, c.throwable,
                         (c.stratagems || []).join(" "),
                         c.planet?.name, c.planet?.sector, (c.planet?.weatherText || c.planet?.weather)
@@ -5346,6 +5407,12 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             const dir = (sortDir === "asc") ? 1 : -1;
             list.sort((x, y) => {
+                if (sortMetric === "playerName") {
+                    const d = getPlayerName(x).localeCompare(getPlayerName(y)) * dir;
+                    if (d !== 0) return d;
+                    return (y.createdAt || "").localeCompare(x.createdAt || "");
+                }
+
                 const vx = (sortMetric === "grade")
                     ? Number(x.grade || 0)
                     : Number(x.stats?.[sortMetric] || 0);
@@ -5365,7 +5432,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             const opts = list.map(c => ({
                 id: c.id,
-                text: `${c.seed} • ${c.mode} • ${c.faction} • Grade ${c.grade || 0}`
+                text: `${getPlayerName(c)} • ${c.seed} • ${c.mode} • ${c.faction} • Grade ${c.grade || 0}`
             }));
 
             const build = (sel) => {
