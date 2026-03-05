@@ -4447,6 +4447,11 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             }
         }
 
+        function isCanvasTaintedError(err) {
+            const msg = String(err?.message || err || "");
+            return /tainted canvases may not be exported/i.test(msg) || /insecure operation/i.test(msg);
+        }
+
         async function sendCardToDiscord(card, sourceLabel) {
             const webhookUrl = getDiscordWebhookUrl();
             if (!webhookUrl) {
@@ -4460,16 +4465,21 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 username: "Helldivers 2 Roulette",
                 content: `📸 ${formatSeedWithPlayer(card)} (${sourceLabel})`,
                 embeds: [{
-                    color: 0xFFD447,
-                    image: { url: "attachment://card-loadout.png" }
+                    color: 0xFFD447
                 }]
             };
 
             const form = new FormData();
-            form.append("payload_json", JSON.stringify(payload));
+            try {
+                const cardPng = await cardPngBlobForDiscord(card);
+                payload.embeds[0].image = { url: "attachment://card-loadout.png" };
+                form.append("file", cardPng, "card-loadout.png");
+            } catch (err) {
+                if (!isCanvasTaintedError(err)) throw err;
+                payload.content += "\n⚠️ Image export was blocked by browser canvas security; sent without card image.";
+            }
 
-            const cardPng = await cardPngBlobForDiscord(card);
-            form.append("file", cardPng, "card-loadout.png");
+            form.append("payload_json", JSON.stringify(payload));
 
             const res = await fetch(webhookUrl, { method: "POST", body: form });
             if (!res.ok) {
