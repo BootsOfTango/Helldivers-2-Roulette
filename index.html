@@ -4327,21 +4327,6 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             return state.cards.find(c => c.id === id) || null;
         }
 
-        function cardDiscordDescription(card) {
-            const s = card.stats || {};
-            const combo = Number(s.deaths || 0) + Number(s.stims || 0);
-            return [
-                `**Mode:** ${card.mode || "—"} | **Faction:** ${card.faction || "—"}`,
-                `**Primary:** ${card.primary || "—"}`,
-                `**Sidearm:** ${card.sidearm || "—"}`,
-                `**Throwable:** ${card.throwable || "—"}`,
-                `**Stratagems:** ${(card.stratagems || []).join(" • ") || "—"}`,
-                `**Planet:** ${card.planet?.name || "—"} (${card.planet?.sector || "—"})`,
-                `**Stats:** K ${Number(s.kills || 0)} | A ${Number(s.accuracy || 0)}% | D ${Number(s.deaths || 0)} | S ${Number(s.stims || 0)} | DS ${combo}`,
-                `**Grade:** ${Number(card.grade || 0)} | **Raw:** ${Number(card.scoreRaw || 0).toFixed(1)} | **MO:** ${card.majorOrderDone ? "DONE" : "NO"}`
-            ].join("\n");
-        }
-
         function getCardTierClass(card) {
             const tierMap = buildTierMap();
             return tierMap.get(card.id) || "";
@@ -4473,12 +4458,9 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             const payload = {
                 username: "Helldivers 2 Roulette",
+                content: `📸 ${formatSeedWithPlayer(card)} (${sourceLabel})`,
                 embeds: [{
-                    title: `${formatSeedWithPlayer(card)} (${sourceLabel})`,
-                    description: cardDiscordDescription(card),
                     color: 0xFFD447,
-                    footer: { text: "Helldivers 2 Roulette" },
-                    timestamp: new Date().toISOString(),
                     image: { url: "attachment://card-loadout.png" }
                 }]
             };
@@ -4487,7 +4469,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             form.append("payload_json", JSON.stringify(payload));
 
             const cardPng = await cardPngBlobForDiscord(card);
-            form.append("files[0]", cardPng, "card-loadout.png");
+            form.append("file", cardPng, "card-loadout.png");
 
             const res = await fetch(webhookUrl, { method: "POST", body: form });
             if (!res.ok) {
@@ -4527,6 +4509,30 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             // keep results view stable, no full redraw per keystroke except textarea input is fine
         }
 
+
+        function syncCardFromResultInputs(cardId, rootEl) {
+            const card = getCardById(cardId);
+            if (!card) return null;
+
+            const scope = rootEl || document;
+            const fields = scope.querySelectorAll(`[data-id="${cardId}"][data-k]`);
+            const STAT_KEYS = ["kills", "accuracy", "deaths", "stims", "distanceKm", "stratUses"];
+
+            fields.forEach(el => {
+                const key = el.getAttribute("data-k");
+                if (!key) return;
+                if (key === "majorOrderDone") {
+                    card.majorOrderDone = (String(el.value) === "true");
+                } else if (key === "notes") {
+                    card.notes = el.value;
+                } else if (STAT_KEYS.includes(key)) {
+                    if (!card.stats) card.stats = {};
+                    card.stats[key] = Number(el.value || 0);
+                }
+            });
+
+            return card;
+        }
         async function onCardAction(e) {
             const act = e.target.getAttribute("data-act");
             const id = e.target.getAttribute("data-id");
@@ -4543,20 +4549,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             if (act === "saveCard") {
                 // Sync latest typed values (even if user didn't blur the input yet)
                 const cardEl = e.target.closest(".card") || document;
-                const fields = cardEl.querySelectorAll(`[data-id="${id}"][data-k]`);
-                const STAT_KEYS = ["kills", "accuracy", "deaths", "stims", "distanceKm", "stratUses"];
-                fields.forEach(el => {
-                    const key = el.getAttribute("data-k");
-                    if (!key) return;
-                    if (key === "majorOrderDone") {
-                        card.majorOrderDone = (String(el.value) === "true");
-                    } else if (key === "notes") {
-                        card.notes = el.value;
-                    } else if (STAT_KEYS.includes(key)) {
-                        if (!card.stats) card.stats = {};
-                        card.stats[key] = Number(el.value || 0);
-                    }
-                });
+                syncCardFromResultInputs(id, cardEl);
 
                 // Recalculate score + grade and persist
                 recalcGrades();
@@ -4570,7 +4563,9 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             if (act === "sendDiscord") {
                 try {
-                    await sendCardToDiscord(card, "RESULTS");
+                    const cardEl = e.target.closest(".card") || document;
+                    const freshCard = syncCardFromResultInputs(id, cardEl) || card;
+                    await sendCardToDiscord(freshCard, "RESULTS");
                     alert("Sent to Discord ✅");
                 } catch (err) {
                     console.error("[discord] send failed", err);
