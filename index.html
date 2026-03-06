@@ -1043,6 +1043,17 @@ END MASTER DIRECTIVE
             opacity: 0.95 !important;
         }
 
+        .cmpAxisDelta {
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .12s ease;
+        }
+
+        .cmpAxisDelta.is-on {
+            opacity: 1;
+            filter: drop-shadow(0 0 8px currentColor) drop-shadow(0 0 18px currentColor);
+        }
+
         .cmpHoverBanner {
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -3837,6 +3848,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const hoverRows = [];
             const hitAreas = [];
             const focusDots = [];
+            const axisDeltas = [];
             for (let i = 0; i < axes.length; i++) {
                 const prevA = angles[i] - (axisStep / 2);
                 const nextA = angles[i] + (axisStep / 2);
@@ -3846,8 +3858,10 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 const hit3 = pt(hitRadius, nextA);
                 hitAreas.push(`<polygon class="cmpOverlayAxisHit" data-axis="${i}" points="${fmt({ x: cx, y: cy })} ${fmt(hit1)} ${fmt(hit2)} ${fmt(hit3)}" />`);
 
-                const axisPoint = pt(rOuter, angles[i]);
-                focusDots.push(`<circle class="cmpAxisFocus" id="cmpAxisFocus-${i}" cx="${axisPoint.x.toFixed(1)}" cy="${axisPoint.y.toFixed(1)}" r="7.2" />`);
+                const pointA = ptsA[i];
+                const pointB = ptsB[i];
+                focusDots.push(`<circle class="cmpAxisFocus" id="cmpAxisFocus-${i}" cx="${pointA.x.toFixed(1)}" cy="${pointA.y.toFixed(1)}" r="7.2" data-side="A" />`);
+                focusDots.push(`<circle class="cmpAxisFocus" id="cmpAxisFocus-${i}-b" cx="${pointB.x.toFixed(1)}" cy="${pointB.y.toFixed(1)}" r="7.2" data-side="B" />`);
 
                 const a = valsA[i], b = valsB[i];
                 const winner = (Math.abs(a - b) < 0.01) ? "tie" : (a > b ? "A" : "B");
@@ -3866,6 +3880,15 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                     ? `${statLabel} TIE`
                     : `${statLabel} ${pctInt}% HIGHER`;
 
+                const lowRadius = rOuter * Math.max(0, Math.min(a, b));
+                const highRadius = rOuter * Math.max(a, b);
+                const glowColor = winner === "A" ? colA.stroke : (winner === "B" ? colB.stroke : "#ffd400");
+                const d1 = pt(highRadius, prevA);
+                const d2 = pt(highRadius, nextA);
+                const d3 = pt(lowRadius, nextA);
+                const d4 = pt(lowRadius, prevA);
+                axisDeltas.push(`<polygon class="cmpAxisDelta" id="cmpAxisDelta-${i}" points="${fmt(d1)} ${fmt(d2)} ${fmt(d3)} ${fmt(d4)}" fill="${glowColor}" fill-opacity="0.30" stroke="#fff8a8" stroke-opacity="0.9" stroke-width="1.2" style="color:${glowColor};" />`);
+
                 hoverRows.push({ axis: i, winner, message: msg, bannerText });
             }
 
@@ -3879,12 +3902,13 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 </g>
                 <polygon id="cmpPolyB" class="cmpOverlayPoly" points="${polyB}" fill="${colB.fill}" stroke="${colB.stroke}" stroke-width="2" opacity="0.78" style="color:${colB.stroke};"><title>${escapeHtml(formatSeedWithPlayer(cardB))}</title></polygon>
                 <polygon id="cmpPolyA" class="cmpOverlayPoly" points="${polyA}" fill="${colA.fill}" stroke="${colA.stroke}" stroke-width="2" opacity="0.78" style="color:${colA.stroke};"><title>${escapeHtml(formatSeedWithPlayer(cardA))}</title></polygon>
+                <g>${axisDeltas.join("")}</g>
                 <g>${focusDots.join("")}</g>
                 <g>${hitAreas.join("")}</g>
                 ${tipLabels}
             </svg>`;
 
-            if (insight) insight.textContent = "Hover a stat section to glow the stronger card area and view % difference.";
+            if (insight) insight.textContent = "Hover a stat section to glow only the winning stat slice and view % difference.";
             if (hoverBanner) {
                 hoverBanner.className = "cmpHoverBanner";
                 const left = hoverBanner.querySelector('[data-side="left"]');
@@ -3893,15 +3917,12 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 if (right) right.textContent = "to reveal winner side";
             }
 
-            const polyNodeA = overlay.querySelector("#cmpPolyA");
-            const polyNodeB = overlay.querySelector("#cmpPolyB");
             const hits = overlay.querySelectorAll(".cmpOverlayAxisHit");
 
             const clearHover = () => {
-                polyNodeA?.classList.remove("is-glow");
-                polyNodeB?.classList.remove("is-glow");
                 overlay.querySelectorAll(".cmpAxisFocus").forEach((dot) => dot.classList.remove("is-on"));
-                if (insight) insight.textContent = "Hover a stat section to glow the stronger card area and view % difference.";
+                overlay.querySelectorAll(".cmpAxisDelta").forEach((seg) => seg.classList.remove("is-on"));
+                if (insight) insight.textContent = "Hover a stat section to glow only the winning stat slice and view % difference.";
                 if (hoverBanner) {
                     hoverBanner.className = "cmpHoverBanner";
                     const left = hoverBanner.querySelector('[data-side="left"]');
@@ -3917,13 +3938,27 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                     const row = hoverRows.find(r => r.axis === axis);
                     clearHover();
                     if (!row) return;
-                    const focusDot = overlay.querySelector(`#cmpAxisFocus-${axis}`);
+                    const focusDot = row.winner === "B"
+                        ? overlay.querySelector(`#cmpAxisFocus-${axis}-b`)
+                        : overlay.querySelector(`#cmpAxisFocus-${axis}`);
                     if (focusDot) {
                         focusDot.style.color = row.winner === "B" ? colB.stroke : (row.winner === "tie" ? "#ffd400" : colA.stroke);
                         focusDot.classList.add("is-on");
                     }
-                    if (row.winner === "A") polyNodeA?.classList.add("is-glow");
-                    if (row.winner === "B") polyNodeB?.classList.add("is-glow");
+                    if (row.winner === "tie") {
+                        const tieDotA = overlay.querySelector(`#cmpAxisFocus-${axis}`);
+                        const tieDotB = overlay.querySelector(`#cmpAxisFocus-${axis}-b`);
+                        if (tieDotA) {
+                            tieDotA.style.color = "#ffd400";
+                            tieDotA.classList.add("is-on");
+                        }
+                        if (tieDotB) {
+                            tieDotB.style.color = "#ffd400";
+                            tieDotB.classList.add("is-on");
+                        }
+                    }
+                    const deltaSeg = overlay.querySelector(`#cmpAxisDelta-${axis}`);
+                    if (deltaSeg) deltaSeg.classList.add("is-on");
                     if (insight) insight.textContent = row.message;
                     if (hoverBanner) {
                         const left = hoverBanner.querySelector('[data-side="left"]');
@@ -4607,12 +4642,19 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             });
         }
 
+        function getDiscordNotesText(card, maxLen = Infinity) {
+            const notes = String(card?.notes || "").trim();
+            if (!notes) return "";
+            if (!Number.isFinite(maxLen) || maxLen <= 0) return notes;
+            return notes.length > maxLen ? `${notes.slice(0, Math.max(0, maxLen - 3))}...` : notes;
+        }
+
         function buildDiscordCardEmbed(card, imageUrl) {
             const s = card.stats || {};
-            const combo = Number(s.deaths || 0) + Number(s.stims || 0);
             const weatherText = card.planet ? getPlanetWeatherText(card.planet) : "None";
             const createdAt = card.createdAt ? new Date(card.createdAt).toLocaleString() : "—";
             const tier = getCardTierClass(card);
+            const notes = getDiscordNotesText(card, 1024);
             const tierColor = {
                 gold: 0xffcc4d,
                 silver: 0xcfd6e6,
@@ -4666,6 +4708,13 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 }
             };
 
+            if (notes) {
+                embed.fields.push({
+                    name: "📝 Notes",
+                    value: notes.length > 1024 ? `${notes.slice(0, 1021)}...` : notes
+                });
+            }
+
             if (imageUrl) embed.image = { url: imageUrl };
             return embed;
         }
@@ -4679,9 +4728,14 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             recalcGrades();
 
+            const noteContent = getDiscordNotesText(card, 1700);
             const payload = {
                 username: "Helldivers 2 Roulette",
-                content: `📸 ${formatSeedWithPlayer(card)}`,
+                content: noteContent
+                    ? `📸 ${formatSeedWithPlayer(card)}
+📝 Notes:
+${noteContent}`
+                    : `📸 ${formatSeedWithPlayer(card)}`,
                 embeds: [buildDiscordCardEmbed(card)]
             };
 
