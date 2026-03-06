@@ -4607,6 +4607,13 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             });
         }
 
+        function getDiscordNotesText(card, maxLen = Infinity) {
+            const notes = String(card?.notes || "").trim();
+            if (!notes) return "";
+            if (!Number.isFinite(maxLen) || maxLen <= 0) return notes;
+            return notes.length > maxLen ? `${notes.slice(0, Math.max(0, maxLen - 3))}...` : notes;
+        }
+
         function buildDiscordCardEmbed(card, imageUrl) {
             const s = card.stats || {};
             const weatherText = card.planet ? getPlanetWeatherText(card.planet) : "None";
@@ -4686,9 +4693,14 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             recalcGrades();
 
+            const noteContent = getDiscordNotesText(card, 1700);
             const payload = {
                 username: "Helldivers 2 Roulette",
-                content: `📸 ${formatSeedWithPlayer(card)}`,
+                content: noteContent
+                    ? `📸 ${formatSeedWithPlayer(card)}
+📝 Notes:
+${noteContent}`
+                    : `📸 ${formatSeedWithPlayer(card)}`,
                 embeds: [buildDiscordCardEmbed(card)]
             };
 
