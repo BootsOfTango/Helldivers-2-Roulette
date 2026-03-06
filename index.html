@@ -4463,16 +4463,16 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             const payload = {
                 username: "Helldivers 2 Roulette",
-                content: `📸 ${formatSeedWithPlayer(card)} (${sourceLabel})`,
-                embeds: [{
-                    color: 0xFFD447
-                }]
+                content: `📸 ${formatSeedWithPlayer(card)} (${sourceLabel})`
             };
 
             const form = new FormData();
             try {
                 const cardPng = await cardPngBlobForDiscord(card);
-                payload.embeds[0].image = { url: "attachment://card-loadout.png" };
+                payload.embeds = [{
+                    color: 0xFFD447,
+                    image: { url: "attachment://card-loadout.png" }
+                }];
                 form.append("file", cardPng, "card-loadout.png");
             } catch (err) {
                 const msg = String(err?.message || err || "unknown error");
