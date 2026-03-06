@@ -4365,6 +4365,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             return tierMap.get(card.id) || "";
         }
 
+        const DISCORD_CARD_SCALE = 2;
+
         function discordCardMarkup(card) {
             const s = card.stats || {};
             const combo = Number(s.deaths || 0) + Number(s.stims || 0);
@@ -4446,9 +4448,16 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         }
 
         async function cardPngBlobForDiscord(card) {
-            const width = 860;
+            const baseWidth = 860;
+            const baseHeight = 1400;
+            const width = Math.round(baseWidth * DISCORD_CARD_SCALE);
+            const height = Math.round(baseHeight * DISCORD_CARD_SCALE);
             const markup = discordCardMarkup(card);
-            const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="1400" viewBox="0 0 ${width} 1400"><foreignObject width="100%" height="100%">${markup}</foreignObject></svg>`;
+            const scaledMarkup = `
+<div xmlns="http://www.w3.org/1999/xhtml" style="width:${width}px;height:${height}px;overflow:hidden;background:#04070e;">
+  <div style="width:${baseWidth}px;height:${baseHeight}px;transform-origin:top left;transform:scale(${DISCORD_CARD_SCALE});">${markup}</div>
+</div>`;
+            const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}"><foreignObject width="100%" height="100%">${scaledMarkup}</foreignObject></svg>`;
             const blob = new Blob([svg], { type: "image/svg+xml;charset=utf-8" });
             const url = URL.createObjectURL(blob);
 
@@ -4462,7 +4471,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
                 const canvas = document.createElement("canvas");
                 canvas.width = width;
-                canvas.height = img.height || 1400;
+                canvas.height = img.height || height;
                 const ctx = canvas.getContext("2d");
                 if (!ctx) throw new Error("Canvas context unavailable");
                 ctx.fillStyle = "#04070e";
@@ -4486,13 +4495,17 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         }
 
         function drawDiscordCardCanvasFallback(card) {
-            const width = 1200;
-            const height = 720;
+            const baseWidth = 1200;
+            const baseHeight = 720;
+            const width = Math.round(baseWidth * DISCORD_CARD_SCALE);
+            const height = Math.round(baseHeight * DISCORD_CARD_SCALE);
             const canvas = document.createElement("canvas");
             canvas.width = width;
             canvas.height = height;
             const ctx = canvas.getContext("2d");
             if (!ctx) throw new Error("Canvas context unavailable");
+
+            ctx.scale(DISCORD_CARD_SCALE, DISCORD_CARD_SCALE);
 
             const s = card.stats || {};
             const primary = card.primary || "—";
@@ -4539,15 +4552,15 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 ctx.fillText(String(value), 1020, y + 4);
             };
 
-            const grad = ctx.createLinearGradient(0, 0, 0, height);
+            const grad = ctx.createLinearGradient(0, 0, 0, baseHeight);
             grad.addColorStop(0, "#060912");
             grad.addColorStop(1, "#04070e");
             ctx.fillStyle = grad;
-            ctx.fillRect(0, 0, width, height);
+            ctx.fillRect(0, 0, baseWidth, baseHeight);
 
             ctx.strokeStyle = borderColor;
             ctx.lineWidth = 3;
-            ctx.strokeRect(20, 20, width - 40, height - 40);
+            ctx.strokeRect(20, 20, baseWidth - 40, baseHeight - 40);
 
             ctx.fillStyle = "#e7edf8";
             ctx.font = "800 52px Inter, Segoe UI, Arial, sans-serif";
