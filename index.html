@@ -1554,7 +1554,7 @@ END MASTER DIRECTIVE
             <div class="pill"><strong id="pillMode">—</strong> mode</div>
             <div class="pill"><strong id="pillFaction">—</strong> faction</div>
             <div class="pill yellow">Seed: <strong id="pillSeed">—</strong></div>
-            <button id="btnDeveloperMode" class="devModeHeaderBtn btnGhost">DEV MODE: OFF</button>
+            <button id="btnDeveloperModeHeader" data-dev-toggle="true" class="devModeHeaderBtn btnGhost">DEV MODE: OFF</button>
         </div>
     </header>
 
@@ -1565,7 +1565,7 @@ END MASTER DIRECTIVE
             <div class="tabBtn" data-tab="compare">COMPARE</div>
             <div class="tabBtn" data-tab="items" data-dev-only="true">ITEMS</div>
             <div class="tabBtn" data-tab="rank">RANK</div>
-            <button id="btnDeveloperMode" class="devToggleBtn btnGhost">DEVELOPER MODE: OFF</button>
+            <button id="btnDeveloperModeTab" data-dev-toggle="true" class="devToggleBtn btnGhost">DEVELOPER MODE: OFF</button>
         </div>
 
         <!-- SPIN TAB -->
@@ -5660,12 +5660,11 @@ ${noteContent}`
                 el.style.display = enabled ? el.dataset.devDisplay : "none";
             });
 
-            const btn = $("#btnDeveloperMode");
-            if (btn) {
+            $$('[data-dev-toggle="true"]').forEach(btn => {
                 btn.textContent = enabled ? "DEVELOPER MODE: ON" : "DEVELOPER MODE: OFF";
                 btn.classList.toggle("btnPrimary", enabled);
                 btn.classList.toggle("btnGhost", !enabled);
-            }
+            });
 
             if (!enabled && $("#tab-items")?.style.display !== "none") {
                 switchTab("spin");
@@ -5920,10 +5919,12 @@ ${noteContent}`
             $("#cmpSearch").addEventListener("input", refreshCompareOptions);
             $("#rankSearch").addEventListener("input", renderRank);
 
-            $("#btnDeveloperMode").addEventListener("click", () => {
-                state.settings.developerMode = !state.settings.developerMode;
-                saveState();
-                applyDeveloperMode();
+            $$('[data-dev-toggle="true"]').forEach(btn => {
+                btn.addEventListener("click", () => {
+                    state.settings.developerMode = !state.settings.developerMode;
+                    saveState();
+                    applyDeveloperMode();
+                });
             });
 
 
