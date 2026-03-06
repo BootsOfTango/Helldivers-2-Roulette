@@ -1563,7 +1563,7 @@ END MASTER DIRECTIVE
             <div class="tabBtn active" data-tab="spin">SPIN</div>
             <div class="tabBtn" data-tab="results">RESULTS</div>
             <div class="tabBtn" data-tab="compare">COMPARE</div>
-            <div class="tabBtn" data-tab="items" data-dev-only="true">ITEMS</div>
+            <div class="tabBtn" data-tab="items">ITEMS</div>
             <div class="tabBtn" data-tab="rank">RANK</div>
             <button id="btnDeveloperModeTab" data-dev-toggle="true" class="devToggleBtn btnGhost">DEVELOPER MODE: OFF</button>
         </div>
@@ -5628,8 +5628,6 @@ ${noteContent}`
          * Event wiring
          ***********************/
         function switchTab(tab) {
-            if (tab === "items" && !state.settings.developerMode) tab = "spin";
-
             $$(".tabBtn").forEach(b => b.classList.toggle("active", b.dataset.tab === tab));
             $("#tab-spin").style.display = (tab === "spin") ? "" : "none";
             $("#tab-results").style.display = (tab === "results") ? "" : "none";
@@ -5666,9 +5664,6 @@ ${noteContent}`
                 btn.classList.toggle("btnGhost", !enabled);
             });
 
-            if (!enabled && $("#tab-items")?.style.display !== "none") {
-                switchTab("spin");
-            }
         }
 
 
@@ -5919,12 +5914,15 @@ ${noteContent}`
             $("#cmpSearch").addEventListener("input", refreshCompareOptions);
             $("#rankSearch").addEventListener("input", renderRank);
 
-            $$('[data-dev-toggle="true"]').forEach(btn => {
-                btn.addEventListener("click", () => {
-                    state.settings.developerMode = !state.settings.developerMode;
-                    saveState();
-                    applyDeveloperMode();
-                });
+            const toggleDeveloperMode = () => {
+                state.settings.developerMode = !state.settings.developerMode;
+                saveState();
+                applyDeveloperMode();
+            };
+
+            ["#btnDeveloperModeHeader", "#btnDeveloperModeTab"].forEach(sel => {
+                const btn = $(sel);
+                if (btn) btn.addEventListener("click", toggleDeveloperMode);
             });
 
 
