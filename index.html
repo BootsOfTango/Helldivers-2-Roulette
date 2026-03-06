@@ -1012,11 +1012,11 @@ END MASTER DIRECTIVE
         }
 
         .cmpAxisFocus {
-            fill: rgba(255,255,255,.15);
-            stroke: currentColor;
+            fill: rgba(120,255,170,.28);
+            stroke: #7fffb3;
             stroke-width: 2;
             opacity: 0;
-            filter: drop-shadow(0 0 8px currentColor) drop-shadow(0 0 16px currentColor);
+            filter: drop-shadow(0 0 8px rgba(127,255,179,.95)) drop-shadow(0 0 16px rgba(127,255,179,.6));
             transition: opacity .1s ease;
             pointer-events: none;
         }
@@ -1035,12 +1035,7 @@ END MASTER DIRECTIVE
         }
 
         .cmpOverlayPoly {
-            transition: filter .16s ease, opacity .16s ease;
-        }
-
-        .cmpOverlayPoly.is-glow {
-            filter: drop-shadow(0 0 8px currentColor) drop-shadow(0 0 16px currentColor);
-            opacity: 0.95 !important;
+            transition: opacity .16s ease;
         }
 
         .cmpAxisDelta {
@@ -1051,7 +1046,7 @@ END MASTER DIRECTIVE
 
         .cmpAxisDelta.is-on {
             opacity: 1;
-            filter: drop-shadow(0 0 8px currentColor) drop-shadow(0 0 18px currentColor);
+            filter: drop-shadow(0 0 8px rgba(127,255,179,.9)) drop-shadow(0 0 18px rgba(127,255,179,.6));
         }
 
         .cmpHoverBanner {
@@ -1093,20 +1088,20 @@ END MASTER DIRECTIVE
 
         .cmpHoverBanner.winner-a .cmpHoverBannerSide.left {
             color: #ffe600;
-            border-color: rgba(46,204,113,.7);
-            box-shadow: 0 0 22px rgba(46,204,113,.26);
+            border-color: rgba(127,255,179,.72);
+            box-shadow: 0 0 22px rgba(127,255,179,.28);
         }
 
         .cmpHoverBanner.winner-b .cmpHoverBannerSide.right {
             color: #ffe600;
-            border-color: rgba(255,90,90,.72);
-            box-shadow: 0 0 22px rgba(255,90,90,.25);
+            border-color: rgba(127,255,179,.72);
+            box-shadow: 0 0 22px rgba(127,255,179,.28);
         }
 
         .cmpHoverBanner.winner-tie .cmpHoverBannerSide {
             color: #ffe600;
-            border-color: rgba(255,212,0,.68);
-            box-shadow: 0 0 22px rgba(255,212,0,.22);
+            border-color: rgba(127,255,179,.72);
+            box-shadow: 0 0 22px rgba(127,255,179,.28);
         }
 
         @media (max-width: 960px) {
@@ -3849,6 +3844,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const hitAreas = [];
             const focusDots = [];
             const axisDeltas = [];
+            const compareHighlight = "#7fffb3";
+            const markerInsetPx = 2.5;
             for (let i = 0; i < axes.length; i++) {
                 const prevA = angles[i] - (axisStep / 2);
                 const nextA = angles[i] + (axisStep / 2);
@@ -3858,10 +3855,10 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 const hit3 = pt(hitRadius, nextA);
                 hitAreas.push(`<polygon class="cmpOverlayAxisHit" data-axis="${i}" points="${fmt({ x: cx, y: cy })} ${fmt(hit1)} ${fmt(hit2)} ${fmt(hit3)}" />`);
 
-                const pointA = ptsA[i];
-                const pointB = ptsB[i];
-                focusDots.push(`<circle class="cmpAxisFocus" id="cmpAxisFocus-${i}" cx="${pointA.x.toFixed(1)}" cy="${pointA.y.toFixed(1)}" r="7.2" data-side="A" />`);
-                focusDots.push(`<circle class="cmpAxisFocus" id="cmpAxisFocus-${i}-b" cx="${pointB.x.toFixed(1)}" cy="${pointB.y.toFixed(1)}" r="7.2" data-side="B" />`);
+                const pointA = pt(Math.max(0, (rOuter * valsA[i]) - markerInsetPx), angles[i]);
+                const pointB = pt(Math.max(0, (rOuter * valsB[i]) - markerInsetPx), angles[i]);
+                focusDots.push(`<circle class="cmpAxisFocus" id="cmpAxisFocus-${i}" cx="${pointA.x.toFixed(1)}" cy="${pointA.y.toFixed(1)}" r="5.2" data-side="A" />`);
+                focusDots.push(`<circle class="cmpAxisFocus" id="cmpAxisFocus-${i}-b" cx="${pointB.x.toFixed(1)}" cy="${pointB.y.toFixed(1)}" r="5.2" data-side="B" />`);
 
                 const a = valsA[i], b = valsB[i];
                 const winner = (Math.abs(a - b) < 0.01) ? "tie" : (a > b ? "A" : "B");
@@ -3882,12 +3879,12 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
                 const lowRadius = rOuter * Math.max(0, Math.min(a, b));
                 const highRadius = rOuter * Math.max(a, b);
-                const glowColor = winner === "A" ? colA.stroke : (winner === "B" ? colB.stroke : "#ffd400");
+                const glowColor = compareHighlight;
                 const d1 = pt(highRadius, prevA);
                 const d2 = pt(highRadius, nextA);
                 const d3 = pt(lowRadius, nextA);
                 const d4 = pt(lowRadius, prevA);
-                axisDeltas.push(`<polygon class="cmpAxisDelta" id="cmpAxisDelta-${i}" points="${fmt(d1)} ${fmt(d2)} ${fmt(d3)} ${fmt(d4)}" fill="${glowColor}" fill-opacity="0.30" stroke="#fff8a8" stroke-opacity="0.9" stroke-width="1.2" style="color:${glowColor};" />`);
+                axisDeltas.push(`<polygon class="cmpAxisDelta" id="cmpAxisDelta-${i}" points="${fmt(d1)} ${fmt(d2)} ${fmt(d3)} ${fmt(d4)}" fill="${glowColor}" fill-opacity="0.34" stroke="${glowColor}" stroke-opacity="0.95" stroke-width="1.35" style="color:${glowColor};" />`);
 
                 hoverRows.push({ axis: i, winner, message: msg, bannerText });
             }
@@ -3942,18 +3939,18 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                         ? overlay.querySelector(`#cmpAxisFocus-${axis}-b`)
                         : overlay.querySelector(`#cmpAxisFocus-${axis}`);
                     if (focusDot) {
-                        focusDot.style.color = row.winner === "B" ? colB.stroke : (row.winner === "tie" ? "#ffd400" : colA.stroke);
+                        focusDot.style.color = compareHighlight;
                         focusDot.classList.add("is-on");
                     }
                     if (row.winner === "tie") {
                         const tieDotA = overlay.querySelector(`#cmpAxisFocus-${axis}`);
                         const tieDotB = overlay.querySelector(`#cmpAxisFocus-${axis}-b`);
                         if (tieDotA) {
-                            tieDotA.style.color = "#ffd400";
+                            tieDotA.style.color = compareHighlight;
                             tieDotA.classList.add("is-on");
                         }
                         if (tieDotB) {
-                            tieDotB.style.color = "#ffd400";
+                            tieDotB.style.color = compareHighlight;
                             tieDotB.classList.add("is-on");
                         }
                     }
