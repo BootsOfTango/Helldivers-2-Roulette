@@ -4365,7 +4365,9 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             return tierMap.get(card.id) || "";
         }
 
-        const DISCORD_CARD_SCALE = 2;
+        // Oversample Discord card renders so Discord's preview downscaling stays readable.
+        // Requested: double current Discord image size.
+        const DISCORD_CARD_SCALE = 4;
 
         function discordCardMarkup(card) {
             const s = card.stats || {};
