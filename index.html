@@ -427,6 +427,12 @@ END MASTER DIRECTIVE
             transition: .15s ease;
         }
 
+        .devModeHeaderBtn {
+            border-radius: 999px;
+            padding: 6px 12px;
+            font-size: 11px;
+        }
+
             .tabBtn:hover {
                 transform: translateY(-1px);
                 border-color: rgba(255,255,255,.18);
@@ -1550,6 +1556,7 @@ END MASTER DIRECTIVE
             <div class="pill"><strong id="pillMode">—</strong> mode</div>
             <div class="pill"><strong id="pillFaction">—</strong> faction</div>
             <div class="pill yellow">Seed: <strong id="pillSeed">—</strong></div>
+            <button id="btnDeveloperMode" class="devModeHeaderBtn btnGhost">DEV MODE: OFF</button>
         </div>
     </header>
 
@@ -1558,7 +1565,7 @@ END MASTER DIRECTIVE
             <div class="tabBtn active" data-tab="spin">SPIN</div>
             <div class="tabBtn" data-tab="results">RESULTS</div>
             <div class="tabBtn" data-tab="compare">COMPARE</div>
-            <div class="tabBtn" data-tab="items">ITEMS</div>
+            <div class="tabBtn" data-tab="items" data-dev-only="true">ITEMS</div>
             <div class="tabBtn" data-tab="rank">RANK</div>
         </div>
 
@@ -1635,11 +1642,11 @@ END MASTER DIRECTIVE
             <div class="row">
                 <div class="col">
                     <div class="label">Saved loadout cards</div>
-                    <div class="formGrid" style="margin-top:8px;">
+                    <div class="formGrid" style="margin-top:8px;" data-dev-only="true">
                         <input id="discordWebhookUrl" type="password" placeholder="Discord webhook URL (for #card-results)" autocomplete="off" />
                         <button id="btnSaveDiscordWebhook" class="btnGhost">SAVE WEBHOOK</button>
                     </div>
-                    <div class="smallHelp">Create this in Discord: Channel Settings → Integrations → Webhooks. In your channel permissions, disable <strong>Send Messages</strong> for everyone except you, keep <strong>Add Reactions</strong> enabled so people can still react.</div>
+                    <div class="smallHelp" data-dev-only="true">Create this in Discord: Channel Settings → Integrations → Webhooks. In your channel permissions, disable <strong>Send Messages</strong> for everyone except you, keep <strong>Add Reactions</strong> enabled so people can still react.</div>
                 </div>
                 <div class="col right">
                     <div class="miniRow" style="justify-content:flex-end;">
@@ -1835,22 +1842,6 @@ END MASTER DIRECTIVE
                     <div id="apiPlanetStatus" class="tiny muted" style="margin-bottom:8px;">Loading live planets...</div>
                     <div id="apiActivePlanetsList"></div>
 
-                    <div class="hr"></div>
-
-                    <div class="formGrid3">
-                        <input id="pName" placeholder="Planet name" />
-                        <select id="pFaction">
-                            <option value="Terminids">Terminids</option>
-                            <option value="Automatons">Automatons</option>
-                            <option value="Illuminate">Illuminate</option>
-                            <option value="Super Earth">Super Earth</option>
-                        </select>
-                        <input id="pSector" placeholder="Sector (e.g. Orion Sector)" />
-                    </div>
-                    <div class="formGrid" style="margin-top:10px;">
-                        <input id="pWeather" placeholder="Weather tags (comma) e.g. snowy, acid, volcanic" />
-                        <button id="btnAddPlanet" class="btnGhost">ADD PLANET</button>
-                    </div>
                 </div>
             </div>
         </section>
@@ -3140,6 +3131,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
          ***********************/
         const STORAGE_KEY = "hd2_chaos_roulette_v1";
         const DISCORD_WEBHOOK_KEY = "hd2_discord_webhook_url";
+        const DEV_MODE_KEY = "hd2_developer_mode";
 
         const state = {
             items: null,
@@ -3163,7 +3155,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             },
 
             settings: {
-                discordWebhookUrl: ""
+                discordWebhookUrl: "",
+                developerMode: false
             }
         };
 
@@ -3179,6 +3172,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             // webhook URL is stored separately so clear-data does not delete it
             state.settings.discordWebhookUrl = localStorage.getItem(DISCORD_WEBHOOK_KEY) || "";
+            state.settings.developerMode = localStorage.getItem(DEV_MODE_KEY) === "1";
 
             if (!raw) return;
 
@@ -3233,6 +3227,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             try {
                 const webhook = String(state.settings?.discordWebhookUrl || "").trim();
                 if (webhook) localStorage.setItem(DISCORD_WEBHOOK_KEY, webhook);
+                localStorage.setItem(DEV_MODE_KEY, state.settings?.developerMode ? "1" : "0");
             } catch (e) { }
 
             updateHeaderPills();
@@ -5634,6 +5629,8 @@ ${noteContent}`
          * Event wiring
          ***********************/
         function switchTab(tab) {
+            if (tab === "items" && !state.settings.developerMode) tab = "spin";
+
             $$(".tabBtn").forEach(b => b.classList.toggle("active", b.dataset.tab === tab));
             $("#tab-spin").style.display = (tab === "spin") ? "" : "none";
             $("#tab-results").style.display = (tab === "results") ? "" : "none";
@@ -5652,6 +5649,28 @@ ${noteContent}`
             }
             if (tab === "items") renderItems();
             if (tab === "rank") renderRank();
+        }
+
+        function applyDeveloperMode() {
+            const enabled = !!state.settings.developerMode;
+
+            $$('[data-dev-only="true"]').forEach(el => {
+                if (el.dataset.devDisplay === undefined) {
+                    el.dataset.devDisplay = el.style.display || "";
+                }
+                el.style.display = enabled ? el.dataset.devDisplay : "none";
+            });
+
+            const btn = $("#btnDeveloperMode");
+            if (btn) {
+                btn.textContent = enabled ? "DEV MODE: ON" : "DEV MODE: OFF";
+                btn.classList.toggle("btnPrimary", enabled);
+                btn.classList.toggle("btnGhost", !enabled);
+            }
+
+            if (!enabled && $("#tab-items")?.style.display !== "none") {
+                switchTab("spin");
+            }
         }
 
 
@@ -5902,6 +5921,15 @@ ${noteContent}`
             $("#cmpSearch").addEventListener("input", refreshCompareOptions);
             $("#rankSearch").addEventListener("input", renderRank);
 
+            const devModeBtn = $("#btnDeveloperMode");
+            if (devModeBtn) {
+                devModeBtn.addEventListener("click", () => {
+                    state.settings.developerMode = !state.settings.developerMode;
+                    saveState();
+                    applyDeveloperMode();
+                });
+            }
+
 
 
             $("#btnSaveDiscordWebhook").addEventListener("click", () => {
@@ -5992,30 +6020,6 @@ ${noteContent}`
                 state.items.stratagems.push({ name: v, enabled: true });
                 $("#addStrat").value = "";
                 saveState(); renderItems();
-            });
-
-            $("#btnAddPlanet").addEventListener("click", () => {
-                const name = $("#pName").value.trim();
-                const faction = $("#pFaction").value;
-                const sector = $("#pSector").value.trim();
-                const weather = $("#pWeather").value.trim();
-
-                if (!name) return alert("Planet name required.");
-
-                state.items.planets = state.items.planets || [];
-                state.items.planets.push({
-                    name,
-                    faction,
-                    sector: sector || "—",
-                    weather: weather || "—",
-                    enabled: true
-                });
-
-                $("#pName").value = "";
-                $("#pSector").value = "";
-                $("#pWeather").value = "";
-
-                saveState(); renderPlanets();
             });
 
             // Optional: let the planet button reroll instead of “roll once”
@@ -6147,6 +6151,7 @@ ${noteContent}`
         }
         saveState();      // ensures pills show correct saved count
         wireOnce();
+        applyDeveloperMode();
         initApp();
         switchTab("spin");
         renderSpin();
