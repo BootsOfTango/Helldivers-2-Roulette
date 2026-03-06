@@ -3196,6 +3196,11 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                             const saved = parsed.items[key];
                             const base = state.items[key];
 
+                            if (!Array.isArray(base)) {
+                                state.items[key] = saved;
+                                return;
+                            }
+
                             saved.forEach(savedItem => {
                                 const match = base.find(b => b.name === savedItem.name);
                                 if (match) {
@@ -3210,12 +3215,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                     });
                 }
 
-                state.cards = parsed.cards || [];
-
-                state.cards.forEach(c => {
-                    if (!c) return;
-                    c.playerName = getPlayerName(c);
-                });
+                state.cards = normalizeCardsCollection(parsed.cards);
 
             } catch {
                 state.items = deepClone(DEFAULTS.items);
@@ -3239,6 +3239,47 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             } catch (e) { }
 
             updateHeaderPills();
+        }
+
+        function normalizeCardRecord(card) {
+            if (!card || typeof card !== "object") return null;
+
+            card.id = String(card.id || uid());
+            card.createdAt = card.createdAt || nowISO();
+            card.seed = String(card.seed || card.seedBase || "Unknown Seed");
+            card.mode = String(card.mode || "Unknown Mode");
+            card.faction = normalizeFactionName(card.faction || "Terminids");
+            card.primary = String(card.primary || "—");
+            card.sidearm = String(card.sidearm || "—");
+            card.throwable = String(card.throwable || "—");
+
+            // Backward compatibility: some older saves/imports had a string here.
+            if (!Array.isArray(card.stratagems)) {
+                if (typeof card.stratagems === "string") {
+                    card.stratagems = splitWeatherTags(card.stratagems);
+                } else {
+                    card.stratagems = [];
+                }
+            }
+
+            card.stratagems = card.stratagems
+                .map(x => String(x || "").trim())
+                .filter(Boolean);
+
+            if (!card.stats || typeof card.stats !== "object") card.stats = {};
+
+            card.majorOrderDone = !!card.majorOrderDone;
+            card.notes = String(card.notes || "");
+            card.scoreRaw = Number(card.scoreRaw || 0);
+            card.grade = Number(card.grade || 0);
+            card.playerName = getPlayerName(card);
+
+            return card;
+        }
+
+        function normalizeCardsCollection(cards) {
+            if (!Array.isArray(cards)) return [];
+            return cards.map(normalizeCardRecord).filter(Boolean);
         }
 
         /***********************
@@ -3520,12 +3561,13 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             for (const c of (cards || [])) {
                 const s = c.stats || {};
+                const combo = Number(s.deaths || 0) + Number(s.stims || 0);
                 out.maxKills = Math.max(out.maxKills, Number(s.kills || 0));
                 out.maxAccuracy = Math.max(out.maxAccuracy, Number(s.accuracy || 0));
                 out.maxDistanceKm = Math.max(out.maxDistanceKm, Number(s.distanceKm || 0));
                 out.maxStratUses = Math.max(out.maxStratUses, Number(s.stratUses || 0));
 
-                                out.maxDeathsPlusStims = Math.max(out.maxDeathsPlusStims, combo);
+                out.maxDeathsPlusStims = Math.max(out.maxDeathsPlusStims, combo);
                 if (out.minDeathsPlusStims === null) out.minDeathsPlusStims = combo;
                 out.minDeathsPlusStims = Math.min(out.minDeathsPlusStims, combo);
             }
@@ -5766,7 +5808,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             }
             card.playerName = cleanName;
 
-            state.cards.unshift(card);
+            state.cards.unshift(normalizeCardRecord(card));
             recalcGrades();
             saveState();
 
@@ -5788,7 +5830,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                     const parsed = JSON.parse(String(reader.result || ""));
                     if (!parsed || typeof parsed !== "object") throw new Error("bad");
                     if (parsed.items) state.items = parsed.items;
-                    if (parsed.cards) { state.cards = parsed.cards; state.cards.forEach(c => { if (c) c.playerName = getPlayerName(c); }); }
+                    if (parsed.cards) state.cards = normalizeCardsCollection(parsed.cards);
                     recalcGrades();
                     saveState();
                     renderItems();
