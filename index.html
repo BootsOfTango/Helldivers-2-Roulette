@@ -4563,6 +4563,71 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             });
         }
 
+        function buildDiscordCardEmbed(card, sourceLabel, imageUrl) {
+            const s = card.stats || {};
+            const combo = Number(s.deaths || 0) + Number(s.stims || 0);
+            const weatherText = card.planet ? getPlanetWeatherText(card.planet) : "None";
+            const createdAt = card.createdAt ? new Date(card.createdAt).toLocaleString() : "—";
+            const tier = getCardTierClass(card);
+            const tierColor = {
+                gold: 0xffcc4d,
+                silver: 0xcfd6e6,
+                bronze: 0xd59a67,
+                darkbronze: 0x8b5a3c,
+                rainbow: 0x8c7bff
+            }[tier] || 0x2b3549;
+
+            const embed = {
+                color: tierColor,
+                title: `🎖️ ${formatSeedWithPlayer(card)}`,
+                description: [
+                    `**Source:** ${sourceLabel}`,
+                    `**Mode:** ${card.mode || "—"}`,
+                    `**Faction:** ${card.faction || "—"}`,
+                    `**Major Order:** ${card.majorOrderDone ? "✅ DONE" : "❌ FAIL"}`,
+                    `**Grade:** ${Number(card.grade || 0)}`,
+                    `**Raw Score:** ${Number(card.scoreRaw || 0).toFixed(1)}`
+                ].join("\n"),
+                fields: [
+                    {
+                        name: "🧰 Loadout",
+                        value: [
+                            `**Primary:** ${card.primary || "—"}`,
+                            `**Sidearm:** ${card.sidearm || "—"}`,
+                            `**Throwable:** ${card.throwable || "—"}`,
+                            `**Strats:** ${(card.stratagems || []).join(" • ") || "—"}`
+                        ].join("\n")
+                    },
+                    {
+                        name: "🪐 Mission",
+                        value: [
+                            `**Planet:** ${card.planet?.name || "—"}`,
+                            `**Sector:** ${card.planet?.sector || "—"}`,
+                            `**Environment:** ${weatherText || "None"}`
+                        ].join("\n")
+                    },
+                    {
+                        name: "📊 Performance",
+                        value: [
+                            `Kills: **${Number(s.kills || 0)}**`,
+                            `Accuracy: **${Number(s.accuracy || 0)}%**`,
+                            `Deaths: **${Number(s.deaths || 0)}**`,
+                            `Stims: **${Number(s.stims || 0)}**`,
+                            `Distance: **${Number(s.distanceKm || 0)} km**`,
+                            `Strat Uses: **${Number(s.stratUses || 0)}**`,
+                            `Deaths + Stims: **${combo}**`
+                        ].join("\n")
+                    }
+                ],
+                footer: {
+                    text: `Created ${createdAt}`
+                }
+            };
+
+            if (imageUrl) embed.image = { url: imageUrl };
+            return embed;
+        }
+
         async function sendCardToDiscord(card, sourceLabel) {
             const webhookUrl = getDiscordWebhookUrl();
             if (!webhookUrl) {
@@ -4574,7 +4639,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             const payload = {
                 username: "Helldivers 2 Roulette",
-                content: `📸 ${formatSeedWithPlayer(card)} (${sourceLabel})`
+                content: `📸 ${formatSeedWithPlayer(card)} (${sourceLabel})`,
+                embeds: [buildDiscordCardEmbed(card, sourceLabel)]
             };
 
             const form = new FormData();
@@ -4583,10 +4649,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 const cardPng = await cardPngBlobForDiscord(card);
                 hasImageAttachment = true;
                 payload.attachments = [{ id: 0, filename: "card-loadout.png" }];
-                payload.embeds = [{
-                    color: 0xFFD447,
-                    image: { url: "attachment://card-loadout.png" }
-                }];
+                payload.embeds = [buildDiscordCardEmbed(card, sourceLabel, "attachment://card-loadout.png")];
                 // Discord expects indexed multipart field names for attachments.
                 form.append("files[0]", cardPng, "card-loadout.png");
             } catch (err) {
@@ -4597,10 +4660,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                         hasImageAttachment = true;
                         payload.content += "\n⚠️ Browser blocked rich card capture; sent with compatibility image renderer.";
                         payload.attachments = [{ id: 0, filename: "card-loadout.png" }];
-                        payload.embeds = [{
-                            color: 0xFFD447,
-                            image: { url: "attachment://card-loadout.png" }
-                        }];
+                        payload.embeds = [buildDiscordCardEmbed(card, sourceLabel, "attachment://card-loadout.png")];
                         form.append("files[0]", fallbackPng, "card-loadout.png");
                     } catch (fallbackErr) {
                         payload.content += `\n⚠️ Image export failed (primary + fallback): ${String(fallbackErr?.message || fallbackErr || "unknown error")}; sent without card image.`;
@@ -4621,11 +4681,10 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 if (/"embeds"\s*:\s*\["0"\]/i.test(body) || /Invalid Form Body/i.test(body)) {
                     const retryPayload = {
                         username: payload.username,
-                        content: `${payload.content}\n⚠️ Discord rejected the rich embed; sent as plain attachment.`
+                        content: `${payload.content}\n⚠️ Discord rejected image embed; sent as structured embed without image.`,
+                        embeds: [buildDiscordCardEmbed(card, sourceLabel)]
                     };
                     const retryForm = new FormData();
-                    const retryPng = await cardPngBlobForDiscord(card);
-                    retryForm.append("files[0]", retryPng, "card-loadout.png");
                     retryForm.append("payload_json", JSON.stringify(retryPayload));
                     res = await fetch(webhookUrl, { method: "POST", body: retryForm });
                 } else {
