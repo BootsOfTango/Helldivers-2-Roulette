@@ -4351,14 +4351,14 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             return `
 <div xmlns="http://www.w3.org/1999/xhtml" style="width:860px;padding:20px;box-sizing:border-box;background:linear-gradient(180deg,#060912,#04070e);font-family:Inter,Segoe UI,Arial,sans-serif;color:#e7edf8;">
   <div style="border:1px solid ${borderColor};border-radius:18px;padding:18px;background:linear-gradient(180deg,#0b101b,#070b14);box-shadow:0 0 0 1px rgba(255,255,255,.05) inset;">
-    <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;">
-      <div>
-        <div style="font-size:38px;font-weight:800;line-height:1.08;">${escapeHtml(formatSeedWithPlayer(card))}</div>
+    <div style="display:flex;justify-content:space-between;gap:18px;align-items:flex-start;">
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:38px;font-weight:800;line-height:1.08;overflow-wrap:anywhere;word-break:break-word;">${escapeHtml(formatSeedWithPlayer(card))}</div>
         <div style="color:#9aa8bf;font-size:22px;margin-top:6px;">${escapeHtml(card.mode || "—")} • <span style="color:${(card.faction || "").toLowerCase().includes("automat") ? "#ff5f5f" : "#8ac7ff"};font-weight:700;">${escapeHtml(card.faction || "—")}</span> • ${escapeHtml(createdAt)}</div>
       </div>
-      <div style="text-align:right;">
-        <div style="display:inline-block;padding:8px 14px;border-radius:999px;border:1px solid #ffe05b;color:#ffe05b;font-weight:800;font-size:24px;">Grade ${Number(card.grade || 0)}</div>
-        <div style="margin-top:8px;display:inline-block;padding:7px 12px;border-radius:999px;border:1px solid ${card.majorOrderDone ? "#33d69f" : "#ff5f5f"};color:${card.majorOrderDone ? "#33d69f" : "#ff5f5f"};font-weight:700;font-size:22px;">${card.majorOrderDone ? "MO DONE" : "MO NO"}</div>
+      <div style="text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex-shrink:0;">
+        <div style="display:inline-flex;white-space:nowrap;padding:8px 14px;border-radius:999px;border:1px solid #ffe05b;color:#ffe05b;font-weight:800;font-size:24px;line-height:1;">Grade ${Number(card.grade || 0)}</div>
+        <div style="display:inline-flex;white-space:nowrap;padding:7px 12px;border-radius:999px;border:1px solid ${card.majorOrderDone ? "#33d69f" : "#ff5f5f"};color:${card.majorOrderDone ? "#33d69f" : "#ff5f5f"};font-weight:700;font-size:22px;line-height:1;">${card.majorOrderDone ? "MO DONE" : "MO NO"}</div>
       </div>
     </div>
 
@@ -4658,11 +4658,11 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                         payload.embeds = [buildDiscordCardEmbed(card, sourceLabel, "attachment://card-loadout.png")];
                         form.append("files[0]", fallbackPng, "card-loadout.png");
                     } catch (fallbackErr) {
-                        payload.content += `\n⚠️ Image export failed (primary + fallback): ${String(fallbackErr?.message || fallbackErr || "unknown error")}; sent without card image.`;
+                        console.warn("[discord] image export failed (primary + fallback), sending without image", fallbackErr);
                     }
                 } else {
                     const msg = String(err?.message || err || "unknown error");
-                    payload.content += `\n⚠️ Card image export failed (${msg}); sent without card image.`;
+                    console.warn(`[discord] card image export failed (${msg}), sending without image`);
                 }
             }
 
