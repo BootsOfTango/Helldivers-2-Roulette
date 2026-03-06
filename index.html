@@ -4467,13 +4467,17 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             };
 
             const form = new FormData();
+            let hasImageAttachment = false;
             try {
                 const cardPng = await cardPngBlobForDiscord(card);
+                hasImageAttachment = true;
+                payload.attachments = [{ id: 0, filename: "card-loadout.png" }];
                 payload.embeds = [{
                     color: 0xFFD447,
                     image: { url: "attachment://card-loadout.png" }
                 }];
-                form.append("file", cardPng, "card-loadout.png");
+                // Discord expects indexed multipart field names for attachments.
+                form.append("files[0]", cardPng, "card-loadout.png");
             } catch (err) {
                 const msg = String(err?.message || err || "unknown error");
                 const blockedByCanvas = isCanvasTaintedError(err);
@@ -4484,7 +4488,25 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             form.append("payload_json", JSON.stringify(payload));
 
-            const res = await fetch(webhookUrl, { method: "POST", body: form });
+            let res = await fetch(webhookUrl, { method: "POST", body: form });
+            // Some Discord webhook configurations reject embed payloads even with valid attachments.
+            // Fall back to sending the file without an embed card if Discord returns an embed validation error.
+            if (!res.ok && res.status === 400 && hasImageAttachment) {
+                const body = await res.text();
+                if (/"embeds"\s*:\s*\["0"\]/i.test(body) || /Invalid Form Body/i.test(body)) {
+                    const retryPayload = {
+                        username: payload.username,
+                        content: `${payload.content}\n⚠️ Discord rejected the rich embed; sent as plain attachment.`
+                    };
+                    const retryForm = new FormData();
+                    const retryPng = await cardPngBlobForDiscord(card);
+                    retryForm.append("files[0]", retryPng, "card-loadout.png");
+                    retryForm.append("payload_json", JSON.stringify(retryPayload));
+                    res = await fetch(webhookUrl, { method: "POST", body: retryForm });
+                } else {
+                    throw new Error(`Discord returned ${res.status}: ${body}`);
+                }
+            }
             if (!res.ok) {
                 const msg = await res.text();
                 throw new Error(`Discord returned ${res.status}: ${msg}`);
