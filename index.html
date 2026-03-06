@@ -427,10 +427,8 @@ END MASTER DIRECTIVE
             transition: .15s ease;
         }
 
-        .devModeHeaderBtn {
-            border-radius: 999px;
-            padding: 6px 12px;
-            font-size: 11px;
+        .devToggleBtn {
+            margin-left: auto;
         }
 
             .tabBtn:hover {
@@ -1567,6 +1565,7 @@ END MASTER DIRECTIVE
             <div class="tabBtn" data-tab="compare">COMPARE</div>
             <div class="tabBtn" data-tab="items" data-dev-only="true">ITEMS</div>
             <div class="tabBtn" data-tab="rank">RANK</div>
+            <button id="btnDeveloperMode" class="devToggleBtn btnGhost">DEVELOPER MODE: OFF</button>
         </div>
 
         <!-- SPIN TAB -->
@@ -5663,7 +5662,7 @@ ${noteContent}`
 
             const btn = $("#btnDeveloperMode");
             if (btn) {
-                btn.textContent = enabled ? "DEV MODE: ON" : "DEV MODE: OFF";
+                btn.textContent = enabled ? "DEVELOPER MODE: ON" : "DEVELOPER MODE: OFF";
                 btn.classList.toggle("btnPrimary", enabled);
                 btn.classList.toggle("btnGhost", !enabled);
             }
@@ -5921,14 +5920,11 @@ ${noteContent}`
             $("#cmpSearch").addEventListener("input", refreshCompareOptions);
             $("#rankSearch").addEventListener("input", renderRank);
 
-            const devModeBtn = $("#btnDeveloperMode");
-            if (devModeBtn) {
-                devModeBtn.addEventListener("click", () => {
-                    state.settings.developerMode = !state.settings.developerMode;
-                    saveState();
-                    applyDeveloperMode();
-                });
-            }
+            $("#btnDeveloperMode").addEventListener("click", () => {
+                state.settings.developerMode = !state.settings.developerMode;
+                saveState();
+                applyDeveloperMode();
+            });
 
 
 
