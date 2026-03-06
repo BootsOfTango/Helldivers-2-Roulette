@@ -1011,20 +1011,6 @@ END MASTER DIRECTIVE
             pointer-events: none;
         }
 
-        .cmpAxisFocus {
-            fill: rgba(120,255,170,.28);
-            stroke: #7fffb3;
-            stroke-width: 2;
-            opacity: 0;
-            filter: drop-shadow(0 0 8px rgba(127,255,179,.95)) drop-shadow(0 0 16px rgba(127,255,179,.6));
-            transition: opacity .1s ease;
-            pointer-events: none;
-        }
-
-        .cmpAxisFocus.is-on {
-            opacity: 1;
-        }
-
         .cmpRadarOverlay svg title {
             pointer-events: none;
         }
@@ -1038,13 +1024,18 @@ END MASTER DIRECTIVE
             transition: opacity .16s ease;
         }
 
-        .cmpAxisDelta {
+        .cmpAxisEdge {
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 3.6;
+            stroke-linecap: round;
+            stroke-linejoin: round;
             opacity: 0;
             pointer-events: none;
             transition: opacity .12s ease;
         }
 
-        .cmpAxisDelta.is-on {
+        .cmpAxisEdge.is-on {
             opacity: 1;
             filter: drop-shadow(0 0 8px rgba(127,255,179,.9)) drop-shadow(0 0 18px rgba(127,255,179,.6));
         }
@@ -3842,10 +3833,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             const hoverRows = [];
             const hitAreas = [];
-            const focusDots = [];
-            const axisDeltas = [];
+            const axisEdges = [];
             const compareHighlight = "#7fffb3";
-            const markerInsetPx = 2.5;
             for (let i = 0; i < axes.length; i++) {
                 const prevA = angles[i] - (axisStep / 2);
                 const nextA = angles[i] + (axisStep / 2);
@@ -3854,11 +3843,6 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 const hit2 = pt(hitRadius, angles[i]);
                 const hit3 = pt(hitRadius, nextA);
                 hitAreas.push(`<polygon class="cmpOverlayAxisHit" data-axis="${i}" points="${fmt({ x: cx, y: cy })} ${fmt(hit1)} ${fmt(hit2)} ${fmt(hit3)}" />`);
-
-                const pointA = pt(Math.max(0, (rOuter * valsA[i]) - markerInsetPx), angles[i]);
-                const pointB = pt(Math.max(0, (rOuter * valsB[i]) - markerInsetPx), angles[i]);
-                focusDots.push(`<circle class="cmpAxisFocus" id="cmpAxisFocus-${i}" cx="${pointA.x.toFixed(1)}" cy="${pointA.y.toFixed(1)}" r="5.2" data-side="A" />`);
-                focusDots.push(`<circle class="cmpAxisFocus" id="cmpAxisFocus-${i}-b" cx="${pointB.x.toFixed(1)}" cy="${pointB.y.toFixed(1)}" r="5.2" data-side="B" />`);
 
                 const a = valsA[i], b = valsB[i];
                 const winner = (Math.abs(a - b) < 0.01) ? "tie" : (a > b ? "A" : "B");
@@ -3879,21 +3863,9 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
                 const glowColor = compareHighlight;
                 if (winner !== "tie") {
-                    const prevIdx = (i - 1 + axes.length) % axes.length;
+                    const edgePts = winner === "A" ? ptsA : ptsB;
                     const nextIdx = (i + 1) % axes.length;
-                    const winPts = winner === "A" ? ptsA : ptsB;
-                    const losePts = winner === "A" ? ptsB : ptsA;
-                    const blend = (p1, p2, t = 0.5) => ({
-                        x: p1.x + ((p2.x - p1.x) * t),
-                        y: p1.y + ((p2.y - p1.y) * t),
-                    });
-
-                    const winPrev = blend(winPts[prevIdx], winPts[i], 0.52);
-                    const winNext = blend(winPts[nextIdx], winPts[i], 0.52);
-                    const losePrev = blend(losePts[prevIdx], losePts[i], 0.52);
-                    const loseNext = blend(losePts[nextIdx], losePts[i], 0.52);
-
-                    axisDeltas.push(`<polygon class="cmpAxisDelta" id="cmpAxisDelta-${i}" points="${fmt(winPrev)} ${fmt(winPts[i])} ${fmt(winNext)} ${fmt(loseNext)} ${fmt(losePts[i])} ${fmt(losePrev)}" fill="${glowColor}" fill-opacity="0.34" stroke="${glowColor}" stroke-opacity="0.95" stroke-width="1.35" style="color:${glowColor};" />`);
+                    axisEdges.push(`<line class="cmpAxisEdge" id="cmpAxisEdge-${i}" x1="${edgePts[i].x.toFixed(1)}" y1="${edgePts[i].y.toFixed(1)}" x2="${edgePts[nextIdx].x.toFixed(1)}" y2="${edgePts[nextIdx].y.toFixed(1)}" style="color:${glowColor};" />`);
                 }
 
                 hoverRows.push({ axis: i, winner, message: msg, bannerText });
@@ -3909,8 +3881,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 </g>
                 <polygon id="cmpPolyB" class="cmpOverlayPoly" points="${polyB}" fill="${colB.fill}" stroke="${colB.stroke}" stroke-width="2" opacity="0.78" style="color:${colB.stroke};"><title>${escapeHtml(formatSeedWithPlayer(cardB))}</title></polygon>
                 <polygon id="cmpPolyA" class="cmpOverlayPoly" points="${polyA}" fill="${colA.fill}" stroke="${colA.stroke}" stroke-width="2" opacity="0.78" style="color:${colA.stroke};"><title>${escapeHtml(formatSeedWithPlayer(cardA))}</title></polygon>
-                <g>${axisDeltas.join("")}</g>
-                <g>${focusDots.join("")}</g>
+                <g>${axisEdges.join("")}</g>
                 <g>${hitAreas.join("")}</g>
                 ${tipLabels}
             </svg>`;
@@ -3927,8 +3898,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const hits = overlay.querySelectorAll(".cmpOverlayAxisHit");
 
             const clearHover = () => {
-                overlay.querySelectorAll(".cmpAxisFocus").forEach((dot) => dot.classList.remove("is-on"));
-                overlay.querySelectorAll(".cmpAxisDelta").forEach((seg) => seg.classList.remove("is-on"));
+                overlay.querySelectorAll(".cmpAxisEdge").forEach((seg) => seg.classList.remove("is-on"));
                 if (insight) insight.textContent = "Hover a stat section to glow only the winning stat slice and view % difference.";
                 if (hoverBanner) {
                     hoverBanner.className = "cmpHoverBanner";
@@ -3945,27 +3915,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                     const row = hoverRows.find(r => r.axis === axis);
                     clearHover();
                     if (!row) return;
-                    const focusDot = row.winner === "B"
-                        ? overlay.querySelector(`#cmpAxisFocus-${axis}-b`)
-                        : overlay.querySelector(`#cmpAxisFocus-${axis}`);
-                    if (focusDot) {
-                        focusDot.style.color = compareHighlight;
-                        focusDot.classList.add("is-on");
-                    }
-                    if (row.winner === "tie") {
-                        const tieDotA = overlay.querySelector(`#cmpAxisFocus-${axis}`);
-                        const tieDotB = overlay.querySelector(`#cmpAxisFocus-${axis}-b`);
-                        if (tieDotA) {
-                            tieDotA.style.color = compareHighlight;
-                            tieDotA.classList.add("is-on");
-                        }
-                        if (tieDotB) {
-                            tieDotB.style.color = compareHighlight;
-                            tieDotB.classList.add("is-on");
-                        }
-                    }
-                    const deltaSeg = overlay.querySelector(`#cmpAxisDelta-${axis}`);
-                    if (deltaSeg) deltaSeg.classList.add("is-on");
+                    const edgeSeg = overlay.querySelector(`#cmpAxisEdge-${axis}`);
+                    if (edgeSeg) edgeSeg.classList.add("is-on");
                     if (insight) insight.textContent = row.message;
                     if (hoverBanner) {
                         const left = hoverBanner.querySelector('[data-side="left"]');
