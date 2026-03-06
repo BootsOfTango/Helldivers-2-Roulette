@@ -4609,10 +4609,10 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
         function buildDiscordCardEmbed(card, imageUrl) {
             const s = card.stats || {};
-            const combo = Number(s.deaths || 0) + Number(s.stims || 0);
             const weatherText = card.planet ? getPlanetWeatherText(card.planet) : "None";
             const createdAt = card.createdAt ? new Date(card.createdAt).toLocaleString() : "—";
             const tier = getCardTierClass(card);
+            const notes = String(card.notes || "").trim();
             const tierColor = {
                 gold: 0xffcc4d,
                 silver: 0xcfd6e6,
@@ -4665,6 +4665,13 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                     text: `Created ${createdAt}`
                 }
             };
+
+            if (notes) {
+                embed.fields.push({
+                    name: "📝 Notes",
+                    value: notes.length > 1024 ? `${notes.slice(0, 1021)}...` : notes
+                });
+            }
 
             if (imageUrl) embed.image = { url: imageUrl };
             return embed;
