@@ -3877,14 +3877,24 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                     ? `${statLabel} TIE`
                     : `${statLabel} ${pctInt}% HIGHER`;
 
-                const lowRadius = rOuter * Math.max(0, Math.min(a, b));
-                const highRadius = rOuter * Math.max(a, b);
                 const glowColor = compareHighlight;
-                const d1 = pt(highRadius, prevA);
-                const d2 = pt(highRadius, nextA);
-                const d3 = pt(lowRadius, nextA);
-                const d4 = pt(lowRadius, prevA);
-                axisDeltas.push(`<polygon class="cmpAxisDelta" id="cmpAxisDelta-${i}" points="${fmt(d1)} ${fmt(d2)} ${fmt(d3)} ${fmt(d4)}" fill="${glowColor}" fill-opacity="0.34" stroke="${glowColor}" stroke-opacity="0.95" stroke-width="1.35" style="color:${glowColor};" />`);
+                if (winner !== "tie") {
+                    const prevIdx = (i - 1 + axes.length) % axes.length;
+                    const nextIdx = (i + 1) % axes.length;
+                    const winPts = winner === "A" ? ptsA : ptsB;
+                    const losePts = winner === "A" ? ptsB : ptsA;
+                    const blend = (p1, p2, t = 0.5) => ({
+                        x: p1.x + ((p2.x - p1.x) * t),
+                        y: p1.y + ((p2.y - p1.y) * t),
+                    });
+
+                    const winPrev = blend(winPts[prevIdx], winPts[i], 0.52);
+                    const winNext = blend(winPts[nextIdx], winPts[i], 0.52);
+                    const losePrev = blend(losePts[prevIdx], losePts[i], 0.52);
+                    const loseNext = blend(losePts[nextIdx], losePts[i], 0.52);
+
+                    axisDeltas.push(`<polygon class="cmpAxisDelta" id="cmpAxisDelta-${i}" points="${fmt(winPrev)} ${fmt(winPts[i])} ${fmt(winNext)} ${fmt(loseNext)} ${fmt(losePts[i])} ${fmt(losePrev)}" fill="${glowColor}" fill-opacity="0.34" stroke="${glowColor}" stroke-opacity="0.95" stroke-width="1.35" style="color:${glowColor};" />`);
+                }
 
                 hoverRows.push({ axis: i, winner, message: msg, bannerText });
             }
