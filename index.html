@@ -1196,21 +1196,12 @@ END MASTER DIRECTIVE
         }
 
         .card.tier-rainbow {
-            position: relative;
+            border: 2px solid transparent;
+            background:
+                linear-gradient(180deg, rgba(0,0,0,.22), rgba(0,0,0,.22)) padding-box,
+                conic-gradient(#ff3b3b, #ffd400, #2ecc71, #3b82f6, #a855f7, #ff3b3b) border-box;
+            box-shadow: 0 0 18px rgba(168,85,247,.28), 0 0 26px rgba(59,130,246,.2);
         }
-
-            .card.tier-rainbow::before {
-                content: "";
-                position: absolute;
-                inset: -2px;
-                border-radius: 18px;
-                padding: 2px;
-                background: conic-gradient( #ff3b3b, #ffd400, #2ecc71, #3b82f6, #a855f7, #ff3b3b );
-                -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-                -webkit-mask-composite: xor;
-                mask-composite: exclude;
-                pointer-events: none;
-            }
 
         .rankOuter > .rankRow {
             background: rgba(0,0,0,.92);
@@ -3534,8 +3525,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 out.maxDistanceKm = Math.max(out.maxDistanceKm, Number(s.distanceKm || 0));
                 out.maxStratUses = Math.max(out.maxStratUses, Number(s.stratUses || 0));
 
-                const combo = Number(s.deaths || 0) + Number(s.stims || 0);
-                out.maxDeathsPlusStims = Math.max(out.maxDeathsPlusStims, combo);
+                                out.maxDeathsPlusStims = Math.max(out.maxDeathsPlusStims, combo);
                 if (out.minDeathsPlusStims === null) out.minDeathsPlusStims = combo;
                 out.minDeathsPlusStims = Math.min(out.minDeathsPlusStims, combo);
             }
@@ -3755,11 +3745,11 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             const size = 260, cx = 130, cy = 130, rOuter = 86;
             const axes = [
-                { key: "POW", label: "Power", metric: "Kills" },
-                { key: "AGI", label: "Agility", metric: "Accuracy" },
-                { key: "END", label: "Endurance", metric: "Deaths + Stims" },
-                { key: "MOB", label: "Mobility", metric: "Distance" },
-                { key: "UTI", label: "Utility", metric: "Strat uses" },
+                { key: "POW", label: "Power", metric: "Kills", compareLabel: "KILLS" },
+                { key: "AGI", label: "Agility", metric: "Accuracy", compareLabel: "ACCURACY" },
+                { key: "END", label: "Endurance", metric: "Deaths + Stims", compareLabel: "STIMS USES + DEATH" },
+                { key: "MOB", label: "Mobility", metric: "Distance", compareLabel: "DISTANCE" },
+                { key: "UTI", label: "Utility", metric: "Strat uses", compareLabel: "STRAT USES" },
             ];
             const axisStep = (Math.PI * 2) / axes.length;
             const angles = axes.map((_, i) => (-Math.PI / 2) + (i * (Math.PI * 2 / axes.length)));
@@ -3825,13 +3815,14 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 const pctInt = Math.max(0, Math.round(pct));
                 const winnerSeed = winner === "A" ? formatSeedWithPlayer(cardA) : (winner === "B" ? formatSeedWithPlayer(cardB) : "Tied");
                 const arrow = winner === "A" ? "↑" : (winner === "B" ? "↑" : "↔");
+                const statLabel = axes[i].compareLabel || axes[i].metric || axes[i].key;
                 const msg = winner === "tie"
-                    ? `${axes[i].key} — TIE`
-                    : `${winnerSeed}, ${axes[i].key} ${pctInt}% ${arrow}`;
+                    ? `${statLabel} — TIE`
+                    : `${winnerSeed}, ${statLabel} ${pctInt}% ${arrow}`;
 
                 const bannerText = winner === "tie"
-                    ? `${axes[i].key} TIE`
-                    : `${axes[i].key} ${pctInt}% HIGHER`;
+                    ? `${statLabel} TIE`
+                    : `${statLabel} ${pctInt}% HIGHER`;
 
                 hoverRows.push({ axis: i, winner, message: msg, bannerText });
             }
@@ -4559,7 +4550,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             });
         }
 
-        function buildDiscordCardEmbed(card, sourceLabel, imageUrl) {
+        function buildDiscordCardEmbed(card, imageUrl) {
             const s = card.stats || {};
             const combo = Number(s.deaths || 0) + Number(s.stims || 0);
             const weatherText = card.planet ? getPlanetWeatherText(card.planet) : "None";
@@ -4577,7 +4568,6 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 color: tierColor,
                 title: `🎖️ ${formatSeedWithPlayer(card)}`,
                 description: [
-                    `**Source:** ${sourceLabel}`,
                     `**Mode:** ${card.mode || "—"}`,
                     `**Faction:** ${card.faction || "—"}`,
                     `**Major Order:** ${card.majorOrderDone ? "✅ DONE" : "❌ FAIL"}`,
@@ -4610,8 +4600,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                             `Deaths: **${Number(s.deaths || 0)}**`,
                             `Stims: **${Number(s.stims || 0)}**`,
                             `Distance: **${Number(s.distanceKm || 0)} km**`,
-                            `Strat Uses: **${Number(s.stratUses || 0)}**`,
-                            `Deaths + Stims: **${combo}**`
+                            `Strat Uses: **${Number(s.stratUses || 0)}**`
                         ].join("\n")
                     }
                 ],
@@ -4635,8 +4624,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             const payload = {
                 username: "Helldivers 2 Roulette",
-                content: `📸 ${formatSeedWithPlayer(card)} (${sourceLabel})`,
-                embeds: [buildDiscordCardEmbed(card, sourceLabel)]
+                content: `📸 ${formatSeedWithPlayer(card)}`,
+                embeds: [buildDiscordCardEmbed(card)]
             };
 
             const form = new FormData();
@@ -4645,7 +4634,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 const cardPng = await cardPngBlobForDiscord(card);
                 hasImageAttachment = true;
                 payload.attachments = [{ id: 0, filename: "card-loadout.png" }];
-                payload.embeds = [buildDiscordCardEmbed(card, sourceLabel, "attachment://card-loadout.png")];
+                payload.embeds = [buildDiscordCardEmbed(card, "attachment://card-loadout.png")];
                 // Discord expects indexed multipart field names for attachments.
                 form.append("files[0]", cardPng, "card-loadout.png");
             } catch (err) {
@@ -4655,7 +4644,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                         const fallbackPng = await drawDiscordCardCanvasFallback(card);
                         hasImageAttachment = true;
                         payload.attachments = [{ id: 0, filename: "card-loadout.png" }];
-                        payload.embeds = [buildDiscordCardEmbed(card, sourceLabel, "attachment://card-loadout.png")];
+                        payload.embeds = [buildDiscordCardEmbed(card, "attachment://card-loadout.png")];
                         form.append("files[0]", fallbackPng, "card-loadout.png");
                     } catch (fallbackErr) {
                         console.warn("[discord] image export failed (primary + fallback), sending without image", fallbackErr);
@@ -4905,8 +4894,10 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const rows = [
                 { name: "Grade (0-100)", k: "grade", better: "high" },
                 { name: "Kills", k: "kills", better: "high" },
-                { name: "Deaths", k: "deaths", better: "low" },
-                { name: "Stims", k: "stims", better: "low" },
+                { name: "Accuracy (%)", k: "accuracy", better: "high" },
+                { name: "Deaths + Stims", k: "deathsPlusStims", better: "low" },
+                { name: "Distance (km)", k: "distanceKm", better: "high" },
+                { name: "Strat Uses", k: "stratUses", better: "high" },
                 { name: "Raw score", k: "raw", better: "high" },
             ];
 
