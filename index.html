@@ -4654,7 +4654,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const weatherText = card.planet ? getPlanetWeatherText(card.planet) : "None";
             const createdAt = card.createdAt ? new Date(card.createdAt).toLocaleString() : "—";
             const tier = getCardTierClass(card);
-            const notes = getDiscordNotesText(card, 1024);
+            const notes = String(card.notes || "").trim();
             const tierColor = {
                 gold: 0xffcc4d,
                 silver: 0xcfd6e6,
