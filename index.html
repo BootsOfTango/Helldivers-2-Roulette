@@ -4607,12 +4607,19 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             });
         }
 
+        function getDiscordNotesText(card, maxLen = Infinity) {
+            const notes = String(card?.notes || "").trim();
+            if (!notes) return "";
+            if (!Number.isFinite(maxLen) || maxLen <= 0) return notes;
+            return notes.length > maxLen ? `${notes.slice(0, Math.max(0, maxLen - 3))}...` : notes;
+        }
+
         function buildDiscordCardEmbed(card, imageUrl) {
             const s = card.stats || {};
-            const combo = Number(s.deaths || 0) + Number(s.stims || 0);
             const weatherText = card.planet ? getPlanetWeatherText(card.planet) : "None";
             const createdAt = card.createdAt ? new Date(card.createdAt).toLocaleString() : "—";
             const tier = getCardTierClass(card);
+            const notes = getDiscordNotesText(card, 1024);
             const tierColor = {
                 gold: 0xffcc4d,
                 silver: 0xcfd6e6,
@@ -4666,6 +4673,13 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 }
             };
 
+            if (notes) {
+                embed.fields.push({
+                    name: "📝 Notes",
+                    value: notes.length > 1024 ? `${notes.slice(0, 1021)}...` : notes
+                });
+            }
+
             if (imageUrl) embed.image = { url: imageUrl };
             return embed;
         }
@@ -4679,9 +4693,14 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             recalcGrades();
 
+            const noteContent = getDiscordNotesText(card, 1700);
             const payload = {
                 username: "Helldivers 2 Roulette",
-                content: `📸 ${formatSeedWithPlayer(card)}`,
+                content: noteContent
+                    ? `📸 ${formatSeedWithPlayer(card)}
+📝 Notes:
+${noteContent}`
+                    : `📸 ${formatSeedWithPlayer(card)}`,
                 embeds: [buildDiscordCardEmbed(card)]
             };
 
