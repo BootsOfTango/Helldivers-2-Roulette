@@ -6302,6 +6302,44 @@ ${noteContent}`
             // Attempt auto-load first (works on localhost/GitHub)
             tryAutoLoadLocalBiomeTxt();
         });
+
+        /* ==============================
+           DEV BADGE CLEANUP GUARD
+           Removes any accidental/injected "DEVELOPER MODE: ON" badges.
+        ================================ */
+        (function removeDeveloperModeBadges() {
+            const DEVELOPER_MODE_TEXT = /developer\s*mode\s*:\s*on/i;
+
+            const removeMatches = (root = document) => {
+                root.querySelectorAll("*").forEach(el => {
+                    const text = (el.textContent || "").trim();
+                    if (!text || !DEVELOPER_MODE_TEXT.test(text)) return;
+
+                    // Only remove compact badge-like elements to avoid touching large containers.
+                    if (text.length <= 30 || el.matches("button, .pill, .chip, .badge")) {
+                        el.remove();
+                    }
+                });
+            };
+
+            document.addEventListener("DOMContentLoaded", () => {
+                removeMatches(document);
+
+                const observer = new MutationObserver(mutations => {
+                    for (const m of mutations) {
+                        m.addedNodes.forEach(node => {
+                            if (!(node instanceof Element)) return;
+                            removeMatches(node);
+                        });
+                    }
+                });
+
+                observer.observe(document.body, {
+                    childList: true,
+                    subtree: true
+                });
+            });
+        })();
     </script>
 
 
