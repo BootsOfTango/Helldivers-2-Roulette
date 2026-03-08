@@ -1024,6 +1024,17 @@ END MASTER DIRECTIVE
             transition: opacity .16s ease;
         }
 
+        .cmpOverlayPoly.is-dim {
+            opacity: 0.32 !important;
+        }
+
+        .cmpOverlayPoly.is-win {
+            opacity: 0.96 !important;
+            stroke: #5bff98 !important;
+            stroke-width: 2.8;
+            filter: drop-shadow(0 0 9px rgba(91,255,152,.95)) drop-shadow(0 0 22px rgba(91,255,152,.55));
+        }
+
         .cmpAxisEdge {
             fill: none;
             stroke: currentColor;
@@ -1038,6 +1049,20 @@ END MASTER DIRECTIVE
         .cmpAxisEdge.is-on {
             opacity: 1;
             filter: drop-shadow(0 0 8px rgba(127,255,179,.9)) drop-shadow(0 0 18px rgba(127,255,179,.6));
+        }
+
+        .cmpWinDot {
+            fill: #8dffb6;
+            stroke: #e7ffef;
+            stroke-width: 1.2;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .12s ease;
+            filter: drop-shadow(0 0 7px rgba(127,255,179,.95)) drop-shadow(0 0 14px rgba(127,255,179,.6));
+        }
+
+        .cmpWinDot.is-on {
+            opacity: 1;
         }
 
         .cmpHoverBanner {
@@ -3813,7 +3838,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const hoverRows = [];
             const hitAreas = [];
             const axisEdges = [];
-            const compareHighlight = "#7fffb3";
+            const winDots = [];
+            const compareHighlight = "#5bff98";
             for (let i = 0; i < axes.length; i++) {
                 const prevA = angles[i] - (axisStep / 2);
                 const nextA = angles[i] + (axisStep / 2);
@@ -3842,12 +3868,16 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
                 const glowColor = compareHighlight;
                 if (winner !== "tie") {
+                    const winnerKey = winner;
                     const edgePts = winner === "A" ? ptsA : ptsB;
                     const nextIdx = (i + 1) % axes.length;
                     axisEdges.push(`<line class="cmpAxisEdge" id="cmpAxisEdge-${i}" x1="${edgePts[i].x.toFixed(1)}" y1="${edgePts[i].y.toFixed(1)}" x2="${edgePts[nextIdx].x.toFixed(1)}" y2="${edgePts[nextIdx].y.toFixed(1)}" style="color:${glowColor};" />`);
+                    winDots.push(`<circle class="cmpWinDot" id="cmpWinDot-${i}" cx="${edgePts[i].x.toFixed(1)}" cy="${edgePts[i].y.toFixed(1)}" r="2.8" />`);
+                    hoverRows.push({ axis: i, winner, winnerKey, message: msg, bannerText });
+                    continue;
                 }
 
-                hoverRows.push({ axis: i, winner, message: msg, bannerText });
+                hoverRows.push({ axis: i, winner, winnerKey: "tie", message: msg, bannerText });
             }
 
             overlay.innerHTML = `
@@ -3861,6 +3891,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 <polygon id="cmpPolyB" class="cmpOverlayPoly" points="${polyB}" fill="${colB.fill}" stroke="${colB.stroke}" stroke-width="2" opacity="0.78" style="color:${colB.stroke};"><title>${escapeHtml(formatSeedWithPlayer(cardB))}</title></polygon>
                 <polygon id="cmpPolyA" class="cmpOverlayPoly" points="${polyA}" fill="${colA.fill}" stroke="${colA.stroke}" stroke-width="2" opacity="0.78" style="color:${colA.stroke};"><title>${escapeHtml(formatSeedWithPlayer(cardA))}</title></polygon>
                 <g>${axisEdges.join("")}</g>
+                <g>${winDots.join("")}</g>
                 <g>${hitAreas.join("")}</g>
                 ${tipLabels}
             </svg>`;
@@ -3878,6 +3909,10 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             const clearHover = () => {
                 overlay.querySelectorAll(".cmpAxisEdge").forEach((seg) => seg.classList.remove("is-on"));
+                overlay.querySelectorAll(".cmpWinDot").forEach((dot) => dot.classList.remove("is-on"));
+                overlay.querySelectorAll(".cmpOverlayPoly").forEach((poly) => {
+                    poly.classList.remove("is-win", "is-dim");
+                });
                 if (insight) insight.textContent = "Hover a stat section to glow only the winning stat slice and view % difference.";
                 if (hoverBanner) {
                     hoverBanner.className = "cmpHoverBanner";
@@ -3896,6 +3931,17 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                     if (!row) return;
                     const edgeSeg = overlay.querySelector(`#cmpAxisEdge-${axis}`);
                     if (edgeSeg) edgeSeg.classList.add("is-on");
+                    const winDot = overlay.querySelector(`#cmpWinDot-${axis}`);
+                    if (winDot) winDot.classList.add("is-on");
+                    const polyA = overlay.querySelector("#cmpPolyA");
+                    const polyB = overlay.querySelector("#cmpPolyB");
+                    if (row.winnerKey === "A") {
+                        if (polyA) polyA.classList.add("is-win");
+                        if (polyB) polyB.classList.add("is-dim");
+                    } else if (row.winnerKey === "B") {
+                        if (polyB) polyB.classList.add("is-win");
+                        if (polyA) polyA.classList.add("is-dim");
+                    }
                     if (insight) insight.textContent = row.message;
                     if (hoverBanner) {
                         const left = hoverBanner.querySelector('[data-side="left"]');
