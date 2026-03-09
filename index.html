@@ -3638,7 +3638,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const outerPts = angles.map(a => pt(rOuter, a));
             const valuePts = angles.map((a, i) => pt(r * vals[i], a));
             const labelRadius = rOuter + 26;
-            const axisLabels = ["POW", "AGI", "END", "MOB", "UTI"];
+            const axisLabels = ["POWER", "AGILITY", "ENDURANCE", "MOBILITY", "UTILITY"];
 
             const fmt = (p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`;
             const polyOuter = outerPts.map(fmt).join(" ");
@@ -3651,9 +3651,9 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             }).join("");
 
             const labelNudge = {
-                AGI: { x: -8, y: 0 },
-                END: { x: 8, y: 0 },
-                UTI: { x: 6, y: 0 },
+                AGILITY: { x: -8, y: 0 },
+                ENDURANCE: { x: 8, y: 0 },
+                UTILITY: { x: 6, y: 0 },
             };
 
             const tipLabels = angles.map((a, i) => {
@@ -3804,11 +3804,11 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             const size = 260, cx = 130, cy = 130, rOuter = 86;
             const axes = [
-                { key: "POW", label: "Power", metric: "Kills", compareLabel: "POW" },
-                { key: "AGI", label: "Agility", metric: "Accuracy", compareLabel: "AGI" },
-                { key: "END", label: "Endurance", metric: "Deaths + Stims", compareLabel: "END" },
-                { key: "MOB", label: "Mobility", metric: "Distance", compareLabel: "MOB" },
-                { key: "UTI", label: "Utility", metric: "Strat uses", compareLabel: "UTI" },
+                { key: "POWER", label: "Power", metric: "Kills", compareLabel: "POWER" },
+                { key: "AGILITY", label: "Agility", metric: "Accuracy", compareLabel: "AGILITY" },
+                { key: "ENDURANCE", label: "Endurance", metric: "Deaths + Stims", compareLabel: "ENDURANCE" },
+                { key: "MOBILITY", label: "Mobility", metric: "Distance", compareLabel: "MOBILITY" },
+                { key: "UTILITY", label: "Utility", metric: "Strat uses", compareLabel: "UTILITY" },
             ];
             const axisStep = (Math.PI * 2) / axes.length;
             const angles = axes.map((_, i) => (-Math.PI / 2) + (i * (Math.PI * 2 / axes.length)));
@@ -3839,9 +3839,9 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const colB = getTierRadarColor(cardB);
             const labelRadius = rOuter + 18;
             const labelNudge = {
-                END: { x: 8, y: 0 },
-                UTI: { x: 6, y: 0 },
-                POW: { x: 0, y: 3 },
+                ENDURANCE: { x: 8, y: 0 },
+                UTILITY: { x: 6, y: 0 },
+                POWER: { x: 0, y: 3 },
             };
             const tipLabels = axes.map((axis, i) => {
                 const base = pt(labelRadius, angles[i]);
