@@ -563,8 +563,78 @@ END MASTER DIRECTIVE
             border-radius: 12px;
             padding: 10px 12px;
             overflow: hidden;
+            display: grid;
+            grid-template-columns: 52px minmax(0, 1fr);
+            gap: 10px;
+            align-items: center;
+            min-height: 72px;
+        }
+
+        .slotVisual {
+            width: 52px;
+            height: 52px;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,.14);
+            background: rgba(0,0,0,.35);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .slotVisual img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .slotVisual.is-icon img {
+            object-fit: contain;
+            padding: 6px;
+            filter: drop-shadow(0 0 8px rgba(255,255,255,.12));
+        }
+
+        .slotLabel {
+            min-width: 0;
             white-space: nowrap;
             text-overflow: ellipsis;
+            overflow: hidden;
+            font-weight: 700;
+        }
+
+        .slot.skeleton .slotVisual,
+        .slot.skeleton .slotLabel {
+            position: relative;
+            color: transparent;
+            border-color: rgba(255,255,255,.06);
+            background: rgba(255,255,255,.06);
+        }
+
+        .slot.skeleton .slotLabel {
+            border-radius: 7px;
+            min-height: 14px;
+            max-width: 72%;
+        }
+
+        .slot.skeleton .slotVisual::after,
+        .slot.skeleton .slotLabel::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(100deg, rgba(255,255,255,0) 20%, rgba(255,255,255,.18) 50%, rgba(255,255,255,0) 80%);
+            transform: translateX(-100%);
+            animation: slotShimmer 1s linear infinite;
+        }
+
+        @keyframes slotShimmer {
+            to {
+                transform: translateX(100%);
+            }
+        }
+
+        .slot.skeleton .slotVisual img {
+            opacity: 0;
         }
 
         /* Weapon reels */
@@ -635,7 +705,7 @@ END MASTER DIRECTIVE
         }
 
         #resultsGrid.cardGrid {
-            grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
         }
 
         @media (max-width: 980px) {
@@ -663,6 +733,45 @@ END MASTER DIRECTIVE
             flex-direction: column;
             gap: 10px;
             overflow: hidden;
+        }
+
+        .resultCard {
+            gap: 8px;
+            padding: 10px;
+        }
+
+        .resultSummary {
+            cursor: pointer;
+            border: 1px solid var(--line2);
+            border-radius: 12px;
+            background: rgba(255,255,255,.02);
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .resultSummary:hover {
+            border-color: rgba(255,255,255,.22);
+            background: rgba(255,255,255,.05);
+        }
+
+        .resultSummaryTop {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .resultSummaryRadar {
+            margin-top: 0;
+            min-height: 140px;
+        }
+
+        .resultDetail {
+            border-top: 1px solid var(--line2);
+            margin-top: 2px;
+            padding-top: 8px;
         }
 
         /* Pentagon / radar mini chart (Results cards) */
@@ -1197,10 +1306,32 @@ END MASTER DIRECTIVE
             transition: border-color .2s ease, box-shadow .2s ease;
         }
 
-            .rankRow.isSelected {
-                border-color: rgba(255,212,0,.85);
-                box-shadow: 0 0 0 1px rgba(255,212,0,.35), 0 0 16px rgba(255,212,0,.18);
-            }
+        .itemVisualCell {
+            width: 28px;
+            height: 28px;
+            min-width: 28px;
+            border-radius: 7px;
+            border: 1px solid rgba(255,255,255,.14);
+            background: rgba(255,255,255,.04);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .itemVisualCell img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .itemVisualFallback {
+            font-size: 10px;
+            font-weight: 900;
+            color: rgba(255,255,255,.72);
+            letter-spacing: .4px;
+        }
 
         .rim-white {
             border-color: rgba(255,255,255,.70) !important;
@@ -1758,15 +1889,15 @@ END MASTER DIRECTIVE
             <div class="label">Spin reels</div>
             <div class="slotGrid" id="slotGrid">
                 <div class="slotCol">
-                    <div class="slotRow"><span class="slotTag">Primary</span><div class="slot slot-primary" id="slotPrimary">—</div></div>
-                    <div class="slotRow"><span class="slotTag">Sidearm</span><div class="slot slot-sidearm" id="slotSidearm">—</div></div>
-                    <div class="slotRow"><span class="slotTag">Throwable</span><div class="slot slot-throwable" id="slotThrowable">—</div></div>
+                    <div class="slotRow"><span class="slotTag">Primary</span><div class="slot slot-primary" id="slotPrimary"><div class="slotVisual" aria-hidden="true"></div><div class="slotLabel">—</div></div></div>
+                    <div class="slotRow"><span class="slotTag">Sidearm</span><div class="slot slot-sidearm" id="slotSidearm"><div class="slotVisual" aria-hidden="true"></div><div class="slotLabel">—</div></div></div>
+                    <div class="slotRow"><span class="slotTag">Throwable</span><div class="slot slot-throwable" id="slotThrowable"><div class="slotVisual" aria-hidden="true"></div><div class="slotLabel">—</div></div></div>
                 </div>
                 <div class="slotCol">
-                    <div class="slotRow"><span class="slotTag">Strat 1</span><div class="slot slot-strat" id="slotStrat1">—</div></div>
-                    <div class="slotRow"><span class="slotTag">Strat 2</span><div class="slot slot-strat" id="slotStrat2">—</div></div>
-                    <div class="slotRow"><span class="slotTag">Strat 3</span><div class="slot slot-strat" id="slotStrat3">—</div></div>
-                    <div class="slotRow"><span class="slotTag">Strat 4</span><div class="slot slot-strat" id="slotStrat4">—</div></div>
+                    <div class="slotRow"><span class="slotTag">Strat 1</span><div class="slot slot-strat" id="slotStrat1"><div class="slotVisual" aria-hidden="true"></div><div class="slotLabel">—</div></div></div>
+                    <div class="slotRow"><span class="slotTag">Strat 2</span><div class="slot slot-strat" id="slotStrat2"><div class="slotVisual" aria-hidden="true"></div><div class="slotLabel">—</div></div></div>
+                    <div class="slotRow"><span class="slotTag">Strat 3</span><div class="slot slot-strat" id="slotStrat3"><div class="slotVisual" aria-hidden="true"></div><div class="slotLabel">—</div></div></div>
+                    <div class="slotRow"><span class="slotTag">Strat 4</span><div class="slot slot-strat" id="slotStrat4"><div class="slotVisual" aria-hidden="true"></div><div class="slotLabel">—</div></div></div>
                 </div>
             </div>
 
@@ -3322,6 +3453,9 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         const state = {
             items: null,
             cards: [],
+            ui: {
+                expandedResultCardId: null
+            },
 
             // current spin
             current: {
@@ -3840,6 +3974,102 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         }
 
         /***********************
+         * Reel visuals
+         ***********************/
+
+        const itemVisuals = {
+            loaded: false,
+            byCategory: { primary: new Map(), sidearm: new Map(), throwable: new Map(), stratagem: new Map() },
+            aliases: new Map()
+        };
+
+        function normalizeItemKey(name) {
+            return String(name || "")
+                .toLowerCase()
+                .replace(/&/g, " and ")
+                .replace(/[^a-z0-9]+/g, " ")
+                .replace(/\s+/g, " ")
+                .trim();
+        }
+
+        function preloadItemVisuals() {
+            if (itemVisuals.loaded) return Promise.resolve();
+            return fetch("assets/item-images.json", { cache: "no-store" })
+                .then(res => {
+                    if (!res.ok) throw new Error(`item-images.json ${res.status}`);
+                    return res.json();
+                })
+                .then(data => {
+                    ["primary", "sidearm", "throwable", "stratagem"].forEach(cat => {
+                        const map = itemVisuals.byCategory[cat];
+                        (data?.[cat] || []).forEach(entry => {
+                            map.set(normalizeItemKey(entry?.name), entry);
+                        });
+                    });
+                    Object.entries(data?.nameAliases || {}).forEach(([alias, proper]) => {
+                        itemVisuals.aliases.set(normalizeItemKey(alias), proper);
+                    });
+                    itemVisuals.loaded = true;
+                })
+                .catch(err => {
+                    console.warn("[item-visuals] Unable to load assets/item-images.json", err);
+                });
+        }
+
+        function mapSlotCategory(slotCategory) {
+            if (slotCategory === "primary" || slotCategory === "sidearm" || slotCategory === "throwable") return slotCategory;
+            return "stratagem";
+        }
+
+        function getItemVisual(name, category) {
+            const cat = mapSlotCategory(category);
+            const key = normalizeItemKey(name);
+            if (!key || !itemVisuals.loaded) return null;
+
+            const canonical = itemVisuals.aliases.get(key) || name;
+            const canonicalKey = normalizeItemKey(canonical);
+            const entry = itemVisuals.byCategory[cat].get(canonicalKey) || itemVisuals.byCategory[cat].get(key);
+            if (!entry?.assetPath) return null;
+
+            const visualKind = (cat === "stratagem") ? "icon" : "image";
+            return {
+                src: entry.assetPath,
+                kind: visualKind,
+                alt: entry.name || name || "Item visual"
+            };
+        }
+
+        function setSlotVisualState(el, name, category, options = {}) {
+            if (!el) return;
+            const visual = el.querySelector(".slotVisual");
+            const label = el.querySelector(".slotLabel");
+            const text = name || "—";
+
+            el.classList.toggle("skeleton", !!options.skeleton);
+            if (label) label.textContent = text;
+
+            if (!visual) return;
+            visual.innerHTML = "";
+            visual.classList.remove("is-icon");
+
+            if (options.skeleton) return;
+
+            const itemVisual = getItemVisual(name, category);
+            if (!itemVisual) return;
+
+            const img = document.createElement("img");
+            img.src = itemVisual.src;
+            img.alt = itemVisual.alt;
+            img.loading = "lazy";
+            if (itemVisual.kind === "icon") visual.classList.add("is-icon");
+            img.onerror = () => {
+                visual.innerHTML = "";
+                visual.classList.remove("is-icon");
+            };
+            visual.appendChild(img);
+        }
+
+        /***********************
          * Reel animation
          ***********************/
 
@@ -3851,20 +4081,22 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             return enabled[randInt(enabled.length)].name;
         }
 
-        async function spinReel(el, sampleFn, finalText, baseMs, slowFactor, onFinal) {
+        async function spinReel(el, slotCategory, sampleFn, finalText, baseMs, slowFactor, onFinal) {
             const myToken = reelToken;
             const start = performance.now();
             const total = baseMs;
 
             let delay = 35;
             const maxDelay = 220 * slowFactor;
+            setSlotVisualState(el, " ", slotCategory, { skeleton: true });
 
             while (true) {
                 if (myToken !== reelToken) return;
                 const t = performance.now() - start;
                 if (t >= total) break;
 
-                el.textContent = sampleFn();
+                const sampleText = sampleFn();
+                setSlotVisualState(el, sampleText, slotCategory, { skeleton: true });
                 playTone("tick");
 
                 const p = clamp(t / total, 0, 1);
@@ -3874,7 +4106,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 await new Promise(res => setTimeout(res, delay));
             }
 
-            el.textContent = finalText ?? "—";
+            setSlotVisualState(el, finalText ?? "—", slotCategory);
             el.style.transform = "scale(1.15)";
             el.style.transition = "transform 0.15s ease";
             playTone("final");
@@ -3891,7 +4123,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             reelToken++;
             const tokenAtStart = reelToken;
 
-
+            await preloadItemVisuals();
+            if (tokenAtStart !== reelToken) return;
 
             const els = {
                 primary: $("#slotPrimary"),
@@ -3903,26 +4136,24 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 s4: $("#slotStrat4"),
             };
 
-            Object.values(els).forEach(e => { if (e) e.textContent = "…" });
+            Object.values(els).forEach(e => setSlotVisualState(e, " ", "stratagem", { skeleton: true }));
 
             const sequence = [
-                [els.primary, () => sampleEnabledText(state.items.primaries), loadout.primary, 900, 1.0],
-                [els.sidearm, () => sampleEnabledText(state.items.sidearms), loadout.sidearm, 900, 1.0],
-                [els.throwable, () => sampleEnabledText(state.items.throwables), loadout.throwable, 950, 1.15],
+                [els.primary, "primary", () => sampleEnabledText(state.items.primaries), loadout.primary, 900, 1.0],
+                [els.sidearm, "sidearm", () => sampleEnabledText(state.items.sidearms), loadout.sidearm, 900, 1.0],
+                [els.throwable, "throwable", () => sampleEnabledText(state.items.throwables), loadout.throwable, 950, 1.15],
 
-                [els.s1, () => sampleEnabledText(state.items.stratagems), loadout.stratagems?.[0], 1100, 1.35],
-                [els.s2, () => sampleEnabledText(state.items.stratagems), loadout.stratagems?.[1], 1250, 1.45],
-                [els.s3, () => sampleEnabledText(state.items.stratagems), loadout.stratagems?.[2], 1400, 1.60],
-                [els.s4, () => sampleEnabledText(state.items.stratagems), loadout.stratagems?.[3], 1600, 1.80],
+                [els.s1, "stratagem", () => sampleEnabledText(state.items.stratagems), loadout.stratagems?.[0], 1100, 1.35],
+                [els.s2, "stratagem", () => sampleEnabledText(state.items.stratagems), loadout.stratagems?.[1], 1250, 1.45],
+                [els.s3, "stratagem", () => sampleEnabledText(state.items.stratagems), loadout.stratagems?.[2], 1400, 1.60],
+                [els.s4, "stratagem", () => sampleEnabledText(state.items.stratagems), loadout.stratagems?.[3], 1600, 1.80],
             ];
             for (const entry of sequence) {
-                const [el, sampler, finalValue, dur, slow, cb] = entry;
+                const [el, slotCategory, sampler, finalValue, dur, slow, cb] = entry;
                 if (tokenAtStart !== reelToken) return;
                 if (!el) continue;
-                await spinReel(el, sampler, finalValue, dur, slow, cb);
+                await spinReel(el, slotCategory, sampler, finalValue, dur, slow, cb);
             }
-
-
         }
 
         /***********************
@@ -4634,8 +4865,13 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             grid.innerHTML = "";
 
             if (!list.length) {
+                state.ui.expandedResultCardId = null;
                 grid.innerHTML = `<div class="tiny">No cards yet. Go spin something awful and commit to it.</div>`;
                 return;
+            }
+
+            if (!list.some(c => c.id === state.ui.expandedResultCardId)) {
+                state.ui.expandedResultCardId = null;
             }
 
             const radarMaxes = getRadarMaxes(state.cards);
@@ -4649,140 +4885,145 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 const cardBiome = card.planet ? (card.planetBiome || getPlanetBiomeFromPlanet(card.planet) || "—") : "—";
 
                 const tier = tierMap.get(card.id) || "";
+                const isExpanded = state.ui.expandedResultCardId === card.id;
 
                 const el = document.createElement("div");
-
-                el.className = "card" + (tier ? ` tier-${tier}` : "");
+                el.className = "card resultCard" + (tier ? ` tier-${tier}` : "");
 
                 el.innerHTML = `
-                      <div class="cardTop">
-                        <div>
-                          <div class="cardTitle">${escapeHtml(formatSeedWithPlayer(card))}</div>
-                          <div class="cardMeta">
-                            ${escapeHtml(card.mode)} •
+                      <button class="resultSummary" data-act="toggleCard" data-id="${card.id}" aria-expanded="${isExpanded ? "true" : "false"}">
+                        <div class="resultSummaryTop">
+                          <div>
+                            <div class="cardTitle">${escapeHtml(formatSeedWithPlayer(card))}</div>
+                            <div class="cardMeta">
+                              ${escapeHtml(card.mode)} •
 <span class="${getFactionClass(card.faction)}">${escapeHtml(card.faction)}</span> •
-                            <span class="muted">${escapeHtml(new Date(card.createdAt).toLocaleString())}</span>
-                          </div>
-                        </div>
-                        <div style="display:flex; flex-direction:column; gap:6px; align-items:flex-end;">
-                          <span class="badge yellow">Grade ${Number(card.grade || 0)}</span>
-                          ${moBadge}
-                        </div>
-                      </div>
-
-                      <div class="cardLine"><strong>Primary:</strong> ${escapeHtml(card.primary)}</div>
-                      <div class="cardLine"><strong>Sidearm:</strong> ${escapeHtml(card.sidearm)}</div>
-                      <div class="cardLine"><strong>Throwable:</strong> ${escapeHtml(card.throwable)}</div>
-                      <div class="cardLine"><strong>Strats:</strong> ${escapeHtml((card.stratagems || []).join(" • "))}</div>
-                      <div class="cardLine"><strong>Planet:</strong> ${pLine}</div>
-
-                      ${card.planet ? `
-                        <div class="planetCardWrap" style="margin-top:10px;">
-                          <div class="planetMiniCard">
-                            <div class="planetMiniLabel">Sector</div>
-                            <div class="planetMiniValue">${escapeHtml(card.planet.sector || "—")}</div>
-                          </div>
-
-                          <div class="planetMiniCard">
-                            <div class="planetMiniLabel">Biome</div>
-                            <div class="planetMiniValue">${escapeHtml(cardBiome)}</div>
-                          </div>
-
-                          <div class="planetMiniCard">
-                            <div class="planetMiniLabel">Environment</div>
-                            <div class="planetMiniValue">${escapeHtml(planetWeatherTags.length ? planetWeatherTags.slice(0, 3).join(" / ") : (planetWeatherText || "None"))}${planetWeatherTags.length > 3 ? ` (+${planetWeatherTags.length - 3})` : ""}</div>
-                            <div class="planetTagRow">
-                              ${(planetWeatherTags.length ? planetWeatherTags : [planetWeatherText || "None"]).map(t => `<span class="planetTag">${envEmoji(t)} ${escapeHtml(t)}</span>`).join("")}
+                              <span class="muted">${escapeHtml(new Date(card.createdAt).toLocaleString())}</span>
                             </div>
                           </div>
-
-                          <div class="planetMiniCard">
-                            <div class="planetMiniLabel">Faction</div>
-                            <div class="planetMiniValue ${getFactionClass(card.faction)}">
-                      ${escapeHtml(card.faction || "—")}
-</div>
+                          <div style="display:flex; flex-direction:column; gap:6px; align-items:flex-end;">
+                            <span class="badge yellow">Grade ${Number(card.grade || 0)}</span>
+                            ${moBadge}
                           </div>
                         </div>
-                      ` : ``}
-
-                      <div class="hr"></div>
-
-                      <div class="formGrid3 statsGrid cardInputGrid">
-                        <div>
-                          <div class="label">Kills</div>
-                          <input type="number" min="0" value="${Number(card.stats?.kills || 0)}" data-k="kills" data-id="${card.id}">
-                        </div>
-                        <div>
-                          <div class="label">Accuracy (%)</div>
-                          <input type="number" min="0" value="${Number(card.stats?.accuracy || 0)}" data-k="accuracy" data-id="${card.id}">
-                        </div>
-                        <div>
-                          <div class="label">Deaths</div>
-                          <input type="number" min="0" value="${Number(card.stats?.deaths || 0)}" data-k="deaths" data-id="${card.id}">
-                        </div>
-                        <div>
-                          <div class="label">Stims</div>
-                          <input type="number" min="0" value="${Number(card.stats?.stims || 0)}" data-k="stims" data-id="${card.id}">
-                        </div>
-                        <div>
-                          <div class="label">Distance (km)</div>
-                          <input type="number" min="0" step="0.1" value="${Number(card.stats?.distanceKm || 0)}" data-k="distanceKm" data-id="${card.id}">
-                        </div>
-                        <div>
-                          <div class="label">Strat uses</div>
-                          <input type="number" min="0" value="${Number(card.stats?.stratUses || 0)}" data-k="stratUses" data-id="${card.id}">
-                        </div>
-                      </div>
-
-                      <div class="cardMetaGrid">
-                        <div>
-                          <div class="label">Deaths + Stims</div>
-                          <div class="tiny"><strong>${Number(card.stats?.deaths || 0) + Number(card.stats?.stims || 0)}</strong> (lower = better endurance)</div>
-                        </div>
-                        <div>
-                          <div class="label">Pentagon${card.majorOrderDone ? "" : " (MO FAIL: -25% size)"}</div>
+                        <div class="label">Pentagon${card.majorOrderDone ? "" : " (MO FAIL: -25% size)"}</div>
+                        <div class="radarWrap resultSummaryRadar">
                           ${buildRadarSVG(card, radarMaxes)}
                         </div>
-                      </div>
+                      </button>
 
-                      <div class="formGrid" style="margin-top:10px;">
-                        <div>
-                          <div class="label">Major order done</div>
-                          <select data-k="majorOrderDone" data-id="${card.id}">
-                            <option value="false" ${card.majorOrderDone ? "" : "selected"}>No</option>
-                            <option value="true" ${card.majorOrderDone ? "selected" : ""}>Yes</option>
-                          </select>
+                      ${isExpanded ? `
+                      <div class="resultDetail">
+                        <div class="cardLine"><strong>Primary:</strong> ${escapeHtml(card.primary)}</div>
+                        <div class="cardLine"><strong>Sidearm:</strong> ${escapeHtml(card.sidearm)}</div>
+                        <div class="cardLine"><strong>Throwable:</strong> ${escapeHtml(card.throwable)}</div>
+                        <div class="cardLine"><strong>Strats:</strong> ${escapeHtml((card.stratagems || []).join(" • "))}</div>
+                        <div class="cardLine"><strong>Planet:</strong> ${pLine}</div>
+
+                        ${card.planet ? `
+                          <div class="planetCardWrap" style="margin-top:10px;">
+                            <div class="planetMiniCard">
+                              <div class="planetMiniLabel">Sector</div>
+                              <div class="planetMiniValue">${escapeHtml(card.planet.sector || "—")}</div>
+                            </div>
+
+                            <div class="planetMiniCard">
+                              <div class="planetMiniLabel">Biome</div>
+                              <div class="planetMiniValue">${escapeHtml(cardBiome)}</div>
+                            </div>
+
+                            <div class="planetMiniCard">
+                              <div class="planetMiniLabel">Environment</div>
+                              <div class="planetMiniValue">${escapeHtml(planetWeatherTags.length ? planetWeatherTags.slice(0, 3).join(" / ") : (planetWeatherText || "None"))}${planetWeatherTags.length > 3 ? ` (+${planetWeatherTags.length - 3})` : ""}</div>
+                              <div class="planetTagRow">
+                                ${(planetWeatherTags.length ? planetWeatherTags : [planetWeatherText || "None"]).map(t => `<span class="planetTag">${envEmoji(t)} ${escapeHtml(t)}</span>`).join("")}
+                              </div>
+                            </div>
+
+                            <div class="planetMiniCard">
+                              <div class="planetMiniLabel">Faction</div>
+                              <div class="planetMiniValue ${getFactionClass(card.faction)}">
+                                ${escapeHtml(card.faction || "—")}
+                              </div>
+                            </div>
+                          </div>
+                        ` : ``}
+
+                        <div class="hr"></div>
+
+                        <div class="formGrid3 statsGrid cardInputGrid">
+                          <div>
+                            <div class="label">Kills</div>
+                            <input type="number" min="0" value="${Number(card.stats?.kills || 0)}" data-k="kills" data-id="${card.id}">
+                          </div>
+                          <div>
+                            <div class="label">Accuracy (%)</div>
+                            <input type="number" min="0" value="${Number(card.stats?.accuracy || 0)}" data-k="accuracy" data-id="${card.id}">
+                          </div>
+                          <div>
+                            <div class="label">Deaths</div>
+                            <input type="number" min="0" value="${Number(card.stats?.deaths || 0)}" data-k="deaths" data-id="${card.id}">
+                          </div>
+                          <div>
+                            <div class="label">Stims</div>
+                            <input type="number" min="0" value="${Number(card.stats?.stims || 0)}" data-k="stims" data-id="${card.id}">
+                          </div>
+                          <div>
+                            <div class="label">Distance (km)</div>
+                            <input type="number" min="0" step="0.1" value="${Number(card.stats?.distanceKm || 0)}" data-k="distanceKm" data-id="${card.id}">
+                          </div>
+                          <div>
+                            <div class="label">Strat uses</div>
+                            <input type="number" min="0" value="${Number(card.stats?.stratUses || 0)}" data-k="stratUses" data-id="${card.id}">
+                          </div>
+                        </div>
+
+                        <div class="formGrid" style="margin-top:10px;">
+                          <div>
+                            <div class="label">Major order done</div>
+                            <select data-k="majorOrderDone" data-id="${card.id}">
+                              <option value="false" ${card.majorOrderDone ? "" : "selected"}>No</option>
+                              <option value="true" ${card.majorOrderDone ? "selected" : ""}>Yes</option>
+                            </select>
+                          </div>
+                        </div>
+
+                        <div style="margin-top:10px;">
+                          <div class="label">Notes</div>
+                          <textarea data-k="notes" data-id="${card.id}" placeholder="Write anything: what sucked, what worked, funny moments...">${escapeHtml(card.notes || "")}</textarea>
+                        </div>
+
+                        <div class="miniRow" style="justify-content:space-between; margin-top:10px;">
+                          <div class="tiny">Raw: <strong>${Number(card.scoreRaw || 0).toFixed(1)}</strong></div>
+                          <div class="miniRow">
+                            <button class="btnGhost" data-act="sendDiscord" data-id="${card.id}">SEND CARD TO DISCORD</button>
+                            <button class="btnPrimary" data-act="saveCard" data-id="${card.id}">SAVE</button>
+                            <button class="btnGhost" data-act="deleteCard" data-id="${card.id}">DELETE</button>
+                          </div>
                         </div>
                       </div>
-
-                      <div style="margin-top:10px;">
-                        <div class="label">Notes</div>
-                        <textarea data-k="notes" data-id="${card.id}" placeholder="Write anything: what sucked, what worked, funny moments...">${escapeHtml(card.notes || "")}</textarea>
-                      </div>
-
-                      <div class="miniRow" style="justify-content:space-between; margin-top:10px;">
-                        <div class="tiny">Raw: <strong>${Number(card.scoreRaw || 0).toFixed(1)}</strong></div>
-                        <div class="miniRow">
-                          <button class="btnGhost" data-act="sendDiscord" data-id="${card.id}">SEND CARD TO DISCORD</button>
-                          <button class="btnPrimary" data-act="saveCard" data-id="${card.id}">SAVE</button>
-                          <button class="btnGhost" data-act="deleteCard" data-id="${card.id}">DELETE</button>
-                        </div>
-                      </div>
+                      ` : ``}
 `;
 
                 grid.appendChild(el);
             }
 
-            // bind inputs
+            grid.querySelectorAll('button[data-act="toggleCard"]').forEach(btn => {
+                btn.addEventListener("click", () => {
+                    const nextId = btn.dataset.id;
+                    state.ui.expandedResultCardId = (state.ui.expandedResultCardId === nextId) ? null : nextId;
+                    renderResults();
+                });
+            });
+
             grid.querySelectorAll("input, textarea, select").forEach(inp => {
                 inp.addEventListener("change", onCardFieldChange);
                 inp.addEventListener("input", (e) => {
-                    // keep it responsive but not too chatty
                     if (e.target.tagName.toLowerCase() === "textarea") onCardFieldChange(e);
                 });
             });
 
-            grid.querySelectorAll("button[data-act]").forEach(btn => {
+            grid.querySelectorAll('button[data-act]:not([data-act="toggleCard"])').forEach(btn => {
                 btn.addEventListener("click", onCardAction);
             });
 
@@ -5732,6 +5973,81 @@ ${noteContent}`
             return m ? m.label : k;
         }
 
+
+        const ITEM_VISUAL_CATEGORY_BY_CONTAINER = {
+            listPrimaries: "primary",
+            listSidearms: "sidearm",
+            listThrowables: "throwable",
+            listStrats: "stratagem"
+        };
+
+        const ITEM_VISUAL_INDEX = {
+            aliases: new Map(),
+            byCategory: {
+                primary: new Map(),
+                sidearm: new Map(),
+                throwable: new Map(),
+                stratagem: new Map()
+            }
+        };
+
+        let itemVisualsLoadPromise = null;
+
+        function normalizeItemVisualKey(s) {
+            return String(s || "")
+                .toLowerCase()
+                .replace(/[^a-z0-9]+/g, " ")
+                .trim();
+        }
+
+        function buildItemVisualIndex(payload) {
+            ITEM_VISUAL_INDEX.aliases.clear();
+            Object.values(ITEM_VISUAL_INDEX.byCategory).forEach(m => m.clear());
+
+            const aliases = payload?.nameAliases || {};
+            Object.entries(aliases).forEach(([raw, canonical]) => {
+                ITEM_VISUAL_INDEX.aliases.set(normalizeItemVisualKey(raw), String(canonical || ""));
+            });
+
+            ["primary", "sidearm", "throwable", "stratagem"].forEach(category => {
+                const list = Array.isArray(payload?.[category]) ? payload[category] : [];
+                list.forEach(entry => {
+                    const name = String(entry?.name || "").trim();
+                    const assetPath = String(entry?.assetPath || "").trim();
+                    if (!name || !assetPath) return;
+                    ITEM_VISUAL_INDEX.byCategory[category].set(normalizeItemVisualKey(name), assetPath);
+                });
+            });
+        }
+
+        async function loadItemVisualIndex() {
+            if (itemVisualsLoadPromise) return itemVisualsLoadPromise;
+
+            itemVisualsLoadPromise = fetch("assets/item-images.json", { cache: "no-store" })
+                .then(res => {
+                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                    return res.json();
+                })
+                .then(data => {
+                    buildItemVisualIndex(data || {});
+                    renderItems();
+                })
+                .catch(err => {
+                    console.warn("[item visuals] failed to load", err);
+                });
+
+            return itemVisualsLoadPromise;
+        }
+
+        function resolveItemVisualAsset(containerId, itemName) {
+            const category = ITEM_VISUAL_CATEGORY_BY_CONTAINER[containerId];
+            if (!category) return "";
+
+            const key = normalizeItemVisualKey(itemName);
+            const canonical = ITEM_VISUAL_INDEX.aliases.get(key) || String(itemName || "");
+            return ITEM_VISUAL_INDEX.byCategory[category].get(normalizeItemVisualKey(canonical)) || "";
+        }
+
         /***********************
          * Items editor
          ***********************/
@@ -5756,10 +6072,32 @@ ${noteContent}`
                 row.style.padding = "8px 10px";
                 row.style.background = "rgba(0,0,0,.18)";
 
+                const visual = document.createElement("div");
+                visual.className = "itemVisualCell";
+
+                const assetPath = resolveItemVisualAsset(containerId, it.name);
+                if (assetPath) {
+                    const img = document.createElement("img");
+                    img.loading = "lazy";
+                    img.alt = `${it.name} visual`;
+                    img.src = assetPath;
+                    img.addEventListener("error", () => {
+                        visual.innerHTML = `<span class="itemVisualFallback">N/A</span>`;
+                    }, { once: true });
+                    visual.appendChild(img);
+                } else {
+                    visual.innerHTML = `<span class="itemVisualFallback">N/A</span>`;
+                }
+
                 const left = document.createElement("div");
                 left.style.display = "flex";
                 left.style.flexDirection = "column";
                 left.style.gap = "2px";
+
+                const leftWrap = document.createElement("div");
+                leftWrap.style.display = "flex";
+                leftWrap.style.alignItems = "center";
+                leftWrap.style.gap = "10px";
 
                 const name = document.createElement("div");
                 name.style.fontWeight = "800";
@@ -5772,6 +6110,8 @@ ${noteContent}`
 
                 left.appendChild(name);
                 left.appendChild(meta);
+                leftWrap.appendChild(visual);
+                leftWrap.appendChild(left);
 
                 const right = document.createElement("div");
                 right.className = "miniRow";
@@ -5789,7 +6129,7 @@ ${noteContent}`
                 right.appendChild(tgl);
                 right.appendChild(del);
 
-                row.appendChild(left);
+                row.appendChild(leftWrap);
                 row.appendChild(right);
                 wrap.appendChild(row);
             });
@@ -6116,6 +6456,7 @@ ${noteContent}`
             $("#tab-items").style.display = (tab === "items") ? "" : "none";
             $("#tab-rank").style.display = (tab === "rank") ? "" : "none";
 
+            if (tab !== "results") state.ui.expandedResultCardId = null;
             if (tab === "results") renderResults();
             if (tab === "compare") {
                 refreshCompareOptions();
@@ -6600,6 +6941,7 @@ ${noteContent}`
          * Boot
          ***********************/
         loadState();
+        loadItemVisualIndex();
         saveState();      // ensures pills show correct saved count
         wireOnce();
         initApp();
