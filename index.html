@@ -1574,6 +1574,18 @@ END MASTER DIRECTIVE
             gap: 8px;
         }
 
+        .planetSearchRow.is-selected {
+            border-color: rgba(245,220,84,.85);
+            box-shadow: 0 0 0 1px rgba(245,220,84,.35), inset 0 0 18px rgba(245,220,84,.08);
+            background: rgba(245,220,84,.08);
+        }
+
+        .planetSearchSelectionCue {
+            margin-top: 8px;
+            color: #f5dc54;
+            font-weight: 800;
+        }
+
         .planetSearchMeta {
             font-size: 11px;
             color: var(--muted);
@@ -1704,6 +1716,7 @@ END MASTER DIRECTIVE
                     <input id="planetSearchInput" placeholder="Type planet name, biome, hazard, or sector..." />
                     <button id="btnPlanetSearchClear" class="btnGhost">CLEAR</button>
                 </div>
+                <div id="planetSearchSelectionCue" class="tiny planetSearchSelectionCue" style="display:none;"></div>
                 <div class="tiny" style="margin-top:8px;">Manual search includes the full known planet list, grouped by sector with alphabetical planet order.</div>
                 <div id="planetSearchResults" class="planetSearchResults"></div>
             </div>
@@ -2059,12 +2072,6 @@ END MASTER DIRECTIVE
             // Kick off biome load, but do NOT block the app.
             // Biomes are a UI enhancement, not a dependency.
             loadBiomes();
-
-            // Absolute fail-safe: unlock planet roll even if the biome API is slow/dead.
-            setTimeout(() => {
-                const b = document.querySelector("#btnRollPlanet");
-                if (b) b.disabled = false;
-            }, 1200);
         }
 
 
@@ -3550,14 +3557,27 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             state.current.planetBiome = chosen.biome;
             state.current.planetLocked = true;
             renderSpin();
+            renderPlanetSearchResults();
         }
 
         function renderPlanetSearchResults() {
             const panel = $("#planetSearchPanel");
             const box = $("#planetSearchResults");
+            const cue = $("#planetSearchSelectionCue");
             const input = $("#planetSearchInput");
             const mode = $("#planetSearchMode")?.value || "all";
             if (!panel || !box || panel.style.display === "none") return;
+
+            const selectedKey = normalizePlanetKey(state.current?.planet?.name || "");
+            if (cue) {
+                if (selectedKey) {
+                    cue.style.display = "";
+                    cue.textContent = `Selected planet: ${state.current.planet.name} (${state.current.planet.sector || "—"})`;
+                } else {
+                    cue.style.display = "none";
+                    cue.textContent = "";
+                }
+            }
 
             const q = normalizeText(input?.value || "");
             const planets = getAllPlanetsSortedBySector().filter(p => {
@@ -3583,7 +3603,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 }
 
                 const row = document.createElement("div");
-                row.className = "planetSearchRow";
+                const isSelected = selectedKey && normalizePlanetKey(planet.name) === selectedKey;
+                row.className = `planetSearchRow${isSelected ? " is-selected" : ""}`;
 
                 const left = document.createElement("div");
                 left.innerHTML = `
@@ -3593,7 +3614,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
                 const pickBtn = document.createElement("button");
                 pickBtn.className = "btnPrimary";
-                pickBtn.textContent = "CHOOSE";
+                pickBtn.textContent = isSelected ? "SELECTED" : "CHOOSE";
                 pickBtn.disabled = !state.current.loadout || !state.current.locked || state.current.spinning;
                 pickBtn.addEventListener("click", () => selectManualPlanet(planet));
 
@@ -5914,6 +5935,7 @@ ${noteContent}`
 
             // update top display AFTER reels finish, but we still set data now
             state.current.spinning = true;
+            togglePlanetSearchPanel(false);
             renderSpin();
 
             spinReelsForLoadout(loadout).then(() => {
@@ -5946,6 +5968,7 @@ ${noteContent}`
                 state.current.rerollsLeft = 0;
             }
 
+            togglePlanetSearchPanel(false);
             renderSpin();
             spinReelsForLoadout(loadout);
         }
