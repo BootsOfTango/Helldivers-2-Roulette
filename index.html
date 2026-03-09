@@ -3509,7 +3509,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const canonical = aliasMap[key] || name;
             const list = Array.isArray(itemImageDb[kind]) ? itemImageDb[kind] : [];
             const hit = list.find(x => toImageKey(x.name) === toImageKey(canonical) || toImageKey(x.name) === key);
-            return hit?.assetPath || "";
+            return hit?.imageUrl || hit?.assetPath || "";
         }
 
         function renderRankDetailPanel(card, place, radarMaxes) {
@@ -4029,11 +4029,12 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const canonical = itemVisuals.aliases.get(key) || name;
             const canonicalKey = normalizeItemKey(canonical);
             const entry = itemVisuals.byCategory[cat].get(canonicalKey) || itemVisuals.byCategory[cat].get(key);
-            if (!entry?.assetPath) return null;
+            if (!entry?.assetPath && !entry?.imageUrl) return null;
 
             const visualKind = (cat === "stratagem") ? "icon" : "image";
             return {
-                src: entry.assetPath,
+                src: entry.assetPath || entry.imageUrl,
+                fallbackSrc: entry.imageUrl || "",
                 kind: visualKind,
                 alt: entry.name || name || "Item visual"
             };
@@ -4063,6 +4064,10 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             img.loading = "lazy";
             if (itemVisual.kind === "icon") visual.classList.add("is-icon");
             img.onerror = () => {
+                if (itemVisual.fallbackSrc && img.src !== itemVisual.fallbackSrc) {
+                    img.src = itemVisual.fallbackSrc;
+                    return;
+                }
                 visual.innerHTML = "";
                 visual.classList.remove("is-icon");
             };
@@ -6014,8 +6019,12 @@ ${noteContent}`
                 list.forEach(entry => {
                     const name = String(entry?.name || "").trim();
                     const assetPath = String(entry?.assetPath || "").trim();
-                    if (!name || !assetPath) return;
-                    ITEM_VISUAL_INDEX.byCategory[category].set(normalizeItemVisualKey(name), assetPath);
+                    const imageUrl = String(entry?.imageUrl || "").trim();
+                    if (!name || (!assetPath && !imageUrl)) return;
+                    ITEM_VISUAL_INDEX.byCategory[category].set(normalizeItemVisualKey(name), {
+                        src: assetPath || imageUrl,
+                        fallbackSrc: imageUrl || ""
+                    });
                 });
             });
         }
@@ -6041,11 +6050,11 @@ ${noteContent}`
 
         function resolveItemVisualAsset(containerId, itemName) {
             const category = ITEM_VISUAL_CATEGORY_BY_CONTAINER[containerId];
-            if (!category) return "";
+            if (!category) return null;
 
             const key = normalizeItemVisualKey(itemName);
             const canonical = ITEM_VISUAL_INDEX.aliases.get(key) || String(itemName || "");
-            return ITEM_VISUAL_INDEX.byCategory[category].get(normalizeItemVisualKey(canonical)) || "";
+            return ITEM_VISUAL_INDEX.byCategory[category].get(normalizeItemVisualKey(canonical)) || null;
         }
 
         /***********************
@@ -6075,15 +6084,19 @@ ${noteContent}`
                 const visual = document.createElement("div");
                 visual.className = "itemVisualCell";
 
-                const assetPath = resolveItemVisualAsset(containerId, it.name);
-                if (assetPath) {
+                const asset = resolveItemVisualAsset(containerId, it.name);
+                if (asset?.src) {
                     const img = document.createElement("img");
                     img.loading = "lazy";
                     img.alt = `${it.name} visual`;
-                    img.src = assetPath;
+                    img.src = asset.src;
                     img.addEventListener("error", () => {
+                        if (asset.fallbackSrc && img.src !== asset.fallbackSrc) {
+                            img.src = asset.fallbackSrc;
+                            return;
+                        }
                         visual.innerHTML = `<span class="itemVisualFallback">N/A</span>`;
-                    }, { once: true });
+                    });
                     visual.appendChild(img);
                 } else {
                     visual.innerHTML = `<span class="itemVisualFallback">N/A</span>`;
