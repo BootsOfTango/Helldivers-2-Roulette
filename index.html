@@ -1523,6 +1523,62 @@ END MASTER DIRECTIVE
             background: rgba(255,255,255,.05);
         }
 
+        .planetSearchPanel {
+            margin-top: 12px;
+        }
+
+        .planetSearchControls {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .planetSearchControls select,
+        .planetSearchControls input {
+            min-height: 38px;
+        }
+
+        .planetSearchControls input {
+            flex: 1;
+            min-width: 220px;
+        }
+
+        .planetSearchResults {
+            margin-top: 10px;
+            max-height: 360px;
+            overflow: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding-right: 4px;
+        }
+
+        .planetSearchSector {
+            margin-top: 4px;
+            font-weight: 900;
+            font-size: 12px;
+            color: #e7edf8;
+            letter-spacing: .3px;
+            text-transform: uppercase;
+        }
+
+        .planetSearchRow {
+            border: 1px solid var(--line2);
+            border-radius: 10px;
+            background: rgba(0,0,0,.2);
+            padding: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .planetSearchMeta {
+            font-size: 11px;
+            color: var(--muted);
+        }
+
         .cmpTitle {
             text-align: center;
             font-weight: 900;
@@ -1609,6 +1665,7 @@ END MASTER DIRECTIVE
                 <button class="btnPrimary" id="btnSpin">SPIN LOADOUT</button>
                 <button id="btnLock" class="btnGhost" disabled>LOCK LOADOUT</button>
                 <button id="btnRollPlanet" class="btnGhost" disabled>ROLL PLANET</button>
+                <button id="btnSearchPlanet" class="btnGhost" disabled>SEARCH PLANET</button>
                 <button id="btnUse" class="btnPrimary" disabled>CONFIRM</button>
                 <button id="btnReroll" class="btnDanger" style="display:none;">SPECIAL EVENT: REROLL (3)</button>
 
@@ -1634,6 +1691,22 @@ END MASTER DIRECTIVE
             </div>
 
             <div class="smallHelp">Reels spin in order and slow down on reveal (especially stratagems). Equal odds. Pure chaos.</div>
+
+            <div id="planetSearchPanel" class="box planetSearchPanel" style="display:none;">
+                <div class="label">Manual planet selection</div>
+                <div class="planetSearchControls">
+                    <select id="planetSearchMode">
+                        <option value="all">Name + biome + environment + sector</option>
+                        <option value="name">Planet name only</option>
+                        <option value="biome">Biome only</option>
+                        <option value="environment">Environment / hazards only</option>
+                    </select>
+                    <input id="planetSearchInput" placeholder="Type planet name, biome, hazard, or sector..." />
+                    <button id="btnPlanetSearchClear" class="btnGhost">CLEAR</button>
+                </div>
+                <div class="tiny" style="margin-top:8px;">Manual search includes the full known planet list, grouped by sector with alphabetical planet order.</div>
+                <div id="planetSearchResults" class="planetSearchResults"></div>
+            </div>
 
             <div class="divider"></div>
 
@@ -3256,6 +3329,10 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             } catch (e) { }
 
             updateHeaderPills();
+
+            if ($("#planetSearchPanel") && $("#planetSearchPanel").style.display !== "none") {
+                renderPlanetSearchResults();
+            }
         }
 
         function normalizeCardRecord(card) {
@@ -3434,6 +3511,104 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 biome: p.biome || "—",
                 weather: p.weather || "—"
             };
+        }
+
+        function getAllPlanetsSortedBySector() {
+            const list = Array.isArray(state?.items?.planets) ? state.items.planets.slice() : [];
+            return list.sort((a, b) => {
+                const s = String(a.sector || "").localeCompare(String(b.sector || ""));
+                if (s !== 0) return s;
+                return String(a.name || "").localeCompare(String(b.name || ""));
+            });
+        }
+
+        function getPlanetSearchHaystack(planet, mode) {
+            const name = planet?.name || "";
+            const biome = planet?.biome || "";
+            const weather = getPlanetWeatherText(planet) || planet?.weather || "";
+            const sector = planet?.sector || "";
+
+            if (mode === "name") return normalizeText(name);
+            if (mode === "biome") return normalizeText(biome);
+            if (mode === "environment") return normalizeText(weather);
+
+            return normalizeText([name, biome, weather, sector].join(" "));
+        }
+
+        function selectManualPlanet(planet) {
+            if (!state.current.loadout || !state.current.locked) return;
+
+            const chosen = {
+                name: planet.name,
+                sector: planet.sector || "—",
+                biome: planet.biome || getPlanetBiomeFromPlanet(planet) || "—",
+                weather: planet.weather || "—"
+            };
+
+            chosen.weatherText = getPlanetWeatherText(chosen) || "None";
+            state.current.planet = chosen;
+            state.current.planetBiome = chosen.biome;
+            state.current.planetLocked = true;
+            renderSpin();
+        }
+
+        function renderPlanetSearchResults() {
+            const panel = $("#planetSearchPanel");
+            const box = $("#planetSearchResults");
+            const input = $("#planetSearchInput");
+            const mode = $("#planetSearchMode")?.value || "all";
+            if (!panel || !box || panel.style.display === "none") return;
+
+            const q = normalizeText(input?.value || "");
+            const planets = getAllPlanetsSortedBySector().filter(p => {
+                if (!q) return true;
+                return getPlanetSearchHaystack(p, mode).includes(q);
+            });
+
+            box.innerHTML = "";
+            if (!planets.length) {
+                box.innerHTML = `<div class="tiny">No planets matched your search.</div>`;
+                return;
+            }
+
+            let currentSector = null;
+            planets.forEach(planet => {
+                const sector = planet.sector || "Unknown Sector";
+                if (sector !== currentSector) {
+                    currentSector = sector;
+                    const head = document.createElement("div");
+                    head.className = "planetSearchSector";
+                    head.textContent = sector;
+                    box.appendChild(head);
+                }
+
+                const row = document.createElement("div");
+                row.className = "planetSearchRow";
+
+                const left = document.createElement("div");
+                left.innerHTML = `
+                    <div style="font-weight:900; font-size:12px;">${escapeHtml(planet.name || "Unknown")}</div>
+                    <div class="planetSearchMeta">${escapeHtml(planet.faction || "Unknown")} • ${escapeHtml(planet.biome || "—")} • ${escapeHtml(getPlanetWeatherText(planet) || planet.weather || "None")}</div>
+                `;
+
+                const pickBtn = document.createElement("button");
+                pickBtn.className = "btnPrimary";
+                pickBtn.textContent = "CHOOSE";
+                pickBtn.disabled = !state.current.loadout || !state.current.locked || state.current.spinning;
+                pickBtn.addEventListener("click", () => selectManualPlanet(planet));
+
+                row.appendChild(left);
+                row.appendChild(pickBtn);
+                box.appendChild(row);
+            });
+        }
+
+        function togglePlanetSearchPanel(forceState) {
+            const panel = $("#planetSearchPanel");
+            if (!panel) return;
+            const show = (typeof forceState === "boolean") ? forceState : panel.style.display === "none";
+            panel.style.display = show ? "" : "none";
+            if (show) renderPlanetSearchResults();
         }
 
         /***********************
@@ -4172,6 +4347,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             // Buttons
             $("#btnLock").disabled = !c.loadout || c.locked || c.spinning;
             $("#btnRollPlanet").disabled = !c.loadout || !c.locked || c.spinning;
+            $("#btnSearchPlanet").disabled = !c.loadout || !c.locked || c.spinning;
             $("#btnUse").disabled = !c.loadout || !c.locked || c.spinning;
 
 
@@ -6027,6 +6203,23 @@ ${noteContent}`
                 // If not rolled yet -> first roll, else reroll
                 if (!state.current.planetLocked) doRollPlanet();
                 else doClearPlanet();
+            });
+
+            $("#btnSearchPlanet").addEventListener("click", () => {
+                togglePlanetSearchPanel();
+            });
+
+            $("#planetSearchInput").addEventListener("input", () => {
+                renderPlanetSearchResults();
+            });
+
+            $("#planetSearchMode").addEventListener("change", () => {
+                renderPlanetSearchResults();
+            });
+
+            $("#btnPlanetSearchClear").addEventListener("click", () => {
+                $("#planetSearchInput").value = "";
+                renderPlanetSearchResults();
             });
 
         } // end wire()
