@@ -2519,8 +2519,9 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 BIOMES_READY = true;
             } catch (e) { }
             finally {
-                const b = document.querySelector("#btnRollPlanet");
-                if (b) b.disabled = false;
+                // Keep button states tied to gameplay state (loadout + lock),
+                // not biome-loading completion.
+                renderSpin();
             }
         }
 
