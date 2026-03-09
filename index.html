@@ -3257,6 +3257,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 planet: null,       // {name, sector, biome, weather}
                 planetBiome: null,
                 planetLocked: false,
+                manualPlanetCandidate: null,
 
                 specialActive: false,
                 rerollsLeft: 0,
@@ -3530,6 +3531,23 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             });
         }
 
+        function normalizeSectorLabel(sector) {
+            const text = String(sector || "").trim();
+            if (!text) return "Unknown Sector";
+            if (/\ssector$/i.test(text)) return text;
+            return `${text} Sector`;
+        }
+
+        function getUniquePlanetsByName(planets) {
+            const seen = new Set();
+            return planets.filter(planet => {
+                const key = normalizePlanetKey(planet?.name || "");
+                if (!key || seen.has(key)) return false;
+                seen.add(key);
+                return true;
+            });
+        }
+
         function getPlanetSearchHaystack(planet, mode) {
             const name = planet?.name || "";
             const biome = planet?.biome || "";
@@ -3543,12 +3561,26 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             return normalizeText([name, biome, weather, sector].join(" "));
         }
 
-        function selectManualPlanet(planet) {
+        function selectManualPlanetCandidate(planet) {
             if (!state.current.loadout || !state.current.locked) return;
+            state.current.manualPlanetCandidate = {
+                name: planet.name,
+                sector: planet.sector || "—",
+                biome: planet.biome || getPlanetBiomeFromPlanet(planet) || "—",
+                weather: planet.weather || "—"
+            };
+            renderPlanetSearchResults();
+        }
+
+        function confirmManualPlanetSelection() {
+            if (!state.current.loadout || !state.current.locked) return;
+
+            const planet = state.current.manualPlanetCandidate;
+            if (!planet?.name) return;
 
             const chosen = {
                 name: planet.name,
-                sector: planet.sector || "—",
+                sector: normalizeSectorLabel(planet.sector || "—"),
                 biome: planet.biome || getPlanetBiomeFromPlanet(planet) || "—",
                 weather: planet.weather || "—"
             };
@@ -3557,6 +3589,10 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             state.current.planet = chosen;
             state.current.planetBiome = chosen.biome;
             state.current.planetLocked = true;
+            state.current.manualPlanetCandidate = null;
+
+            if ($("#planetSearchInput")) $("#planetSearchInput").value = "";
+            togglePlanetSearchPanel(false);
             renderSpin();
             renderPlanetSearchResults();
         }
@@ -3570,10 +3606,14 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             if (!panel || !box || panel.style.display === "none") return;
 
             const selectedKey = normalizePlanetKey(state.current?.planet?.name || "");
+            const pendingKey = normalizePlanetKey(state.current?.manualPlanetCandidate?.name || "");
             if (cue) {
                 if (selectedKey) {
                     cue.style.display = "";
-                    cue.textContent = `Selected planet: ${state.current.planet.name} (${state.current.planet.sector || "—"})`;
+                    cue.textContent = `Selected planet: ${state.current.planet.name} (${normalizeSectorLabel(state.current.planet.sector || "—")})`;
+                } else if (pendingKey) {
+                    cue.style.display = "";
+                    cue.textContent = `Pending confirmation: ${state.current.manualPlanetCandidate.name} (${normalizeSectorLabel(state.current.manualPlanetCandidate.sector || "—")})`;
                 } else {
                     cue.style.display = "none";
                     cue.textContent = "";
@@ -3581,7 +3621,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             }
 
             const q = normalizeText(input?.value || "");
-            const planets = getAllPlanetsSortedBySector().filter(p => {
+            const planets = getUniquePlanetsByName(getAllPlanetsSortedBySector()).filter(p => {
                 if (!q) return true;
                 return getPlanetSearchHaystack(p, mode).includes(q);
             });
@@ -3594,7 +3634,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             let currentSector = null;
             planets.forEach(planet => {
-                const sector = planet.sector || "Unknown Sector";
+                const sector = normalizeSectorLabel(planet.sector || "Unknown Sector");
                 if (sector !== currentSector) {
                     currentSector = sector;
                     const head = document.createElement("div");
@@ -3605,6 +3645,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
                 const row = document.createElement("div");
                 const isSelected = selectedKey && normalizePlanetKey(planet.name) === selectedKey;
+                const isPending = pendingKey && normalizePlanetKey(planet.name) === pendingKey;
                 row.className = `planetSearchRow${isSelected ? " is-selected" : ""}`;
 
                 const left = document.createElement("div");
@@ -3614,10 +3655,16 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 `;
 
                 const pickBtn = document.createElement("button");
-                pickBtn.className = "btnPrimary";
-                pickBtn.textContent = isSelected ? "SELECTED" : "CHOOSE";
+                pickBtn.className = isPending ? "btnDanger" : "btnPrimary";
+                pickBtn.textContent = isSelected ? "SELECTED" : (isPending ? "CONFIRM?" : "CHOOSE");
                 pickBtn.disabled = !state.current.loadout || !state.current.locked || state.current.spinning;
-                pickBtn.addEventListener("click", () => selectManualPlanet(planet));
+                pickBtn.addEventListener("click", () => {
+                    if (isPending) {
+                        confirmManualPlanetSelection();
+                    } else {
+                        selectManualPlanetCandidate(planet);
+                    }
+                });
 
                 row.appendChild(left);
                 row.appendChild(pickBtn);
@@ -5924,6 +5971,7 @@ ${noteContent}`
             state.current.planet = null;
             state.current.planetLocked = false;
             state.current.planetBiome = null;
+            state.current.manualPlanetCandidate = null;
 
             // special event: only if EXACT same fingerprint already exists in saved cards
             if (hasDuplicateFingerprint(loadout.fingerprint)) {
@@ -5962,6 +6010,7 @@ ${noteContent}`
             state.current.planet = null;
             state.current.planetLocked = false;
             state.current.planetBiome = null;
+            state.current.manualPlanetCandidate = null;
 
             // if reroll produced non-duplicate, disable special mode immediately
             if (!hasDuplicateFingerprint(loadout.fingerprint)) {
@@ -6002,6 +6051,7 @@ ${noteContent}`
             state.current.planet = pc;
             state.current.planetBiome = pc.biome; // cached for UI + card persistence
             state.current.planetLocked = true;
+            state.current.manualPlanetCandidate = null;
             renderSpin();
         }
 
@@ -6023,6 +6073,7 @@ ${noteContent}`
             state.current.planet = pc;
             state.current.planetBiome = pc.biome;
             state.current.planetLocked = true;
+            state.current.manualPlanetCandidate = null;
             renderSpin();
         }
 
@@ -6158,7 +6209,7 @@ ${noteContent}`
                 saveState();
                 renderResults();
                 updateSavedCount();
-                state.current = { seed: null, seedBase: null, mode: null, faction: null, loadout: null, locked: false, planet: null, planetLocked: false, specialActive: false, rerollsLeft: 0 };
+                state.current = { seed: null, seedBase: null, mode: null, faction: null, loadout: null, locked: false, planet: null, planetLocked: false, planetBiome: null, manualPlanetCandidate: null, specialActive: false, rerollsLeft: 0 };
                 renderSpin();
                 renderResults();
                 refreshCompareOptions();
@@ -6243,6 +6294,7 @@ ${noteContent}`
 
             $("#btnPlanetSearchClear").addEventListener("click", () => {
                 $("#planetSearchInput").value = "";
+                state.current.manualPlanetCandidate = null;
                 renderPlanetSearchResults();
             });
 
