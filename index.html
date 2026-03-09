@@ -1304,6 +1304,33 @@ END MASTER DIRECTIVE
             background: rgba(0,0,0,.18);
         }
 
+        .itemVisualCell {
+            width: 28px;
+            height: 28px;
+            min-width: 28px;
+            border-radius: 7px;
+            border: 1px solid rgba(255,255,255,.14);
+            background: rgba(255,255,255,.04);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .itemVisualCell img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .itemVisualFallback {
+            font-size: 10px;
+            font-weight: 900;
+            color: rgba(255,255,255,.72);
+            letter-spacing: .4px;
+        }
+
         .rim-white {
             border-color: rgba(255,255,255,.70) !important;
         }
@@ -5792,6 +5819,81 @@ ${noteContent}`
             return m ? m.label : k;
         }
 
+
+        const ITEM_VISUAL_CATEGORY_BY_CONTAINER = {
+            listPrimaries: "primary",
+            listSidearms: "sidearm",
+            listThrowables: "throwable",
+            listStrats: "stratagem"
+        };
+
+        const ITEM_VISUAL_INDEX = {
+            aliases: new Map(),
+            byCategory: {
+                primary: new Map(),
+                sidearm: new Map(),
+                throwable: new Map(),
+                stratagem: new Map()
+            }
+        };
+
+        let itemVisualsLoadPromise = null;
+
+        function normalizeItemVisualKey(s) {
+            return String(s || "")
+                .toLowerCase()
+                .replace(/[^a-z0-9]+/g, " ")
+                .trim();
+        }
+
+        function buildItemVisualIndex(payload) {
+            ITEM_VISUAL_INDEX.aliases.clear();
+            Object.values(ITEM_VISUAL_INDEX.byCategory).forEach(m => m.clear());
+
+            const aliases = payload?.nameAliases || {};
+            Object.entries(aliases).forEach(([raw, canonical]) => {
+                ITEM_VISUAL_INDEX.aliases.set(normalizeItemVisualKey(raw), String(canonical || ""));
+            });
+
+            ["primary", "sidearm", "throwable", "stratagem"].forEach(category => {
+                const list = Array.isArray(payload?.[category]) ? payload[category] : [];
+                list.forEach(entry => {
+                    const name = String(entry?.name || "").trim();
+                    const assetPath = String(entry?.assetPath || "").trim();
+                    if (!name || !assetPath) return;
+                    ITEM_VISUAL_INDEX.byCategory[category].set(normalizeItemVisualKey(name), assetPath);
+                });
+            });
+        }
+
+        async function loadItemVisualIndex() {
+            if (itemVisualsLoadPromise) return itemVisualsLoadPromise;
+
+            itemVisualsLoadPromise = fetch("assets/item-images.json", { cache: "no-store" })
+                .then(res => {
+                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                    return res.json();
+                })
+                .then(data => {
+                    buildItemVisualIndex(data || {});
+                    renderItems();
+                })
+                .catch(err => {
+                    console.warn("[item visuals] failed to load", err);
+                });
+
+            return itemVisualsLoadPromise;
+        }
+
+        function resolveItemVisualAsset(containerId, itemName) {
+            const category = ITEM_VISUAL_CATEGORY_BY_CONTAINER[containerId];
+            if (!category) return "";
+
+            const key = normalizeItemVisualKey(itemName);
+            const canonical = ITEM_VISUAL_INDEX.aliases.get(key) || String(itemName || "");
+            return ITEM_VISUAL_INDEX.byCategory[category].get(normalizeItemVisualKey(canonical)) || "";
+        }
+
         /***********************
          * Items editor
          ***********************/
@@ -5816,10 +5918,32 @@ ${noteContent}`
                 row.style.padding = "8px 10px";
                 row.style.background = "rgba(0,0,0,.18)";
 
+                const visual = document.createElement("div");
+                visual.className = "itemVisualCell";
+
+                const assetPath = resolveItemVisualAsset(containerId, it.name);
+                if (assetPath) {
+                    const img = document.createElement("img");
+                    img.loading = "lazy";
+                    img.alt = `${it.name} visual`;
+                    img.src = assetPath;
+                    img.addEventListener("error", () => {
+                        visual.innerHTML = `<span class="itemVisualFallback">N/A</span>`;
+                    }, { once: true });
+                    visual.appendChild(img);
+                } else {
+                    visual.innerHTML = `<span class="itemVisualFallback">N/A</span>`;
+                }
+
                 const left = document.createElement("div");
                 left.style.display = "flex";
                 left.style.flexDirection = "column";
                 left.style.gap = "2px";
+
+                const leftWrap = document.createElement("div");
+                leftWrap.style.display = "flex";
+                leftWrap.style.alignItems = "center";
+                leftWrap.style.gap = "10px";
 
                 const name = document.createElement("div");
                 name.style.fontWeight = "800";
@@ -5832,6 +5956,8 @@ ${noteContent}`
 
                 left.appendChild(name);
                 left.appendChild(meta);
+                leftWrap.appendChild(visual);
+                leftWrap.appendChild(left);
 
                 const right = document.createElement("div");
                 right.className = "miniRow";
@@ -5849,7 +5975,7 @@ ${noteContent}`
                 right.appendChild(tgl);
                 right.appendChild(del);
 
-                row.appendChild(left);
+                row.appendChild(leftWrap);
                 row.appendChild(right);
                 wrap.appendChild(row);
             });
@@ -6632,6 +6758,7 @@ ${noteContent}`
          * Boot
          ***********************/
         loadState();
+        loadItemVisualIndex();
         saveState();      // ensures pills show correct saved count
         wireOnce();
         initApp();
