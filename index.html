@@ -705,7 +705,7 @@ END MASTER DIRECTIVE
         }
 
         #resultsGrid.cardGrid {
-            grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
         }
 
         @media (max-width: 980px) {
@@ -733,6 +733,45 @@ END MASTER DIRECTIVE
             flex-direction: column;
             gap: 10px;
             overflow: hidden;
+        }
+
+        .resultCard {
+            gap: 8px;
+            padding: 10px;
+        }
+
+        .resultSummary {
+            cursor: pointer;
+            border: 1px solid var(--line2);
+            border-radius: 12px;
+            background: rgba(255,255,255,.02);
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .resultSummary:hover {
+            border-color: rgba(255,255,255,.22);
+            background: rgba(255,255,255,.05);
+        }
+
+        .resultSummaryTop {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .resultSummaryRadar {
+            margin-top: 0;
+            min-height: 140px;
+        }
+
+        .resultDetail {
+            border-top: 1px solid var(--line2);
+            margin-top: 2px;
+            padding-top: 8px;
         }
 
         /* Pentagon / radar mini chart (Results cards) */
@@ -3315,6 +3354,9 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         const state = {
             items: null,
             cards: [],
+            ui: {
+                expandedResultCardId: null
+            },
 
             // current spin
             current: {
@@ -4642,8 +4684,13 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             grid.innerHTML = "";
 
             if (!list.length) {
+                state.ui.expandedResultCardId = null;
                 grid.innerHTML = `<div class="tiny">No cards yet. Go spin something awful and commit to it.</div>`;
                 return;
+            }
+
+            if (!list.some(c => c.id === state.ui.expandedResultCardId)) {
+                state.ui.expandedResultCardId = null;
             }
 
             const radarMaxes = getRadarMaxes(state.cards);
@@ -4657,140 +4704,145 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 const cardBiome = card.planet ? (card.planetBiome || getPlanetBiomeFromPlanet(card.planet) || "—") : "—";
 
                 const tier = tierMap.get(card.id) || "";
+                const isExpanded = state.ui.expandedResultCardId === card.id;
 
                 const el = document.createElement("div");
-
-                el.className = "card" + (tier ? ` tier-${tier}` : "");
+                el.className = "card resultCard" + (tier ? ` tier-${tier}` : "");
 
                 el.innerHTML = `
-                      <div class="cardTop">
-                        <div>
-                          <div class="cardTitle">${escapeHtml(formatSeedWithPlayer(card))}</div>
-                          <div class="cardMeta">
-                            ${escapeHtml(card.mode)} •
+                      <button class="resultSummary" data-act="toggleCard" data-id="${card.id}" aria-expanded="${isExpanded ? "true" : "false"}">
+                        <div class="resultSummaryTop">
+                          <div>
+                            <div class="cardTitle">${escapeHtml(formatSeedWithPlayer(card))}</div>
+                            <div class="cardMeta">
+                              ${escapeHtml(card.mode)} •
 <span class="${getFactionClass(card.faction)}">${escapeHtml(card.faction)}</span> •
-                            <span class="muted">${escapeHtml(new Date(card.createdAt).toLocaleString())}</span>
-                          </div>
-                        </div>
-                        <div style="display:flex; flex-direction:column; gap:6px; align-items:flex-end;">
-                          <span class="badge yellow">Grade ${Number(card.grade || 0)}</span>
-                          ${moBadge}
-                        </div>
-                      </div>
-
-                      <div class="cardLine"><strong>Primary:</strong> ${escapeHtml(card.primary)}</div>
-                      <div class="cardLine"><strong>Sidearm:</strong> ${escapeHtml(card.sidearm)}</div>
-                      <div class="cardLine"><strong>Throwable:</strong> ${escapeHtml(card.throwable)}</div>
-                      <div class="cardLine"><strong>Strats:</strong> ${escapeHtml((card.stratagems || []).join(" • "))}</div>
-                      <div class="cardLine"><strong>Planet:</strong> ${pLine}</div>
-
-                      ${card.planet ? `
-                        <div class="planetCardWrap" style="margin-top:10px;">
-                          <div class="planetMiniCard">
-                            <div class="planetMiniLabel">Sector</div>
-                            <div class="planetMiniValue">${escapeHtml(card.planet.sector || "—")}</div>
-                          </div>
-
-                          <div class="planetMiniCard">
-                            <div class="planetMiniLabel">Biome</div>
-                            <div class="planetMiniValue">${escapeHtml(cardBiome)}</div>
-                          </div>
-
-                          <div class="planetMiniCard">
-                            <div class="planetMiniLabel">Environment</div>
-                            <div class="planetMiniValue">${escapeHtml(planetWeatherTags.length ? planetWeatherTags.slice(0, 3).join(" / ") : (planetWeatherText || "None"))}${planetWeatherTags.length > 3 ? ` (+${planetWeatherTags.length - 3})` : ""}</div>
-                            <div class="planetTagRow">
-                              ${(planetWeatherTags.length ? planetWeatherTags : [planetWeatherText || "None"]).map(t => `<span class="planetTag">${envEmoji(t)} ${escapeHtml(t)}</span>`).join("")}
+                              <span class="muted">${escapeHtml(new Date(card.createdAt).toLocaleString())}</span>
                             </div>
                           </div>
-
-                          <div class="planetMiniCard">
-                            <div class="planetMiniLabel">Faction</div>
-                            <div class="planetMiniValue ${getFactionClass(card.faction)}">
-                      ${escapeHtml(card.faction || "—")}
-</div>
+                          <div style="display:flex; flex-direction:column; gap:6px; align-items:flex-end;">
+                            <span class="badge yellow">Grade ${Number(card.grade || 0)}</span>
+                            ${moBadge}
                           </div>
                         </div>
-                      ` : ``}
-
-                      <div class="hr"></div>
-
-                      <div class="formGrid3 statsGrid cardInputGrid">
-                        <div>
-                          <div class="label">Kills</div>
-                          <input type="number" min="0" value="${Number(card.stats?.kills || 0)}" data-k="kills" data-id="${card.id}">
-                        </div>
-                        <div>
-                          <div class="label">Accuracy (%)</div>
-                          <input type="number" min="0" value="${Number(card.stats?.accuracy || 0)}" data-k="accuracy" data-id="${card.id}">
-                        </div>
-                        <div>
-                          <div class="label">Deaths</div>
-                          <input type="number" min="0" value="${Number(card.stats?.deaths || 0)}" data-k="deaths" data-id="${card.id}">
-                        </div>
-                        <div>
-                          <div class="label">Stims</div>
-                          <input type="number" min="0" value="${Number(card.stats?.stims || 0)}" data-k="stims" data-id="${card.id}">
-                        </div>
-                        <div>
-                          <div class="label">Distance (km)</div>
-                          <input type="number" min="0" step="0.1" value="${Number(card.stats?.distanceKm || 0)}" data-k="distanceKm" data-id="${card.id}">
-                        </div>
-                        <div>
-                          <div class="label">Strat uses</div>
-                          <input type="number" min="0" value="${Number(card.stats?.stratUses || 0)}" data-k="stratUses" data-id="${card.id}">
-                        </div>
-                      </div>
-
-                      <div class="cardMetaGrid">
-                        <div>
-                          <div class="label">Deaths + Stims</div>
-                          <div class="tiny"><strong>${Number(card.stats?.deaths || 0) + Number(card.stats?.stims || 0)}</strong> (lower = better endurance)</div>
-                        </div>
-                        <div>
-                          <div class="label">Pentagon${card.majorOrderDone ? "" : " (MO FAIL: -25% size)"}</div>
+                        <div class="label">Pentagon${card.majorOrderDone ? "" : " (MO FAIL: -25% size)"}</div>
+                        <div class="radarWrap resultSummaryRadar">
                           ${buildRadarSVG(card, radarMaxes)}
                         </div>
-                      </div>
+                      </button>
 
-                      <div class="formGrid" style="margin-top:10px;">
-                        <div>
-                          <div class="label">Major order done</div>
-                          <select data-k="majorOrderDone" data-id="${card.id}">
-                            <option value="false" ${card.majorOrderDone ? "" : "selected"}>No</option>
-                            <option value="true" ${card.majorOrderDone ? "selected" : ""}>Yes</option>
-                          </select>
+                      ${isExpanded ? `
+                      <div class="resultDetail">
+                        <div class="cardLine"><strong>Primary:</strong> ${escapeHtml(card.primary)}</div>
+                        <div class="cardLine"><strong>Sidearm:</strong> ${escapeHtml(card.sidearm)}</div>
+                        <div class="cardLine"><strong>Throwable:</strong> ${escapeHtml(card.throwable)}</div>
+                        <div class="cardLine"><strong>Strats:</strong> ${escapeHtml((card.stratagems || []).join(" • "))}</div>
+                        <div class="cardLine"><strong>Planet:</strong> ${pLine}</div>
+
+                        ${card.planet ? `
+                          <div class="planetCardWrap" style="margin-top:10px;">
+                            <div class="planetMiniCard">
+                              <div class="planetMiniLabel">Sector</div>
+                              <div class="planetMiniValue">${escapeHtml(card.planet.sector || "—")}</div>
+                            </div>
+
+                            <div class="planetMiniCard">
+                              <div class="planetMiniLabel">Biome</div>
+                              <div class="planetMiniValue">${escapeHtml(cardBiome)}</div>
+                            </div>
+
+                            <div class="planetMiniCard">
+                              <div class="planetMiniLabel">Environment</div>
+                              <div class="planetMiniValue">${escapeHtml(planetWeatherTags.length ? planetWeatherTags.slice(0, 3).join(" / ") : (planetWeatherText || "None"))}${planetWeatherTags.length > 3 ? ` (+${planetWeatherTags.length - 3})` : ""}</div>
+                              <div class="planetTagRow">
+                                ${(planetWeatherTags.length ? planetWeatherTags : [planetWeatherText || "None"]).map(t => `<span class="planetTag">${envEmoji(t)} ${escapeHtml(t)}</span>`).join("")}
+                              </div>
+                            </div>
+
+                            <div class="planetMiniCard">
+                              <div class="planetMiniLabel">Faction</div>
+                              <div class="planetMiniValue ${getFactionClass(card.faction)}">
+                                ${escapeHtml(card.faction || "—")}
+                              </div>
+                            </div>
+                          </div>
+                        ` : ``}
+
+                        <div class="hr"></div>
+
+                        <div class="formGrid3 statsGrid cardInputGrid">
+                          <div>
+                            <div class="label">Kills</div>
+                            <input type="number" min="0" value="${Number(card.stats?.kills || 0)}" data-k="kills" data-id="${card.id}">
+                          </div>
+                          <div>
+                            <div class="label">Accuracy (%)</div>
+                            <input type="number" min="0" value="${Number(card.stats?.accuracy || 0)}" data-k="accuracy" data-id="${card.id}">
+                          </div>
+                          <div>
+                            <div class="label">Deaths</div>
+                            <input type="number" min="0" value="${Number(card.stats?.deaths || 0)}" data-k="deaths" data-id="${card.id}">
+                          </div>
+                          <div>
+                            <div class="label">Stims</div>
+                            <input type="number" min="0" value="${Number(card.stats?.stims || 0)}" data-k="stims" data-id="${card.id}">
+                          </div>
+                          <div>
+                            <div class="label">Distance (km)</div>
+                            <input type="number" min="0" step="0.1" value="${Number(card.stats?.distanceKm || 0)}" data-k="distanceKm" data-id="${card.id}">
+                          </div>
+                          <div>
+                            <div class="label">Strat uses</div>
+                            <input type="number" min="0" value="${Number(card.stats?.stratUses || 0)}" data-k="stratUses" data-id="${card.id}">
+                          </div>
+                        </div>
+
+                        <div class="formGrid" style="margin-top:10px;">
+                          <div>
+                            <div class="label">Major order done</div>
+                            <select data-k="majorOrderDone" data-id="${card.id}">
+                              <option value="false" ${card.majorOrderDone ? "" : "selected"}>No</option>
+                              <option value="true" ${card.majorOrderDone ? "selected" : ""}>Yes</option>
+                            </select>
+                          </div>
+                        </div>
+
+                        <div style="margin-top:10px;">
+                          <div class="label">Notes</div>
+                          <textarea data-k="notes" data-id="${card.id}" placeholder="Write anything: what sucked, what worked, funny moments...">${escapeHtml(card.notes || "")}</textarea>
+                        </div>
+
+                        <div class="miniRow" style="justify-content:space-between; margin-top:10px;">
+                          <div class="tiny">Raw: <strong>${Number(card.scoreRaw || 0).toFixed(1)}</strong></div>
+                          <div class="miniRow">
+                            <button class="btnGhost" data-act="sendDiscord" data-id="${card.id}">SEND CARD TO DISCORD</button>
+                            <button class="btnPrimary" data-act="saveCard" data-id="${card.id}">SAVE</button>
+                            <button class="btnGhost" data-act="deleteCard" data-id="${card.id}">DELETE</button>
+                          </div>
                         </div>
                       </div>
-
-                      <div style="margin-top:10px;">
-                        <div class="label">Notes</div>
-                        <textarea data-k="notes" data-id="${card.id}" placeholder="Write anything: what sucked, what worked, funny moments...">${escapeHtml(card.notes || "")}</textarea>
-                      </div>
-
-                      <div class="miniRow" style="justify-content:space-between; margin-top:10px;">
-                        <div class="tiny">Raw: <strong>${Number(card.scoreRaw || 0).toFixed(1)}</strong></div>
-                        <div class="miniRow">
-                          <button class="btnGhost" data-act="sendDiscord" data-id="${card.id}">SEND CARD TO DISCORD</button>
-                          <button class="btnPrimary" data-act="saveCard" data-id="${card.id}">SAVE</button>
-                          <button class="btnGhost" data-act="deleteCard" data-id="${card.id}">DELETE</button>
-                        </div>
-                      </div>
+                      ` : ``}
 `;
 
                 grid.appendChild(el);
             }
 
-            // bind inputs
+            grid.querySelectorAll('button[data-act="toggleCard"]').forEach(btn => {
+                btn.addEventListener("click", () => {
+                    const nextId = btn.dataset.id;
+                    state.ui.expandedResultCardId = (state.ui.expandedResultCardId === nextId) ? null : nextId;
+                    renderResults();
+                });
+            });
+
             grid.querySelectorAll("input, textarea, select").forEach(inp => {
                 inp.addEventListener("change", onCardFieldChange);
                 inp.addEventListener("input", (e) => {
-                    // keep it responsive but not too chatty
                     if (e.target.tagName.toLowerCase() === "textarea") onCardFieldChange(e);
                 });
             });
 
-            grid.querySelectorAll("button[data-act]").forEach(btn => {
+            grid.querySelectorAll('button[data-act]:not([data-act="toggleCard"])').forEach(btn => {
                 btn.addEventListener("click", onCardAction);
             });
 
@@ -6095,6 +6147,7 @@ ${noteContent}`
             $("#tab-items").style.display = (tab === "items") ? "" : "none";
             $("#tab-rank").style.display = (tab === "rank") ? "" : "none";
 
+            if (tab !== "results") state.ui.expandedResultCardId = null;
             if (tab === "results") renderResults();
             if (tab === "compare") {
                 refreshCompareOptions();
