@@ -1083,14 +1083,23 @@ END MASTER DIRECTIVE
             align-items: center;
             justify-content: center;
             text-align: center;
-            font-size: clamp(22px, 2.9vw, 36px);
+            font-size: clamp(16px, 2.3vw, 30px);
             font-weight: 900;
             letter-spacing: .02em;
             line-height: 1.15;
             color: #ffe600;
-            text-shadow: 0 0 8px rgba(255,230,0,.65), 0 0 16px rgba(255,230,0,.35);
             opacity: 1;
             transition: opacity .12s ease, border-color .12s ease, box-shadow .12s ease, color .12s ease;
+        }
+
+        .cmpHoverBannerSide .cmpLabel,
+        .cmpHoverBannerSide .cmpSuffix {
+            color: #ffe600;
+        }
+
+        .cmpHoverBannerSide .cmpPct {
+            color: #ff4b4b;
+            text-shadow: 0 0 8px rgba(255,75,75,.8), 0 0 16px rgba(255,75,75,.45);
         }
 
         .cmpHoverBanner.winner-a .cmpHoverBannerSide.left,
@@ -3788,11 +3797,11 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             const size = 260, cx = 130, cy = 130, rOuter = 86;
             const axes = [
-                { key: "POW", label: "Power", metric: "Kills", compareLabel: "KILLS" },
-                { key: "AGI", label: "Agility", metric: "Accuracy", compareLabel: "ACCURACY" },
-                { key: "END", label: "Endurance", metric: "Deaths + Stims", compareLabel: "STIMS USES + DEATH" },
-                { key: "MOB", label: "Mobility", metric: "Distance", compareLabel: "DISTANCE" },
-                { key: "UTI", label: "Utility", metric: "Strat uses", compareLabel: "STRAT USES" },
+                { key: "POW", label: "Power", metric: "Kills", compareLabel: "POW" },
+                { key: "AGI", label: "Agility", metric: "Accuracy", compareLabel: "AGI" },
+                { key: "END", label: "Endurance", metric: "Deaths + Stims", compareLabel: "END" },
+                { key: "MOB", label: "Mobility", metric: "Distance", compareLabel: "MOB" },
+                { key: "UTI", label: "Utility", metric: "Strat uses", compareLabel: "UTI" },
             ];
             const axisStep = (Math.PI * 2) / axes.length;
             const angles = axes.map((_, i) => (-Math.PI / 2) + (i * (Math.PI * 2 / axes.length)));
@@ -3863,8 +3872,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                     : `${winnerSeed}, ${statLabel} ${pctInt}% ${arrow}`;
 
                 const bannerText = winner === "tie"
-                    ? `${statLabel} TIE`
-                    : `${statLabel} ${pctInt}% HIGHER`;
+                    ? `<span class="cmpLabel">${statLabel}</span> <span class="cmpSuffix">TIE</span>`
+                    : `<span class="cmpLabel">${statLabel}</span> <span class="cmpPct">${pctInt}%</span> <span class="cmpSuffix">HIGHER</span>`;
 
                 const glowColor = compareHighlight;
                 if (winner !== "tie") {
@@ -3948,14 +3957,14 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                         const right = hoverBanner.querySelector('[data-side="right"]');
                         hoverBanner.className = `cmpHoverBanner winner-${row.winner}`;
                         if (row.winner === "A") {
-                            if (left) left.textContent = row.bannerText;
+                            if (left) left.innerHTML = row.bannerText;
                             if (right) right.textContent = "";
                         } else if (row.winner === "B") {
                             if (left) left.textContent = "";
-                            if (right) right.textContent = row.bannerText;
+                            if (right) right.innerHTML = row.bannerText;
                         } else {
-                            if (left) left.textContent = row.bannerText;
-                            if (right) right.textContent = row.bannerText;
+                            if (left) left.innerHTML = row.bannerText;
+                            if (right) right.innerHTML = row.bannerText;
                         }
                     }
                 });
@@ -4989,7 +4998,8 @@ ${noteContent}`
                 { name: "Grade (0-100)", k: "grade", better: "high" },
                 { name: "Kills", k: "kills", better: "high" },
                 { name: "Accuracy (%)", k: "accuracy", better: "high" },
-                { name: "Deaths + Stims", k: "deathsPlusStims", better: "low" },
+                { name: "Deaths", k: "deaths", better: "low" },
+                { name: "Stims", k: "stims", better: "low" },
                 { name: "Distance (km)", k: "distanceKm", better: "high" },
                 { name: "Strat Uses", k: "stratUses", better: "high" },
                 { name: "Raw score", k: "raw", better: "high" },
