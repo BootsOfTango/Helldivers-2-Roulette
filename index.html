@@ -563,8 +563,78 @@ END MASTER DIRECTIVE
             border-radius: 12px;
             padding: 10px 12px;
             overflow: hidden;
+            display: grid;
+            grid-template-columns: 52px minmax(0, 1fr);
+            gap: 10px;
+            align-items: center;
+            min-height: 72px;
+        }
+
+        .slotVisual {
+            width: 52px;
+            height: 52px;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,.14);
+            background: rgba(0,0,0,.35);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .slotVisual img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .slotVisual.is-icon img {
+            object-fit: contain;
+            padding: 6px;
+            filter: drop-shadow(0 0 8px rgba(255,255,255,.12));
+        }
+
+        .slotLabel {
+            min-width: 0;
             white-space: nowrap;
             text-overflow: ellipsis;
+            overflow: hidden;
+            font-weight: 700;
+        }
+
+        .slot.skeleton .slotVisual,
+        .slot.skeleton .slotLabel {
+            position: relative;
+            color: transparent;
+            border-color: rgba(255,255,255,.06);
+            background: rgba(255,255,255,.06);
+        }
+
+        .slot.skeleton .slotLabel {
+            border-radius: 7px;
+            min-height: 14px;
+            max-width: 72%;
+        }
+
+        .slot.skeleton .slotVisual::after,
+        .slot.skeleton .slotLabel::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(100deg, rgba(255,255,255,0) 20%, rgba(255,255,255,.18) 50%, rgba(255,255,255,0) 80%);
+            transform: translateX(-100%);
+            animation: slotShimmer 1s linear infinite;
+        }
+
+        @keyframes slotShimmer {
+            to {
+                transform: translateX(100%);
+            }
+        }
+
+        .slot.skeleton .slotVisual img {
+            opacity: 0;
         }
 
         /* Weapon reels */
@@ -1690,15 +1760,15 @@ END MASTER DIRECTIVE
             <div class="label">Spin reels</div>
             <div class="slotGrid" id="slotGrid">
                 <div class="slotCol">
-                    <div class="slotRow"><span class="slotTag">Primary</span><div class="slot slot-primary" id="slotPrimary">—</div></div>
-                    <div class="slotRow"><span class="slotTag">Sidearm</span><div class="slot slot-sidearm" id="slotSidearm">—</div></div>
-                    <div class="slotRow"><span class="slotTag">Throwable</span><div class="slot slot-throwable" id="slotThrowable">—</div></div>
+                    <div class="slotRow"><span class="slotTag">Primary</span><div class="slot slot-primary" id="slotPrimary"><div class="slotVisual" aria-hidden="true"></div><div class="slotLabel">—</div></div></div>
+                    <div class="slotRow"><span class="slotTag">Sidearm</span><div class="slot slot-sidearm" id="slotSidearm"><div class="slotVisual" aria-hidden="true"></div><div class="slotLabel">—</div></div></div>
+                    <div class="slotRow"><span class="slotTag">Throwable</span><div class="slot slot-throwable" id="slotThrowable"><div class="slotVisual" aria-hidden="true"></div><div class="slotLabel">—</div></div></div>
                 </div>
                 <div class="slotCol">
-                    <div class="slotRow"><span class="slotTag">Strat 1</span><div class="slot slot-strat" id="slotStrat1">—</div></div>
-                    <div class="slotRow"><span class="slotTag">Strat 2</span><div class="slot slot-strat" id="slotStrat2">—</div></div>
-                    <div class="slotRow"><span class="slotTag">Strat 3</span><div class="slot slot-strat" id="slotStrat3">—</div></div>
-                    <div class="slotRow"><span class="slotTag">Strat 4</span><div class="slot slot-strat" id="slotStrat4">—</div></div>
+                    <div class="slotRow"><span class="slotTag">Strat 1</span><div class="slot slot-strat" id="slotStrat1"><div class="slotVisual" aria-hidden="true"></div><div class="slotLabel">—</div></div></div>
+                    <div class="slotRow"><span class="slotTag">Strat 2</span><div class="slot slot-strat" id="slotStrat2"><div class="slotVisual" aria-hidden="true"></div><div class="slotLabel">—</div></div></div>
+                    <div class="slotRow"><span class="slotTag">Strat 3</span><div class="slot slot-strat" id="slotStrat3"><div class="slotVisual" aria-hidden="true"></div><div class="slotLabel">—</div></div></div>
+                    <div class="slotRow"><span class="slotTag">Strat 4</span><div class="slot slot-strat" id="slotStrat4"><div class="slotVisual" aria-hidden="true"></div><div class="slotLabel">—</div></div></div>
                 </div>
             </div>
 
@@ -3681,6 +3751,102 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         }
 
         /***********************
+         * Reel visuals
+         ***********************/
+
+        const itemVisuals = {
+            loaded: false,
+            byCategory: { primary: new Map(), sidearm: new Map(), throwable: new Map(), stratagem: new Map() },
+            aliases: new Map()
+        };
+
+        function normalizeItemKey(name) {
+            return String(name || "")
+                .toLowerCase()
+                .replace(/&/g, " and ")
+                .replace(/[^a-z0-9]+/g, " ")
+                .replace(/\s+/g, " ")
+                .trim();
+        }
+
+        function preloadItemVisuals() {
+            if (itemVisuals.loaded) return Promise.resolve();
+            return fetch("assets/item-images.json", { cache: "no-store" })
+                .then(res => {
+                    if (!res.ok) throw new Error(`item-images.json ${res.status}`);
+                    return res.json();
+                })
+                .then(data => {
+                    ["primary", "sidearm", "throwable", "stratagem"].forEach(cat => {
+                        const map = itemVisuals.byCategory[cat];
+                        (data?.[cat] || []).forEach(entry => {
+                            map.set(normalizeItemKey(entry?.name), entry);
+                        });
+                    });
+                    Object.entries(data?.nameAliases || {}).forEach(([alias, proper]) => {
+                        itemVisuals.aliases.set(normalizeItemKey(alias), proper);
+                    });
+                    itemVisuals.loaded = true;
+                })
+                .catch(err => {
+                    console.warn("[item-visuals] Unable to load assets/item-images.json", err);
+                });
+        }
+
+        function mapSlotCategory(slotCategory) {
+            if (slotCategory === "primary" || slotCategory === "sidearm" || slotCategory === "throwable") return slotCategory;
+            return "stratagem";
+        }
+
+        function getItemVisual(name, category) {
+            const cat = mapSlotCategory(category);
+            const key = normalizeItemKey(name);
+            if (!key || !itemVisuals.loaded) return null;
+
+            const canonical = itemVisuals.aliases.get(key) || name;
+            const canonicalKey = normalizeItemKey(canonical);
+            const entry = itemVisuals.byCategory[cat].get(canonicalKey) || itemVisuals.byCategory[cat].get(key);
+            if (!entry?.assetPath) return null;
+
+            const visualKind = (cat === "stratagem") ? "icon" : "image";
+            return {
+                src: entry.assetPath,
+                kind: visualKind,
+                alt: entry.name || name || "Item visual"
+            };
+        }
+
+        function setSlotVisualState(el, name, category, options = {}) {
+            if (!el) return;
+            const visual = el.querySelector(".slotVisual");
+            const label = el.querySelector(".slotLabel");
+            const text = name || "—";
+
+            el.classList.toggle("skeleton", !!options.skeleton);
+            if (label) label.textContent = text;
+
+            if (!visual) return;
+            visual.innerHTML = "";
+            visual.classList.remove("is-icon");
+
+            if (options.skeleton) return;
+
+            const itemVisual = getItemVisual(name, category);
+            if (!itemVisual) return;
+
+            const img = document.createElement("img");
+            img.src = itemVisual.src;
+            img.alt = itemVisual.alt;
+            img.loading = "lazy";
+            if (itemVisual.kind === "icon") visual.classList.add("is-icon");
+            img.onerror = () => {
+                visual.innerHTML = "";
+                visual.classList.remove("is-icon");
+            };
+            visual.appendChild(img);
+        }
+
+        /***********************
          * Reel animation
          ***********************/
 
@@ -3692,20 +3858,22 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             return enabled[randInt(enabled.length)].name;
         }
 
-        async function spinReel(el, sampleFn, finalText, baseMs, slowFactor, onFinal) {
+        async function spinReel(el, slotCategory, sampleFn, finalText, baseMs, slowFactor, onFinal) {
             const myToken = reelToken;
             const start = performance.now();
             const total = baseMs;
 
             let delay = 35;
             const maxDelay = 220 * slowFactor;
+            setSlotVisualState(el, " ", slotCategory, { skeleton: true });
 
             while (true) {
                 if (myToken !== reelToken) return;
                 const t = performance.now() - start;
                 if (t >= total) break;
 
-                el.textContent = sampleFn();
+                const sampleText = sampleFn();
+                setSlotVisualState(el, sampleText, slotCategory, { skeleton: true });
                 playTone("tick");
 
                 const p = clamp(t / total, 0, 1);
@@ -3715,7 +3883,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 await new Promise(res => setTimeout(res, delay));
             }
 
-            el.textContent = finalText ?? "—";
+            setSlotVisualState(el, finalText ?? "—", slotCategory);
             el.style.transform = "scale(1.15)";
             el.style.transition = "transform 0.15s ease";
             playTone("final");
@@ -3732,7 +3900,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             reelToken++;
             const tokenAtStart = reelToken;
 
-
+            await preloadItemVisuals();
+            if (tokenAtStart !== reelToken) return;
 
             const els = {
                 primary: $("#slotPrimary"),
@@ -3744,26 +3913,24 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 s4: $("#slotStrat4"),
             };
 
-            Object.values(els).forEach(e => { if (e) e.textContent = "…" });
+            Object.values(els).forEach(e => setSlotVisualState(e, " ", "stratagem", { skeleton: true }));
 
             const sequence = [
-                [els.primary, () => sampleEnabledText(state.items.primaries), loadout.primary, 900, 1.0],
-                [els.sidearm, () => sampleEnabledText(state.items.sidearms), loadout.sidearm, 900, 1.0],
-                [els.throwable, () => sampleEnabledText(state.items.throwables), loadout.throwable, 950, 1.15],
+                [els.primary, "primary", () => sampleEnabledText(state.items.primaries), loadout.primary, 900, 1.0],
+                [els.sidearm, "sidearm", () => sampleEnabledText(state.items.sidearms), loadout.sidearm, 900, 1.0],
+                [els.throwable, "throwable", () => sampleEnabledText(state.items.throwables), loadout.throwable, 950, 1.15],
 
-                [els.s1, () => sampleEnabledText(state.items.stratagems), loadout.stratagems?.[0], 1100, 1.35],
-                [els.s2, () => sampleEnabledText(state.items.stratagems), loadout.stratagems?.[1], 1250, 1.45],
-                [els.s3, () => sampleEnabledText(state.items.stratagems), loadout.stratagems?.[2], 1400, 1.60],
-                [els.s4, () => sampleEnabledText(state.items.stratagems), loadout.stratagems?.[3], 1600, 1.80],
+                [els.s1, "stratagem", () => sampleEnabledText(state.items.stratagems), loadout.stratagems?.[0], 1100, 1.35],
+                [els.s2, "stratagem", () => sampleEnabledText(state.items.stratagems), loadout.stratagems?.[1], 1250, 1.45],
+                [els.s3, "stratagem", () => sampleEnabledText(state.items.stratagems), loadout.stratagems?.[2], 1400, 1.60],
+                [els.s4, "stratagem", () => sampleEnabledText(state.items.stratagems), loadout.stratagems?.[3], 1600, 1.80],
             ];
             for (const entry of sequence) {
-                const [el, sampler, finalValue, dur, slow, cb] = entry;
+                const [el, slotCategory, sampler, finalValue, dur, slow, cb] = entry;
                 if (tokenAtStart !== reelToken) return;
                 if (!el) continue;
-                await spinReel(el, sampler, finalValue, dur, slow, cb);
+                await spinReel(el, slotCategory, sampler, finalValue, dur, slow, cb);
             }
-
-
         }
 
         /***********************
