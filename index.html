@@ -1193,7 +1193,14 @@ END MASTER DIRECTIVE
             border: 1px solid var(--line2);
             border-radius: 14px;
             background: rgba(0,0,0,.18);
+            cursor: pointer;
+            transition: border-color .2s ease, box-shadow .2s ease;
         }
+
+            .rankRow.isSelected {
+                border-color: rgba(255,212,0,.85);
+                box-shadow: 0 0 0 1px rgba(255,212,0,.35), 0 0 16px rgba(255,212,0,.18);
+            }
 
         .rim-white {
             border-color: rgba(255,255,255,.70) !important;
@@ -1329,6 +1336,67 @@ END MASTER DIRECTIVE
             padding: 10px 6px 10px 0;
             scroll-padding-top: 10px;
             box-sizing: border-box;
+        }
+
+        #rankSplitView {
+            display: grid;
+            grid-template-columns: minmax(340px, 1fr) minmax(360px, 1fr);
+            gap: 14px;
+            align-items: start;
+        }
+
+        #rankDetailPanel {
+            min-height: 520px;
+            border: 1px solid var(--line2);
+            border-radius: 14px;
+            background: rgba(0,0,0,.22);
+            padding: 12px;
+        }
+
+        .rankDetailLoadout {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .rankDetailItemCard {
+            border: 1px solid var(--line2);
+            border-radius: 12px;
+            padding: 8px;
+            background: rgba(0,0,0,.22);
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            align-items: center;
+        }
+
+            .rankDetailItemCard img {
+                width: 100%;
+                max-width: 120px;
+                aspect-ratio: 1 / 1;
+                object-fit: contain;
+                background: rgba(0,0,0,.35);
+                border-radius: 10px;
+                border: 1px solid var(--line2);
+                padding: 6px;
+            }
+
+        .rankDetailStrats {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        @media (max-width: 1100px) {
+            #rankSplitView {
+                grid-template-columns: 1fr;
+            }
+
+            #rankDetailPanel {
+                min-height: 0;
+            }
         }
 
         /* ===== YOUTUBE PROMO ANIMATION ===== */
@@ -1988,7 +2056,14 @@ END MASTER DIRECTIVE
 
             <div class="divider"></div>
 
-            <div id="rankList"></div>
+            <div id="rankSplitView">
+                <div>
+                    <div id="rankList"></div>
+                </div>
+                <aside id="rankDetailPanel">
+                    <div class="tiny muted">Select a ranked card to view details.</div>
+                </aside>
+            </div>
             <div class="smallHelp">Top 3 rims: shiny white (1), gold (2), silver (3). Bronze for 4th. The rest: default. Humans love medals.</div>
         </section>
 
@@ -2068,6 +2143,8 @@ END MASTER DIRECTIVE
         async function initApp() {
             const btn = document.querySelector("#btnRollPlanet");
             if (btn) btn.disabled = true;
+
+            await loadItemImageDb();
 
             // Kick off biome load, but do NOT block the app.
             // Biomes are a UI enhancement, not a dependency.
@@ -3268,6 +3345,88 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 discordWebhookUrl: "",
             }
         };
+
+        let itemImageDb = null;
+        let selectedRankCardId = null;
+
+        function loadItemImageDb() {
+            return fetch("assets/item-images.json")
+                .then(r => {
+                    if (!r.ok) throw new Error(`Failed to load item images (${r.status})`);
+                    return r.json();
+                })
+                .then(data => {
+                    itemImageDb = data;
+                })
+                .catch(err => {
+                    console.warn("[item images]", err);
+                    itemImageDb = { nameAliases: {} };
+                });
+        }
+
+        function toImageKey(s) {
+            return normalizeText(String(s || "").replace(/[^a-z0-9]+/gi, " "));
+        }
+
+        function getImageAssetPath(kind, name) {
+            if (!itemImageDb || !kind || !name) return "";
+            const aliasMap = itemImageDb.nameAliases || {};
+            const key = toImageKey(name);
+            const canonical = aliasMap[key] || name;
+            const list = Array.isArray(itemImageDb[kind]) ? itemImageDb[kind] : [];
+            const hit = list.find(x => toImageKey(x.name) === toImageKey(canonical) || toImageKey(x.name) === key);
+            return hit?.assetPath || "";
+        }
+
+        function renderRankDetailPanel(card, place, radarMaxes) {
+            const panel = $("#rankDetailPanel");
+            if (!panel) return;
+
+            if (!card) {
+                panel.innerHTML = `<div class="tiny muted">Select a ranked card to view details.</div>`;
+                return;
+            }
+
+            const makeItemCard = (label, value, kind) => {
+                const src = getImageAssetPath(kind, value);
+                return `
+                    <div class="rankDetailItemCard">
+                        <div class="tiny muted">${escapeHtml(label)}</div>
+                        ${src ? `<img src="${escapeHtml(src)}" alt="${escapeHtml(value)}">` : `<div class="tiny muted">No image</div>`}
+                        <div class="tiny">${escapeHtml(value || "—")}</div>
+                    </div>
+                `;
+            };
+
+            const strats = (card.stratagems || []).map(s => makeItemCard("Stratagem", s, "stratagem")).join("");
+
+            panel.innerHTML = `
+                <div style="display:flex; justify-content:space-between; gap:8px; align-items:flex-start;">
+                    <div>
+                        <div style="font-weight:900;">#${place} • ${escapeHtml(formatSeedWithPlayer(card))}</div>
+                        <div class="tiny muted">${escapeHtml(card.mode)} • ${escapeHtml(card.faction)} • ${escapeHtml(getPlayerName(card))}</div>
+                    </div>
+                    <div class="badge yellow">Grade ${Number(card.grade || 0)}</div>
+                </div>
+
+                <div style="margin-top:10px;">
+                    <div class="label">Pentagon${card.majorOrderDone ? "" : " (MO FAIL: -25% size)"}</div>
+                    ${buildRadarSVG(card, radarMaxes)}
+                </div>
+
+                <div style="margin-top:10px;" class="label">Loadout</div>
+                <div class="rankDetailLoadout">
+                    ${makeItemCard("Primary", card.primary, "primary")}
+                    ${makeItemCard("Sidearm", card.sidearm, "sidearm")}
+                    ${makeItemCard("Throwable", card.throwable, "throwable")}
+                </div>
+
+                <div style="margin-top:10px;" class="label">Stratagems</div>
+                <div class="rankDetailStrats">
+                    ${strats || `<div class="tiny muted">No stratagem data.</div>`}
+                </div>
+            `;
+        }
 
         function loadState() {
             const raw = localStorage.getItem(STORAGE_KEY);
@@ -5864,10 +6023,24 @@ ${noteContent}`
             const box = $("#rankList");
             box.innerHTML = "";
 
+            if (selectedRankCardId && !list.some(c => c.id === selectedRankCardId)) {
+                selectedRankCardId = null;
+            }
+
             if (!filtered.length) {
                 box.innerHTML = `<div class="tiny">No cards to rank yet.</div>`;
+                renderRankDetailPanel(null, 0, getRadarMaxes(state.cards));
                 return;
             }
+
+            if (!selectedRankCardId) {
+                selectedRankCardId = filtered[0]?.id || null;
+            }
+            if (selectedRankCardId && !filtered.some(c => c.id === selectedRankCardId)) {
+                selectedRankCardId = filtered[0]?.id || null;
+            }
+
+            const radarMaxes = getRadarMaxes(state.cards);
 
             filtered.forEach((c) => {
                 const place = list.findIndex(x => x.id === c.id) + 1;
@@ -5877,6 +6050,11 @@ ${noteContent}`
 
                 const row = document.createElement("div");
                 row.className = "rankRow";
+                row.dataset.id = c.id;
+
+                if (c.id === selectedRankCardId) {
+                    row.classList.add("isSelected");
+                }
 
                 const tier = tierForPlace(place);
 
@@ -5898,6 +6076,12 @@ ${noteContent}`
                           </div>
                         `;
 
+                row.addEventListener("click", (e) => {
+                    if (e.target.closest('button[data-rank-act]')) return;
+                    selectedRankCardId = c.id;
+                    renderRank();
+                });
+
                 outer.appendChild(row);
                 box.appendChild(outer);
             });
@@ -5905,6 +6089,10 @@ ${noteContent}`
             box.querySelectorAll("button[data-rank-act]").forEach(btn => {
                 btn.addEventListener("click", onRankCardAction);
             });
+
+            const selectedCard = list.find(c => c.id === selectedRankCardId) || filtered[0] || null;
+            const selectedPlace = selectedCard ? (list.findIndex(x => x.id === selectedCard.id) + 1) : 0;
+            renderRankDetailPanel(selectedCard, selectedPlace, radarMaxes);
         }
 
         /***********************
