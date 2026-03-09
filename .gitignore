@@ -1,0 +1,24 @@
+# Generated wiki assets (large/binary) are synced locally by script
+assets/weapons/primaries/*
+assets/weapons/sidearms/*
+assets/weapons/throwables/*
+assets/stratagems/support/*
+assets/stratagems/orbital/*
+assets/stratagems/eagle/*
+assets/stratagems/defensive/*
+assets/stratagems/backpack/*
+assets/stratagems/exosuits/*
+
+# Keep folder placeholders committed
+!assets/weapons/primaries/.gitkeep
+!assets/weapons/sidearms/.gitkeep
+!assets/weapons/throwables/.gitkeep
+!assets/stratagems/support/.gitkeep
+!assets/stratagems/orbital/.gitkeep
+!assets/stratagems/eagle/.gitkeep
+!assets/stratagems/defensive/.gitkeep
+!assets/stratagems/backpack/.gitkeep
+!assets/stratagems/exosuits/.gitkeep
+
+# Mapping file is committed
+!assets/item-images.json
