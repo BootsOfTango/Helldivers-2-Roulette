@@ -657,9 +657,9 @@ END MASTER DIRECTIVE
         }
 
         .slot-strat {
-            border: 2px solid #54d8ff;
-            background: rgba(84,216,255,.10);
-            color: #8ce9ff;
+            border: 2px solid rgba(255,255,255,.12);
+            background: rgba(0,0,0,.35);
+            color: #0a0a0a;
         }
 
         .slot.slot-strat.skeleton {
@@ -690,6 +690,35 @@ END MASTER DIRECTIVE
             border-color: #65e8a2;
             background: rgba(101,232,162,.10);
             color: #93f5bf;
+        }
+
+        .slot-strat.strat-rim-defensive .slotVisual,
+        .slot-strat.strat-rim-orbital .slotVisual {
+            border-color: rgba(84,216,255,.45);
+            background: rgba(84,216,255,.12);
+        }
+
+        .slot-strat.strat-rim-eagle .slotVisual {
+            border-color: rgba(255,109,109,.45);
+            background: rgba(255,109,109,.15);
+        }
+
+        .slot-strat.strat-rim-support .slotVisual {
+            border-color: rgba(101,232,162,.45);
+            background: rgba(101,232,162,.12);
+        }
+
+        .slot-strat.strat-rim-defensive .slotVisual.is-icon img,
+        .slot-strat.strat-rim-orbital .slotVisual.is-icon img {
+            filter: brightness(0) saturate(100%) invert(82%) sepia(34%) saturate(1836%) hue-rotate(161deg) brightness(102%) contrast(102%);
+        }
+
+        .slot-strat.strat-rim-eagle .slotVisual.is-icon img {
+            filter: brightness(0) saturate(100%) invert(67%) sepia(71%) saturate(1424%) hue-rotate(312deg) brightness(101%) contrast(102%);
+        }
+
+        .slot-strat.strat-rim-support .slotVisual.is-icon img {
+            filter: brightness(0) saturate(100%) invert(86%) sepia(13%) saturate(2728%) hue-rotate(83deg) brightness(102%) contrast(93%);
         }
 
         .slotGrid {
