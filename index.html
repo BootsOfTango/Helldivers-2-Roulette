@@ -662,6 +662,25 @@ END MASTER DIRECTIVE
             color: #ff3b3b;
         }
 
+        .slot-strat.strat-rim-defensive {
+            border-color: #3ddc84;
+            background: rgba(61,220,132,.10);
+            color: #8effbe;
+        }
+
+        .slot-strat.strat-rim-orbital,
+        .slot-strat.strat-rim-eagle {
+            border-color: #ff4b4b;
+            background: rgba(255,75,75,.10);
+            color: #ff9a9a;
+        }
+
+        .slot-strat.strat-rim-support {
+            border-color: #7dd8ff;
+            background: rgba(125,216,255,.10);
+            color: #b5ecff;
+        }
+
         .slotGrid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -702,6 +721,7 @@ END MASTER DIRECTIVE
             display: grid;
             grid-template-columns: repeat(3, minmax(260px, 1fr));
             gap: 12px;
+            align-items: start;
         }
 
         #resultsGrid.cardGrid {
@@ -757,10 +777,128 @@ END MASTER DIRECTIVE
         }
 
         .resultSummaryTop {
-            display: flex;
-            justify-content: space-between;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
             align-items: flex-start;
             gap: 10px;
+        }
+
+        .resultSummaryMetaGrid {
+            margin-top: 6px;
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 6px;
+        }
+
+        .resultMetaChip {
+            border: 1px solid var(--line2);
+            border-radius: 10px;
+            padding: 6px 8px;
+            background: rgba(255,255,255,.02);
+            font-size: 11px;
+            line-height: 1.25;
+        }
+
+        .resultMetaChip .k {
+            display: block;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: .4px;
+            font-size: 10px;
+            margin-bottom: 2px;
+        }
+
+        .resultSummaryBadges {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            align-items: flex-end;
+        }
+
+        .resultSummaryLabel {
+            margin-top: 2px;
+        }
+
+        @media (max-width: 520px) {
+            .resultSummaryTop {
+                grid-template-columns: 1fr;
+            }
+
+            .resultSummaryBadges {
+                flex-direction: row;
+                justify-content: flex-start;
+                align-items: center;
+            }
+        }
+
+        .cardModal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,.75);
+            z-index: 60;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 18px;
+        }
+
+        .cardModal[hidden] {
+            display: none !important;
+        }
+
+        .cardModalDialog {
+            width: min(1200px, 96vw);
+            max-height: 92vh;
+            overflow: auto;
+            border: 1px solid var(--line2);
+            border-radius: 16px;
+            background: #090b10;
+            padding: 14px;
+        }
+
+        .modalLoadoutGrid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .modalLoadoutItem {
+            border: 1px solid var(--line2);
+            border-radius: 12px;
+            background: rgba(255,255,255,.02);
+            padding: 8px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .modalLoadoutIcon {
+            width: 56px;
+            height: 56px;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,.15);
+            background: rgba(0,0,0,.25);
+            object-fit: contain;
+            padding: 4px;
+            flex: 0 0 56px;
+        }
+
+        .modalLoadoutText {
+            min-width: 0;
+            font-size: 13px;
+            line-height: 1.3;
+        }
+
+        .modalLoadoutText .k {
+            color: var(--muted);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: .4px;
+        }
+
+        .modalLoadoutText .v {
+            font-weight: 700;
+            overflow-wrap: anywhere;
         }
 
         .resultSummaryRadar {
@@ -2011,6 +2149,16 @@ END MASTER DIRECTIVE
                 <div id="resultsGrid" class="cardGrid"></div>
             </div>
         </section>
+
+        <div id="resultCardModal" class="cardModal" hidden>
+            <div class="cardModalDialog">
+                <div class="miniRow" style="justify-content:space-between; margin-bottom:10px;">
+                    <div class="label">Card details</div>
+                    <button class="btnGhost" id="btnCloseResultModal">CLOSE</button>
+                </div>
+                <div id="resultCardModalBody"></div>
+            </div>
+        </div>
 
         <!-- COMPARE TAB -->
         <section id="tab-compare" class="panel" style="display:none;">
@@ -3454,7 +3602,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             items: null,
             cards: [],
             ui: {
-                expandedResultCardId: null
+                activeResultCardId: null,
+                modalOpen: false
             },
 
             // current spin
@@ -3544,7 +3693,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 </div>
 
                 <div style="margin-top:10px;">
-                    <div class="label">Pentagon${card.majorOrderDone ? "" : " (MO FAIL: -25% size)"}</div>
+                    <div class="label">Pentagon</div>
                     ${buildRadarSVG(card, radarMaxes)}
                 </div>
 
@@ -4021,6 +4170,15 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             return "stratagem";
         }
 
+        function getStratRimClassFromAsset(assetPath) {
+            const p = String(assetPath || "").toLowerCase();
+            if (!p.includes("assets/stratagems/")) return "";
+            if (p.includes("/defensive/")) return "strat-rim-defensive";
+            if (p.includes("/orbital/") || p.includes("/eagle/")) return "strat-rim-orbital";
+            if (p.includes("/support/") || p.includes("/backpack/") || p.includes("/exosuits/")) return "strat-rim-support";
+            return "";
+        }
+
         function getItemVisual(name, category) {
             const cat = mapSlotCategory(category);
             const key = normalizeItemKey(name);
@@ -4032,11 +4190,13 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             if (!entry?.assetPath && !entry?.imageUrl) return null;
 
             const visualKind = (cat === "stratagem") ? "icon" : "image";
+            const stratClass = (cat === "stratagem") ? getStratRimClassFromAsset(entry.assetPath || "") : "";
             return {
                 src: entry.assetPath || entry.imageUrl,
                 fallbackSrc: entry.imageUrl || "",
                 kind: visualKind,
-                alt: entry.name || name || "Item visual"
+                alt: entry.name || name || "Item visual",
+                stratClass
             };
         }
 
@@ -4052,11 +4212,13 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             if (!visual) return;
             visual.innerHTML = "";
             visual.classList.remove("is-icon");
+            el.classList.remove("strat-rim-defensive", "strat-rim-orbital", "strat-rim-eagle", "strat-rim-support");
 
             if (options.skeleton) return;
 
             const itemVisual = getItemVisual(name, category);
             if (!itemVisual) return;
+            if (itemVisual.stratClass) el.classList.add(itemVisual.stratClass);
 
             const img = document.createElement("img");
             img.src = itemVisual.src;
@@ -4870,170 +5032,173 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             grid.innerHTML = "";
 
             if (!list.length) {
-                state.ui.expandedResultCardId = null;
+                closeResultCardModal();
                 grid.innerHTML = `<div class="tiny">No cards yet. Go spin something awful and commit to it.</div>`;
                 return;
-            }
-
-            if (!list.some(c => c.id === state.ui.expandedResultCardId)) {
-                state.ui.expandedResultCardId = null;
             }
 
             const radarMaxes = getRadarMaxes(state.cards);
 
             for (const card of list) {
                 const moBadge = card.majorOrderDone ? `<span class="badge good">MO DONE</span>` : `<span class="badge red">MO NO</span>`;
-                const pLine = card.planet ? `${card.planet.name} <span class="muted">(${card.planet.sector || "—"})</span>` : `<span class="muted">Planet: not rolled</span>`;
-
-                const planetWeatherText = card.planet ? getPlanetWeatherText(card.planet) : "None";
-                const planetWeatherTags = splitWeatherTags(planetWeatherText);
-                const cardBiome = card.planet ? (card.planetBiome || getPlanetBiomeFromPlanet(card.planet) || "—") : "—";
-
                 const tier = tierMap.get(card.id) || "";
-                const isExpanded = state.ui.expandedResultCardId === card.id;
-
                 const el = document.createElement("div");
                 el.className = "card resultCard" + (tier ? ` tier-${tier}` : "");
 
                 el.innerHTML = `
-                      <button class="resultSummary" data-act="toggleCard" data-id="${card.id}" aria-expanded="${isExpanded ? "true" : "false"}">
+                      <button class="resultSummary" data-act="toggleCard" data-id="${card.id}">
                         <div class="resultSummaryTop">
                           <div>
                             <div class="cardTitle">${escapeHtml(formatSeedWithPlayer(card))}</div>
-                            <div class="cardMeta">
-                              ${escapeHtml(card.mode)} •
-<span class="${getFactionClass(card.faction)}">${escapeHtml(card.faction)}</span> •
-                              <span class="muted">${escapeHtml(new Date(card.createdAt).toLocaleString())}</span>
+                            <div class="resultSummaryMetaGrid">
+                                <div class="resultMetaChip"><span class="k">Mode</span>${escapeHtml(card.mode || "—")}</div>
+                                <div class="resultMetaChip"><span class="k">Faction</span><span class="${getFactionClass(card.faction)}">${escapeHtml(card.faction || "—")}</span></div>
+                                <div class="resultMetaChip"><span class="k">Date</span>${escapeHtml(new Date(card.createdAt).toLocaleString())}</div>
+                                <div class="resultMetaChip"><span class="k">Planet</span>${escapeHtml(card.planet?.name || "Not rolled")}</div>
                             </div>
                           </div>
-                          <div style="display:flex; flex-direction:column; gap:6px; align-items:flex-end;">
+                          <div class="resultSummaryBadges">
                             <span class="badge yellow">Grade ${Number(card.grade || 0)}</span>
                             ${moBadge}
                           </div>
                         </div>
-                        <div class="label">Pentagon${card.majorOrderDone ? "" : " (MO FAIL: -25% size)"}</div>
+                        <div class="label resultSummaryLabel">Pentagon</div>
                         <div class="radarWrap resultSummaryRadar">
                           ${buildRadarSVG(card, radarMaxes)}
                         </div>
-                      </button>
-
-                      ${isExpanded ? `
-                      <div class="resultDetail">
-                        <div class="cardLine"><strong>Primary:</strong> ${escapeHtml(card.primary)}</div>
-                        <div class="cardLine"><strong>Sidearm:</strong> ${escapeHtml(card.sidearm)}</div>
-                        <div class="cardLine"><strong>Throwable:</strong> ${escapeHtml(card.throwable)}</div>
-                        <div class="cardLine"><strong>Strats:</strong> ${escapeHtml((card.stratagems || []).join(" • "))}</div>
-                        <div class="cardLine"><strong>Planet:</strong> ${pLine}</div>
-
-                        ${card.planet ? `
-                          <div class="planetCardWrap" style="margin-top:10px;">
-                            <div class="planetMiniCard">
-                              <div class="planetMiniLabel">Sector</div>
-                              <div class="planetMiniValue">${escapeHtml(card.planet.sector || "—")}</div>
-                            </div>
-
-                            <div class="planetMiniCard">
-                              <div class="planetMiniLabel">Biome</div>
-                              <div class="planetMiniValue">${escapeHtml(cardBiome)}</div>
-                            </div>
-
-                            <div class="planetMiniCard">
-                              <div class="planetMiniLabel">Environment</div>
-                              <div class="planetMiniValue">${escapeHtml(planetWeatherTags.length ? planetWeatherTags.slice(0, 3).join(" / ") : (planetWeatherText || "None"))}${planetWeatherTags.length > 3 ? ` (+${planetWeatherTags.length - 3})` : ""}</div>
-                              <div class="planetTagRow">
-                                ${(planetWeatherTags.length ? planetWeatherTags : [planetWeatherText || "None"]).map(t => `<span class="planetTag">${envEmoji(t)} ${escapeHtml(t)}</span>`).join("")}
-                              </div>
-                            </div>
-
-                            <div class="planetMiniCard">
-                              <div class="planetMiniLabel">Faction</div>
-                              <div class="planetMiniValue ${getFactionClass(card.faction)}">
-                                ${escapeHtml(card.faction || "—")}
-                              </div>
-                            </div>
-                          </div>
-                        ` : ``}
-
-                        <div class="hr"></div>
-
-                        <div class="formGrid3 statsGrid cardInputGrid">
-                          <div>
-                            <div class="label">Kills</div>
-                            <input type="number" min="0" value="${Number(card.stats?.kills || 0)}" data-k="kills" data-id="${card.id}">
-                          </div>
-                          <div>
-                            <div class="label">Accuracy (%)</div>
-                            <input type="number" min="0" value="${Number(card.stats?.accuracy || 0)}" data-k="accuracy" data-id="${card.id}">
-                          </div>
-                          <div>
-                            <div class="label">Deaths</div>
-                            <input type="number" min="0" value="${Number(card.stats?.deaths || 0)}" data-k="deaths" data-id="${card.id}">
-                          </div>
-                          <div>
-                            <div class="label">Stims</div>
-                            <input type="number" min="0" value="${Number(card.stats?.stims || 0)}" data-k="stims" data-id="${card.id}">
-                          </div>
-                          <div>
-                            <div class="label">Distance (km)</div>
-                            <input type="number" min="0" step="0.1" value="${Number(card.stats?.distanceKm || 0)}" data-k="distanceKm" data-id="${card.id}">
-                          </div>
-                          <div>
-                            <div class="label">Strat uses</div>
-                            <input type="number" min="0" value="${Number(card.stats?.stratUses || 0)}" data-k="stratUses" data-id="${card.id}">
-                          </div>
-                        </div>
-
-                        <div class="formGrid" style="margin-top:10px;">
-                          <div>
-                            <div class="label">Major order done</div>
-                            <select data-k="majorOrderDone" data-id="${card.id}">
-                              <option value="false" ${card.majorOrderDone ? "" : "selected"}>No</option>
-                              <option value="true" ${card.majorOrderDone ? "selected" : ""}>Yes</option>
-                            </select>
-                          </div>
-                        </div>
-
-                        <div style="margin-top:10px;">
-                          <div class="label">Notes</div>
-                          <textarea data-k="notes" data-id="${card.id}" placeholder="Write anything: what sucked, what worked, funny moments...">${escapeHtml(card.notes || "")}</textarea>
-                        </div>
-
-                        <div class="miniRow" style="justify-content:space-between; margin-top:10px;">
-                          <div class="tiny">Raw: <strong>${Number(card.scoreRaw || 0).toFixed(1)}</strong></div>
-                          <div class="miniRow">
-                            <button class="btnGhost" data-act="sendDiscord" data-id="${card.id}">SEND CARD TO DISCORD</button>
-                            <button class="btnPrimary" data-act="saveCard" data-id="${card.id}">SAVE</button>
-                            <button class="btnGhost" data-act="deleteCard" data-id="${card.id}">DELETE</button>
-                          </div>
-                        </div>
-                      </div>
-                      ` : ``}
-`;
+                      </button>`;
 
                 grid.appendChild(el);
             }
 
             grid.querySelectorAll('button[data-act="toggleCard"]').forEach(btn => {
                 btn.addEventListener("click", () => {
-                    const nextId = btn.dataset.id;
-                    state.ui.expandedResultCardId = (state.ui.expandedResultCardId === nextId) ? null : nextId;
-                    renderResults();
+                    openResultCardModal(btn.dataset.id);
                 });
             });
 
-            grid.querySelectorAll("input, textarea, select").forEach(inp => {
+            refreshCompareOptions();
+            renderRank();
+        }
+
+        function renderModalLoadoutItem(label, value, kind) {
+            const src = getImageAssetPath(kind, value);
+            return `
+                <div class="modalLoadoutItem">
+                    ${src ? `<img class="modalLoadoutIcon" src="${escapeHtml(src)}" alt="${escapeHtml(value || label)}">` : `<div class="modalLoadoutIcon"></div>`}
+                    <div class="modalLoadoutText">
+                        <div class="k">${escapeHtml(label)}</div>
+                        <div class="v">${escapeHtml(value || "—")}</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function openResultCardModal(cardId) {
+            const card = getCardById(cardId);
+            const modal = $("#resultCardModal");
+            const body = $("#resultCardModalBody");
+            if (!card || !modal || !body) return;
+
+            const planetWeatherText = card.planet ? getPlanetWeatherText(card.planet) : "None";
+            const planetWeatherTags = splitWeatherTags(planetWeatherText);
+            const cardBiome = card.planet ? (card.planetBiome || getPlanetBiomeFromPlanet(card.planet) || "—") : "—";
+
+            body.innerHTML = `
+                <div class="resultDetail">
+                    <div class="cardTitle">${escapeHtml(formatSeedWithPlayer(card))}</div>
+                    <div class="cardMeta">${escapeHtml(card.mode)} • <span class="${getFactionClass(card.faction)}">${escapeHtml(card.faction)}</span> • ${escapeHtml(new Date(card.createdAt).toLocaleString())}</div>
+
+                    <div class="modalLoadoutGrid" style="margin-top:10px;">
+                        ${renderModalLoadoutItem("Primary", card.primary, "primary")}
+                        ${renderModalLoadoutItem("Sidearm", card.sidearm, "sidearm")}
+                        ${renderModalLoadoutItem("Throwable", card.throwable, "throwable")}
+                        ${(card.stratagems || []).map((s, i) => renderModalLoadoutItem(`Strat ${i + 1}`, s, "stratagem")).join("")}
+                    </div>
+
+                    ${card.planet ? `
+                      <div class="planetCardWrap" style="margin-top:10px;">
+                        <div class="planetMiniCard">
+                          <div class="planetMiniLabel">Sector</div>
+                          <div class="planetMiniValue">${escapeHtml(card.planet.sector || "—")}</div>
+                        </div>
+
+                        <div class="planetMiniCard">
+                          <div class="planetMiniLabel">Biome</div>
+                          <div class="planetMiniValue">${escapeHtml(cardBiome)}</div>
+                        </div>
+
+                        <div class="planetMiniCard">
+                          <div class="planetMiniLabel">Environment</div>
+                          <div class="planetMiniValue">${escapeHtml(planetWeatherTags.length ? planetWeatherTags.slice(0, 3).join(" / ") : (planetWeatherText || "None"))}${planetWeatherTags.length > 3 ? ` (+${planetWeatherTags.length - 3})` : ""}</div>
+                          <div class="planetTagRow">
+                            ${(planetWeatherTags.length ? planetWeatherTags : [planetWeatherText || "None"]).map(t => `<span class="planetTag">${envEmoji(t)} ${escapeHtml(t)}</span>`).join("")}
+                          </div>
+                        </div>
+
+                        <div class="planetMiniCard">
+                          <div class="planetMiniLabel">Faction</div>
+                          <div class="planetMiniValue ${getFactionClass(card.faction)}">${escapeHtml(card.faction || "—")}</div>
+                        </div>
+                      </div>
+                    ` : ``}
+
+                    <div class="hr"></div>
+
+                    <div class="formGrid3 statsGrid cardInputGrid">
+                      <div><div class="label">Kills</div><input type="number" min="0" value="${Number(card.stats?.kills || 0)}" data-k="kills" data-id="${card.id}"></div>
+                      <div><div class="label">Accuracy (%)</div><input type="number" min="0" value="${Number(card.stats?.accuracy || 0)}" data-k="accuracy" data-id="${card.id}"></div>
+                      <div><div class="label">Deaths</div><input type="number" min="0" value="${Number(card.stats?.deaths || 0)}" data-k="deaths" data-id="${card.id}"></div>
+                      <div><div class="label">Stims</div><input type="number" min="0" value="${Number(card.stats?.stims || 0)}" data-k="stims" data-id="${card.id}"></div>
+                      <div><div class="label">Distance (km)</div><input type="number" min="0" step="0.1" value="${Number(card.stats?.distanceKm || 0)}" data-k="distanceKm" data-id="${card.id}"></div>
+                      <div><div class="label">Strat uses</div><input type="number" min="0" value="${Number(card.stats?.stratUses || 0)}" data-k="stratUses" data-id="${card.id}"></div>
+                    </div>
+
+                    <div class="formGrid" style="margin-top:10px;">
+                      <div>
+                        <div class="label">Major order done</div>
+                        <select data-k="majorOrderDone" data-id="${card.id}">
+                          <option value="false" ${card.majorOrderDone ? "" : "selected"}>No</option>
+                          <option value="true" ${card.majorOrderDone ? "selected" : ""}>Yes</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div style="margin-top:10px;">
+                      <div class="label">Notes</div>
+                      <textarea data-k="notes" data-id="${card.id}" placeholder="Write anything: what sucked, what worked, funny moments...">${escapeHtml(card.notes || "")}</textarea>
+                    </div>
+
+                    <div class="miniRow" style="justify-content:space-between; margin-top:10px;">
+                      <div class="tiny">Raw: <strong>${Number(card.scoreRaw || 0).toFixed(1)}</strong></div>
+                      <div class="miniRow">
+                        <button class="btnGhost" data-act="sendDiscord" data-id="${card.id}">SEND CARD TO DISCORD</button>
+                        <button class="btnPrimary" data-act="saveCard" data-id="${card.id}">SAVE</button>
+                        <button class="btnGhost" data-act="deleteCard" data-id="${card.id}">DELETE</button>
+                      </div>
+                    </div>
+                </div>
+            `;
+
+            body.querySelectorAll("input, textarea, select").forEach(inp => {
                 inp.addEventListener("change", onCardFieldChange);
                 inp.addEventListener("input", (e) => {
                     if (e.target.tagName.toLowerCase() === "textarea") onCardFieldChange(e);
                 });
             });
+            body.querySelectorAll('button[data-act]').forEach(btn => btn.addEventListener("click", onCardAction));
 
-            grid.querySelectorAll('button[data-act]:not([data-act="toggleCard"])').forEach(btn => {
-                btn.addEventListener("click", onCardAction);
-            });
+            state.ui.activeResultCardId = card.id;
+            state.ui.modalOpen = true;
+            modal.hidden = false;
+        }
 
-            refreshCompareOptions();
-            renderRank();
+        function closeResultCardModal() {
+            const modal = $("#resultCardModal");
+            if (!modal) return;
+            modal.hidden = true;
+            state.ui.activeResultCardId = null;
+            state.ui.modalOpen = false;
         }
 
         function getDiscordWebhookUrl() {
@@ -5449,6 +5614,7 @@ ${noteContent}`
 
             const card = state.cards.find(c => c.id === id);
             if (!card) return;
+            const sourceRoot = e.target.closest(".cardModalDialog") || e.target.closest(".card") || document;
 
             // ensure stats container exists
             if (!card.stats || typeof card.stats !== "object") card.stats = {};
@@ -5507,17 +5673,18 @@ ${noteContent}`
                 state.cards = state.cards.filter(c => c.id !== id);
                 saveState();
                 renderResults();
+                closeResultCardModal();
                 return;
             }
             if (act === "saveCard") {
                 // Sync latest typed values (even if user didn't blur the input yet)
-                const cardEl = e.target.closest(".card") || document;
-                syncCardFromResultInputs(id, cardEl);
+                syncCardFromResultInputs(id, sourceRoot);
 
                 // Recalculate score + grade and persist
                 recalcGrades();
                 saveState();
                 renderResults();
+                if (state.ui.modalOpen && state.ui.activeResultCardId === id) openResultCardModal(id);
 
                 // Tiny confirmation so you know it worked
                 alert("Saved ✅");
@@ -5526,8 +5693,7 @@ ${noteContent}`
 
             if (act === "sendDiscord") {
                 try {
-                    const cardEl = e.target.closest(".card") || document;
-                    const freshCard = syncCardFromResultInputs(id, cardEl) || card;
+                    const freshCard = syncCardFromResultInputs(id, sourceRoot) || card;
                     await sendCardToDiscord(freshCard, "RESULTS");
                     alert("Sent to Discord ✅");
                 } catch (err) {
@@ -6469,7 +6635,7 @@ ${noteContent}`
             $("#tab-items").style.display = (tab === "items") ? "" : "none";
             $("#tab-rank").style.display = (tab === "rank") ? "" : "none";
 
-            if (tab !== "results") state.ui.expandedResultCardId = null;
+            if (tab !== "results") closeResultCardModal();
             if (tab === "results") renderResults();
             if (tab === "compare") {
                 refreshCompareOptions();
@@ -6719,6 +6885,14 @@ ${noteContent}`
             $("#btnReroll").addEventListener("click", () => doReroll());
             $("#btnLock").addEventListener("click", () => doLock());
             $("#btnUse").addEventListener("click", () => doUseThisRun());
+
+            $("#btnCloseResultModal").addEventListener("click", closeResultCardModal);
+            $("#resultCardModal").addEventListener("click", (e) => {
+                if (e.target && e.target.id === "resultCardModal") closeResultCardModal();
+            });
+            document.addEventListener("keydown", (e) => {
+                if (e.key === "Escape" && state.ui.modalOpen) closeResultCardModal();
+            });
 
             $("#resFilterMode").addEventListener("change", renderResults);
             $("#resFilterFaction").addEventListener("change", renderResults);
