@@ -1653,6 +1653,46 @@ END MASTER DIRECTIVE
             font-size: 150%;
         }
 
+        #tab-items .itemSearchRow {
+            margin-top: 12px;
+        }
+
+        #tab-items .itemSearchInput {
+            width: 100%;
+        }
+
+        #tab-items .warbondGroup {
+            border: 1px solid rgba(255,255,255,.08);
+            border-radius: 12px;
+            padding: 10px;
+            background: rgba(0,0,0,.18);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        #tab-items .warbondHeader {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        #tab-items .warbondHeader img {
+            width: 120px;
+            height: 62px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,.12);
+            background: rgba(255,255,255,.04);
+        }
+
+        #tab-items .itemToggleBtn {
+            font-size: 75% !important;
+            padding: 4px 8px !important;
+            min-height: 28px;
+            min-width: 88px;
+        }
+
         .rim-white {
             border-color: rgba(255,255,255,.70) !important;
         }
@@ -2238,6 +2278,14 @@ END MASTER DIRECTIVE
                 <div id="planetSearchSelectionCue" class="tiny planetSearchSelectionCue" style="display:none;"></div>
                 <div class="tiny" style="margin-top:8px;">Manual search includes the full known planet list, grouped by sector with alphabetical planet order.</div>
                 <div id="planetSearchResults" class="planetSearchResults"></div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="row itemSearchRow">
+                <div class="col">
+                    <input id="itemSearch" class="itemSearchInput" placeholder="Search weapons/stratagems by name, then enable/disable quickly..." />
+                </div>
             </div>
 
             <div class="divider"></div>
@@ -6387,6 +6435,190 @@ ${noteContent}`
             listStrats: "stratagem"
         };
 
+        const WARBOND_ORDER = [
+            "Helldiver Basics (Mobilize)",
+            "Steeled Veterans",
+            "Cutting Edge",
+            "Democratic Detonation",
+            "Polar Patriots",
+            "Viper Commandos",
+            "Freedom's Flame",
+            "Chemical Agents",
+            "Truth Enforcers",
+            "Urban Legends",
+            "Servants of Freedom",
+            "Borderline Justice",
+            "Masters of Ceremony",
+            "Force of Law",
+            "Control Group",
+            "Dust Devils",
+            "Python Commandos",
+            "Redacted Regiment",
+            "Siege Breakers",
+            "Entrenched Division",
+            "Obedient Democracy Support Troopers",
+            "Righteous Revenants",
+            "Unassigned / Custom"
+        ];
+
+        const WARBOND_ART = {
+            "Helldiver Basics (Mobilize)": "https://helldivers.wiki.gg/images/Helldivers_Mobilize_Warbond_Cover.png?76622f",
+            "Steeled Veterans": "https://helldivers.wiki.gg/images/Steeled_Veterans_Premium_Warbond_Cover.png?f28782",
+            "Cutting Edge": "https://helldivers.wiki.gg/images/Cutting_Edge_Premium_Warbond_Cover.png?77ee57",
+            "Democratic Detonation": "https://helldivers.wiki.gg/images/Democratic_Detonation_Premium_Warbond_Cover.png?3a5fe5",
+            "Polar Patriots": "https://helldivers.wiki.gg/images/Polar_Patriots_Premium_Warbond_Cover.png?636036",
+            "Viper Commandos": "https://helldivers.wiki.gg/images/Viper_Commandos_Premium_Warbond_Cover.png?1535b6",
+            "Freedom's Flame": "https://helldivers.wiki.gg/images/Freedom%27s_Flame_Premium_Warbond_Cover.png?31d352",
+            "Chemical Agents": "https://helldivers.wiki.gg/images/Chemical_Agents_Premium_Warbond_Cover.png?351fa0",
+            "Truth Enforcers": "https://helldivers.wiki.gg/images/Truth_Enforcers_Premium_Warbond_Cover.png?ed26e0",
+            "Urban Legends": "https://helldivers.wiki.gg/images/Urban_Legends_Premium_Warbond_Cover.png?66990d",
+            "Servants of Freedom": "https://helldivers.wiki.gg/images/Servants_of_Freedom_Premium_Warbond_Cover.png?2f2dcb",
+            "Borderline Justice": "https://helldivers.wiki.gg/images/Borderline_Justice_Premium_Warbond_Cover.png?f4d7aa",
+            "Masters of Ceremony": "https://helldivers.wiki.gg/images/Masters_of_Ceremony_Premium_Warbond_Cover.png?b85f69",
+            "Force of Law": "https://helldivers.wiki.gg/images/Force_of_Law_Premium_Warbond_Cover.png?58f3d8",
+            "Control Group": "https://helldivers.wiki.gg/images/Control_Group_Premium_Warbond_Cover.png?3b16f0",
+            "Dust Devils": "https://helldivers.wiki.gg/images/Dust_Devils_Premium_Warbond_Cover.png?ad2a4f",
+            "Python Commandos": "https://helldivers.wiki.gg/images/Python_Commandos_Premium_Warbond_Cover.png?37db96",
+            "Redacted Regiment": "https://helldivers.wiki.gg/images/Redacted_Regiment_Premium_Warbond_Cover.png?631f8b",
+            "Siege Breakers": "https://helldivers.wiki.gg/images/thumb/Siege_Breakers_Premium_Warbond_Cover.png/1920px-Siege_Breakers_Premium_Warbond_Cover.png?22d8ca",
+            "Entrenched Division": "https://helldivers.wiki.gg/images/thumb/Entrenched_Division_Premium_Warbond_Marketing_13.png/1780px-Entrenched_Division_Premium_Warbond_Marketing_13.png?24cc5a",
+            "Obedient Democracy Support Troopers": "https://helldivers.wiki.gg/images/thumb/Halo_ODST_Legendary_Warbond_Cover.png/1920px-Halo_ODST_Legendary_Warbond_Cover.png?3e16b0",
+            "Righteous Revenants": "https://helldivers.wiki.gg/images/Righteous_Revenants_Legendary_Warbond_Cover.png?da3de4"
+        };
+
+        const ITEM_WARBOND_BY_NAME = {
+            "AR-23 Liberator": "Helldiver Basics (Mobilize)",
+            "AR-23P Liberator Penetrator": "Helldiver Basics (Mobilize)",
+            "AR-23C Liberator Concussive": "Helldiver Basics (Mobilize)",
+            "R-63 Diligence": "Helldiver Basics (Mobilize)",
+            "SG-8 Punisher": "Helldiver Basics (Mobilize)",
+            "SMG-37 Defender": "Helldiver Basics (Mobilize)",
+            "P-2 Peacemaker": "Helldiver Basics (Mobilize)",
+            "MG-43 Machine Gun": "Helldiver Basics (Mobilize)",
+            "APW-1 Anti-Materiel Rifle": "Helldiver Basics (Mobilize)",
+            "M-105 Stalwart": "Helldiver Basics (Mobilize)",
+            "EAT-17 Expendable Anti-Tank": "Helldiver Basics (Mobilize)",
+            "GL-21 Grenade Launcher": "Helldiver Basics (Mobilize)",
+            "Orbital Precision Strike": "Helldiver Basics (Mobilize)",
+            "Orbital Gatling Barrage": "Helldiver Basics (Mobilize)",
+            "Orbital Airburst Strike": "Helldiver Basics (Mobilize)",
+            "Orbital 120MM HE Barrage": "Helldiver Basics (Mobilize)",
+            "Orbital 380MM HE Barrage": "Helldiver Basics (Mobilize)",
+            "Orbital Smoke Strike": "Helldiver Basics (Mobilize)",
+            "Eagle Airstrike": "Helldiver Basics (Mobilize)",
+            "Eagle Cluster Bomb": "Helldiver Basics (Mobilize)",
+            "Eagle Napalm Airstrike": "Helldiver Basics (Mobilize)",
+            "Eagle Smoke Strike": "Helldiver Basics (Mobilize)",
+            "Rocket Sentry": "Helldiver Basics (Mobilize)",
+            "Gatling Sentry": "Helldiver Basics (Mobilize)",
+            "Autocannon Sentry": "Helldiver Basics (Mobilize)",
+            "Mortar Sentry": "Helldiver Basics (Mobilize)",
+            "Shield Generator Relay": "Helldiver Basics (Mobilize)",
+            "Anti-Personnel Minefield": "Helldiver Basics (Mobilize)",
+            "Supply Pack": "Helldiver Basics (Mobilize)",
+            "Jump Pack": "Helldiver Basics (Mobilize)",
+            "Guard Dog Rover": "Helldiver Basics (Mobilize)",
+            "Incendiary Mines": "Helldiver Basics (Mobilize)",
+            "AR-61 Tenderizer": "Steeled Veterans",
+            "SG-225IE Breaker Incendiary": "Steeled Veterans",
+            "P-4 Senator": "Steeled Veterans",
+            "LAS-16 Sickle": "Cutting Edge",
+            "SG-8P Punisher Plasma": "Cutting Edge",
+            "ARC-12 Blitzer": "Cutting Edge",
+            "LAS-7 Dagger": "Cutting Edge",
+            "G-23 Stun": "Cutting Edge",
+            "LAS-98 Laser Cannon": "Cutting Edge",
+            "SG-225SP Breaker Spray&Pray": "Democratic Detonation",
+            "R-36 Eruptor": "Democratic Detonation",
+            "CB-9 Exploding Crossbow": "Democratic Detonation",
+            "GP-31 Grenade Pistol": "Democratic Detonation",
+            "G-123 Thermite": "Democratic Detonation",
+            "AR-61 Tenderizer": "Democratic Detonation",
+            "AR-23P Liberator Penetrator": "Helldiver Basics (Mobilize)",
+            "AR-23C Liberator Concussive": "Helldiver Basics (Mobilize)",
+            "SMG-72 Pummeler": "Polar Patriots",
+            "AR-61 Tenderizer": "Democratic Detonation",
+            "PLAS-101 Purifier": "Polar Patriots",
+            "P-113 Verdict": "Polar Patriots",
+            "G-13 Incendiary Impact": "Polar Patriots",
+            "AR-23A Liberator Carbine": "Viper Commandos",
+            "SG-22 Bushwhacker": "Viper Commandos",
+            "K-2 Throwing Knife": "Viper Commandos",
+            "FLAM-40 Flamethrower": "Freedom's Flame",
+            "SG-451 Cookout": "Freedom's Flame",
+            "P-72 Crisper": "Freedom's Flame",
+            "G-10 Incendiary": "Freedom's Flame",
+            "SG-20 Halt": "Chemical Agents",
+            "G-4 Gas": "Chemical Agents",
+            "SMG-32 Reprimand": "Truth Enforcers",
+            "PLAS-15 Loyalist": "Truth Enforcers",
+            "SMG-32 Reprimand": "Truth Enforcers",
+            "AR-2 Coyote": "Servants of Freedom",
+            "StA-X3 W.A.S.P. Launcher": "Servants of Freedom",
+            "R-6 Deadeye": "Borderline Justice",
+            "LAS-58 Talon": "Borderline Justice",
+            "TED-63 Dynamite": "Borderline Justice",
+            "R-2124 Constitution": "Masters of Ceremony",
+            "StA-52 Assault Rifle": "Force of Law",
+            "AR-32 Pacifier": "Force of Law",
+            "AR-59 Suppressor": "Control Group",
+            "PLAS-39 Accelerator Rifle": "Control Group",
+            "P-92 Warrant": "Control Group",
+            "G-31 Arc": "Control Group",
+            "R-72 Censor": "Dust Devils",
+            "LAS-17 Double-Edge Sickle": "Dust Devils",
+            "GP-20 Ultimatum": "Dust Devils",
+            "G-89 Smokescreen": "Dust Devils",
+            "StA-11 SMG": "Python Commandos",
+            "G-142 Pyrotech": "Siege Breakers",
+            "G-109 Urchin": "Redacted Regiment",
+            "P-35 Re-Educator": "Redacted Regiment",
+            "TM-1 Lure Mine": "Entrenched Division",
+            "G/SH-39 Shield": "Obedient Democracy Support Troopers",
+            "M6C/SOCOM Pistol": "Obedient Democracy Support Troopers",
+            "MA5C Assault Rifle": "Obedient Democracy Support Troopers",
+            "RS-422 Railgun": "Helldiver Basics (Mobilize)",
+            "FAF-14 Spear": "Helldiver Basics (Mobilize)",
+            "GR-8 Recoilless Rifle": "Helldiver Basics (Mobilize)",
+            "AC-8 Autocannon": "Helldiver Basics (Mobilize)",
+            "MG-206 Heavy Machine Gun": "Helldiver Basics (Mobilize)",
+            "RL-77 Airburst Rocket Launcher": "Helldiver Basics (Mobilize)",
+            "MLS-4X Commando": "Helldiver Basics (Mobilize)",
+            "LAS-99 Quasar Cannon": "Helldiver Basics (Mobilize)",
+            "ARC-3 Arc Thrower": "Helldiver Basics (Mobilize)",
+            "Orbital Laser": "Helldiver Basics (Mobilize)",
+            "Orbital Railcannon Strike": "Helldiver Basics (Mobilize)",
+            "Eagle 110MM Rocket Pods": "Helldiver Basics (Mobilize)",
+            "EMS Strike": "Helldiver Basics (Mobilize)",
+            "HMG Emplacement": "Helldiver Basics (Mobilize)",
+            "Ballistic Shield Backpack": "Helldiver Basics (Mobilize)",
+            "EMS Mortar Sentry": "Helldiver Basics (Mobilize)",
+            "PLAS-1 Scorcher": "Helldiver Basics (Mobilize)",
+            "LAS-5 Scythe": "Helldiver Basics (Mobilize)",
+            "DBS-2 Double Freedom": "Helldiver Basics (Mobilize)",
+            "SG-225 Breaker": "Helldiver Basics (Mobilize)",
+            "SG-8S Slugger": "Helldiver Basics (Mobilize)",
+            "BR-14 Adjudicator": "Helldiver Basics (Mobilize)",
+            "R-2 Amendment": "Helldiver Basics (Mobilize)",
+            "R-63CS Diligence Counter Sniper": "Helldiver Basics (Mobilize)",
+            "MP-98 Knight": "Helldiver Basics (Mobilize)",
+            "M7S SMG": "Helldiver Basics (Mobilize)",
+            "M90A Shotgun": "Helldiver Basics (Mobilize)",
+            "P-19 Redeemer": "Helldiver Basics (Mobilize)",
+            "P-11 Stim Pistol": "Helldiver Basics (Mobilize)",
+            "G-6 Frag": "Helldiver Basics (Mobilize)",
+            "G-12 High Explosive": "Helldiver Basics (Mobilize)",
+            "G-16 Impact": "Helldiver Basics (Mobilize)",
+            "G-3 Smoke": "Helldiver Basics (Mobilize)",
+            "G-50 Seeker": "Helldiver Basics (Mobilize)",
+            "G-7 Pineapple": "Helldiver Basics (Mobilize)",
+        };
+
+        function getItemWarbond(item) {
+            if (item?.warbond) return item.warbond;
+            return ITEM_WARBOND_BY_NAME[item?.name] || "Unassigned / Custom";
+        }
+
         function resolveItemVisualAsset(containerId, itemName) {
             const category = ITEM_VISUAL_CATEGORY_BY_CONTAINER[containerId];
             if (!category) return null;
@@ -6402,16 +6634,63 @@ ${noteContent}`
         /***********************
          * Items editor
          ***********************/
-        function renderItemList(containerId, list, onToggle, onDelete) {
+        function renderItemList(containerId, list, onToggle) {
             const box = document.getElementById(containerId);
             box.innerHTML = "";
+
+            const query = normalizeText($("#itemSearch")?.value || "");
+            const filteredList = query
+                ? list.filter(it => normalizeText(`${it.name} ${getItemWarbond(it)}`).includes(query))
+                : list;
+
+            if (!filteredList.length) {
+                box.innerHTML = `<div class="tiny">No items matched your search.</div>`;
+                return;
+            }
+
+            const byWarbond = new Map();
+            filteredList.forEach((it, idx) => {
+                const warbond = getItemWarbond(it);
+                const sourceIndex = list.indexOf(it);
+                if (!byWarbond.has(warbond)) byWarbond.set(warbond, []);
+                byWarbond.get(warbond).push({ it, idx: sourceIndex, localIdx: idx });
+            });
 
             const wrap = document.createElement("div");
             wrap.style.display = "flex";
             wrap.style.flexDirection = "column";
             wrap.style.gap = "8px";
 
-            list.forEach((it, idx) => {
+            const groups = Array.from(byWarbond.entries()).sort((a, b) => {
+                const ai = WARBOND_ORDER.indexOf(a[0]);
+                const bi = WARBOND_ORDER.indexOf(b[0]);
+                if (ai === -1 && bi === -1) return a[0].localeCompare(b[0]);
+                if (ai === -1) return 1;
+                if (bi === -1) return -1;
+                return ai - bi;
+            });
+
+            groups.forEach(([warbond, items]) => {
+                const groupBox = document.createElement("div");
+                groupBox.className = "warbondGroup";
+
+                const groupHeader = document.createElement("div");
+                groupHeader.className = "warbondHeader";
+                const art = WARBOND_ART[warbond];
+                if (art) {
+                    const img = document.createElement("img");
+                    img.loading = "lazy";
+                    img.alt = `${warbond} cover`;
+                    img.src = art;
+                    groupHeader.appendChild(img);
+                }
+                const title = document.createElement("div");
+                title.style.fontWeight = "900";
+                title.textContent = warbond;
+                groupHeader.appendChild(title);
+                groupBox.appendChild(groupHeader);
+
+                items.forEach(({ it, idx }) => {
                 const outer = document.createElement("div");
                 outer.className = "rankOuter";
 
@@ -6473,20 +6752,19 @@ ${noteContent}`
 
                 const tgl = document.createElement("button");
                 tgl.className = it.enabled ? "btnPrimary" : "btnGhost";
+                tgl.classList.add("itemToggleBtn");
                 tgl.textContent = it.enabled ? "ENABLED" : "DISABLED";
                 tgl.addEventListener("click", () => onToggle(idx));
 
-                const del = document.createElement("button");
-                del.className = "btnDanger";
-                del.textContent = "DEL";
-                del.addEventListener("click", () => onDelete(idx));
-
                 right.appendChild(tgl);
-                right.appendChild(del);
 
                 row.appendChild(leftWrap);
                 row.appendChild(right);
-                wrap.appendChild(row);
+                outer.appendChild(row);
+                groupBox.appendChild(outer);
+            });
+
+                wrap.appendChild(groupBox);
             });
 
             box.appendChild(wrap);
@@ -6670,20 +6948,16 @@ ${noteContent}`
 
         function renderItems() {
             renderItemList("listPrimaries", state.items.primaries,
-                (i) => { state.items.primaries[i].enabled = !state.items.primaries[i].enabled; saveState(); renderItems(); },
-                (i) => { state.items.primaries.splice(i, 1); saveState(); renderItems(); }
+                (i) => { state.items.primaries[i].enabled = !state.items.primaries[i].enabled; saveState(); renderItems(); }
             );
             renderItemList("listSidearms", state.items.sidearms,
-                (i) => { state.items.sidearms[i].enabled = !state.items.sidearms[i].enabled; saveState(); renderItems(); },
-                (i) => { state.items.sidearms.splice(i, 1); saveState(); renderItems(); }
+                (i) => { state.items.sidearms[i].enabled = !state.items.sidearms[i].enabled; saveState(); renderItems(); }
             );
             renderItemList("listThrowables", state.items.throwables,
-                (i) => { state.items.throwables[i].enabled = !state.items.throwables[i].enabled; saveState(); renderItems(); },
-                (i) => { state.items.throwables.splice(i, 1); saveState(); renderItems(); }
+                (i) => { state.items.throwables[i].enabled = !state.items.throwables[i].enabled; saveState(); renderItems(); }
             );
             renderItemList("listStrats", state.items.stratagems,
-                (i) => { state.items.stratagems[i].enabled = !state.items.stratagems[i].enabled; saveState(); renderItems(); },
-                (i) => { state.items.stratagems.splice(i, 1); saveState(); renderItems(); }
+                (i) => { state.items.stratagems[i].enabled = !state.items.stratagems[i].enabled; saveState(); renderItems(); }
             );
             renderPlanets();
 
@@ -7085,6 +7359,7 @@ ${noteContent}`
             $("#cmpSortDir").addEventListener("change", refreshCompareOptions);
             $("#cmpSearch").addEventListener("input", refreshCompareOptions);
             $("#rankSearch").addEventListener("input", renderRank);
+            $("#itemSearch").addEventListener("input", renderItems);
 
             $("#btnExport").addEventListener("click", exportJSON);
             $("#btnImport").addEventListener("click", () => $("#importFile").click());
@@ -7136,21 +7411,21 @@ ${noteContent}`
             $("#btnAddPrimary").addEventListener("click", () => {
                 const v = $("#addPrimary").value.trim();
                 if (!v) return;
-                state.items.primaries.push({ name: v, enabled: true });
+                state.items.primaries.push({ name: v, enabled: true, warbond: "Unassigned / Custom" });
                 $("#addPrimary").value = "";
                 saveState(); renderItems();
             });
             $("#btnAddSidearm").addEventListener("click", () => {
                 const v = $("#addSidearm").value.trim();
                 if (!v) return;
-                state.items.sidearms.push({ name: v, enabled: true });
+                state.items.sidearms.push({ name: v, enabled: true, warbond: "Unassigned / Custom" });
                 $("#addSidearm").value = "";
                 saveState(); renderItems();
             });
             $("#btnAddThrowable").addEventListener("click", () => {
                 const v = $("#addThrowable").value.trim();
                 if (!v) return;
-                state.items.throwables.push({ name: v, enabled: true });
+                state.items.throwables.push({ name: v, enabled: true, warbond: "Unassigned / Custom" });
                 $("#addThrowable").value = "";
                 saveState(); renderItems();
             });
@@ -7158,7 +7433,7 @@ ${noteContent}`
             $("#btnAddStrat").addEventListener("click", () => {
                 const v = $("#addStrat").value.trim();
                 if (!v) return;
-                state.items.stratagems.push({ name: v, enabled: true });
+                state.items.stratagems.push({ name: v, enabled: true, warbond: "Unassigned / Custom" });
                 $("#addStrat").value = "";
                 saveState(); renderItems();
             });
