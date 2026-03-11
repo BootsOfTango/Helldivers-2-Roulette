@@ -5815,6 +5815,19 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             return notes.length > maxLen ? `${notes.slice(0, Math.max(0, maxLen - 3))}...` : notes;
         }
 
+        function getDiscordRadarValues(card) {
+            const maxes = getRadarMaxes(state.cards || []);
+            const s = card.stats || {};
+            const combo = Number(s.deaths || 0) + Number(s.stims || 0);
+            return [
+                normPos(s.kills, maxes.maxKills),
+                normPos(s.accuracy, maxes.maxAccuracy),
+                normInverse(combo, maxes.minDeathsPlusStims, maxes.maxDeathsPlusStims),
+                normPos(s.distanceKm, maxes.maxDistanceKm),
+                normPos(s.stratUses, maxes.maxStratUses),
+            ];
+        }
+
         function buildDiscordCardEmbed(card, imageUrl, imageStyle = "thumbnail") {
             const s = card.stats || {};
             const weatherText = card.planet ? getPlanetWeatherText(card.planet) : "None";
@@ -5891,6 +5904,155 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             return embed;
         }
 
+        function drawDiscordRankPanelCanvas(card) {
+            const width = 1600;
+            const height = 2100;
+            const canvas = document.createElement("canvas");
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext("2d");
+            if (!ctx) throw new Error("Canvas context unavailable");
+
+            const s = card.stats || {};
+            const grad = ctx.createLinearGradient(0, 0, 0, height);
+            grad.addColorStop(0, "#070c16");
+            grad.addColorStop(1, "#03060d");
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, width, height);
+
+            ctx.strokeStyle = "rgba(120,150,220,.35)";
+            ctx.lineWidth = 4;
+            ctx.strokeRect(22, 22, width - 44, height - 44);
+
+            ctx.fillStyle = "#eaf0fb";
+            ctx.font = "900 58px Inter, Segoe UI, Arial, sans-serif";
+            ctx.fillText(`#1 • ${formatSeedWithPlayer(card)}`, 64, 104);
+
+            ctx.fillStyle = "#a8b6ce";
+            ctx.font = "600 38px Inter, Segoe UI, Arial, sans-serif";
+            ctx.fillText(`${card.mode || "—"} • ${card.faction || "—"} • ${getPlayerName(card)}`, 64, 156);
+
+            const badgeW = 230;
+            const badgeH = 70;
+            const badgeX = width - badgeW - 64;
+            const badgeY = 48;
+            ctx.strokeStyle = "#ffe05b";
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.roundRect(badgeX, badgeY, badgeW, badgeH, 34);
+            ctx.stroke();
+            ctx.fillStyle = "#ffe05b";
+            ctx.font = "800 36px Inter, Segoe UI, Arial, sans-serif";
+            ctx.fillText(`Grade ${Number(card.grade || 0)}`, badgeX + 22, badgeY + 46);
+
+            ctx.strokeStyle = "rgba(85,110,150,.45)";
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.roundRect(56, 200, width - 112, 760, 30);
+            ctx.stroke();
+
+            const radarValues = getDiscordRadarValues(card);
+            const labels = ["POWER", "AGILITY", "ENDURANCE", "MOBILITY", "UTILITY"];
+            const cx = width / 2;
+            const cy = 560;
+            const radius = 190;
+            const points = labels.map((_, i) => {
+                const ang = -Math.PI / 2 + i * (Math.PI * 2 / labels.length);
+                return { x: cx + Math.cos(ang) * radius, y: cy + Math.sin(ang) * radius, ang };
+            });
+
+            ctx.strokeStyle = "rgba(255,255,255,.20)";
+            for (let ring = 1; ring <= 4; ring++) {
+                ctx.beginPath();
+                for (let i = 0; i < points.length; i++) {
+                    const ang = points[i].ang;
+                    const rr = radius * (ring / 4);
+                    const x = cx + Math.cos(ang) * rr;
+                    const y = cy + Math.sin(ang) * rr;
+                    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+                }
+                ctx.closePath();
+                ctx.stroke();
+            }
+            points.forEach(p => {
+                ctx.beginPath();
+                ctx.moveTo(cx, cy);
+                ctx.lineTo(p.x, p.y);
+                ctx.stroke();
+            });
+
+            const valPoints = labels.map((_, i) => {
+                const ang = points[i].ang;
+                const rr = radius * Math.max(0, Math.min(1, Number(radarValues[i] || 0)));
+                return { x: cx + Math.cos(ang) * rr, y: cy + Math.sin(ang) * rr };
+            });
+            ctx.fillStyle = "rgba(90,120,255,.28)";
+            ctx.strokeStyle = "#7ea1ff";
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            valPoints.forEach((p, i) => {
+                if (i === 0) ctx.moveTo(p.x, p.y); else ctx.lineTo(p.x, p.y);
+            });
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.fillStyle = "#eaf0fb";
+            ctx.font = "800 32px Inter, Segoe UI, Arial, sans-serif";
+            points.forEach((p, i) => {
+                const offsetX = Math.cos(p.ang) * 40;
+                const offsetY = Math.sin(p.ang) * 40;
+                ctx.fillText(labels[i], p.x + offsetX - 45, p.y + offsetY + 10);
+            });
+
+            const drawBox = (x, y, w, h, title, value) => {
+                ctx.strokeStyle = "rgba(80,110,145,.45)";
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.roundRect(x, y, w, h, 24);
+                ctx.stroke();
+                ctx.fillStyle = "#aebcce";
+                ctx.font = "600 36px Inter, Segoe UI, Arial, sans-serif";
+                ctx.fillText(title, x + 26, y + 52);
+                ctx.fillStyle = "#eaf0fb";
+                ctx.font = "700 38px Inter, Segoe UI, Arial, sans-serif";
+                const lines = String(value || "—").match(/.{1,28}(\s|$)/g) || [String(value || "—")];
+                ctx.fillText(lines[0].trim(), x + 26, y + 108);
+                if (lines[1]) ctx.fillText(lines[1].trim(), x + 26, y + 152);
+            };
+
+            ctx.fillStyle = "#aebcce";
+            ctx.font = "700 42px Inter, Segoe UI, Arial, sans-serif";
+            ctx.fillText("LOADOUT", 56, 1040);
+            drawBox(56, 1065, 486, 200, "Primary", card.primary || "—");
+            drawBox(558, 1065, 486, 200, "Sidearm", card.sidearm || "—");
+            drawBox(1060, 1065, 486, 200, "Throwable", card.throwable || "—");
+
+            ctx.fillStyle = "#aebcce";
+            ctx.font = "700 42px Inter, Segoe UI, Arial, sans-serif";
+            ctx.fillText("STRATAGEMS", 56, 1340);
+            const strats = (card.stratagems || []).slice(0, 4);
+            for (let i = 0; i < 4; i++) {
+                drawBox(56 + i * 372, 1368, 356, 260, "Stratagem", strats[i] || "—");
+            }
+
+            ctx.fillStyle = "#aebcce";
+            ctx.font = "700 38px Inter, Segoe UI, Arial, sans-serif";
+            ctx.fillText(`Kills ${Number(s.kills || 0)}   Accuracy ${Number(s.accuracy || 0)}%   Deaths ${Number(s.deaths || 0)}   Stims ${Number(s.stims || 0)}   Dist ${Number(s.distanceKm || 0)} km   Strat Uses ${Number(s.stratUses || 0)}`, 56, 1700);
+
+            return canvas;
+        }
+
+        function rankPanelPngBlobForDiscord(card) {
+            const canvas = drawDiscordRankPanelCanvas(card);
+            return new Promise((resolve, reject) => {
+                canvas.toBlob((pngBlob) => {
+                    if (!pngBlob) return reject(new Error("Failed to export rank detail PNG"));
+                    resolve(pngBlob);
+                }, "image/png");
+            });
+        }
+
         async function sendCardToDiscord(card) {
             const webhookUrl = getDiscordWebhookUrl();
             if (!webhookUrl) {
@@ -5915,20 +6077,30 @@ ${noteContent}`
             let hasImageAttachment = false;
             try {
                 const cardPng = await cardPngBlobForDiscord(card);
+                const rankPng = await rankPanelPngBlobForDiscord(card);
                 hasImageAttachment = true;
-                payload.attachments = [{ id: 0, filename: "card-loadout.png" }];
-                payload.embeds = [buildDiscordCardEmbed(card, "attachment://card-loadout.png", "thumbnail")];
+                payload.attachments = [
+                    { id: 0, filename: "card-loadout.png" },
+                    { id: 1, filename: "rank-detail.png" }
+                ];
+                payload.embeds = [buildDiscordCardEmbed(card, "attachment://card-loadout.png", "image")];
                 // Discord expects indexed multipart field names for attachments.
                 form.append("files[0]", cardPng, "card-loadout.png");
+                form.append("files[1]", rankPng, "rank-detail.png");
             } catch (err) {
                 const blockedByCanvas = isCanvasTaintedError(err);
                 if (blockedByCanvas) {
                     try {
                         const fallbackPng = await drawDiscordCardCanvasFallback(card);
+                        const rankPng = await rankPanelPngBlobForDiscord(card);
                         hasImageAttachment = true;
-                        payload.attachments = [{ id: 0, filename: "card-loadout.png" }];
-                        payload.embeds = [buildDiscordCardEmbed(card, "attachment://card-loadout.png", "thumbnail")];
+                        payload.attachments = [
+                            { id: 0, filename: "card-loadout.png" },
+                            { id: 1, filename: "rank-detail.png" }
+                        ];
+                        payload.embeds = [buildDiscordCardEmbed(card, "attachment://card-loadout.png", "image")];
                         form.append("files[0]", fallbackPng, "card-loadout.png");
+                        form.append("files[1]", rankPng, "rank-detail.png");
                     } catch (fallbackErr) {
                         console.warn("[discord] image export failed (primary + fallback), sending without image", fallbackErr);
                     }
