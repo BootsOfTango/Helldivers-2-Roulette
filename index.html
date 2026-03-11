@@ -1870,6 +1870,11 @@ END MASTER DIRECTIVE
             border-radius: 14px;
             background: rgba(0,0,0,.22);
             padding: 12px;
+            position: sticky;
+            top: 82px;
+            align-self: start;
+            max-height: calc(100vh - 96px);
+            overflow: auto;
         }
 
         .rankDetailLoadout {
@@ -1919,6 +1924,8 @@ END MASTER DIRECTIVE
 
             #rankDetailPanel {
                 min-height: 0;
+                position: static;
+                max-height: none;
             }
         }
 
