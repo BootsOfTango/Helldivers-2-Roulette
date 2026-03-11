@@ -2504,7 +2504,14 @@ END MASTER DIRECTIVE
                     <div class="miniRow" style="justify-content:flex-end;">
                         <select id="itemsViewMode">
                             <option value="warbond">Warbond-first (recommended)</option>
-                            <option value="category">Type-first (Primary / Sidearm / Throwable / Stratagems)</option>
+                            <option value="category">Type-first</option>
+                        </select>
+                        <select id="itemsTypeFilter">
+                            <option value="all">All types</option>
+                            <option value="primary">Primary only</option>
+                            <option value="sidearm">Sidearm only</option>
+                            <option value="throwable">Throwable only</option>
+                            <option value="stratagem">Stratagem only</option>
                         </select>
                     </div>
                 </div>
@@ -3999,7 +4006,10 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             // webhook URL is stored separately so clear-data does not delete it
             state.settings.discordWebhookUrl = localStorage.getItem(DISCORD_WEBHOOK_KEY) || "";
 
-            if (!raw) return;
+            if (!raw) {
+                normalizeItemWarbondAssignments();
+                return;
+            }
 
             try {
                 const parsed = JSON.parse(raw);
@@ -4032,9 +4042,11 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 }
 
                 state.cards = normalizeCardsCollection(parsed.cards);
+                normalizeItemWarbondAssignments();
 
             } catch {
                 state.items = deepClone(DEFAULTS.items);
+                normalizeItemWarbondAssignments();
                 state.cards = [];
             }
 
@@ -6489,6 +6501,7 @@ ${noteContent}`
         ];
 
         const ITEMS_VIEW_MODE_KEY = "hd2_items_view_mode";
+        const ITEMS_TYPE_FILTER_KEY = "hd2_items_type_filter";
 
         const WARBOND_ORDER = [
             "Helldiver Basics (Mobilize)",
@@ -6667,11 +6680,27 @@ ${noteContent}`
             "G-3 Smoke": "Helldiver Basics (Mobilize)",
             "G-50 Seeker": "Helldiver Basics (Mobilize)",
             "G-7 Pineapple": "Helldiver Basics (Mobilize)",
+            "AR/GL-21 One-Two": "Unassigned / Custom",
+            "LAS-13 Trident": "Unassigned / Custom",
         };
 
         function getItemWarbond(item) {
-            if (item?.warbond) return item.warbond;
-            return ITEM_WARBOND_BY_NAME[item?.name] || "Unassigned / Custom";
+            const canonical = ITEM_WARBOND_BY_NAME[item?.name] || "Unassigned / Custom";
+            if (!item?.warbond || item.warbond === "Unassigned / Custom") return canonical;
+            if (ITEM_WARBOND_BY_NAME[item?.name]) return canonical;
+            return item.warbond;
+        }
+
+        function normalizeItemWarbondAssignments() {
+            ITEM_LIST_METADATA.forEach(meta => {
+                const list = Array.isArray(state.items[meta.key]) ? state.items[meta.key] : [];
+                list.forEach(item => {
+                    if (!item || !item.name) return;
+                    const canonical = ITEM_WARBOND_BY_NAME[item.name];
+                    if (canonical) item.warbond = canonical;
+                    else if (!item.warbond) item.warbond = "Unassigned / Custom";
+                });
+            });
         }
 
         function resolveItemVisualAsset(containerId, itemName) {
@@ -6843,6 +6872,16 @@ ${noteContent}`
         function getItemsViewMode() {
             const saved = localStorage.getItem(ITEMS_VIEW_MODE_KEY);
             return saved === "category" ? "category" : "warbond";
+        }
+
+        function getItemsTypeFilter() {
+            const saved = localStorage.getItem(ITEMS_TYPE_FILTER_KEY);
+            return ["primary", "sidearm", "throwable", "stratagem"].includes(saved) ? saved : "all";
+        }
+
+        function shouldShowItemCategory(category) {
+            const f = getItemsTypeFilter();
+            return f === "all" || f === category;
         }
 
         function renderItemsByWarbond() {
@@ -7109,19 +7148,33 @@ ${noteContent}`
             const modeSelect = $("#itemsViewMode");
             if (modeSelect && modeSelect.value !== viewMode) modeSelect.value = viewMode;
 
+            const typeSelect = $("#itemsTypeFilter");
+            const typeFilter = getItemsTypeFilter();
+            if (typeSelect && typeSelect.value !== typeFilter) typeSelect.value = typeFilter;
+            if (typeSelect) typeSelect.style.display = viewMode === "category" ? "inline-block" : "none";
+
+            const primaryCol = $("#listPrimaries")?.closest(".col");
+            const sidearmCol = $("#listSidearms")?.closest(".col");
+            const throwableCol = $("#listThrowables")?.closest(".col");
+            const stratCol = $("#listStrats")?.closest(".col");
+            if (primaryCol) primaryCol.style.display = (viewMode === "category" && shouldShowItemCategory("primary")) ? "block" : "none";
+            if (sidearmCol) sidearmCol.style.display = (viewMode === "category" && shouldShowItemCategory("sidearm")) ? "block" : "none";
+            if (throwableCol) throwableCol.style.display = (viewMode === "category" && shouldShowItemCategory("throwable")) ? "block" : "none";
+            if (stratCol) stratCol.style.display = (viewMode === "category" && shouldShowItemCategory("stratagem")) ? "block" : "none";
+
             if (viewMode === "warbond") {
                 renderItemsByWarbond();
             } else {
-                renderItemList("listPrimaries", state.items.primaries,
+                if (shouldShowItemCategory("primary")) renderItemList("listPrimaries", state.items.primaries,
                     (i) => { state.items.primaries[i].enabled = !state.items.primaries[i].enabled; saveState(); renderItems(); }
                 );
-                renderItemList("listSidearms", state.items.sidearms,
+                if (shouldShowItemCategory("sidearm")) renderItemList("listSidearms", state.items.sidearms,
                     (i) => { state.items.sidearms[i].enabled = !state.items.sidearms[i].enabled; saveState(); renderItems(); }
                 );
-                renderItemList("listThrowables", state.items.throwables,
+                if (shouldShowItemCategory("throwable")) renderItemList("listThrowables", state.items.throwables,
                     (i) => { state.items.throwables[i].enabled = !state.items.throwables[i].enabled; saveState(); renderItems(); }
                 );
-                renderItemList("listStrats", state.items.stratagems,
+                if (shouldShowItemCategory("stratagem")) renderItemList("listStrats", state.items.stratagems,
                     (i) => { state.items.stratagems[i].enabled = !state.items.stratagems[i].enabled; saveState(); renderItems(); }
                 );
             }
@@ -7531,6 +7584,11 @@ ${noteContent}`
                 localStorage.setItem(ITEMS_VIEW_MODE_KEY, e.target.value === "category" ? "category" : "warbond");
                 renderItems();
             });
+            $("#itemsTypeFilter").addEventListener("change", (e) => {
+                const value = String(e.target.value || "all");
+                localStorage.setItem(ITEMS_TYPE_FILTER_KEY, ["primary", "sidearm", "throwable", "stratagem"].includes(value) ? value : "all");
+                renderItems();
+            });
 
             $("#btnExport").addEventListener("click", exportJSON);
             $("#btnImport").addEventListener("click", () => $("#importFile").click());
@@ -7564,6 +7622,7 @@ ${noteContent}`
             $("#btnResetDefaults").addEventListener("click", () => {
                 if (!confirm("Reset item lists to defaults? Your custom edits will be overwritten.")) return;
                 state.items = deepClone(DEFAULTS.items);
+                normalizeItemWarbondAssignments();
                 saveState();
                 renderItems();
                 alert("Defaults restored.");
