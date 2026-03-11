@@ -1635,6 +1635,24 @@ END MASTER DIRECTIVE
             letter-spacing: .4px;
         }
 
+        /* ITEMS tab readability scaling */
+        #tab-items .itemVisualCell {
+            width: 56px;
+            height: 56px;
+            min-width: 56px;
+            border-radius: 10px;
+        }
+
+        #tab-items .label,
+        #tab-items .tiny,
+        #tab-items .smallHelp,
+        #tab-items button,
+        #tab-items input,
+        #tab-items select,
+        #tab-items textarea {
+            font-size: 150%;
+        }
+
         .rim-white {
             border-color: rgba(255,255,255,.70) !important;
         }
@@ -6438,7 +6456,7 @@ ${noteContent}`
 
                 const name = document.createElement("div");
                 name.style.fontWeight = "800";
-                name.style.fontSize = "12px";
+                name.style.fontSize = "18px";
                 name.textContent = it.name;
 
                 const meta = document.createElement("div");
