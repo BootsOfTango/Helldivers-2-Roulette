@@ -657,6 +657,7 @@ END MASTER DIRECTIVE
         }
 
         .slot-strat {
+            /* Intentional icon policy: preserve source icon artwork, tint the slot chrome only. */
             border: 2px solid rgba(255,255,255,.12);
             background: rgba(0,0,0,.35);
             color: #0a0a0a;
@@ -712,7 +713,7 @@ END MASTER DIRECTIVE
             background: rgba(0,0,0,.08);
         }
 
-        /* Preserve original stratagem icon artwork (no recolor filter passes). */
+        /* Intentional policy: preserve original stratagem icon artwork (no recolor filter passes). */
         .slot-strat.strat-rim-defensive .slotVisual.is-icon img,
         .slot-strat.strat-rim-orbital .slotVisual.is-icon img,
         .slot-strat.strat-rim-eagle .slotVisual.is-icon img,
@@ -4164,7 +4165,15 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         const itemVisuals = {
             loaded: false,
             byCategory: { primary: new Map(), sidearm: new Map(), throwable: new Map(), stratagem: new Map() },
-            aliases: new Map()
+            aliases: new Map(),
+            validation: { errors: [] }
+        };
+
+        const STRAT_RIM_CLASS_BY_CATEGORY = {
+            defensive: "strat-rim-defensive",
+            orbital: "strat-rim-orbital",
+            eagle: "strat-rim-eagle",
+            support: "strat-rim-support"
         };
 
         function normalizeItemKey(name) {
@@ -4193,6 +4202,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                     Object.entries(data?.nameAliases || {}).forEach(([alias, proper]) => {
                         itemVisuals.aliases.set(normalizeItemKey(alias), proper);
                     });
+                    itemVisuals.validation = validateItemVisualData(data || {});
                     itemVisuals.loaded = true;
                 })
                 .catch(err => {
@@ -4200,12 +4210,39 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 });
         }
 
+        function validateItemVisualData(data) {
+            const errors = [];
+            const allowedStratRims = new Set(Object.keys(STRAT_RIM_CLASS_BY_CATEGORY));
+            const list = Array.isArray(data?.stratagem) ? data.stratagem : [];
+
+            list.forEach((entry, idx) => {
+                const name = String(entry?.name || "").trim();
+                const assetPath = String(entry?.assetPath || "").trim();
+                const imageUrl = String(entry?.imageUrl || "").trim();
+                const rimCategory = String(entry?.rimCategory || "").trim().toLowerCase();
+
+                if (!name) errors.push(`#${idx + 1}: missing name`);
+                if (!assetPath && !imageUrl) errors.push(`${name || `#${idx + 1}`}: missing assetPath/imageUrl`);
+                if (!allowedStratRims.has(rimCategory)) {
+                    errors.push(`${name || `#${idx + 1}`}: invalid rimCategory \"${entry?.rimCategory ?? ""}\"`);
+                }
+            });
+
+            if (errors.length) {
+                console.groupCollapsed(`[item-visuals] stratagem visual validation failed (${errors.length})`);
+                errors.forEach(err => console.error(err));
+                console.groupEnd();
+            }
+
+            return { errors };
+        }
+
         function mapSlotCategory(slotCategory) {
             if (slotCategory === "primary" || slotCategory === "sidearm" || slotCategory === "throwable") return slotCategory;
             return "stratagem";
         }
 
-        function getStratRimClassFromAsset(assetPath, itemName = "") {
+        function getLegacyStratRimClass(assetPath, itemName = "") {
             const p = String(assetPath || "").toLowerCase();
             const n = String(itemName || "").toLowerCase();
             if (n.startsWith("orbital ")) return "strat-rim-orbital";
@@ -4215,7 +4252,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             if (p.includes("/orbital/")) return "strat-rim-orbital";
             if (p.includes("/eagle/")) return "strat-rim-eagle";
             if (p.includes("/support/") || p.includes("/backpack/") || p.includes("/exosuits/")) return "strat-rim-support";
-            return "";
+            return "strat-rim-support";
         }
 
         function getItemVisual(name, category) {
@@ -4229,7 +4266,15 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             if (!entry?.assetPath && !entry?.imageUrl) return null;
 
             const visualKind = (cat === "stratagem") ? "icon" : "image";
-            const stratClass = (cat === "stratagem") ? getStratRimClassFromAsset(entry.assetPath || "", entry.name || name) : "";
+            let stratClass = "";
+            if (cat === "stratagem") {
+                const rimCategory = String(entry?.rimCategory || "").toLowerCase();
+                stratClass = STRAT_RIM_CLASS_BY_CATEGORY[rimCategory] || "";
+                if (!stratClass) {
+                    stratClass = getLegacyStratRimClass(entry.assetPath || "", entry.name || name);
+                    console.warn(`[item-visuals] Missing rimCategory for stratagem \"${entry?.name || name || "unknown"}\"; using legacy classifier.`);
+                }
+            }
             return {
                 src: entry.assetPath || entry.imageUrl,
                 fallbackSrc: entry.imageUrl || "",
@@ -6190,75 +6235,16 @@ ${noteContent}`
             listStrats: "stratagem"
         };
 
-        const ITEM_VISUAL_INDEX = {
-            aliases: new Map(),
-            byCategory: {
-                primary: new Map(),
-                sidearm: new Map(),
-                throwable: new Map(),
-                stratagem: new Map()
-            }
-        };
-
-        let itemVisualsLoadPromise = null;
-
-        function normalizeItemVisualKey(s) {
-            return String(s || "")
-                .toLowerCase()
-                .replace(/[^a-z0-9]+/g, " ")
-                .trim();
-        }
-
-        function buildItemVisualIndex(payload) {
-            ITEM_VISUAL_INDEX.aliases.clear();
-            Object.values(ITEM_VISUAL_INDEX.byCategory).forEach(m => m.clear());
-
-            const aliases = payload?.nameAliases || {};
-            Object.entries(aliases).forEach(([raw, canonical]) => {
-                ITEM_VISUAL_INDEX.aliases.set(normalizeItemVisualKey(raw), String(canonical || ""));
-            });
-
-            ["primary", "sidearm", "throwable", "stratagem"].forEach(category => {
-                const list = Array.isArray(payload?.[category]) ? payload[category] : [];
-                list.forEach(entry => {
-                    const name = String(entry?.name || "").trim();
-                    const assetPath = String(entry?.assetPath || "").trim();
-                    const imageUrl = String(entry?.imageUrl || "").trim();
-                    if (!name || (!assetPath && !imageUrl)) return;
-                    ITEM_VISUAL_INDEX.byCategory[category].set(normalizeItemVisualKey(name), {
-                        src: assetPath || imageUrl,
-                        fallbackSrc: imageUrl || ""
-                    });
-                });
-            });
-        }
-
-        async function loadItemVisualIndex() {
-            if (itemVisualsLoadPromise) return itemVisualsLoadPromise;
-
-            itemVisualsLoadPromise = fetch("assets/item-images.json", { cache: "no-store" })
-                .then(res => {
-                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-                    return res.json();
-                })
-                .then(data => {
-                    buildItemVisualIndex(data || {});
-                    renderItems();
-                })
-                .catch(err => {
-                    console.warn("[item visuals] failed to load", err);
-                });
-
-            return itemVisualsLoadPromise;
-        }
-
         function resolveItemVisualAsset(containerId, itemName) {
             const category = ITEM_VISUAL_CATEGORY_BY_CONTAINER[containerId];
             if (!category) return null;
 
-            const key = normalizeItemVisualKey(itemName);
-            const canonical = ITEM_VISUAL_INDEX.aliases.get(key) || String(itemName || "");
-            return ITEM_VISUAL_INDEX.byCategory[category].get(normalizeItemVisualKey(canonical)) || null;
+            const visual = getItemVisual(itemName, category);
+            if (!visual) return null;
+            return {
+                src: visual.src,
+                fallbackSrc: visual.fallbackSrc
+            };
         }
 
         /***********************
@@ -7166,7 +7152,7 @@ ${noteContent}`
          * Boot
          ***********************/
         loadState();
-        loadItemVisualIndex();
+        preloadItemVisuals().then(() => renderItems());
         saveState();      // ensures pills show correct saved count
         wireOnce();
         initApp();
