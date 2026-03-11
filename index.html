@@ -3960,6 +3960,16 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             return hit?.imageUrl || hit?.assetPath || "";
         }
 
+        function getLocalImageAssetPath(kind, name) {
+            if (!itemImageDb || !kind || !name) return "";
+            const aliasMap = itemImageDb.nameAliases || {};
+            const key = toImageKey(name);
+            const canonical = aliasMap[key] || name;
+            const list = Array.isArray(itemImageDb[kind]) ? itemImageDb[kind] : [];
+            const hit = list.find(x => toImageKey(x.name) === toImageKey(canonical) || toImageKey(x.name) === key);
+            return hit?.assetPath || hit?.imageUrl || "";
+        }
+
         function renderRankDetailPanel(card, place, radarMaxes) {
             const panel = $("#rankDetailPanel");
             if (!panel) return;
@@ -5904,25 +5914,44 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             return embed;
         }
 
-        function drawDiscordRankPanelCanvas(card) {
-            const width = 1600;
-            const height = 2100;
+        async function drawDiscordRankPanelCanvas(card) {
+            const baseWidth = 1600;
+            const baseHeight = 2100;
+            const DISCORD_RANK_PANEL_SCALE = 1.35;
+            const width = Math.round(baseWidth * DISCORD_RANK_PANEL_SCALE);
+            const height = Math.round(baseHeight * DISCORD_RANK_PANEL_SCALE);
             const canvas = document.createElement("canvas");
             canvas.width = width;
             canvas.height = height;
             const ctx = canvas.getContext("2d");
             if (!ctx) throw new Error("Canvas context unavailable");
+            ctx.scale(DISCORD_RANK_PANEL_SCALE, DISCORD_RANK_PANEL_SCALE);
+
+            const imageCache = new Map();
+            const loadCanvasImage = async (src) => {
+                const key = String(src || "").trim();
+                if (!key) return null;
+                if (imageCache.has(key)) return imageCache.get(key);
+                const promise = new Promise((resolve) => {
+                    const img = new Image();
+                    img.onload = () => resolve(img);
+                    img.onerror = () => resolve(null);
+                    img.src = key;
+                });
+                imageCache.set(key, promise);
+                return promise;
+            };
 
             const s = card.stats || {};
-            const grad = ctx.createLinearGradient(0, 0, 0, height);
+            const grad = ctx.createLinearGradient(0, 0, 0, baseHeight);
             grad.addColorStop(0, "#070c16");
             grad.addColorStop(1, "#03060d");
             ctx.fillStyle = grad;
-            ctx.fillRect(0, 0, width, height);
+            ctx.fillRect(0, 0, baseWidth, baseHeight);
 
             ctx.strokeStyle = "rgba(120,150,220,.35)";
             ctx.lineWidth = 4;
-            ctx.strokeRect(22, 22, width - 44, height - 44);
+            ctx.strokeRect(22, 22, baseWidth - 44, baseHeight - 44);
 
             ctx.fillStyle = "#eaf0fb";
             ctx.font = "900 58px Inter, Segoe UI, Arial, sans-serif";
@@ -5934,7 +5963,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             const badgeW = 230;
             const badgeH = 70;
-            const badgeX = width - badgeW - 64;
+            const badgeX = baseWidth - badgeW - 64;
             const badgeY = 48;
             ctx.strokeStyle = "#ffe05b";
             ctx.lineWidth = 3;
@@ -5948,12 +5977,12 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             ctx.strokeStyle = "rgba(85,110,150,.45)";
             ctx.lineWidth = 2;
             ctx.beginPath();
-            ctx.roundRect(56, 200, width - 112, 760, 30);
+            ctx.roundRect(56, 200, baseWidth - 112, 760, 30);
             ctx.stroke();
 
             const radarValues = getDiscordRadarValues(card);
             const labels = ["POWER", "AGILITY", "ENDURANCE", "MOBILITY", "UTILITY"];
-            const cx = width / 2;
+            const cx = baseWidth / 2;
             const cy = 560;
             const radius = 190;
             const points = labels.map((_, i) => {
@@ -6005,35 +6034,51 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 ctx.fillText(labels[i], p.x + offsetX - 45, p.y + offsetY + 10);
             });
 
-            const drawBox = (x, y, w, h, title, value) => {
+            const drawBox = async (x, y, w, h, title, value, kind) => {
                 ctx.strokeStyle = "rgba(80,110,145,.45)";
                 ctx.lineWidth = 2;
                 ctx.beginPath();
                 ctx.roundRect(x, y, w, h, 24);
                 ctx.stroke();
+
+                const iconPad = 22;
+                const iconSize = 72;
+                const textLeft = x + iconPad + iconSize + 18;
+
+                const src = getLocalImageAssetPath(kind, value) || getImageAssetPath(kind, value);
+                const img = await loadCanvasImage(src);
+                if (img) {
+                    const fit = Math.min(iconSize / img.width, iconSize / img.height);
+                    const drawW = Math.max(1, img.width * fit);
+                    const drawH = Math.max(1, img.height * fit);
+                    const drawX = x + iconPad + (iconSize - drawW) / 2;
+                    const drawY = y + 66 + (iconSize - drawH) / 2;
+                    ctx.drawImage(img, drawX, drawY, drawW, drawH);
+                }
+
                 ctx.fillStyle = "#aebcce";
                 ctx.font = "600 36px Inter, Segoe UI, Arial, sans-serif";
-                ctx.fillText(title, x + 26, y + 52);
+                ctx.fillText(title, textLeft, y + 52);
                 ctx.fillStyle = "#eaf0fb";
                 ctx.font = "700 38px Inter, Segoe UI, Arial, sans-serif";
                 const lines = String(value || "—").match(/.{1,28}(\s|$)/g) || [String(value || "—")];
-                ctx.fillText(lines[0].trim(), x + 26, y + 108);
-                if (lines[1]) ctx.fillText(lines[1].trim(), x + 26, y + 152);
+                ctx.fillText(lines[0].trim(), textLeft, y + 108);
+                if (lines[1]) ctx.fillText(lines[1].trim(), textLeft, y + 152);
             };
 
             ctx.fillStyle = "#aebcce";
             ctx.font = "700 42px Inter, Segoe UI, Arial, sans-serif";
             ctx.fillText("LOADOUT", 56, 1040);
-            drawBox(56, 1065, 486, 200, "Primary", card.primary || "—");
-            drawBox(558, 1065, 486, 200, "Sidearm", card.sidearm || "—");
-            drawBox(1060, 1065, 486, 200, "Throwable", card.throwable || "—");
+            await drawBox(56, 1065, 486, 200, "Primary", card.primary || "—", "primary");
+            await drawBox(558, 1065, 486, 200, "Sidearm", card.sidearm || "—", "sidearm");
+            await drawBox(1060, 1065, 486, 200, "Throwable", card.throwable || "—", "throwable");
 
             ctx.fillStyle = "#aebcce";
             ctx.font = "700 42px Inter, Segoe UI, Arial, sans-serif";
             ctx.fillText("STRATAGEMS", 56, 1340);
             const strats = (card.stratagems || []).slice(0, 4);
             for (let i = 0; i < 4; i++) {
-                drawBox(56 + i * 372, 1368, 356, 260, "Stratagem", strats[i] || "—");
+                await drawBox(56 + i * 372, 1368, 356, 260, "Stratagem", strats[i] || "—", "stratagem");
             }
 
             ctx.fillStyle = "#aebcce";
@@ -6043,8 +6088,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             return canvas;
         }
 
-        function rankPanelPngBlobForDiscord(card) {
-            const canvas = drawDiscordRankPanelCanvas(card);
+        async function rankPanelPngBlobForDiscord(card) {
+            const canvas = await drawDiscordRankPanelCanvas(card);
             return new Promise((resolve, reject) => {
                 canvas.toBlob((pngBlob) => {
                     if (!pngBlob) return reject(new Error("Failed to export rank detail PNG"));
@@ -6083,7 +6128,7 @@ ${noteContent}`
                     { id: 0, filename: "card-loadout.png" },
                     { id: 1, filename: "rank-detail.png" }
                 ];
-                payload.embeds = [buildDiscordCardEmbed(card, "attachment://card-loadout.png", "image")];
+                payload.embeds = [buildDiscordCardEmbed(card, "attachment://rank-detail.png", "image")];
                 // Discord expects indexed multipart field names for attachments.
                 form.append("files[0]", cardPng, "card-loadout.png");
                 form.append("files[1]", rankPng, "rank-detail.png");
@@ -6098,7 +6143,7 @@ ${noteContent}`
                             { id: 0, filename: "card-loadout.png" },
                             { id: 1, filename: "rank-detail.png" }
                         ];
-                        payload.embeds = [buildDiscordCardEmbed(card, "attachment://card-loadout.png", "image")];
+                        payload.embeds = [buildDiscordCardEmbed(card, "attachment://rank-detail.png", "image")];
                         form.append("files[0]", fallbackPng, "card-loadout.png");
                         form.append("files[1]", rankPng, "rank-detail.png");
                     } catch (fallbackErr) {
