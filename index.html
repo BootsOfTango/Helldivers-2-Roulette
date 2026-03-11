@@ -5915,9 +5915,9 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         }
 
         async function drawDiscordRankPanelCanvas(card) {
-            const baseWidth = 1600;
-            const baseHeight = 2100;
-            const DISCORD_RANK_PANEL_SCALE = 1.35;
+            const baseWidth = 1200;
+            const baseHeight = 1200;
+            const DISCORD_RANK_PANEL_SCALE = 1.2;
             const width = Math.round(baseWidth * DISCORD_RANK_PANEL_SCALE);
             const height = Math.round(baseHeight * DISCORD_RANK_PANEL_SCALE);
             const canvas = document.createElement("canvas");
@@ -5926,21 +5926,6 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const ctx = canvas.getContext("2d");
             if (!ctx) throw new Error("Canvas context unavailable");
             ctx.scale(DISCORD_RANK_PANEL_SCALE, DISCORD_RANK_PANEL_SCALE);
-
-            const imageCache = new Map();
-            const loadCanvasImage = async (src) => {
-                const key = String(src || "").trim();
-                if (!key) return null;
-                if (imageCache.has(key)) return imageCache.get(key);
-                const promise = new Promise((resolve) => {
-                    const img = new Image();
-                    img.onload = () => resolve(img);
-                    img.onerror = () => resolve(null);
-                    img.src = key;
-                });
-                imageCache.set(key, promise);
-                return promise;
-            };
 
             const s = card.stats || {};
             const grad = ctx.createLinearGradient(0, 0, 0, baseHeight);
@@ -5953,38 +5938,17 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             ctx.lineWidth = 4;
             ctx.strokeRect(22, 22, baseWidth - 44, baseHeight - 44);
 
-            ctx.fillStyle = "#eaf0fb";
-            ctx.font = "900 58px Inter, Segoe UI, Arial, sans-serif";
-            ctx.fillText(`#1 • ${formatSeedWithPlayer(card)}`, 64, 104);
-
-            ctx.fillStyle = "#a8b6ce";
-            ctx.font = "600 38px Inter, Segoe UI, Arial, sans-serif";
-            ctx.fillText(`${card.mode || "—"} • ${card.faction || "—"} • ${getPlayerName(card)}`, 64, 156);
-
-            const badgeW = 230;
-            const badgeH = 70;
-            const badgeX = baseWidth - badgeW - 64;
-            const badgeY = 48;
-            ctx.strokeStyle = "#ffe05b";
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            ctx.roundRect(badgeX, badgeY, badgeW, badgeH, 34);
-            ctx.stroke();
-            ctx.fillStyle = "#ffe05b";
-            ctx.font = "800 36px Inter, Segoe UI, Arial, sans-serif";
-            ctx.fillText(`Grade ${Number(card.grade || 0)}`, badgeX + 22, badgeY + 46);
-
-            ctx.strokeStyle = "rgba(85,110,150,.45)";
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.roundRect(56, 200, baseWidth - 112, 760, 30);
-            ctx.stroke();
-
             const radarValues = getDiscordRadarValues(card);
-            const labels = ["POWER", "AGILITY", "ENDURANCE", "MOBILITY", "UTILITY"];
+            const labels = [
+                `POWER\n${Number(s.kills || 0)} kills`,
+                `AGILITY\n${Number(s.accuracy || 0)}% acc`,
+                `ENDURANCE\n${Number(s.deaths || 0) + Number(s.stims || 0)} combo`,
+                `MOBILITY\n${Number(s.distanceKm || 0)} km`,
+                `UTILITY\n${Number(s.stratUses || 0)} uses`
+            ];
             const cx = baseWidth / 2;
-            const cy = 560;
-            const radius = 190;
+            const cy = 620;
+            const radius = 340;
             const points = labels.map((_, i) => {
                 const ang = -Math.PI / 2 + i * (Math.PI * 2 / labels.length);
                 return { x: cx + Math.cos(ang) * radius, y: cy + Math.sin(ang) * radius, ang };
@@ -6015,7 +5979,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 const rr = radius * Math.max(0, Math.min(1, Number(radarValues[i] || 0)));
                 return { x: cx + Math.cos(ang) * rr, y: cy + Math.sin(ang) * rr };
             });
-            ctx.fillStyle = "rgba(90,120,255,.28)";
+            ctx.fillStyle = "rgba(90,120,255,.32)";
             ctx.strokeStyle = "#7ea1ff";
             ctx.lineWidth = 4;
             ctx.beginPath();
@@ -6027,63 +5991,22 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             ctx.stroke();
 
             ctx.fillStyle = "#eaf0fb";
-            ctx.font = "800 32px Inter, Segoe UI, Arial, sans-serif";
+            ctx.font = "800 54px Inter, Segoe UI, Arial, sans-serif";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
             points.forEach((p, i) => {
-                const offsetX = Math.cos(p.ang) * 40;
-                const offsetY = Math.sin(p.ang) * 40;
-                ctx.fillText(labels[i], p.x + offsetX - 45, p.y + offsetY + 10);
-            });
-
-            const drawBox = async (x, y, w, h, title, value, kind) => {
-                ctx.strokeStyle = "rgba(80,110,145,.45)";
-                ctx.lineWidth = 2;
-                ctx.beginPath();
-                ctx.roundRect(x, y, w, h, 24);
-                ctx.stroke();
-
-                const iconPad = 22;
-                const iconSize = 72;
-                const textLeft = x + iconPad + iconSize + 18;
-
-                const src = getLocalImageAssetPath(kind, value) || getImageAssetPath(kind, value);
-                const img = await loadCanvasImage(src);
-                if (img) {
-                    const fit = Math.min(iconSize / img.width, iconSize / img.height);
-                    const drawW = Math.max(1, img.width * fit);
-                    const drawH = Math.max(1, img.height * fit);
-                    const drawX = x + iconPad + (iconSize - drawW) / 2;
-                    const drawY = y + 66 + (iconSize - drawH) / 2;
-                    ctx.drawImage(img, drawX, drawY, drawW, drawH);
-                }
-
-                ctx.fillStyle = "#aebcce";
-                ctx.font = "600 36px Inter, Segoe UI, Arial, sans-serif";
-                ctx.fillText(title, textLeft, y + 52);
+                const offsetX = Math.cos(p.ang) * 120;
+                const offsetY = Math.sin(p.ang) * 120;
+                const labelX = p.x + offsetX;
+                const labelY = p.y + offsetY;
+                const [line1, line2] = labels[i].split("\n");
+                ctx.fillText(line1, labelX, labelY - 30);
+                ctx.fillStyle = "#a9b7d2";
+                ctx.font = "700 34px Inter, Segoe UI, Arial, sans-serif";
+                ctx.fillText(line2, labelX, labelY + 24);
                 ctx.fillStyle = "#eaf0fb";
-                ctx.font = "700 38px Inter, Segoe UI, Arial, sans-serif";
-                const lines = String(value || "—").match(/.{1,28}(\s|$)/g) || [String(value || "—")];
-                ctx.fillText(lines[0].trim(), textLeft, y + 108);
-                if (lines[1]) ctx.fillText(lines[1].trim(), textLeft, y + 152);
-            };
-
-            ctx.fillStyle = "#aebcce";
-            ctx.font = "700 42px Inter, Segoe UI, Arial, sans-serif";
-            ctx.fillText("LOADOUT", 56, 1040);
-            await drawBox(56, 1065, 486, 200, "Primary", card.primary || "—", "primary");
-            await drawBox(558, 1065, 486, 200, "Sidearm", card.sidearm || "—", "sidearm");
-            await drawBox(1060, 1065, 486, 200, "Throwable", card.throwable || "—", "throwable");
-
-            ctx.fillStyle = "#aebcce";
-            ctx.font = "700 42px Inter, Segoe UI, Arial, sans-serif";
-            ctx.fillText("STRATAGEMS", 56, 1340);
-            const strats = (card.stratagems || []).slice(0, 4);
-            for (let i = 0; i < 4; i++) {
-                await drawBox(56 + i * 372, 1368, 356, 260, "Stratagem", strats[i] || "—", "stratagem");
-            }
-
-            ctx.fillStyle = "#aebcce";
-            ctx.font = "700 38px Inter, Segoe UI, Arial, sans-serif";
-            ctx.fillText(`Kills ${Number(s.kills || 0)}   Accuracy ${Number(s.accuracy || 0)}%   Deaths ${Number(s.deaths || 0)}   Stims ${Number(s.stims || 0)}   Dist ${Number(s.distanceKm || 0)} km   Strat Uses ${Number(s.stratUses || 0)}`, 56, 1700);
+                ctx.font = "800 54px Inter, Segoe UI, Arial, sans-serif";
+            });
 
             return canvas;
         }
@@ -6121,38 +6044,17 @@ ${noteContent}`
             const form = new FormData();
             let hasImageAttachment = false;
             try {
-                const cardPng = await cardPngBlobForDiscord(card);
                 const rankPng = await rankPanelPngBlobForDiscord(card);
                 hasImageAttachment = true;
                 payload.attachments = [
-                    { id: 0, filename: "card-loadout.png" },
-                    { id: 1, filename: "rank-detail.png" }
+                    { id: 0, filename: "radar-detail.png" }
                 ];
-                payload.embeds = [buildDiscordCardEmbed(card, "attachment://rank-detail.png", "image")];
+                payload.embeds = [buildDiscordCardEmbed(card, "attachment://radar-detail.png", "image")];
                 // Discord expects indexed multipart field names for attachments.
-                form.append("files[0]", cardPng, "card-loadout.png");
-                form.append("files[1]", rankPng, "rank-detail.png");
+                form.append("files[0]", rankPng, "radar-detail.png");
             } catch (err) {
-                const blockedByCanvas = isCanvasTaintedError(err);
-                if (blockedByCanvas) {
-                    try {
-                        const fallbackPng = await drawDiscordCardCanvasFallback(card);
-                        const rankPng = await rankPanelPngBlobForDiscord(card);
-                        hasImageAttachment = true;
-                        payload.attachments = [
-                            { id: 0, filename: "card-loadout.png" },
-                            { id: 1, filename: "rank-detail.png" }
-                        ];
-                        payload.embeds = [buildDiscordCardEmbed(card, "attachment://rank-detail.png", "image")];
-                        form.append("files[0]", fallbackPng, "card-loadout.png");
-                        form.append("files[1]", rankPng, "rank-detail.png");
-                    } catch (fallbackErr) {
-                        console.warn("[discord] image export failed (primary + fallback), sending without image", fallbackErr);
-                    }
-                } else {
-                    const msg = String(err?.message || err || "unknown error");
-                    console.warn(`[discord] card image export failed (${msg}), sending without image`);
-                }
+                const msg = String(err?.message || err || "unknown error");
+                console.warn(`[discord] radar image export failed (${msg}), sending without image`);
             }
 
             form.append("payload_json", JSON.stringify(payload));
