@@ -1845,7 +1845,7 @@ END MASTER DIRECTIVE
             display: flex;
             flex-direction: column;
             gap: 10px;
-            max-height: 520px;
+            height: 100%;
             overflow: auto;
             padding: 10px 6px 10px 0;
             scroll-padding-top: 10px;
@@ -1856,7 +1856,12 @@ END MASTER DIRECTIVE
             display: grid;
             grid-template-columns: minmax(340px, 1fr) minmax(360px, 1fr);
             gap: 14px;
-            align-items: start;
+            align-items: stretch;
+        }
+
+        #rankSplitView > div {
+            min-height: 520px;
+            display: flex;
         }
 
         #rankDetailPanel {
@@ -1906,6 +1911,10 @@ END MASTER DIRECTIVE
         @media (max-width: 1100px) {
             #rankSplitView {
                 grid-template-columns: 1fr;
+            }
+
+            #rankSplitView > div {
+                min-height: 0;
             }
 
             #rankDetailPanel {
@@ -5509,7 +5518,6 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                     <div class="miniRow modalActionRow" style="justify-content:space-between;">
                       <div class="tiny">Raw: <strong>${Number(card.scoreRaw || 0).toFixed(1)}</strong></div>
                       <div class="miniRow modalActionButtons">
-                        <button class="btnGhost" data-act="sendDiscord" data-id="${card.id}">SEND CARD TO DISCORD</button>
                         <button class="btnPrimary" data-act="saveCard" data-id="${card.id}">SAVE</button>
                         <button class="btnGhost" data-act="deleteCard" data-id="${card.id}">DELETE</button>
                       </div>
@@ -5800,7 +5808,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             return notes.length > maxLen ? `${notes.slice(0, Math.max(0, maxLen - 3))}...` : notes;
         }
 
-        function buildDiscordCardEmbed(card, imageUrl) {
+        function buildDiscordCardEmbed(card, imageUrl, imageStyle = "thumbnail") {
             const s = card.stats || {};
             const weatherText = card.planet ? getPlanetWeatherText(card.planet) : "None";
             const createdAt = card.createdAt ? new Date(card.createdAt).toLocaleString() : "—";
@@ -5866,11 +5874,17 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 });
             }
 
-            if (imageUrl) embed.image = { url: imageUrl };
+            if (imageUrl) {
+                if (imageStyle === "image") {
+                    embed.image = { url: imageUrl };
+                } else {
+                    embed.thumbnail = { url: imageUrl };
+                }
+            }
             return embed;
         }
 
-        async function sendCardToDiscord(card, sourceLabel) {
+        async function sendCardToDiscord(card) {
             const webhookUrl = getDiscordWebhookUrl();
             if (!webhookUrl) {
                 alert("Please save your Discord webhook URL first.");
@@ -5896,7 +5910,7 @@ ${noteContent}`
                 const cardPng = await cardPngBlobForDiscord(card);
                 hasImageAttachment = true;
                 payload.attachments = [{ id: 0, filename: "card-loadout.png" }];
-                payload.embeds = [buildDiscordCardEmbed(card, "attachment://card-loadout.png")];
+                payload.embeds = [buildDiscordCardEmbed(card, "attachment://card-loadout.png", "thumbnail")];
                 // Discord expects indexed multipart field names for attachments.
                 form.append("files[0]", cardPng, "card-loadout.png");
             } catch (err) {
@@ -5906,7 +5920,7 @@ ${noteContent}`
                         const fallbackPng = await drawDiscordCardCanvasFallback(card);
                         hasImageAttachment = true;
                         payload.attachments = [{ id: 0, filename: "card-loadout.png" }];
-                        payload.embeds = [buildDiscordCardEmbed(card, "attachment://card-loadout.png")];
+                        payload.embeds = [buildDiscordCardEmbed(card, "attachment://card-loadout.png", "thumbnail")];
                         form.append("files[0]", fallbackPng, "card-loadout.png");
                     } catch (fallbackErr) {
                         console.warn("[discord] image export failed (primary + fallback), sending without image", fallbackErr);
@@ -5928,7 +5942,7 @@ ${noteContent}`
                     const retryPayload = {
                         username: payload.username,
                         content: `${payload.content}\n⚠️ Discord rejected image embed; sent as structured embed without image.`,
-                        embeds: [buildDiscordCardEmbed(card, sourceLabel)]
+                        embeds: [buildDiscordCardEmbed(card)]
                     };
                     const retryForm = new FormData();
                     retryForm.append("payload_json", JSON.stringify(retryPayload));
@@ -6032,19 +6046,6 @@ ${noteContent}`
                 return;
             }
 
-            if (act === "sendDiscord") {
-                try {
-                    const freshCard = syncCardFromResultInputs(id, sourceRoot) || card;
-                    await sendCardToDiscord(freshCard, "RESULTS");
-                    alert("Sent to Discord ✅");
-                } catch (err) {
-                    console.error("[discord] send failed", err);
-                    alert(`Discord send failed: ${err.message || err}`);
-                }
-                return;
-            }
-
-
         }
 
         async function onRankCardAction(e) {
@@ -6056,7 +6057,7 @@ ${noteContent}`
             if (!card) return;
 
             try {
-                await sendCardToDiscord(card, "RANK");
+                await sendCardToDiscord(card);
                 alert("Sent to Discord ✅");
             } catch (err) {
                 console.error("[discord] send failed", err);
