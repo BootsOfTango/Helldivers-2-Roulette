@@ -907,6 +907,24 @@ END MASTER DIRECTIVE
             padding: 12px;
         }
 
+        .modalActionRow {
+            position: sticky;
+            bottom: -12px;
+            z-index: 2;
+            border-top: 1px solid var(--line2);
+            margin-top: 10px;
+            margin-inline: -12px;
+            padding: 10px 12px;
+            background: #090b10;
+        }
+
+        .modalActionButtons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
         .modalLoadoutGrid {
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1031,6 +1049,19 @@ END MASTER DIRECTIVE
             .modalPlanetWrap,
             .modalStatGrid {
                 grid-template-columns: repeat(2, minmax(120px, 1fr));
+            }
+
+            .modalActionRow {
+                display: grid;
+                gap: 8px;
+            }
+
+            .modalActionButtons {
+                justify-content: stretch;
+            }
+
+            .modalActionButtons button {
+                flex: 1 1 140px;
             }
         }
 
@@ -5351,9 +5382,9 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                       </div>
                     </div>
 
-                    <div class="miniRow" style="justify-content:space-between; margin-top:10px;">
+                    <div class="miniRow modalActionRow" style="justify-content:space-between;">
                       <div class="tiny">Raw: <strong>${Number(card.scoreRaw || 0).toFixed(1)}</strong></div>
-                      <div class="miniRow">
+                      <div class="miniRow modalActionButtons">
                         <button class="btnGhost" data-act="sendDiscord" data-id="${card.id}">SEND CARD TO DISCORD</button>
                         <button class="btnPrimary" data-act="saveCard" data-id="${card.id}">SAVE</button>
                         <button class="btnGhost" data-act="deleteCard" data-id="${card.id}">DELETE</button>
@@ -5845,10 +5876,14 @@ ${noteContent}`
             return card;
         }
         async function onCardAction(e) {
-            const act = e.target.getAttribute("data-act");
-            const id = e.target.getAttribute("data-id");
+            const actionBtn = e.target.closest("button[data-act]");
+            if (!actionBtn) return;
+
+            const act = actionBtn.getAttribute("data-act");
+            const id = actionBtn.getAttribute("data-id");
             const card = state.cards.find(c => c.id === id);
             if (!card) return;
+            const sourceRoot = actionBtn.closest(".cardModalDialog") || actionBtn.closest(".card") || document;
 
             if (act === "deleteCard") {
                 if (!confirm("Delete this card?")) return;
