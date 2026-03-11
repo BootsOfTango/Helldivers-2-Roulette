@@ -4205,8 +4205,11 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             return "stratagem";
         }
 
-        function getStratRimClassFromAsset(assetPath) {
+        function getStratRimClassFromAsset(assetPath, itemName = "") {
             const p = String(assetPath || "").toLowerCase();
+            const n = String(itemName || "").toLowerCase();
+            if (n.startsWith("orbital ")) return "strat-rim-orbital";
+            if (n.startsWith("eagle ")) return "strat-rim-eagle";
             if (!p.includes("assets/stratagems/")) return "";
             if (p.includes("/defensive/")) return "strat-rim-defensive";
             if (p.includes("/orbital/")) return "strat-rim-orbital";
@@ -4226,7 +4229,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             if (!entry?.assetPath && !entry?.imageUrl) return null;
 
             const visualKind = (cat === "stratagem") ? "icon" : "image";
-            const stratClass = (cat === "stratagem") ? getStratRimClassFromAsset(entry.assetPath || "") : "";
+            const stratClass = (cat === "stratagem") ? getStratRimClassFromAsset(entry.assetPath || "", entry.name || name) : "";
             return {
                 src: entry.assetPath || entry.imageUrl,
                 fallbackSrc: entry.imageUrl || "",
