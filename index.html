@@ -2305,14 +2305,6 @@ END MASTER DIRECTIVE
 
             <div class="divider"></div>
 
-            <div class="row itemSearchRow">
-                <div class="col">
-                    <input id="itemSearch" class="itemSearchInput" placeholder="Search weapons/stratagems by name, then enable/disable quickly..." />
-                </div>
-            </div>
-
-            <div class="divider"></div>
-
             <div class="row">
                 <div class="col">
                     <div class="box">
@@ -2490,6 +2482,14 @@ END MASTER DIRECTIVE
                         <button id="btnResetDefaults" class="btnDanger">RESET DEFAULT LISTS</button>
                         <button id="btnSaveItems" class="btnPrimary">SAVE ITEMS</button>
                     </div>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="row itemSearchRow">
+                <div class="col">
+                    <input id="itemSearch" class="itemSearchInput" placeholder="Search item name, warbond, or type to find and edit quickly..." />
                 </div>
             </div>
 
@@ -6671,8 +6671,10 @@ ${noteContent}`
             box.innerHTML = "";
 
             const query = normalizeText($("#itemSearch")?.value || "");
+            const meta = ITEM_LIST_METADATA.find(m => m.containerId === containerId);
+            const typeLabel = meta?.label || "";
             const filteredList = query
-                ? list.filter(it => normalizeText(it.name).includes(query))
+                ? list.filter(it => matchesItemSearch(it, typeLabel, query))
                 : list;
 
             if (!filteredList.length) {
@@ -6793,6 +6795,13 @@ ${noteContent}`
             return f === "all" || f === category;
         }
 
+        function matchesItemSearch(item, metaLabel, query) {
+            if (!query) return true;
+            const warbond = getItemWarbond(item);
+            const searchable = `${item.name} ${warbond} ${metaLabel}`;
+            return normalizeText(searchable).includes(query);
+        }
+
         function renderItemsByWarbond() {
             const box = document.getElementById("listItemsByWarbond");
             if (!box) return;
@@ -6805,8 +6814,7 @@ ${noteContent}`
                 const list = state.items[meta.key] || [];
                 list.forEach((item, index) => {
                     const warbond = getItemWarbond(item);
-                    const searchable = `${item.name} ${warbond} ${meta.label}`;
-                    if (query && !normalizeText(searchable).includes(query)) return;
+                    if (!matchesItemSearch(item, meta.label, query)) return;
                     if (!byWarbond.has(warbond)) byWarbond.set(warbond, []);
                     byWarbond.get(warbond).push({ item, index, meta });
                 });
