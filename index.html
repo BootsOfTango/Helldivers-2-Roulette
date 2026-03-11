@@ -884,19 +884,25 @@ END MASTER DIRECTIVE
         }
 
         .cardModalDialog {
-            width: min(1200px, 96vw);
-            max-height: 92vh;
+            width: min(860px, 92vw);
+            max-height: 84vh;
             overflow: auto;
             border: 1px solid var(--line2);
             border-radius: 16px;
             background: #090b10;
-            padding: 14px;
+            padding: 12px;
         }
 
         .modalLoadoutGrid {
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: 10px;
+        }
+
+        .modalLoadoutColumn {
+            display: grid;
+            gap: 10px;
+            align-content: start;
         }
 
         .modalLoadoutItem {
@@ -936,6 +942,82 @@ END MASTER DIRECTIVE
         .modalLoadoutText .v {
             font-weight: 700;
             overflow-wrap: anywhere;
+        }
+
+        .modalPlanetWrap {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .modalPlanetWrap .planetMiniCard {
+            min-width: 0;
+            min-height: 112px;
+            padding: 12px 14px;
+        }
+
+        .modalPlanetWrap .planetMiniLabel {
+            font-size: 12px;
+            margin-bottom: 6px;
+        }
+
+        .modalPlanetWrap .planetMiniValue {
+            font-size: 17px;
+            line-height: 1.2;
+        }
+
+        .modalPlanetWrap .planetTag {
+            font-size: 11px;
+        }
+
+        .modalStatGrid {
+            display: grid;
+            grid-template-columns: repeat(6, minmax(90px, 1fr));
+            gap: 10px;
+        }
+
+        .modalStatGrid .label {
+            min-height: auto;
+            margin-bottom: 4px;
+        }
+
+        .modalMoNotesRow {
+            margin-top: 10px;
+            display: grid;
+            grid-template-columns: minmax(170px, 240px) minmax(0, 1fr);
+            gap: 10px;
+            align-items: start;
+        }
+
+        .modalNotes textarea {
+            min-height: 104px;
+        }
+
+        @media (max-width: 980px) {
+            .cardModalDialog {
+                width: min(760px, 94vw);
+            }
+
+            .modalPlanetWrap {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .modalStatGrid {
+                grid-template-columns: repeat(3, minmax(110px, 1fr));
+            }
+        }
+
+        @media (max-width: 720px) {
+            .modalLoadoutGrid,
+            .modalMoNotesRow {
+                grid-template-columns: 1fr;
+            }
+
+            .modalPlanetWrap,
+            .modalStatGrid {
+                grid-template-columns: repeat(2, minmax(120px, 1fr));
+            }
         }
 
         .resultSummaryRadar {
@@ -5193,14 +5275,18 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                     <div class="cardMeta">${escapeHtml(card.mode)} • <span class="${getFactionClass(card.faction)}">${escapeHtml(card.faction)}</span> • ${escapeHtml(new Date(card.createdAt).toLocaleString())}</div>
 
                     <div class="modalLoadoutGrid" style="margin-top:10px;">
-                        ${renderModalLoadoutItem("Primary", card.primary, "primary")}
-                        ${renderModalLoadoutItem("Sidearm", card.sidearm, "sidearm")}
-                        ${renderModalLoadoutItem("Throwable", card.throwable, "throwable")}
-                        ${(card.stratagems || []).map((s, i) => renderModalLoadoutItem(`Strat ${i + 1}`, s, "stratagem")).join("")}
+                        <div class="modalLoadoutColumn">
+                          ${renderModalLoadoutItem("Primary", card.primary, "primary")}
+                          ${renderModalLoadoutItem("Sidearm", card.sidearm, "sidearm")}
+                          ${renderModalLoadoutItem("Throwable", card.throwable, "throwable")}
+                        </div>
+                        <div class="modalLoadoutColumn">
+                          ${(card.stratagems || []).map((s, i) => renderModalLoadoutItem(`Strat ${i + 1}`, s, "stratagem")).join("")}
+                        </div>
                     </div>
 
                     ${card.planet ? `
-                      <div class="planetCardWrap" style="margin-top:10px;">
+                      <div class="planetCardWrap modalPlanetWrap">
                         <div class="planetMiniCard">
                           <div class="planetMiniLabel">Sector</div>
                           <div class="planetMiniValue">${escapeHtml(card.planet.sector || "—")}</div>
@@ -5228,7 +5314,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
                     <div class="hr"></div>
 
-                    <div class="formGrid3 statsGrid cardInputGrid">
+                    <div class="statsGrid modalStatGrid">
                       <div><div class="label">Kills</div><input type="number" min="0" value="${Number(card.stats?.kills || 0)}" data-k="kills" data-id="${card.id}"></div>
                       <div><div class="label">Accuracy (%)</div><input type="number" min="0" value="${Number(card.stats?.accuracy || 0)}" data-k="accuracy" data-id="${card.id}"></div>
                       <div><div class="label">Deaths</div><input type="number" min="0" value="${Number(card.stats?.deaths || 0)}" data-k="deaths" data-id="${card.id}"></div>
@@ -5237,7 +5323,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                       <div><div class="label">Strat uses</div><input type="number" min="0" value="${Number(card.stats?.stratUses || 0)}" data-k="stratUses" data-id="${card.id}"></div>
                     </div>
 
-                    <div class="formGrid" style="margin-top:10px;">
+                    <div class="modalMoNotesRow">
                       <div>
                         <div class="label">Major order done</div>
                         <select data-k="majorOrderDone" data-id="${card.id}">
@@ -5245,11 +5331,10 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                           <option value="true" ${card.majorOrderDone ? "selected" : ""}>Yes</option>
                         </select>
                       </div>
-                    </div>
-
-                    <div style="margin-top:10px;">
-                      <div class="label">Notes</div>
-                      <textarea data-k="notes" data-id="${card.id}" placeholder="Write anything: what sucked, what worked, funny moments...">${escapeHtml(card.notes || "")}</textarea>
+                      <div class="modalNotes">
+                        <div class="label">Notes</div>
+                        <textarea data-k="notes" data-id="${card.id}" placeholder="Write anything: what sucked, what worked, funny moments...">${escapeHtml(card.notes || "")}</textarea>
+                      </div>
                     </div>
 
                     <div class="miniRow" style="justify-content:space-between; margin-top:10px;">
