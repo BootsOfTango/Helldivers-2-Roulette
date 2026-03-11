@@ -570,6 +570,11 @@ END MASTER DIRECTIVE
             min-height: 72px;
         }
 
+        .slotRow-weapon .slot {
+            grid-template-columns: 104px minmax(0, 1fr);
+            min-height: 72px;
+        }
+
         .slotVisual {
             width: 52px;
             height: 52px;
@@ -741,6 +746,15 @@ END MASTER DIRECTIVE
             grid-template-columns: 86px minmax(220px, 420px);
             gap: 10px;
             align-items: center;
+        }
+
+        .slotRow-weapon {
+            grid-template-columns: 86px minmax(110px, 420px);
+        }
+
+        .slotRow-weapon .slotVisual {
+            width: 104px;
+            height: 52px;
         }
 
         .slotTag {
@@ -2146,9 +2160,9 @@ END MASTER DIRECTIVE
             <div class="label">Spin reels</div>
             <div class="slotGrid" id="slotGrid">
                 <div class="slotCol">
-                    <div class="slotRow"><span class="slotTag">Primary</span><div class="slot slot-primary" id="slotPrimary"><div class="slotVisual" aria-hidden="true"></div><div class="slotLabel">—</div></div></div>
-                    <div class="slotRow"><span class="slotTag">Sidearm</span><div class="slot slot-sidearm" id="slotSidearm"><div class="slotVisual" aria-hidden="true"></div><div class="slotLabel">—</div></div></div>
-                    <div class="slotRow"><span class="slotTag">Throwable</span><div class="slot slot-throwable" id="slotThrowable"><div class="slotVisual" aria-hidden="true"></div><div class="slotLabel">—</div></div></div>
+                    <div class="slotRow slotRow-weapon"><span class="slotTag">Primary</span><div class="slot slot-primary" id="slotPrimary"><div class="slotVisual" aria-hidden="true"></div><div class="slotLabel">—</div></div></div>
+                    <div class="slotRow slotRow-weapon"><span class="slotTag">Sidearm</span><div class="slot slot-sidearm" id="slotSidearm"><div class="slotVisual" aria-hidden="true"></div><div class="slotLabel">—</div></div></div>
+                    <div class="slotRow slotRow-weapon"><span class="slotTag">Throwable</span><div class="slot slot-throwable" id="slotThrowable"><div class="slotVisual" aria-hidden="true"></div><div class="slotLabel">—</div></div></div>
                 </div>
                 <div class="slotCol">
                     <div class="slotRow"><span class="slotTag">Strat 1</span><div class="slot slot-strat" id="slotStrat1"><div class="slotVisual" aria-hidden="true"></div><div class="slotLabel">—</div></div></div>
