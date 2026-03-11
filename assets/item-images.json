@@ -765,7 +765,8 @@
       "kind": "icon",
       "wikiTitle": "AC-8 Autocannon",
       "sourceUrl": "https://helldivers.wiki.gg/wiki/AC-8_Autocannon",
-      "imageUrl": "https://helldivers.wiki.gg/images/Autocannon_Stratagem_Icon.svg?b0fdbd"
+      "imageUrl": "https://helldivers.wiki.gg/images/Autocannon_Stratagem_Icon.svg?b0fdbd",
+      "rimCategory": "support"
     },
     {
       "name": "APW-1 Anti-Materiel Rifle",
@@ -773,7 +774,8 @@
       "kind": "icon",
       "wikiTitle": "APW-1 Anti-Materiel Rifle",
       "sourceUrl": "https://helldivers.wiki.gg/wiki/APW-1_Anti-Materiel_Rifle",
-      "imageUrl": "https://helldivers.wiki.gg/images/Anti-Materiel_Rifle_Stratagem_Icon.svg?57748b"
+      "imageUrl": "https://helldivers.wiki.gg/images/Anti-Materiel_Rifle_Stratagem_Icon.svg?57748b",
+      "rimCategory": "support"
     },
     {
       "name": "ARC-3 Arc Thrower",
@@ -781,7 +783,8 @@
       "kind": "icon",
       "wikiTitle": "ARC-3 Arc Thrower",
       "sourceUrl": "https://helldivers.wiki.gg/wiki/ARC-3_Arc_Thrower",
-      "imageUrl": "https://helldivers.wiki.gg/images/Arc_Thrower_Stratagem_Icon.svg?df4a53"
+      "imageUrl": "https://helldivers.wiki.gg/images/Arc_Thrower_Stratagem_Icon.svg?df4a53",
+      "rimCategory": "support"
     },
     {
       "name": "Anti-Personnel Minefield",
@@ -789,7 +792,8 @@
       "kind": "icon",
       "wikiTitle": "Anti-Personnel Minefield",
       "sourceUrl": "https://helldivers.wiki.gg/wiki/Anti-Personnel_Minefield",
-      "imageUrl": "https://helldivers.wiki.gg/images/Anti-Personnel_Minefield_Stratagem_Icon.svg?e61852"
+      "imageUrl": "https://helldivers.wiki.gg/images/Anti-Personnel_Minefield_Stratagem_Icon.svg?e61852",
+      "rimCategory": "defensive"
     },
     {
       "name": "Autocannon Sentry",
@@ -797,7 +801,8 @@
       "kind": "icon",
       "wikiTitle": "Autocannon Sentry",
       "sourceUrl": "https://helldivers.wiki.gg/wiki/Autocannon_Sentry",
-      "imageUrl": "https://helldivers.wiki.gg/images/Autocannon_Sentry_Stratagem_Icon.svg?fa44e4"
+      "imageUrl": "https://helldivers.wiki.gg/images/Autocannon_Sentry_Stratagem_Icon.svg?fa44e4",
+      "rimCategory": "defensive"
     },
     {
       "name": "Ballistic Shield Backpack",
@@ -805,7 +810,8 @@
       "kind": "icon",
       "wikiTitle": "Ballistic Shield Backpack",
       "sourceUrl": "https://helldivers.wiki.gg/wiki/Ballistic_Shield_Backpack",
-      "imageUrl": "https://helldivers.wiki.gg/images/Ballistic_Shield_Backpack_Stratagem_Icon.svg?5174ae"
+      "imageUrl": "https://helldivers.wiki.gg/images/Ballistic_Shield_Backpack_Stratagem_Icon.svg?5174ae",
+      "rimCategory": "support"
     },
     {
       "name": "EAT-17 Expendable Anti-Tank",
@@ -813,7 +819,8 @@
       "kind": "icon",
       "wikiTitle": "EAT-17 Expendable Anti-Tank",
       "sourceUrl": "https://helldivers.wiki.gg/wiki/EAT-17_Expendable_Anti-Tank",
-      "imageUrl": "https://helldivers.wiki.gg/images/Expendable_Anti-Tank_Stratagem_Icon.svg?6a8217"
+      "imageUrl": "https://helldivers.wiki.gg/images/Expendable_Anti-Tank_Stratagem_Icon.svg?6a8217",
+      "rimCategory": "support"
     },
     {
       "name": "EMS Mortar Sentry",
@@ -821,7 +828,8 @@
       "kind": "icon",
       "wikiTitle": "EMS Mortar Sentry",
       "sourceUrl": "https://helldivers.wiki.gg/wiki/EMS_Mortar_Sentry",
-      "imageUrl": "https://helldivers.wiki.gg/images/EMS_Mortar_Sentry_Stratagem_Icon.svg?bc2f29"
+      "imageUrl": "https://helldivers.wiki.gg/images/EMS_Mortar_Sentry_Stratagem_Icon.svg?bc2f29",
+      "rimCategory": "defensive"
     },
     {
       "name": "EMS Strike",
@@ -829,7 +837,8 @@
       "kind": "icon",
       "wikiTitle": "Orbital EMS Strike",
       "sourceUrl": "https://helldivers.wiki.gg/wiki/Orbital_EMS_Strike",
-      "imageUrl": "https://helldivers.wiki.gg/images/Orbital_EMS_Strike_Stratagem_Icon.svg?b27303"
+      "imageUrl": "https://helldivers.wiki.gg/images/Orbital_EMS_Strike_Stratagem_Icon.svg?b27303",
+      "rimCategory": "support"
     },
     {
       "name": "Eagle 110MM Rocket Pods",
@@ -837,7 +846,8 @@
       "kind": "icon",
       "wikiTitle": "Eagle 110mm Rocket Pods",
       "sourceUrl": "https://helldivers.wiki.gg/wiki/Eagle_110mm_Rocket_Pods",
-      "imageUrl": "https://helldivers.wiki.gg/images/Eagle_110mm_Rocket_Pods_Stratagem_Icon.svg?29c794"
+      "imageUrl": "https://helldivers.wiki.gg/images/Eagle_110mm_Rocket_Pods_Stratagem_Icon.svg?29c794",
+      "rimCategory": "eagle"
     },
     {
       "name": "Eagle Airstrike",
@@ -845,7 +855,8 @@
       "kind": "icon",
       "wikiTitle": "Eagle Airstrike",
       "sourceUrl": "https://helldivers.wiki.gg/wiki/Eagle_Airstrike",
-      "imageUrl": "https://helldivers.wiki.gg/images/Eagle_Airstrike_Stratagem_Icon.svg?88f2f7"
+      "imageUrl": "https://helldivers.wiki.gg/images/Eagle_Airstrike_Stratagem_Icon.svg?88f2f7",
+      "rimCategory": "eagle"
     },
     {
       "name": "Eagle Cluster Bomb",
@@ -853,7 +864,8 @@
       "kind": "icon",
       "wikiTitle": "Eagle Cluster Bomb",
       "sourceUrl": "https://helldivers.wiki.gg/wiki/Eagle_Cluster_Bomb",
-      "imageUrl": "https://helldivers.wiki.gg/images/Eagle_Cluster_Bomb_Stratagem_Icon.svg?fb049b"
+      "imageUrl": "https://helldivers.wiki.gg/images/Eagle_Cluster_Bomb_Stratagem_Icon.svg?fb049b",
+      "rimCategory": "eagle"
     },
     {
       "name": "Eagle Napalm Airstrike",
@@ -861,7 +873,8 @@
       "kind": "icon",
       "wikiTitle": "Eagle Napalm Airstrike",
       "sourceUrl": "https://helldivers.wiki.gg/wiki/Eagle_Napalm_Airstrike",
-      "imageUrl": "https://helldivers.wiki.gg/images/Eagle_Napalm_Airstrike_Stratagem_Icon.svg?3189c7"
+      "imageUrl": "https://helldivers.wiki.gg/images/Eagle_Napalm_Airstrike_Stratagem_Icon.svg?3189c7",
+      "rimCategory": "eagle"
     },
     {
       "name": "Eagle Smoke Strike",
@@ -869,7 +882,8 @@
       "kind": "icon",
       "wikiTitle": "Eagle Smoke Strike",
       "sourceUrl": "https://helldivers.wiki.gg/wiki/Eagle_Smoke_Strike",
-      "imageUrl": "https://helldivers.wiki.gg/images/Eagle_Smoke_Strike_Stratagem_Icon.svg?de3782"
+      "imageUrl": "https://helldivers.wiki.gg/images/Eagle_Smoke_Strike_Stratagem_Icon.svg?de3782",
+      "rimCategory": "eagle"
     },
     {
       "name": "FAF-14 Spear",
@@ -877,7 +891,8 @@
       "kind": "icon",
       "wikiTitle": "FAF-14 Spear",
       "sourceUrl": "https://helldivers.wiki.gg/wiki/FAF-14_Spear",
-      "imageUrl": "https://helldivers.wiki.gg/images/Spear_Stratagem_Icon.svg?5fa05d"
+      "imageUrl": "https://helldivers.wiki.gg/images/Spear_Stratagem_Icon.svg?5fa05d",
+      "rimCategory": "support"
     },
     {
       "name": "FLAM-40 Flamethrower",
@@ -885,7 +900,8 @@
       "kind": "icon",
       "wikiTitle": "FLAM-40 Flamethrower",
       "sourceUrl": "https://helldivers.wiki.gg/wiki/FLAM-40_Flamethrower",
-      "imageUrl": "https://helldivers.wiki.gg/images/Flamethrower_Stratagem_Icon.svg?439f4d"
+      "imageUrl": "https://helldivers.wiki.gg/images/Flamethrower_Stratagem_Icon.svg?439f4d",
+      "rimCategory": "support"
     },
     {
       "name": "GL-21 Grenade Launcher",
@@ -893,7 +909,8 @@
       "kind": "icon",
       "wikiTitle": "GL-21 Grenade Launcher",
       "sourceUrl": "https://helldivers.wiki.gg/wiki/GL-21_Grenade_Launcher",
-      "imageUrl": "https://helldivers.wiki.gg/images/Grenade_Launcher_Stratagem_Icon.svg?5a00fc"
+      "imageUrl": "https://helldivers.wiki.gg/images/Grenade_Launcher_Stratagem_Icon.svg?5a00fc",
+      "rimCategory": "support"
     },
     {
       "name": "GR-8 Recoilless Rifle",
@@ -901,7 +918,8 @@
       "kind": "icon",
       "wikiTitle": "GR-8 Recoilless Rifle",
       "sourceUrl": "https://helldivers.wiki.gg/wiki/GR-8_Recoilless_Rifle",
-      "imageUrl": "https://helldivers.wiki.gg/images/Recoilless_Rifle_Stratagem_Icon.svg?445930"
+      "imageUrl": "https://helldivers.wiki.gg/images/Recoilless_Rifle_Stratagem_Icon.svg?445930",
+      "rimCategory": "support"
     },
     {
       "name": "Gatling Sentry",
@@ -909,7 +927,8 @@
       "kind": "icon",
       "wikiTitle": "Gatling Sentry",
       "sourceUrl": "https://helldivers.wiki.gg/wiki/Gatling_Sentry",
-      "imageUrl": "https://helldivers.wiki.gg/images/Gatling_Sentry_Stratagem_Icon.svg?44ccc6"
+      "imageUrl": "https://helldivers.wiki.gg/images/Gatling_Sentry_Stratagem_Icon.svg?44ccc6",
+      "rimCategory": "defensive"
     },
     {
       "name": "Guard Dog Rover",
@@ -917,7 +936,8 @@
       "kind": "icon",
       "wikiTitle": "AX/LAS-5 \"Guard Dog\" Rover",
       "sourceUrl": "https://helldivers.wiki.gg/wiki/AX/LAS-5_%22Guard_Dog%22_Rover",
-      "imageUrl": "https://helldivers.wiki.gg/images/Rover_Stratagem_Icon.svg?cdeccd"
+      "imageUrl": "https://helldivers.wiki.gg/images/Rover_Stratagem_Icon.svg?cdeccd",
+      "rimCategory": "support"
     },
     {
       "name": "HMG Emplacement",
@@ -925,7 +945,8 @@
       "kind": "icon",
       "wikiTitle": "HMG Emplacement",
       "sourceUrl": "https://helldivers.wiki.gg/wiki/HMG_Emplacement",
-      "imageUrl": "https://helldivers.wiki.gg/images/HMG_Emplacement_Stratagem_Icon.svg?18cbca"
+      "imageUrl": "https://helldivers.wiki.gg/images/HMG_Emplacement_Stratagem_Icon.svg?18cbca",
+      "rimCategory": "defensive"
     },
     {
       "name": "Incendiary Mines",
@@ -933,7 +954,8 @@
       "kind": "icon",
       "wikiTitle": "Incendiary Mines",
       "sourceUrl": "https://helldivers.wiki.gg/wiki/Incendiary_Mines",
-      "imageUrl": "https://helldivers.wiki.gg/images/Incendiary_Mines_Stratagem_Icon.svg?be9d5c"
+      "imageUrl": "https://helldivers.wiki.gg/images/Incendiary_Mines_Stratagem_Icon.svg?be9d5c",
+      "rimCategory": "defensive"
     },
     {
       "name": "Jump Pack",
@@ -941,7 +963,8 @@
       "kind": "icon",
       "wikiTitle": "Jump Pack",
       "sourceUrl": "https://helldivers.wiki.gg/wiki/Jump_Pack",
-      "imageUrl": "https://helldivers.wiki.gg/images/Jump_Pack_Stratagem_Icon.svg?2262cd"
+      "imageUrl": "https://helldivers.wiki.gg/images/Jump_Pack_Stratagem_Icon.svg?2262cd",
+      "rimCategory": "support"
     },
     {
       "name": "LAS-98 Laser Cannon",
@@ -949,7 +972,8 @@
       "kind": "icon",
       "wikiTitle": "LAS-98 Laser Cannon",
       "sourceUrl": "https://helldivers.wiki.gg/wiki/LAS-98_Laser_Cannon",
-      "imageUrl": "https://helldivers.wiki.gg/images/Laser_Cannon_Stratagem_Icon.svg?aa8306"
+      "imageUrl": "https://helldivers.wiki.gg/images/Laser_Cannon_Stratagem_Icon.svg?aa8306",
+      "rimCategory": "support"
     },
     {
       "name": "LAS-99 Quasar Cannon",
@@ -957,7 +981,8 @@
       "kind": "icon",
       "wikiTitle": "LAS-99 Quasar Cannon",
       "sourceUrl": "https://helldivers.wiki.gg/wiki/LAS-99_Quasar_Cannon",
-      "imageUrl": "https://helldivers.wiki.gg/images/Quasar_Cannon_Stratagem_Icon.svg?f3ca16"
+      "imageUrl": "https://helldivers.wiki.gg/images/Quasar_Cannon_Stratagem_Icon.svg?f3ca16",
+      "rimCategory": "support"
     },
     {
       "name": "M-105 Stalwart",
@@ -965,7 +990,8 @@
       "kind": "icon",
       "wikiTitle": "M-105 Stalwart",
       "sourceUrl": "https://helldivers.wiki.gg/wiki/M-105_Stalwart",
-      "imageUrl": "https://helldivers.wiki.gg/images/Stalwart_Stratagem_Icon.svg?40988a"
+      "imageUrl": "https://helldivers.wiki.gg/images/Stalwart_Stratagem_Icon.svg?40988a",
+      "rimCategory": "support"
     },
     {
       "name": "MG-206 Heavy Machine Gun",
@@ -973,7 +999,8 @@
       "kind": "icon",
       "wikiTitle": "MG-206 Heavy Machine Gun",
       "sourceUrl": "https://helldivers.wiki.gg/wiki/MG-206_Heavy_Machine_Gun",
-      "imageUrl": "https://helldivers.wiki.gg/images/Heavy_Machine_Gun_Stratagem_Icon.svg?e95409"
+      "imageUrl": "https://helldivers.wiki.gg/images/Heavy_Machine_Gun_Stratagem_Icon.svg?e95409",
+      "rimCategory": "support"
     },
     {
       "name": "MG-43 Machine Gun",
@@ -981,7 +1008,8 @@
       "kind": "icon",
       "wikiTitle": "MG-43 Machine Gun",
       "sourceUrl": "https://helldivers.wiki.gg/wiki/MG-43_Machine_Gun",
-      "imageUrl": "https://helldivers.wiki.gg/images/Machine_Gun_Stratagem_Icon.svg?786faf"
+      "imageUrl": "https://helldivers.wiki.gg/images/Machine_Gun_Stratagem_Icon.svg?786faf",
+      "rimCategory": "support"
     },
     {
       "name": "MLS-4X Commando",
@@ -989,7 +1017,8 @@
       "kind": "icon",
       "wikiTitle": "MLS-4X Commando",
       "sourceUrl": "https://helldivers.wiki.gg/wiki/MLS-4X_Commando",
-      "imageUrl": "https://helldivers.wiki.gg/images/Commando_Stratagem_Icon.svg?884668"
+      "imageUrl": "https://helldivers.wiki.gg/images/Commando_Stratagem_Icon.svg?884668",
+      "rimCategory": "support"
     },
     {
       "name": "Mortar Sentry",
@@ -997,7 +1026,8 @@
       "kind": "icon",
       "wikiTitle": "Mortar Sentry",
       "sourceUrl": "https://helldivers.wiki.gg/wiki/Mortar_Sentry",
-      "imageUrl": "https://helldivers.wiki.gg/images/Mortar_Sentry_Stratagem_Icon.svg?8373bb"
+      "imageUrl": "https://helldivers.wiki.gg/images/Mortar_Sentry_Stratagem_Icon.svg?8373bb",
+      "rimCategory": "defensive"
     },
     {
       "name": "Orbital 120MM HE Barrage",
@@ -1005,7 +1035,8 @@
       "kind": "icon",
       "wikiTitle": "Orbital 120mm HE Barrage",
       "sourceUrl": "https://helldivers.wiki.gg/wiki/Orbital_120mm_HE_Barrage",
-      "imageUrl": "https://helldivers.wiki.gg/images/Orbital_120mm_HE_Barrage_Stratagem_Icon.svg?3bdd54"
+      "imageUrl": "https://helldivers.wiki.gg/images/Orbital_120mm_HE_Barrage_Stratagem_Icon.svg?3bdd54",
+      "rimCategory": "orbital"
     },
     {
       "name": "Orbital 380MM HE Barrage",
@@ -1013,7 +1044,8 @@
       "kind": "icon",
       "wikiTitle": "Orbital 380mm HE Barrage",
       "sourceUrl": "https://helldivers.wiki.gg/wiki/Orbital_380mm_HE_Barrage",
-      "imageUrl": "https://helldivers.wiki.gg/images/Orbital_380mm_HE_Barrage_Stratagem_Icon.svg?219bed"
+      "imageUrl": "https://helldivers.wiki.gg/images/Orbital_380mm_HE_Barrage_Stratagem_Icon.svg?219bed",
+      "rimCategory": "orbital"
     },
     {
       "name": "Orbital Airburst Strike",
@@ -1021,7 +1053,8 @@
       "kind": "icon",
       "wikiTitle": "Orbital Airburst Strike",
       "sourceUrl": "https://helldivers.wiki.gg/wiki/Orbital_Airburst_Strike",
-      "imageUrl": "https://helldivers.wiki.gg/images/Orbital_Airburst_Strike_Stratagem_Icon.svg?294c96"
+      "imageUrl": "https://helldivers.wiki.gg/images/Orbital_Airburst_Strike_Stratagem_Icon.svg?294c96",
+      "rimCategory": "orbital"
     },
     {
       "name": "Orbital Gatling Barrage",
@@ -1029,7 +1062,8 @@
       "kind": "icon",
       "wikiTitle": "Orbital Gatling Barrage",
       "sourceUrl": "https://helldivers.wiki.gg/wiki/Orbital_Gatling_Barrage",
-      "imageUrl": "https://helldivers.wiki.gg/images/Orbital_Gatling_Barrage_Stratagem_Icon.svg?b09e0e"
+      "imageUrl": "https://helldivers.wiki.gg/images/Orbital_Gatling_Barrage_Stratagem_Icon.svg?b09e0e",
+      "rimCategory": "orbital"
     },
     {
       "name": "Orbital Laser",
@@ -1037,7 +1071,8 @@
       "kind": "icon",
       "wikiTitle": "Orbital Laser",
       "sourceUrl": "https://helldivers.wiki.gg/wiki/Orbital_Laser",
-      "imageUrl": "https://helldivers.wiki.gg/images/Orbital_Laser_Stratagem_Icon.svg?b2c12d"
+      "imageUrl": "https://helldivers.wiki.gg/images/Orbital_Laser_Stratagem_Icon.svg?b2c12d",
+      "rimCategory": "orbital"
     },
     {
       "name": "Orbital Precision Strike",
@@ -1045,7 +1080,8 @@
       "kind": "icon",
       "wikiTitle": "Orbital Precision Strike",
       "sourceUrl": "https://helldivers.wiki.gg/wiki/Orbital_Precision_Strike",
-      "imageUrl": "https://helldivers.wiki.gg/images/Orbital_Precision_Strike_Stratagem_Icon.svg?64761d"
+      "imageUrl": "https://helldivers.wiki.gg/images/Orbital_Precision_Strike_Stratagem_Icon.svg?64761d",
+      "rimCategory": "orbital"
     },
     {
       "name": "Orbital Railcannon Strike",
@@ -1053,7 +1089,8 @@
       "kind": "icon",
       "wikiTitle": "Orbital Railcannon Strike",
       "sourceUrl": "https://helldivers.wiki.gg/wiki/Orbital_Railcannon_Strike",
-      "imageUrl": "https://helldivers.wiki.gg/images/Orbital_Railcannon_Strike_Stratagem_Icon.svg?9e9dcf"
+      "imageUrl": "https://helldivers.wiki.gg/images/Orbital_Railcannon_Strike_Stratagem_Icon.svg?9e9dcf",
+      "rimCategory": "orbital"
     },
     {
       "name": "Orbital Smoke Strike",
@@ -1061,7 +1098,8 @@
       "kind": "icon",
       "wikiTitle": "Orbital Smoke Strike",
       "sourceUrl": "https://helldivers.wiki.gg/wiki/Orbital_Smoke_Strike",
-      "imageUrl": "https://helldivers.wiki.gg/images/Orbital_Smoke_Strike_Stratagem_Icon.svg?ef6ab9"
+      "imageUrl": "https://helldivers.wiki.gg/images/Orbital_Smoke_Strike_Stratagem_Icon.svg?ef6ab9",
+      "rimCategory": "orbital"
     },
     {
       "name": "RL-77 Airburst Rocket Launcher",
@@ -1069,7 +1107,8 @@
       "kind": "icon",
       "wikiTitle": "RL-77 Airburst Rocket Launcher",
       "sourceUrl": "https://helldivers.wiki.gg/wiki/RL-77_Airburst_Rocket_Launcher",
-      "imageUrl": "https://helldivers.wiki.gg/images/Airburst_Rocket_Launcher_Stratagem_Icon.svg?a0a857"
+      "imageUrl": "https://helldivers.wiki.gg/images/Airburst_Rocket_Launcher_Stratagem_Icon.svg?a0a857",
+      "rimCategory": "support"
     },
     {
       "name": "RS-422 Railgun",
@@ -1077,7 +1116,8 @@
       "kind": "icon",
       "wikiTitle": "RS-422 Railgun",
       "sourceUrl": "https://helldivers.wiki.gg/wiki/RS-422_Railgun",
-      "imageUrl": "https://helldivers.wiki.gg/images/Railgun_Stratagem_Icon.svg?ac42ae"
+      "imageUrl": "https://helldivers.wiki.gg/images/Railgun_Stratagem_Icon.svg?ac42ae",
+      "rimCategory": "support"
     },
     {
       "name": "Rocket Sentry",
@@ -1085,7 +1125,8 @@
       "kind": "icon",
       "wikiTitle": "Rocket Sentry",
       "sourceUrl": "https://helldivers.wiki.gg/wiki/Rocket_Sentry",
-      "imageUrl": "https://helldivers.wiki.gg/images/Rocket_Sentry_Stratagem_Icon.svg?a1bc57"
+      "imageUrl": "https://helldivers.wiki.gg/images/Rocket_Sentry_Stratagem_Icon.svg?a1bc57",
+      "rimCategory": "defensive"
     },
     {
       "name": "Shield Generator Relay",
@@ -1093,7 +1134,8 @@
       "kind": "icon",
       "wikiTitle": "Shield Generator Relay",
       "sourceUrl": "https://helldivers.wiki.gg/wiki/Shield_Generator_Relay",
-      "imageUrl": "https://helldivers.wiki.gg/images/Shield_Generator_Relay_Stratagem_Icon.svg?6dfbad"
+      "imageUrl": "https://helldivers.wiki.gg/images/Shield_Generator_Relay_Stratagem_Icon.svg?6dfbad",
+      "rimCategory": "defensive"
     },
     {
       "name": "StA-X3 W.A.S.P. Launcher",
@@ -1101,7 +1143,8 @@
       "kind": "icon",
       "wikiTitle": "StA-X3 W.A.S.P. Launcher",
       "sourceUrl": "https://helldivers.wiki.gg/wiki/StA-X3_W.A.S.P._Launcher",
-      "imageUrl": "https://helldivers.wiki.gg/images/W.A.S.P._Launcher_Stratagem_Icon.svg?3e82eb"
+      "imageUrl": "https://helldivers.wiki.gg/images/W.A.S.P._Launcher_Stratagem_Icon.svg?3e82eb",
+      "rimCategory": "support"
     },
     {
       "name": "Supply Pack",
@@ -1109,7 +1152,8 @@
       "kind": "icon",
       "wikiTitle": "Supply Pack",
       "sourceUrl": "https://helldivers.wiki.gg/wiki/Supply_Pack",
-      "imageUrl": "https://helldivers.wiki.gg/images/Supply_Pack_Stratagem_Icon.svg?e1c9b1"
+      "imageUrl": "https://helldivers.wiki.gg/images/Supply_Pack_Stratagem_Icon.svg?e1c9b1",
+      "rimCategory": "support"
     }
   ]
 }
