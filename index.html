@@ -1661,6 +1661,29 @@ END MASTER DIRECTIVE
             width: 100%;
         }
 
+        #tab-items .itemsViewModeRow {
+            margin-top: 10px;
+            align-items: center;
+        }
+
+        #tab-items .itemsViewModeRow .label {
+            margin-bottom: 0;
+        }
+
+        #tab-items .typeTag {
+            display: inline-flex;
+            align-items: center;
+            border: 1px solid rgba(255, 212, 0, .35);
+            border-radius: 999px;
+            padding: 2px 8px;
+            font-size: 10px;
+            letter-spacing: .5px;
+            font-weight: 900;
+            color: rgba(255, 212, 0, .95);
+            text-transform: uppercase;
+            width: fit-content;
+        }
+
         #tab-items .warbondGroup {
             border: 1px solid rgba(255,255,255,.08);
             border-radius: 12px;
@@ -2472,6 +2495,29 @@ END MASTER DIRECTIVE
 
             <div class="divider"></div>
 
+            <div class="row itemsViewModeRow">
+                <div class="col">
+                    <div class="label">Item view mode</div>
+                    <div class="tiny">Default is Warbond-first so all items from a warbond stay together. Switch to Type-first anytime.</div>
+                </div>
+                <div class="col right">
+                    <div class="miniRow" style="justify-content:flex-end;">
+                        <select id="itemsViewMode">
+                            <option value="warbond">Warbond-first (recommended)</option>
+                            <option value="category">Type-first (Primary / Sidearm / Throwable / Stratagems)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div id="itemsWarbondView">
+                <div id="listItemsByWarbond"></div>
+            </div>
+
+            <div id="itemsCategoryView">
+
             <div class="row">
                 <div class="col">
                     <div class="label">Primary</div>
@@ -2491,8 +2537,6 @@ END MASTER DIRECTIVE
                 </div>
             </div>
 
-            <div class="divider"></div>
-
             <div class="row">
                 <div class="col">
                     <div class="label">Throwable</div>
@@ -2510,6 +2554,8 @@ END MASTER DIRECTIVE
                         <button id="btnAddStrat" class="btnGhost">ADD</button>
                     </div>
                 </div>
+            </div>
+
             </div>
 
             <div class="divider"></div>
@@ -6435,6 +6481,15 @@ ${noteContent}`
             listStrats: "stratagem"
         };
 
+        const ITEM_LIST_METADATA = [
+            { key: "primaries", label: "Primary", containerId: "listPrimaries", visualCategory: "primary" },
+            { key: "sidearms", label: "Sidearm", containerId: "listSidearms", visualCategory: "sidearm" },
+            { key: "throwables", label: "Throwable", containerId: "listThrowables", visualCategory: "throwable" },
+            { key: "stratagems", label: "Stratagem", containerId: "listStrats", visualCategory: "stratagem" }
+        ];
+
+        const ITEMS_VIEW_MODE_KEY = "hd2_items_view_mode";
+
         const WARBOND_ORDER = [
             "Helldiver Basics (Mobilize)",
             "Steeled Veterans",
@@ -6691,78 +6746,176 @@ ${noteContent}`
                 groupBox.appendChild(groupHeader);
 
                 items.forEach(({ it, idx }) => {
-                const outer = document.createElement("div");
-                outer.className = "rankOuter";
+                    const row = buildItemEditorRow({
+                        item: it,
+                        containerId,
+                        onToggle: () => onToggle(idx)
+                    });
+                    groupBox.appendChild(row);
+                });
 
-                const row = document.createElement("div");
-                row.className = "rankRow";
-                row.style.justifyContent = "space-between";
-                row.style.border = "1px solid rgba(255,255,255,.06)";
-                row.style.borderRadius = "12px";
-                row.style.padding = "8px 10px";
-                row.style.background = "rgba(0,0,0,.18)";
+                wrap.appendChild(groupBox);
+            });
 
-                const visual = document.createElement("div");
-                visual.className = "itemVisualCell";
+            box.appendChild(wrap);
+        }
 
-                const asset = resolveItemVisualAsset(containerId, it.name);
-                if (asset?.src) {
+        function buildItemEditorRow({ item, containerId, onToggle, typeLabel = "" }) {
+            const outer = document.createElement("div");
+            outer.className = "rankOuter";
+
+            const row = document.createElement("div");
+            row.className = "rankRow";
+            row.style.justifyContent = "space-between";
+            row.style.border = "1px solid rgba(255,255,255,.06)";
+            row.style.borderRadius = "12px";
+            row.style.padding = "8px 10px";
+            row.style.background = "rgba(0,0,0,.18)";
+
+            const visual = document.createElement("div");
+            visual.className = "itemVisualCell";
+
+            const asset = resolveItemVisualAsset(containerId, item.name);
+            if (asset?.src) {
+                const img = document.createElement("img");
+                img.loading = "lazy";
+                img.alt = `${item.name} visual`;
+                img.src = asset.src;
+                img.addEventListener("error", () => {
+                    if (asset.fallbackSrc && img.src !== asset.fallbackSrc) {
+                        img.src = asset.fallbackSrc;
+                        return;
+                    }
+                    visual.innerHTML = `<span class="itemVisualFallback">N/A</span>`;
+                });
+                visual.appendChild(img);
+            } else {
+                visual.innerHTML = `<span class="itemVisualFallback">N/A</span>`;
+            }
+
+            const left = document.createElement("div");
+            left.style.display = "flex";
+            left.style.flexDirection = "column";
+            left.style.gap = "2px";
+
+            const leftWrap = document.createElement("div");
+            leftWrap.style.display = "flex";
+            leftWrap.style.alignItems = "center";
+            leftWrap.style.gap = "10px";
+
+            const name = document.createElement("div");
+            name.style.fontWeight = "800";
+            name.style.fontSize = "18px";
+            name.textContent = item.name;
+
+            const meta = document.createElement("div");
+            meta.className = "tiny";
+            meta.textContent = item.enabled ? "Enabled" : "Disabled";
+
+            left.appendChild(name);
+            if (typeLabel) {
+                const type = document.createElement("div");
+                type.className = "typeTag";
+                type.textContent = typeLabel;
+                left.appendChild(type);
+            }
+            left.appendChild(meta);
+            leftWrap.appendChild(visual);
+            leftWrap.appendChild(left);
+
+            const right = document.createElement("div");
+            right.className = "miniRow";
+
+            const tgl = document.createElement("button");
+            tgl.className = item.enabled ? "btnPrimary" : "btnGhost";
+            tgl.classList.add("itemToggleBtn");
+            tgl.textContent = item.enabled ? "ENABLED" : "DISABLED";
+            tgl.addEventListener("click", onToggle);
+
+            right.appendChild(tgl);
+
+            row.appendChild(leftWrap);
+            row.appendChild(right);
+            outer.appendChild(row);
+            return outer;
+        }
+
+        function getItemsViewMode() {
+            const saved = localStorage.getItem(ITEMS_VIEW_MODE_KEY);
+            return saved === "category" ? "category" : "warbond";
+        }
+
+        function renderItemsByWarbond() {
+            const box = document.getElementById("listItemsByWarbond");
+            if (!box) return;
+            box.innerHTML = "";
+
+            const query = normalizeText($("#itemSearch")?.value || "");
+            const byWarbond = new Map();
+
+            ITEM_LIST_METADATA.forEach(meta => {
+                const list = state.items[meta.key] || [];
+                list.forEach((item, index) => {
+                    const warbond = getItemWarbond(item);
+                    const searchable = `${item.name} ${warbond} ${meta.label}`;
+                    if (query && !normalizeText(searchable).includes(query)) return;
+                    if (!byWarbond.has(warbond)) byWarbond.set(warbond, []);
+                    byWarbond.get(warbond).push({ item, index, meta });
+                });
+            });
+
+            if (!byWarbond.size) {
+                box.innerHTML = `<div class="tiny">No items matched your search.</div>`;
+                return;
+            }
+
+            const wrap = document.createElement("div");
+            wrap.style.display = "flex";
+            wrap.style.flexDirection = "column";
+            wrap.style.gap = "8px";
+
+            const groups = Array.from(byWarbond.entries()).sort((a, b) => {
+                const ai = WARBOND_ORDER.indexOf(a[0]);
+                const bi = WARBOND_ORDER.indexOf(b[0]);
+                if (ai === -1 && bi === -1) return a[0].localeCompare(b[0]);
+                if (ai === -1) return 1;
+                if (bi === -1) return -1;
+                return ai - bi;
+            });
+
+            groups.forEach(([warbond, entries]) => {
+                const groupBox = document.createElement("div");
+                groupBox.className = "warbondGroup";
+
+                const groupHeader = document.createElement("div");
+                groupHeader.className = "warbondHeader";
+                const art = WARBOND_ART[warbond];
+                if (art) {
                     const img = document.createElement("img");
                     img.loading = "lazy";
-                    img.alt = `${it.name} visual`;
-                    img.src = asset.src;
-                    img.addEventListener("error", () => {
-                        if (asset.fallbackSrc && img.src !== asset.fallbackSrc) {
-                            img.src = asset.fallbackSrc;
-                            return;
-                        }
-                        visual.innerHTML = `<span class="itemVisualFallback">N/A</span>`;
-                    });
-                    visual.appendChild(img);
-                } else {
-                    visual.innerHTML = `<span class="itemVisualFallback">N/A</span>`;
+                    img.alt = `${warbond} cover`;
+                    img.src = art;
+                    groupHeader.appendChild(img);
                 }
+                const title = document.createElement("div");
+                title.style.fontWeight = "900";
+                title.textContent = warbond;
+                groupHeader.appendChild(title);
+                groupBox.appendChild(groupHeader);
 
-                const left = document.createElement("div");
-                left.style.display = "flex";
-                left.style.flexDirection = "column";
-                left.style.gap = "2px";
-
-                const leftWrap = document.createElement("div");
-                leftWrap.style.display = "flex";
-                leftWrap.style.alignItems = "center";
-                leftWrap.style.gap = "10px";
-
-                const name = document.createElement("div");
-                name.style.fontWeight = "800";
-                name.style.fontSize = "18px";
-                name.textContent = it.name;
-
-                const meta = document.createElement("div");
-                meta.className = "tiny";
-                meta.textContent = it.enabled ? "Enabled" : "Disabled";
-
-                left.appendChild(name);
-                left.appendChild(meta);
-                leftWrap.appendChild(visual);
-                leftWrap.appendChild(left);
-
-                const right = document.createElement("div");
-                right.className = "miniRow";
-
-                const tgl = document.createElement("button");
-                tgl.className = it.enabled ? "btnPrimary" : "btnGhost";
-                tgl.classList.add("itemToggleBtn");
-                tgl.textContent = it.enabled ? "ENABLED" : "DISABLED";
-                tgl.addEventListener("click", () => onToggle(idx));
-
-                right.appendChild(tgl);
-
-                row.appendChild(leftWrap);
-                row.appendChild(right);
-                outer.appendChild(row);
-                groupBox.appendChild(outer);
-            });
+                entries.forEach(({ item, index, meta }) => {
+                    const row = buildItemEditorRow({
+                        item,
+                        containerId: meta.containerId,
+                        typeLabel: meta.label,
+                        onToggle: () => {
+                            state.items[meta.key][index].enabled = !state.items[meta.key][index].enabled;
+                            saveState();
+                            renderItems();
+                        }
+                    });
+                    groupBox.appendChild(row);
+                });
 
                 wrap.appendChild(groupBox);
             });
@@ -6947,18 +7100,32 @@ ${noteContent}`
         }
 
         function renderItems() {
-            renderItemList("listPrimaries", state.items.primaries,
-                (i) => { state.items.primaries[i].enabled = !state.items.primaries[i].enabled; saveState(); renderItems(); }
-            );
-            renderItemList("listSidearms", state.items.sidearms,
-                (i) => { state.items.sidearms[i].enabled = !state.items.sidearms[i].enabled; saveState(); renderItems(); }
-            );
-            renderItemList("listThrowables", state.items.throwables,
-                (i) => { state.items.throwables[i].enabled = !state.items.throwables[i].enabled; saveState(); renderItems(); }
-            );
-            renderItemList("listStrats", state.items.stratagems,
-                (i) => { state.items.stratagems[i].enabled = !state.items.stratagems[i].enabled; saveState(); renderItems(); }
-            );
+            const viewMode = getItemsViewMode();
+            const warbondView = $("#itemsWarbondView");
+            const categoryView = $("#itemsCategoryView");
+            if (warbondView) warbondView.style.display = viewMode === "warbond" ? "block" : "none";
+            if (categoryView) categoryView.style.display = viewMode === "category" ? "block" : "none";
+
+            const modeSelect = $("#itemsViewMode");
+            if (modeSelect && modeSelect.value !== viewMode) modeSelect.value = viewMode;
+
+            if (viewMode === "warbond") {
+                renderItemsByWarbond();
+            } else {
+                renderItemList("listPrimaries", state.items.primaries,
+                    (i) => { state.items.primaries[i].enabled = !state.items.primaries[i].enabled; saveState(); renderItems(); }
+                );
+                renderItemList("listSidearms", state.items.sidearms,
+                    (i) => { state.items.sidearms[i].enabled = !state.items.sidearms[i].enabled; saveState(); renderItems(); }
+                );
+                renderItemList("listThrowables", state.items.throwables,
+                    (i) => { state.items.throwables[i].enabled = !state.items.throwables[i].enabled; saveState(); renderItems(); }
+                );
+                renderItemList("listStrats", state.items.stratagems,
+                    (i) => { state.items.stratagems[i].enabled = !state.items.stratagems[i].enabled; saveState(); renderItems(); }
+                );
+            }
+
             renderPlanets();
 
             if (Array.isArray(window.__apiActivePlanetsCache) && window.__apiActivePlanetsCache.length) {
@@ -7360,6 +7527,10 @@ ${noteContent}`
             $("#cmpSearch").addEventListener("input", refreshCompareOptions);
             $("#rankSearch").addEventListener("input", renderRank);
             $("#itemSearch").addEventListener("input", renderItems);
+            $("#itemsViewMode").addEventListener("change", (e) => {
+                localStorage.setItem(ITEMS_VIEW_MODE_KEY, e.target.value === "category" ? "category" : "warbond");
+                renderItems();
+            });
 
             $("#btnExport").addEventListener("click", exportJSON);
             $("#btnImport").addEventListener("click", () => $("#importFile").click());
