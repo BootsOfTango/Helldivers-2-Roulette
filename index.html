@@ -6004,8 +6004,20 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 const rr = radius * Math.max(0, Math.min(1, Number(radarValues[i] || 0)));
                 return { x: cx + Math.cos(ang) * rr, y: cy + Math.sin(ang) * rr };
             });
-            ctx.fillStyle = "rgba(90,120,255,.32)";
-            ctx.strokeStyle = "#7ea1ff";
+            const radarTierColor = getTierRadarColor({ tier });
+            ctx.fillStyle = radarTierColor.fill;
+            if (tier === "rainbow") {
+                const radarGradient = ctx.createLinearGradient(cx - radius, cy - radius, cx + radius, cy + radius);
+                radarGradient.addColorStop(0, "#ff3b3b");
+                radarGradient.addColorStop(0.2, "#ff9f1a");
+                radarGradient.addColorStop(0.4, "#ffd400");
+                radarGradient.addColorStop(0.6, "#2ecc71");
+                radarGradient.addColorStop(0.8, "#3b82f6");
+                radarGradient.addColorStop(1, "#a855f7");
+                ctx.strokeStyle = radarGradient;
+            } else {
+                ctx.strokeStyle = radarTierColor.stroke;
+            }
             ctx.lineWidth = 4;
             ctx.beginPath();
             valPoints.forEach((p, i) => {
