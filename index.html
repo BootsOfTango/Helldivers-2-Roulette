@@ -5838,24 +5838,35 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             ];
         }
 
+        function getDiscordTierVisual(tier) {
+            const map = {
+                gold: { label: "Gold", embedColor: 0xffcc4d, strokeColor: "#ffcc4d", marker: "🟡" },
+                silver: { label: "Silver", embedColor: 0xcfd6e6, strokeColor: "#cfd6e6", marker: "⚪" },
+                bronze: { label: "Bronze", embedColor: 0xd59a67, strokeColor: "#d59a67", marker: "🟠" },
+                darkbronze: { label: "Dark Bronze", embedColor: 0x8b5a3c, strokeColor: "#8b5a3c", marker: "🟤" },
+                rainbow: {
+                    label: "Rainbow",
+                    embedColor: 0x8c7bff,
+                    strokeColor: "#8c7bff",
+                    marker: "🔴🟠🟡🟢🔵🟣"
+                }
+            };
+            return map[tier] || { label: "Unranked", embedColor: 0x2b3549, strokeColor: "#7f8ca8", marker: "⚫" };
+        }
+
         function buildDiscordCardEmbed(card, imageUrl, imageStyle = "thumbnail") {
             const s = card.stats || {};
             const weatherText = card.planet ? getPlanetWeatherText(card.planet) : "None";
             const createdAt = card.createdAt ? new Date(card.createdAt).toLocaleString() : "—";
             const tier = getCardTierClass(card);
+            const tierVisual = getDiscordTierVisual(tier);
             const notes = String(card.notes || "").trim();
-            const tierColor = {
-                gold: 0xffcc4d,
-                silver: 0xcfd6e6,
-                bronze: 0xd59a67,
-                darkbronze: 0x8b5a3c,
-                rainbow: 0x8c7bff
-            }[tier] || 0x2b3549;
 
             const embed = {
-                color: tierColor,
+                color: tierVisual.embedColor,
                 title: `🎖️ ${formatSeedWithPlayer(card)}`,
                 description: [
+                    `**Rank:** ${tierVisual.marker} ${tierVisual.label}`,
                     `**Mode:** ${card.mode || "—"}`,
                     `**Faction:** ${card.faction || "—"}`,
                     `**Major Order:** ${card.majorOrderDone ? "✅ DONE" : "❌ FAIL"}`,
@@ -5927,6 +5938,9 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             if (!ctx) throw new Error("Canvas context unavailable");
             ctx.scale(DISCORD_RANK_PANEL_SCALE, DISCORD_RANK_PANEL_SCALE);
 
+            const tier = getCardTierClass(card);
+            const tierVisual = getDiscordTierVisual(tier);
+
             const s = card.stats || {};
             const grad = ctx.createLinearGradient(0, 0, 0, baseHeight);
             grad.addColorStop(0, "#070c16");
@@ -5934,7 +5948,18 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             ctx.fillStyle = grad;
             ctx.fillRect(0, 0, baseWidth, baseHeight);
 
-            ctx.strokeStyle = "rgba(120,150,220,.35)";
+            if (tier === "rainbow") {
+                const rainbowBorder = ctx.createLinearGradient(22, 22, baseWidth - 22, baseHeight - 22);
+                rainbowBorder.addColorStop(0, "#ff3b3b");
+                rainbowBorder.addColorStop(0.2, "#ff9f1a");
+                rainbowBorder.addColorStop(0.4, "#ffd400");
+                rainbowBorder.addColorStop(0.6, "#2ecc71");
+                rainbowBorder.addColorStop(0.8, "#3b82f6");
+                rainbowBorder.addColorStop(1, "#a855f7");
+                ctx.strokeStyle = rainbowBorder;
+            } else {
+                ctx.strokeStyle = tierVisual.strokeColor;
+            }
             ctx.lineWidth = 4;
             ctx.strokeRect(22, 22, baseWidth - 44, baseHeight - 44);
 
