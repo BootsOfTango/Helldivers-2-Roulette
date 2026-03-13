@@ -3137,6 +3137,19 @@ END MASTER DIRECTIVE
 
 function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
+        function roundToSingleDecimal(value) {
+            const n = Number(value || 0);
+            if (!Number.isFinite(n)) return 0;
+            return Math.round(n * 10) / 10;
+        }
+
+        function formatMetricDisplay(value, metricKey = "") {
+            const n = Number(value || 0);
+            if (!Number.isFinite(n)) return "0";
+            if (metricKey === "distanceKm" || metricKey === "raw") return roundToSingleDecimal(n).toFixed(1);
+            return Number.isInteger(n) ? String(n) : roundToSingleDecimal(n).toFixed(1);
+        }
+
         const DEFAULT_PLAYER_NAME = "Boots of Tango";
 
         function getPlayerName(card) {
@@ -5935,7 +5948,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             statLine("Accuracy", `${Number(s.accuracy || 0)}%`, 305);
             statLine("Deaths", Number(s.deaths || 0), 360);
             statLine("Stims", Number(s.stims || 0), 415);
-            statLine("Distance", `${Number(s.distanceKm || 0)} km`, 470);
+            statLine("Distance", `${formatMetricDisplay(s.distanceKm, "distanceKm")} km`, 470);
             statLine("Strat Uses", Number(s.stratUses || 0), 525);
 
             ctx.fillStyle = "#f5dc54";
@@ -6029,7 +6042,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                             `Accuracy: **${Number(s.accuracy || 0)}%**`,
                             `Deaths: **${Number(s.deaths || 0)}**`,
                             `Stims: **${Number(s.stims || 0)}**`,
-                            `Distance: **${Number(s.distanceKm || 0)} km**`,
+                            `Distance: **${formatMetricDisplay(s.distanceKm, "distanceKm")} km**`,
                             `Strat Uses: **${Number(s.stratUses || 0)}**`
                         ].join("\n")
                     }
@@ -6099,7 +6112,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 `POWER\n${Number(s.kills || 0)} kills`,
                 `AGILITY\n${Number(s.accuracy || 0)}% acc`,
                 `ENDURANCE\n${Number(s.deaths || 0) + Number(s.stims || 0)} combo`,
-                `MOBILITY\n${Number(s.distanceKm || 0)} km`,
+                `MOBILITY\n${formatMetricDisplay(s.distanceKm, "distanceKm")} km`,
                 `UTILITY\n${Number(s.stratUses || 0)} uses`
             ];
             const cx = baseWidth / 2;
@@ -6477,8 +6490,8 @@ ${noteContent}`
                 table.insertAdjacentHTML("beforeend", `
                               <tr>
                                 <td class="muted">${escapeHtml(r.name)}</td>
-                                <td class="${clsA}">${r.k === "majorOrderDone" ? (ca ? (ca.majorOrderDone ? "MO DONE ✅" : "MO FAIL ❌") : "—") : (va ?? "—")}</td>
-                                <td class="${clsB}">${r.k === "majorOrderDone" ? (cb ? (cb.majorOrderDone ? "MO DONE ✅" : "MO FAIL ❌") : "—") : (vb ?? "—")}</td>
+                                <td class="${clsA}">${r.k === "majorOrderDone" ? (ca ? (ca.majorOrderDone ? "MO DONE ✅" : "MO FAIL ❌") : "—") : formatMetricDisplay(va, r.k)}</td>
+                                <td class="${clsB}">${r.k === "majorOrderDone" ? (cb ? (cb.majorOrderDone ? "MO DONE ✅" : "MO FAIL ❌") : "—") : formatMetricDisplay(vb, r.k)}</td>
                               </tr>
                             `);
             }
