@@ -1766,16 +1766,6 @@ END MASTER DIRECTIVE
             background: rgba(0,0,0,.92);
         }
 
-        .rankDiscordBtn {
-            width: 170px;
-            min-height: 48px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            line-height: 1.1;
-            padding: 10px 14px;
-        }
 
         .rim-rainbow {
             padding: 4px;
@@ -6222,22 +6212,6 @@ ${noteContent}`
 
         }
 
-        async function onRankCardAction(e) {
-            const act = e.target.getAttribute("data-rank-act");
-            const id = e.target.getAttribute("data-id");
-            if (act !== "sendDiscord" || !id) return;
-
-            const card = getCardById(id);
-            if (!card) return;
-
-            try {
-                await sendCardToDiscord(card);
-                alert("Sent to Discord ✅");
-            } catch (err) {
-                console.error("[discord] send failed", err);
-                alert(`Discord send failed: ${err.message || err}`);
-            }
-        }
 
         /***********************
          * Compare
@@ -7353,12 +7327,10 @@ ${noteContent}`
                           <div style="text-align:right; display:flex; flex-direction:column; align-items:flex-end; gap:6px;">
                             <div class="badge yellow">Grade ${Number(c.grade || 0)}</div>
                             <div class="tiny">Raw ${Number(c.scoreRaw || 0).toFixed(1)}</div>
-                            <button class="btnGhost rankDiscordBtn" data-rank-act="sendDiscord" data-id="${c.id}">SEND CARD TO DISCORD</button>
                           </div>
                         `;
 
                 row.addEventListener("click", (e) => {
-                    if (e.target.closest('button[data-rank-act]')) return;
                     selectedRankCardId = c.id;
                     renderRank();
                 });
@@ -7366,11 +7338,6 @@ ${noteContent}`
                 outer.appendChild(row);
                 box.appendChild(outer);
             });
-
-            box.querySelectorAll("button[data-rank-act]").forEach(btn => {
-                btn.addEventListener("click", onRankCardAction);
-            });
-
             const selectedCard = list.find(c => c.id === selectedRankCardId) || filtered[0] || null;
             const selectedPlace = selectedCard ? (list.findIndex(x => x.id === selectedCard.id) + 1) : 0;
             renderRankDetailPanel(selectedCard, selectedPlace, radarMaxes);
