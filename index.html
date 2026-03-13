@@ -5012,7 +5012,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             </div>`;
 
             if (overlay) {
-                overlay.innerHTML = `<div class="tiny muted">Click <strong>STACK RADARS</strong> to overlap both pentagons, then hover each stat wedge to see who wins.<br>Radar size now follows Grade, and MO FAIL still applies a ${Math.round((1 - MO_FAIL_MULTIPLIER) * 100)}% penalty.</div>`;
+                overlay.innerHTML = `<div class="tiny muted">Click <strong>STACK RADARS</strong> to overlap both pentagons, then hover each stat wedge to see who wins.<br>Stacked radar uses raw stat values per axis (no Grade/MO size scaling) so winners and % are accurate for any pair.</div>`;
             }
             if (insight) insight.textContent = "";
 
@@ -5026,14 +5026,49 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         function getCompareVals(card, maxes) {
             const s = card?.stats || {};
             const combo = Number(s.deaths || 0) + Number(s.stims || 0);
-            const radarScale = getRadarScale(card);
+            // Overlay comparisons must use raw stat-normalized values (no grade/MO scaling),
+            // otherwise a stronger overall grade can incorrectly flip per-axis winners.
             return [
-                normPos(s.kills, maxes.maxKills) * radarScale,
-                normPos(s.accuracy, maxes.maxAccuracy) * radarScale,
-                normInverse(combo, maxes.minDeathsPlusStims, maxes.maxDeathsPlusStims) * radarScale,
-                normPos(s.distanceKm, maxes.maxDistanceKm) * radarScale,
-                normPos(s.stratUses, maxes.maxStratUses) * radarScale,
+                normPos(s.kills, maxes.maxKills),
+                normPos(s.accuracy, maxes.maxAccuracy),
+                normInverse(combo, maxes.minDeathsPlusStims, maxes.maxDeathsPlusStims),
+                normPos(s.distanceKm, maxes.maxDistanceKm),
+                normPos(s.stratUses, maxes.maxStratUses),
             ].map(v => clamp(v, 0, 1));
+        }
+
+        function getCompareMetricValue(card, axisKey) {
+            const s = card?.stats || {};
+            if (axisKey === "POWER") return Number(s.kills || 0);
+            if (axisKey === "AGILITY") return Number(s.accuracy || 0);
+            if (axisKey === "ENDURANCE") return Number(s.deaths || 0) + Number(s.stims || 0);
+            if (axisKey === "MOBILITY") return Number(s.distanceKm || 0);
+            if (axisKey === "UTILITY") return Number(s.stratUses || 0);
+            return 0;
+        }
+
+        function getComparePercentDiff(cardA, cardB, axisKey) {
+            const aRaw = getCompareMetricValue(cardA, axisKey);
+            const bRaw = getCompareMetricValue(cardB, axisKey);
+            const lowerIsBetter = axisKey === "ENDURANCE";
+
+            if (Math.abs(aRaw - bRaw) < 0.000001) {
+                return { winner: "tie", pctInt: 0 };
+            }
+
+            if (!lowerIsBetter) {
+                const winner = aRaw > bRaw ? "A" : "B";
+                const high = Math.max(aRaw, bRaw);
+                const low = Math.min(aRaw, bRaw);
+                const pct = low <= 0 ? (high > 0 ? 100 : 0) : ((high - low) / low) * 100;
+                return { winner, pctInt: Math.max(0, Math.round(pct)) };
+            }
+
+            const winner = aRaw < bRaw ? "A" : "B";
+            const better = Math.min(aRaw, bRaw);
+            const worse = Math.max(aRaw, bRaw);
+            const pct = worse <= 0 ? 0 : ((worse - better) / worse) * 100;
+            return { winner, pctInt: Math.max(0, Math.round(pct)) };
         }
 
         function buildOverlayRadar() {
@@ -5125,22 +5160,18 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 const hit3 = pt(hitRadius, nextA);
                 hitAreas.push(`<polygon class="cmpOverlayAxisHit" data-axis="${i}" points="${fmt({ x: cx, y: cy })} ${fmt(hit1)} ${fmt(hit2)} ${fmt(hit3)}" />`);
 
-                const a = valsA[i], b = valsB[i];
-                const winner = (Math.abs(a - b) < 0.01) ? "tie" : (a > b ? "A" : "B");
-                const high = Math.max(a, b);
-                const low = Math.min(a, b);
-                const pct = low <= 0 ? (high > 0 ? 100 : 0) : ((high - low) / low) * 100;
-                const pctInt = Math.max(0, Math.round(pct));
+                const compare = getComparePercentDiff(cardA, cardB, axes[i].key);
+                const winner = compare.winner;
+                const pctInt = compare.pctInt;
                 const winnerSeed = winner === "A" ? formatSeedWithPlayer(cardA) : (winner === "B" ? formatSeedWithPlayer(cardB) : "Tied");
-                const arrow = winner === "A" ? "↑" : (winner === "B" ? "↑" : "↔");
                 const statLabel = axes[i].compareLabel || axes[i].metric || axes[i].key;
                 const msg = winner === "tie"
                     ? `${statLabel} — TIE`
-                    : `${winnerSeed}, ${statLabel} ${pctInt}% ${arrow}`;
+                     : `${winnerSeed}, ${statLabel} ${pctInt}% BETTER`;
 
                 const bannerText = winner === "tie"
                     ? `<span class="cmpLabel">${statLabel}</span> <span class="cmpSuffix">TIE</span>`
-                    : `<span class="cmpLabel">${statLabel}</span> <span class="cmpPct">${pctInt}%</span> <span class="cmpSuffix">HIGHER</span>`;
+                    : `<span class="cmpLabel">${statLabel}</span> <span class="cmpPct">${pctInt}%</span> <span class="cmpSuffix">BETTER</span>`;
 
                 const glowColor = compareHighlight;
                 if (winner !== "tie") {
