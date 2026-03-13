@@ -1914,6 +1914,36 @@ END MASTER DIRECTIVE
             margin-top: 8px;
         }
 
+        .rankBackupNotice {
+            margin-top: 12px;
+            border: 1px solid rgba(255, 212, 0, .45);
+            background: rgba(255, 212, 0, .10);
+            border-radius: 10px;
+            padding: 10px 12px;
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+            .rankBackupNotice .warnText {
+                font-size: 12px;
+                color: #ffeaa2;
+                line-height: 1.35;
+            }
+
+            .rankBackupNotice .warnText strong {
+                color: #fff6ce;
+            }
+
+        #btnRankBackupNow {
+            white-space: nowrap;
+            border-color: rgba(255, 212, 0, .65);
+            color: #ffe05b;
+            background: rgba(255, 212, 0, .08);
+        }
+
         @media (max-width: 1100px) {
             #rankSplitView {
                 grid-template-columns: 1fr;
@@ -2631,6 +2661,14 @@ END MASTER DIRECTIVE
                 <div class="col">
                     <input id="rankSearch" placeholder="Search rank by player name..." />
                 </div>
+            </div>
+
+            <div class="rankBackupNotice" role="note" aria-live="polite">
+                <div class="warnText">
+                    <strong>⚠️ If not saved, your rank data could be lost.</strong><br>
+                    Click this button to save locally.
+                </div>
+                <button id="btnRankBackupNow" class="btnGhost">SAVE LOCAL BACKUP</button>
             </div>
 
             <div class="divider"></div>
@@ -7650,6 +7688,7 @@ ${noteContent}`
             });
 
             $("#btnExport").addEventListener("click", exportJSON);
+            $("#btnRankBackupNow").addEventListener("click", exportJSON);
             $("#btnImport").addEventListener("click", () => $("#importFile").click());
             $("#importFile").addEventListener("change", (e) => {
                 const f = e.target.files && e.target.files[0];
