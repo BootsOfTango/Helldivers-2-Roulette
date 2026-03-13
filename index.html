@@ -1543,6 +1543,39 @@ END MASTER DIRECTIVE
             text-shadow: 0 0 8px rgba(255,75,75,.8), 0 0 16px rgba(255,75,75,.45);
         }
 
+        .cmpHoverSeed {
+            width: 100%;
+            display: block;
+            font-size: .45em;
+            font-weight: 800;
+            letter-spacing: .03em;
+            text-transform: none;
+            color: #d8e8ff;
+            opacity: .95;
+            margin-bottom: .2em;
+        }
+
+        .cmpStackHoverTip {
+            position: fixed;
+            z-index: 9999;
+            pointer-events: none;
+            display: none;
+            max-width: min(320px, 88vw);
+            padding: 8px 10px;
+            border-radius: 10px;
+            border: 1px solid rgba(127,255,179,.55);
+            background: rgba(3, 7, 16, .94);
+            color: #f3fbff;
+            font-size: 12px;
+            line-height: 1.35;
+            box-shadow: 0 0 16px rgba(0,0,0,.45), 0 0 22px rgba(127,255,179,.2);
+            white-space: normal;
+        }
+
+        .cmpStackHoverTip .muted {
+            color: #97a6bf;
+        }
+
         .cmpHoverBanner.winner-a .cmpHoverBannerSide.left,
         .cmpHoverBanner.winner-b .cmpHoverBannerSide.right,
         .cmpHoverBanner.winner-tie .cmpHoverBannerSide {
@@ -5179,14 +5212,21 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 const winner = compare.winner;
                 const pctInt = compare.pctInt;
                 const winnerSeed = winner === "A" ? formatSeedWithPlayer(cardA) : (winner === "B" ? formatSeedWithPlayer(cardB) : "Tied");
+                const winnerCard = winner === "A" ? cardA : (winner === "B" ? cardB : null);
+                const winnerSeedName = winnerCard ? String(winnerCard.seed || "—") : "Tie";
+                const winnerPlayerName = winnerCard ? getPlayerName(winnerCard) : `${getPlayerName(cardA)} / ${getPlayerName(cardB)}`;
                 const statLabel = axes[i].compareLabel || axes[i].metric || axes[i].key;
                 const msg = winner === "tie"
                     ? `${statLabel} — TIE`
                      : `${winnerSeed}, ${statLabel} ${pctInt}% BETTER`;
 
-                const bannerText = winner === "tie"
+                const statLine = winner === "tie"
                     ? `<span class="cmpLabel">${statLabel}</span> <span class="cmpSuffix">TIE</span>`
                     : `<span class="cmpLabel">${statLabel}</span> <span class="cmpPct">${pctInt}%</span> <span class="cmpSuffix">BETTER</span>`;
+                const seedLine = winner === "tie"
+                    ? `Seeds: ${String(cardA.seed || "—")} vs ${String(cardB.seed || "—")}`
+                    : `Seed: ${winnerSeedName}`;
+                const bannerText = `<span class="cmpHoverSeed">${escapeHtml(seedLine)}</span>${statLine}`;
 
                 const glowColor = compareHighlight;
                 if (winner !== "tie") {
@@ -5195,11 +5235,11 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                     const nextIdx = (i + 1) % axes.length;
                     axisEdges.push(`<line class="cmpAxisEdge" id="cmpAxisEdge-${i}" x1="${edgePts[i].x.toFixed(1)}" y1="${edgePts[i].y.toFixed(1)}" x2="${edgePts[nextIdx].x.toFixed(1)}" y2="${edgePts[nextIdx].y.toFixed(1)}" style="color:${glowColor};" />`);
                     winDots.push(`<circle class="cmpWinDot" id="cmpWinDot-${i}" cx="${edgePts[i].x.toFixed(1)}" cy="${edgePts[i].y.toFixed(1)}" r="2.8" />`);
-                    hoverRows.push({ axis: i, winner, winnerKey, message: msg, bannerText });
+                    hoverRows.push({ axis: i, winner, winnerKey, message: msg, bannerText, winnerSeedName, winnerPlayerName, statLabel, pctInt });
                     continue;
                 }
 
-                hoverRows.push({ axis: i, winner, winnerKey: "tie", message: msg, bannerText });
+                hoverRows.push({ axis: i, winner, winnerKey: "tie", message: msg, bannerText, winnerSeedName, winnerPlayerName, statLabel, pctInt });
             }
 
             overlay.innerHTML = `
@@ -5228,8 +5268,49 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             }
 
             const hits = overlay.querySelectorAll(".cmpOverlayAxisHit");
+            let activeHoverRow = null;
+
+            const getCmpStackHoverTip = () => {
+                let tip = document.getElementById("cmpStackHoverTip");
+                if (!tip) {
+                    tip = document.createElement("div");
+                    tip.id = "cmpStackHoverTip";
+                    tip.className = "cmpStackHoverTip";
+                    document.body.appendChild(tip);
+                }
+                return tip;
+            };
+
+            const hideCmpStackHoverTip = () => {
+                const tip = document.getElementById("cmpStackHoverTip");
+                if (tip) tip.style.display = "none";
+            };
+
+            const showCmpStackHoverTip = (event, row) => {
+                const tip = getCmpStackHoverTip();
+                const details = row.winner === "tie"
+                    ? `<div><span class="muted">Players:</span> ${escapeHtml(row.winnerPlayerName)}</div>`
+                    : `<div><span class="muted">Player:</span> ${escapeHtml(row.winnerPlayerName)}</div>`;
+                tip.innerHTML = `
+                    <div><strong>${escapeHtml(row.winner === "tie" ? "Tie" : row.winnerSeedName)}</strong></div>
+                    ${details}
+                    <div><span class="muted">Stat:</span> ${escapeHtml(row.statLabel)}${row.winner === "tie" ? " (TIE)" : ` (${row.pctInt}% BETTER)`}</div>
+                `;
+                tip.style.display = "block";
+
+                const pad = 10;
+                const rect = tip.getBoundingClientRect();
+                let x = event.clientX + 14;
+                let y = event.clientY + 14;
+                if (x + rect.width + pad > window.innerWidth) x = event.clientX - rect.width - 14;
+                if (y + rect.height + pad > window.innerHeight) y = event.clientY - rect.height - 14;
+                tip.style.left = `${Math.max(pad, x)}px`;
+                tip.style.top = `${Math.max(pad, y)}px`;
+            };
 
             const clearHover = () => {
+                activeHoverRow = null;
+                hideCmpStackHoverTip();
                 overlay.querySelectorAll(".cmpAxisEdge").forEach((seg) => seg.classList.remove("is-on"));
                 overlay.querySelectorAll(".cmpWinDot").forEach((dot) => dot.classList.remove("is-on"));
                 overlay.querySelectorAll(".cmpOverlayPoly").forEach((poly) => {
@@ -5246,11 +5327,12 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             };
 
             hits.forEach((el) => {
-                el.addEventListener("mouseenter", () => {
+                el.addEventListener("mouseenter", (event) => {
                     const axis = Number(el.getAttribute("data-axis") || -1);
                     const row = hoverRows.find(r => r.axis === axis);
                     clearHover();
                     if (!row) return;
+                    activeHoverRow = row;
                     const edgeSeg = overlay.querySelector(`#cmpAxisEdge-${axis}`);
                     if (edgeSeg) edgeSeg.classList.add("is-on");
                     const winDot = overlay.querySelector(`#cmpWinDot-${axis}`);
@@ -5280,9 +5362,15 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                             if (right) right.innerHTML = row.bannerText;
                         }
                     }
+                    showCmpStackHoverTip(event, row);
+                });
+                el.addEventListener("mousemove", (event) => {
+                    if (!activeHoverRow) return;
+                    showCmpStackHoverTip(event, activeHoverRow);
                 });
                 el.addEventListener("mouseleave", clearHover);
             });
+            overlay.addEventListener("mouseleave", clearHover);
         }
 
 
