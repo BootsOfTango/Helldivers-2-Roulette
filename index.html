@@ -4770,6 +4770,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         /***********************
          * Ranking system (0-100 scale)
          ***********************/
+        const MO_FAIL_MULTIPLIER = 0.75;
+
         function computeRawScore(card) {
             const kills = Number(card.stats?.kills ?? 0);
             const deaths = Number(card.stats?.deaths ?? 0);
@@ -4782,6 +4784,9 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 (deaths * 10) -
                 (stims * 1) +
                 (stratUses * 1.0);
+
+            const moMultiplier = card.majorOrderDone ? 1.0 : MO_FAIL_MULTIPLIER;
+            raw *= moMultiplier;
 
             if (!isFinite(raw)) raw = 0;
             raw = Math.max(0, raw);
@@ -4864,7 +4869,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 normPos(s.stratUses, maxes.maxStratUses),
             ];
 
-            const moScale = card.majorOrderDone ? 1.0 : 0.75;
+            const moScale = card.majorOrderDone ? 1.0 : MO_FAIL_MULTIPLIER;
 
             const renderSize = 250;
             const viewSize = 320;
@@ -4917,7 +4922,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 return `<polygon points="${pts}" />`;
             };
 
-            const penaltyNote = card.majorOrderDone ? "" : " (MO -25% size)";
+            const penaltyNote = card.majorOrderDone ? "" : ` (MO -${Math.round((1 - MO_FAIL_MULTIPLIER) * 100)}% size)`;
             const col = getTierRadarColor(card);
 
             return `
@@ -4973,6 +4978,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             const titleStyleA = (tA && typeof tierColor === "function") ? ` style="color:${tierColor(tA)}"` : "";
             const titleStyleB = (tB && typeof tierColor === "function") ? ` style="color:${tierColor(tB)}"` : "";
+            const moBadgeA = cardA.majorOrderDone ? '<span class="badge good">MO DONE</span>' : '<span class="badge red">MO FAIL</span>';
+            const moBadgeB = cardB.majorOrderDone ? '<span class="badge good">MO DONE</span>' : '<span class="badge red">MO FAIL</span>';
 
             window.__cmpCtx = {
                 idA: cardA.id,
@@ -4987,17 +4994,19 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             wrapA.innerHTML = `
             <div class="${cardClassA}">
                 <div class="cmpTitle"${titleStyleA}>${escapeHtml(formatSeedWithPlayer(cardA))}</div>
+                <div class="miniRow" style="justify-content:center; margin-bottom:6px;">${moBadgeA}</div>
                 ${buildRadarSVG(cardA, safeMaxes)}
             </div>`;
 
             wrapB.innerHTML = `
             <div class="${cardClassB}">
                 <div class="cmpTitle"${titleStyleB}>${escapeHtml(formatSeedWithPlayer(cardB))}</div>
+                <div class="miniRow" style="justify-content:center; margin-bottom:6px;">${moBadgeB}</div>
                 ${buildRadarSVG(cardB, safeMaxes)}
             </div>`;
 
             if (overlay) {
-                overlay.innerHTML = '<div class="tiny muted">Click <strong>STACK RADARS</strong> to overlap both pentagons, then hover each stat wedge to see who wins.</div>';
+                overlay.innerHTML = `<div class="tiny muted">Click <strong>STACK RADARS</strong> to overlap both pentagons, then hover each stat wedge to see who wins.<br>MO FAIL applies a ${Math.round((1 - MO_FAIL_MULTIPLIER) * 100)}% penalty to both score and radar size.</div>`;
             }
             if (insight) insight.textContent = "";
 
@@ -5011,7 +5020,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         function getCompareVals(card, maxes) {
             const s = card?.stats || {};
             const combo = Number(s.deaths || 0) + Number(s.stims || 0);
-            const moScale = card?.majorOrderDone ? 1 : 0.75;
+            const moScale = card?.majorOrderDone ? 1 : MO_FAIL_MULTIPLIER;
             return [
                 normPos(s.kills, maxes.maxKills) * moScale,
                 normPos(s.accuracy, maxes.maxAccuracy) * moScale,
@@ -6371,6 +6380,7 @@ ${noteContent}`
         function metricValue(card, k) {
             if (k === "grade") return Number(card.grade || 0);
             if (k === "raw") return Number(card.scoreRaw || 0);
+            if (k === "majorOrderDone") return card?.majorOrderDone ? 1 : 0;
 
             const s = card.stats || {};
             if (k === "deathsPlusStims") return Number(s.deaths || 0) + Number(s.stims || 0);
@@ -6391,6 +6401,7 @@ ${noteContent}`
 
             const rows = [
                 { name: "Grade (0-100)", k: "grade", better: "high" },
+                { name: "Major Order", k: "majorOrderDone", better: "high" },
                 { name: "Kills", k: "kills", better: "high" },
                 { name: "Accuracy (%)", k: "accuracy", better: "high" },
                 { name: "Deaths", k: "deaths", better: "low" },
@@ -6427,8 +6438,8 @@ ${noteContent}`
                 table.insertAdjacentHTML("beforeend", `
                               <tr>
                                 <td class="muted">${escapeHtml(r.name)}</td>
-                                <td class="${clsA}">${va ?? "—"}</td>
-                                <td class="${clsB}">${vb ?? "—"}</td>
+                                <td class="${clsA}">${r.k === "majorOrderDone" ? (ca ? (ca.majorOrderDone ? "MO DONE ✅" : "MO FAIL ❌") : "—") : (va ?? "—")}</td>
+                                <td class="${clsB}">${r.k === "majorOrderDone" ? (cb ? (cb.majorOrderDone ? "MO DONE ✅" : "MO FAIL ❌") : "—") : (vb ?? "—")}</td>
                               </tr>
                             `);
             }
