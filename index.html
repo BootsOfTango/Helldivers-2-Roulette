@@ -4855,6 +4855,12 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             return { fill: "rgba(255,212,0,.18)", stroke: "#ffd400" };
         }
 
+        function getRadarScale(card) {
+            const gradeScale = clamp(Number(card?.grade || 0) / 100, 0, 1);
+            const moScale = card?.majorOrderDone ? 1 : MO_FAIL_MULTIPLIER;
+            return clamp(gradeScale * moScale, 0, 1);
+        }
+
         function buildRadarSVG(card, maxes) {
             const s = card.stats || {};
             const combo = Number(s.deaths || 0) + Number(s.stims || 0);
@@ -4869,14 +4875,14 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 normPos(s.stratUses, maxes.maxStratUses),
             ];
 
-            const moScale = card.majorOrderDone ? 1.0 : MO_FAIL_MULTIPLIER;
+            const radarScale = getRadarScale(card);
 
             const renderSize = 250;
             const viewSize = 320;
             const cx = viewSize / 2;
             const cy = viewSize / 2;
             const rOuter = 74;
-            const r = rOuter * moScale;
+            const r = rOuter * radarScale;
 
             const angles = [-90, -18, 54, 126, 198].map(a => a * Math.PI / 180);
 
@@ -4922,7 +4928,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 return `<polygon points="${pts}" />`;
             };
 
-            const penaltyNote = card.majorOrderDone ? "" : ` (MO -${Math.round((1 - MO_FAIL_MULTIPLIER) * 100)}% size)`;
+            const penaltyNote = ` (scaled by Grade${card.majorOrderDone ? "" : ` and MO -${Math.round((1 - MO_FAIL_MULTIPLIER) * 100)}%`})`;
             const col = getTierRadarColor(card);
 
             return `
@@ -5006,7 +5012,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             </div>`;
 
             if (overlay) {
-                overlay.innerHTML = `<div class="tiny muted">Click <strong>STACK RADARS</strong> to overlap both pentagons, then hover each stat wedge to see who wins.<br>MO FAIL applies a ${Math.round((1 - MO_FAIL_MULTIPLIER) * 100)}% penalty to both score and radar size.</div>`;
+                overlay.innerHTML = `<div class="tiny muted">Click <strong>STACK RADARS</strong> to overlap both pentagons, then hover each stat wedge to see who wins.<br>Radar size now follows Grade, and MO FAIL still applies a ${Math.round((1 - MO_FAIL_MULTIPLIER) * 100)}% penalty.</div>`;
             }
             if (insight) insight.textContent = "";
 
@@ -5020,13 +5026,13 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         function getCompareVals(card, maxes) {
             const s = card?.stats || {};
             const combo = Number(s.deaths || 0) + Number(s.stims || 0);
-            const moScale = card?.majorOrderDone ? 1 : MO_FAIL_MULTIPLIER;
+            const radarScale = getRadarScale(card);
             return [
-                normPos(s.kills, maxes.maxKills) * moScale,
-                normPos(s.accuracy, maxes.maxAccuracy) * moScale,
-                normInverse(combo, maxes.minDeathsPlusStims, maxes.maxDeathsPlusStims) * moScale,
-                normPos(s.distanceKm, maxes.maxDistanceKm) * moScale,
-                normPos(s.stratUses, maxes.maxStratUses) * moScale,
+                normPos(s.kills, maxes.maxKills) * radarScale,
+                normPos(s.accuracy, maxes.maxAccuracy) * radarScale,
+                normInverse(combo, maxes.minDeathsPlusStims, maxes.maxDeathsPlusStims) * radarScale,
+                normPos(s.distanceKm, maxes.maxDistanceKm) * radarScale,
+                normPos(s.stratUses, maxes.maxStratUses) * radarScale,
             ].map(v => clamp(v, 0, 1));
         }
 
