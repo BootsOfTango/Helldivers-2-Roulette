@@ -4774,19 +4774,21 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
         function computeRawScore(card) {
             const kills = Number(card.stats?.kills ?? 0);
+            const accuracy = Number(card.stats?.accuracy ?? 0);
             const deaths = Number(card.stats?.deaths ?? 0);
             const stims = Number(card.stats?.stims ?? 0);
+            const distanceKm = Number(card.stats?.distanceKm ?? 0);
             const stratUses = Number(card.stats?.stratUses ?? 0);
 
-            // Less punishing so most runs don't collapse to 0
+            // Balance power (kills) with execution (accuracy/survival) and utility (stratagems/mobility).
             let raw =
-                (kills * 1.0) -
-                (deaths * 10) -
-                (stims * 1) +
-                (stratUses * 1.0);
-
-            const moMultiplier = card.majorOrderDone ? 1.0 : MO_FAIL_MULTIPLIER;
-            raw *= moMultiplier;
+                (kills * 0.7) +
+                (accuracy * 2.0) +
+                (stratUses * 3.0) +
+                (distanceKm * 4.0) -
+                (deaths * 12.0) -
+                (stims * 5.0) +
+                (card.majorOrderDone ? 20.0 : 0.0);
 
             if (!isFinite(raw)) raw = 0;
             raw = Math.max(0, raw);
