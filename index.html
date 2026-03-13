@@ -1944,6 +1944,20 @@ END MASTER DIRECTIVE
             background: rgba(255, 212, 0, .08);
         }
 
+        .rankBackupMiniControls {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 6px;
+            margin-top: 8px;
+        }
+
+            .rankBackupMiniControls .btnGhost {
+                font-size: 11px;
+                padding: 5px 9px;
+                letter-spacing: .2px;
+            }
+
         @media (max-width: 1100px) {
             #rankSplitView {
                 grid-template-columns: 1fr;
@@ -2663,15 +2677,9 @@ END MASTER DIRECTIVE
                 </div>
             </div>
 
-            <div class="rankBackupNotice" role="note" aria-live="polite">
-                <div class="warnText">
-                    <strong>⚠️ If not saved, your rank data could be lost.</strong><br>
-                    Save a JSON backup now, then use Restore Backup if you ever need to load it back into Roulette.
-                </div>
-                <div class="miniRow" style="justify-content:flex-end; gap:8px;">
-                    <button id="btnRankRestoreBackup" class="btnGhost">RESTORE BACKUP</button>
-                    <button id="btnRankBackupNow" class="btnGhost">SAVE LOCAL BACKUP</button>
-                </div>
+            <div class="rankBackupMiniControls" aria-label="Rank backup actions">
+                <button id="btnRankRestoreBackup" class="btnGhost">RESTORE</button>
+                <button id="btnRankBackupNow" class="btnGhost">BACKUP</button>
             </div>
 
             <div class="divider"></div>
@@ -3938,13 +3946,15 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
          ***********************/
         const STORAGE_KEY = "hd2_chaos_roulette_v1";
         const DISCORD_WEBHOOK_KEY = "hd2_discord_webhook_url";
+        const RESULTS_BACKUP_NUDGE_KEY = "hd2_results_backup_nudge_seen_v1";
 
         const state = {
             items: null,
             cards: [],
             ui: {
                 activeResultCardId: null,
-                modalOpen: false
+                modalOpen: false,
+                resultsBackupNudgeSeen: false
             },
 
             // current spin
@@ -4073,6 +4083,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             // webhook URL is stored separately so clear-data does not delete it
             state.settings.discordWebhookUrl = localStorage.getItem(DISCORD_WEBHOOK_KEY) || "";
+            state.ui.resultsBackupNudgeSeen = localStorage.getItem(RESULTS_BACKUP_NUDGE_KEY) === "1";
 
             if (!raw) {
                 normalizeItemWarbondAssignments();
@@ -7397,6 +7408,15 @@ ${noteContent}`
         /***********************
          * Event wiring
          ***********************/
+        function maybeShowResultsBackupNudge() {
+            if (state.ui.resultsBackupNudgeSeen) return;
+
+            state.ui.resultsBackupNudgeSeen = true;
+            localStorage.setItem(RESULTS_BACKUP_NUDGE_KEY, "1");
+
+            alert("⚠️ Backup reminder (shown once):\n\nYour rank/results history is stored locally in this browser. Use BACKUP (Rank tab) to save a JSON copy, and RESTORE to load it later if needed.");
+        }
+
         function switchTab(tab) {
             $$(".tabBtn").forEach(b => b.classList.toggle("active", b.dataset.tab === tab));
             $("#tab-spin").style.display = (tab === "spin") ? "" : "none";
@@ -7406,7 +7426,10 @@ ${noteContent}`
             $("#tab-rank").style.display = (tab === "rank") ? "" : "none";
 
             if (tab !== "results") closeResultCardModal();
-            if (tab === "results") renderResults();
+            if (tab === "results") {
+                maybeShowResultsBackupNudge();
+                renderResults();
+            }
             if (tab === "compare") {
                 refreshCompareOptions();
                 // Ensure layout + options are ready before drawing radars (COMPARE tab is hidden until now)
