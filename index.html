@@ -642,6 +642,29 @@ END MASTER DIRECTIVE
             opacity: 0;
         }
 
+        .slot.slot-spinning {
+            animation: slotSpinPulse .18s linear infinite;
+        }
+
+        .slot.slot-spinning .slotLabel,
+        .slot.slot-spinning .slotVisual {
+            filter: blur(.2px);
+        }
+
+        @keyframes slotSpinPulse {
+            0% {
+                transform: translateY(-1px) scale(1.005);
+            }
+
+            50% {
+                transform: translateY(1px) scale(.995);
+            }
+
+            100% {
+                transform: translateY(-1px) scale(1.005);
+            }
+        }
+
         /* Weapon reels */
         .slot-primary {
             border: 2px solid #2ecc71;
@@ -4669,7 +4692,9 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             let delay = 35;
             const maxDelay = 220 * slowFactor;
-            setSlotVisualState(el, " ", slotCategory, { skeleton: true });
+            const firstSample = sampleFn();
+            setSlotVisualState(el, firstSample, slotCategory);
+            el.classList.add("slot-spinning");
 
             while (true) {
                 if (myToken !== reelToken) return;
@@ -4677,7 +4702,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 if (t >= total) break;
 
                 const sampleText = sampleFn();
-                setSlotVisualState(el, sampleText, slotCategory, { skeleton: true });
+                setSlotVisualState(el, sampleText, slotCategory);
                 playTone("tick");
 
                 const p = clamp(t / total, 0, 1);
@@ -4688,6 +4713,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             }
 
             setSlotVisualState(el, finalText ?? "—", slotCategory);
+            el.classList.remove("slot-spinning");
             el.style.transform = "scale(1.15)";
             el.style.transition = "transform 0.15s ease";
             playTone("final");
@@ -4717,7 +4743,11 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 s4: $("#slotStrat4"),
             };
 
-            Object.values(els).forEach(e => setSlotVisualState(e, " ", "stratagem", { skeleton: true }));
+            Object.values(els).forEach(e => {
+                if (!e) return;
+                e.classList.remove("slot-spinning");
+                setSlotVisualState(e, " ", "stratagem", { skeleton: true });
+            });
 
             const sequence = [
                 [els.primary, "primary", () => sampleEnabledText(state.items.primaries), loadout.primary, 900, 1.0],
