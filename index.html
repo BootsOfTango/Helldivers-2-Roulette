@@ -2666,9 +2666,12 @@ END MASTER DIRECTIVE
             <div class="rankBackupNotice" role="note" aria-live="polite">
                 <div class="warnText">
                     <strong>⚠️ If not saved, your rank data could be lost.</strong><br>
-                    Click this button to save locally.
+                    Save a JSON backup now, then use Restore Backup if you ever need to load it back into Roulette.
                 </div>
-                <button id="btnRankBackupNow" class="btnGhost">SAVE LOCAL BACKUP</button>
+                <div class="miniRow" style="justify-content:flex-end; gap:8px;">
+                    <button id="btnRankRestoreBackup" class="btnGhost">RESTORE BACKUP</button>
+                    <button id="btnRankBackupNow" class="btnGhost">SAVE LOCAL BACKUP</button>
+                </div>
             </div>
 
             <div class="divider"></div>
@@ -7689,6 +7692,7 @@ ${noteContent}`
 
             $("#btnExport").addEventListener("click", exportJSON);
             $("#btnRankBackupNow").addEventListener("click", exportJSON);
+            $("#btnRankRestoreBackup").addEventListener("click", () => $("#importFile").click());
             $("#btnImport").addEventListener("click", () => $("#importFile").click());
             $("#importFile").addEventListener("change", (e) => {
                 const f = e.target.files && e.target.files[0];
