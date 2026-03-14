@@ -1782,6 +1782,82 @@ END MASTER DIRECTIVE
             min-width: 88px;
         }
 
+        #tab-items .armoryModeSwitch {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        #tab-items .armoryModeBtn {
+            border: 1px solid rgba(255, 255, 255, .18);
+            background: rgba(255, 255, 255, .04);
+            color: #d8e6ff;
+            border-radius: 999px;
+            padding: 7px 14px;
+            font-weight: 900;
+            letter-spacing: .4px;
+            text-transform: uppercase;
+            cursor: pointer;
+        }
+
+        #tab-items .armoryModeBtn.isActive {
+            border-color: rgba(255, 212, 0, .55);
+            color: #ffd54f;
+            background: rgba(255, 212, 0, .10);
+        }
+
+        #tab-items .armoryGroupBlock {
+            border: 1px solid rgba(255,255,255,.08);
+            border-radius: 12px;
+            padding: 10px;
+            background: rgba(0,0,0,.18);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        #tab-items .armoryTileGrid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 8px;
+        }
+
+        #tab-items .armoryTile {
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+            align-items: center;
+            border: 1px solid rgba(255,255,255,.08);
+            border-radius: 12px;
+            padding: 8px;
+            background: rgba(0,0,0,.22);
+        }
+
+        #tab-items .armoryTileName {
+            font-size: 15px;
+            font-weight: 800;
+            line-height: 1.2;
+        }
+
+        #tab-items .armoryStatChips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 4px;
+        }
+
+        #tab-items .armoryStatChip {
+            border: 1px solid rgba(255,255,255,.18);
+            border-radius: 999px;
+            padding: 2px 8px;
+            font-size: 11px;
+            color: rgba(227, 236, 255, .95);
+            background: rgba(255,255,255,.04);
+            white-space: nowrap;
+        }
+
         .rim-white {
             border-color: rgba(255,255,255,.70) !important;
         }
@@ -2602,8 +2678,25 @@ END MASTER DIRECTIVE
         <section id="tab-items" class="panel" style="display:none;">
             <div class="row">
                 <div class="col">
-                    <div class="label">Edit your item pools (enable/disable, add/remove)</div>
-                    <div class="smallHelp">Everything is equal chance among ENABLED items only. Disable what you don’t own. Add new warbond stuff. The roulette does not care.</div>
+                    <div class="label">ARMORY</div>
+                    <div class="smallHelp">Use Armory view mode to inspect your catalog with roll history, then manage enable/disable states in the manual section below.</div>
+                </div>
+                <div class="col right">
+                    <div class="armoryModeSwitch">
+                        <button id="btnArmoryModeStratagems" class="armoryModeBtn">Stratagems</button>
+                        <button id="btnArmoryModeWeapons" class="armoryModeBtn">Weapons</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="armoryGroupedGrid"></div>
+
+            <div class="divider"></div>
+
+            <div class="row">
+                <div class="col">
+                    <div class="label">Manual pool management</div>
+                    <div class="smallHelp">Enable/disable, add, and remove items here. These controls stay separate from Armory analytics tiles to reduce clutter.</div>
                 </div>
                 <div class="col right">
                     <div class="miniRow" style="justify-content:flex-end;">
@@ -6895,6 +6988,7 @@ ${noteContent}`
 
         const ITEMS_VIEW_MODE_KEY = "hd2_items_view_mode";
         const ITEMS_TYPE_FILTER_KEY = "hd2_items_type_filter";
+        const ARMORY_VIEW_MODE_KEY = "hd2_armory_view_mode";
 
         const WARBOND_ORDER = [
             "Helldiver Basics (Mobilize)",
@@ -7054,6 +7148,147 @@ ${noteContent}`
                 src: visual.src,
                 fallbackSrc: visual.fallbackSrc
             };
+        }
+
+        function getArmoryViewMode() {
+            const saved = localStorage.getItem(ARMORY_VIEW_MODE_KEY);
+            return saved === "stratagems" ? "stratagems" : "weapons";
+        }
+
+        function setArmoryViewMode(mode) {
+            localStorage.setItem(ARMORY_VIEW_MODE_KEY, mode === "stratagems" ? "stratagems" : "weapons");
+        }
+
+        function classifyStratagemGroup(name) {
+            const n = normalizeText(name || "");
+            if (n.includes("eagle") || n.includes("orbital")) return "Eagle-Orbital";
+            if (n.includes("sentry") || n.includes("mine") || n.includes("shield generator relay") || n.includes("hmg emplacement") || n.includes("tesla tower") || n.includes("ems strike")) return "Defensive";
+            if (n.includes("backpack") || n.includes("pack") || n.includes("guard dog") || n.includes("jump pack")) return "Backpack";
+            if (n.includes("exosuit") || n.includes("patriot") || n.includes("emancipator")) return "Exosuit";
+            return "Support";
+        }
+
+        function buildArmoryItemStats() {
+            const stats = new Map();
+            const bump = (name, key) => {
+                if (!name) return;
+                if (!stats.has(name)) stats.set(name, { rolled: 0, moSuccess: 0 });
+                stats.get(name)[key] += 1;
+            };
+
+            (state.cards || []).forEach(card => {
+                const names = [card.primary, card.sidearm, card.throwable, ...(card.stratagems || [])].filter(Boolean);
+                names.forEach(name => {
+                    bump(name, "rolled");
+                    if (card.majorOrderDone) bump(name, "moSuccess");
+                });
+            });
+
+            return stats;
+        }
+
+        function buildArmoryTile({ item, containerId, stats }) {
+            const tile = document.createElement("div");
+            tile.className = "armoryTile";
+
+            const leftWrap = document.createElement("div");
+            leftWrap.style.display = "flex";
+            leftWrap.style.alignItems = "center";
+            leftWrap.style.gap = "10px";
+
+            const visual = document.createElement("div");
+            visual.className = "itemVisualCell";
+            const asset = resolveItemVisualAsset(containerId, item.name);
+            if (asset?.src) {
+                const img = document.createElement("img");
+                img.loading = "lazy";
+                img.alt = `${item.name} visual`;
+                img.src = asset.src;
+                img.addEventListener("error", () => {
+                    if (asset.fallbackSrc && img.src !== asset.fallbackSrc) {
+                        img.src = asset.fallbackSrc;
+                        return;
+                    }
+                    visual.innerHTML = `<span class="itemVisualFallback">N/A</span>`;
+                });
+                visual.appendChild(img);
+            } else {
+                visual.innerHTML = `<span class="itemVisualFallback">N/A</span>`;
+            }
+
+            const meta = document.createElement("div");
+            const name = document.createElement("div");
+            name.className = "armoryTileName";
+            name.textContent = item.name;
+
+            const chipWrap = document.createElement("div");
+            chipWrap.className = "armoryStatChips";
+            const itemStats = stats.get(item.name) || { rolled: 0, moSuccess: 0 };
+            chipWrap.innerHTML = `
+                <span class="armoryStatChip">Rolled: ${itemStats.rolled}</span>
+                <span class="armoryStatChip">MO Success: ${itemStats.moSuccess}</span>
+            `;
+
+            meta.appendChild(name);
+            meta.appendChild(chipWrap);
+            leftWrap.appendChild(visual);
+            leftWrap.appendChild(meta);
+            tile.appendChild(leftWrap);
+            return tile;
+        }
+
+        function renderArmoryGroupedGrid() {
+            const box = $("#armoryGroupedGrid");
+            if (!box) return;
+            box.innerHTML = "";
+
+            const mode = getArmoryViewMode();
+            const stats = buildArmoryItemStats();
+            const groups = [];
+
+            if (mode === "weapons") {
+                groups.push(
+                    { label: "Primary", items: state.items.primaries || [], containerId: "listPrimaries" },
+                    { label: "Secondary", items: state.items.sidearms || [], containerId: "listSidearms" },
+                    { label: "Throwable", items: state.items.throwables || [], containerId: "listThrowables" }
+                );
+            } else {
+                const stratItems = state.items.stratagems || [];
+                const grouped = new Map();
+                stratItems.forEach(item => {
+                    const group = classifyStratagemGroup(item.name);
+                    if (!grouped.has(group)) grouped.set(group, []);
+                    grouped.get(group).push(item);
+                });
+
+                const order = ["Eagle-Orbital", "Support", "Defensive", "Backpack", "Exosuit"];
+                order.forEach(label => {
+                    if (grouped.has(label)) {
+                        groups.push({ label, items: grouped.get(label), containerId: "listStrats" });
+                        grouped.delete(label);
+                    }
+                });
+                grouped.forEach((items, label) => groups.push({ label, items, containerId: "listStrats" }));
+            }
+
+            groups.forEach(group => {
+                const block = document.createElement("div");
+                block.className = "armoryGroupBlock";
+                block.innerHTML = `<div class="label">${escapeHtml(group.label)}</div>`;
+
+                const grid = document.createElement("div");
+                grid.className = "armoryTileGrid";
+
+                const sorted = (group.items || []).slice().sort((a, b) => a.name.localeCompare(b.name));
+                sorted.forEach(item => grid.appendChild(buildArmoryTile({ item, containerId: group.containerId, stats })));
+                block.appendChild(grid);
+                box.appendChild(block);
+            });
+
+            const stratBtn = $("#btnArmoryModeStratagems");
+            const weapBtn = $("#btnArmoryModeWeapons");
+            stratBtn?.classList.toggle("isActive", mode === "stratagems");
+            weapBtn?.classList.toggle("isActive", mode === "weapons");
         }
 
         /***********************
@@ -7449,6 +7684,8 @@ ${noteContent}`
         }
 
         function renderItems() {
+            renderArmoryGroupedGrid();
+
             const viewMode = getItemsViewMode();
             const warbondView = $("#itemsWarbondView");
             const categoryView = $("#itemsCategoryView");
@@ -7902,6 +8139,14 @@ ${noteContent}`
             $("#itemsTypeFilter").addEventListener("change", (e) => {
                 const value = String(e.target.value || "all");
                 localStorage.setItem(ITEMS_TYPE_FILTER_KEY, ["primary", "sidearm", "throwable", "stratagem"].includes(value) ? value : "all");
+                renderItems();
+            });
+            $("#btnArmoryModeWeapons").addEventListener("click", () => {
+                setArmoryViewMode("weapons");
+                renderItems();
+            });
+            $("#btnArmoryModeStratagems").addEventListener("click", () => {
+                setArmoryViewMode("stratagems");
                 renderItems();
             });
 
