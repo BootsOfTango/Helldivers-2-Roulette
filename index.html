@@ -1807,6 +1807,56 @@ END MASTER DIRECTIVE
             margin-top: 10px;
         }
 
+        #tab-items .armoryAnalyticsChart {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        #tab-items .armoryAnalyticsBarRow {
+            border: 1px solid rgba(255,255,255,.08);
+            border-radius: 12px;
+            background: rgba(0,0,0,.16);
+            padding: 8px 10px;
+        }
+
+        #tab-items .armoryAnalyticsBarTop {
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+            align-items: center;
+        }
+
+        #tab-items .armoryAnalyticsBarItem {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 0;
+            flex: 1;
+        }
+
+        #tab-items .armoryAnalyticsBarTrack {
+            margin-top: 6px;
+            height: 11px;
+            border-radius: 999px;
+            background: rgba(255,255,255,.08);
+            overflow: hidden;
+        }
+
+        #tab-items .armoryAnalyticsBarFill {
+            height: 100%;
+            min-width: 2px;
+            border-radius: inherit;
+            background: linear-gradient(90deg, rgba(62,214,255,.75), rgba(106,242,255,.95));
+        }
+
+        #tab-items .armoryAnalyticsRate {
+            font-weight: 900;
+            font-family: var(--mono);
+            white-space: nowrap;
+        }
+
         #tab-items .armoryAnalyticsList {
             display: flex;
             flex-direction: column;
@@ -1862,6 +1912,45 @@ END MASTER DIRECTIVE
         #tab-items .armoryAnalyticsMetric {
             text-align: right;
             font-family: var(--mono);
+        }
+
+        #tab-items .armoryCategoryGrid {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        #tab-items .armoryCategoryGroup {
+            border: 1px solid rgba(255,255,255,.08);
+            border-radius: 12px;
+            padding: 10px;
+            background: rgba(0,0,0,.18);
+        }
+
+        #tab-items .armoryCategoryCards {
+            margin-top: 8px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 8px;
+        }
+
+        #tab-items .armoryItemCard {
+            border: 1px solid rgba(255,255,255,.08);
+            border-radius: 10px;
+            padding: 8px;
+            background: rgba(0,0,0,.14);
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        #tab-items .armoryItemCardMeta {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(76px, 1fr));
+            gap: 2px 10px;
+            font-family: var(--mono);
+            font-size: 13px;
         }
 
         .rim-white {
@@ -2788,9 +2877,47 @@ END MASTER DIRECTIVE
             <div class="row">
                 <div class="col">
                     <div class="label">Armory overview</div>
-                    <div class="smallHelp">Monitor your editable planet pool against live campaign data so your war map context stays current.</div>
+                    <div class="smallHelp">Track your personal roll history, MO success, and top-tier item impact. Manual pool editing stays below.</div>
                 </div>
             </div>
+
+            <div class="row armoryAnalyticsControls">
+                <div class="col">
+                    <div class="label">Personal pick-rate chart</div>
+                    <div class="tiny">Shows how often each item is rolled in your own history. Default view hides never-picked items.</div>
+                </div>
+                <div class="col right">
+                    <div class="miniRow" style="justify-content:flex-end; flex-wrap:wrap;">
+                        <select id="armoryAnalyticsSortMetric">
+                            <option value="rolledCount">Sort: Most rolled</option>
+                            <option value="moSuccessCount">Sort: Most MO wins</option>
+                            <option value="moRate">Sort: Best MO rate</option>
+                        </select>
+                        <select id="armoryAnalyticsGroupBy">
+                            <option value="none">All types together</option>
+                            <option value="type">Group by type</option>
+                        </select>
+                        <label class="tiny" style="display:flex; align-items:center; gap:6px;">
+                            <input id="armoryShowUnpicked" type="checkbox" />
+                            Show unpicked (0)
+                        </label>
+                        <label class="tiny" style="display:flex; align-items:center; gap:6px;">
+                            <input id="armoryExpandAll" type="checkbox" />
+                            Show all rows
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div id="armoryAnalyticsList" class="armoryAnalyticsList"></div>
+
+            <div class="row" style="margin-top:12px;">
+                <div class="col">
+                    <div class="label">Armory grid breakdown</div>
+                    <div class="tiny">Grid layout for quick scanning by type. Rainbow glow marks items used in top-performing rainbow cards.</div>
+                </div>
+            </div>
+            <div id="armoryCategoryGrid" class="armoryCategoryGrid"></div>
 
             <div class="row">
                 <div class="col">
@@ -7518,6 +7645,7 @@ ${noteContent}`
                         name: cleanName,
                         rolledCount: 0,
                         moSuccessCount: 0,
+                        rainbowTopCount: 0,
                         moRate: 0
                     });
                 }
@@ -7530,19 +7658,29 @@ ${noteContent}`
                 list.forEach(item => ensure(type, item?.name));
             });
 
-            const bump = (type, name, moDone) => {
+            const ranked = sortCardsByRankOrder(state.cards || []).filter(c => c.isComplete !== false);
+            const rainbowCardIds = new Set(
+                ranked
+                    .map((card, idx) => ({ card, tier: tierForPlace(idx + 1) }))
+                    .filter(({ tier }) => tier === "rainbow")
+                    .map(({ card }) => card.id)
+            );
+
+            const bump = (type, name, moDone, isRainbowTop) => {
                 const row = ensure(type, name);
                 if (!row) return;
                 row.rolledCount += 1;
                 if (moDone) row.moSuccessCount += 1;
+                if (isRainbowTop) row.rainbowTopCount += 1;
             };
 
             (state.cards || []).forEach(card => {
                 const moDone = !!card?.majorOrderDone;
-                bump("primary", card?.primary, moDone);
-                bump("sidearm", card?.sidearm, moDone);
-                bump("throwable", card?.throwable, moDone);
-                (card?.stratagems || []).forEach(name => bump("stratagem", name, moDone));
+                const isRainbowTop = rainbowCardIds.has(card?.id);
+                bump("primary", card?.primary, moDone, isRainbowTop);
+                bump("sidearm", card?.sidearm, moDone, isRainbowTop);
+                bump("throwable", card?.throwable, moDone, isRainbowTop);
+                (card?.stratagems || []).forEach(name => bump("stratagem", name, moDone, isRainbowTop));
             });
 
             const rows = Array.from(map.values());
@@ -7565,6 +7703,7 @@ ${noteContent}`
 
             const query = normalizeText($("#itemSearch")?.value || "");
             const showUnpicked = !!$("#armoryShowUnpicked")?.checked;
+            const expandAll = !!$("#armoryExpandAll")?.checked;
             const groupBy = $("#armoryAnalyticsGroupBy")?.value || "none";
             const sortMetric = $("#armoryAnalyticsSortMetric")?.value || "rolledCount";
             const labelByType = {
@@ -7601,60 +7740,125 @@ ${noteContent}`
                 return;
             }
 
-            const buildHeader = () => `
-                <div class="armoryAnalyticsHeader">
-                    <div>Item</div>
-                    <div style="text-align:right;">Rolled</div>
-                    <div style="text-align:right;">MO success</div>
-                    <div style="text-align:right;">MO rate</div>
-                </div>
-            `;
+            const totalRolls = list.reduce((sum, row) => sum + Number(row.rolledCount || 0), 0);
+            const renderSlice = (rows) => {
+                const topRows = expandAll ? rows : rows.slice(0, 18);
+                return topRows.map(row => {
+                    const visual = getItemVisual(row.name, row.type);
+                    const imgHtml = visual?.src
+                        ? `<img src="${escapeHtml(visual.src)}" alt="${escapeHtml(row.name)}" loading="lazy">`
+                        : `<span class="itemVisualFallback">N/A</span>`;
+                    const itemShare = totalRolls > 0 ? ((Number(row.rolledCount || 0) / totalRolls) * 100) : 0;
+                    const rate = row.rolledCount > 0 ? ((row.moSuccessCount / row.rolledCount) * 100) : 0;
+                    const rainbowClass = Number(row.rainbowTopCount || 0) > 0
+                        ? ` armoryRainbowGlow ${row.type === "stratagem" ? "armoryRainbowGlow--stratagem" : "armoryRainbowGlow--weapon"}`
+                        : "";
 
-            const buildRow = (row) => {
-                const visual = getItemVisual(row.name, row.type);
-                const imgHtml = visual?.src
-                    ? `<img src="${escapeHtml(visual.src)}" alt="${escapeHtml(row.name)}" loading="lazy">`
-                    : `<span class="itemVisualFallback">N/A</span>`;
-                const rate = row.rolledCount > 0 ? ((row.moSuccessCount / row.rolledCount) * 100) : 0;
-
-                return `
-                    <div class="armoryAnalyticsRow">
-                        <div class="armoryAnalyticsItem">
-                            <div class="itemVisualCell">${imgHtml}</div>
-                            <div>
-                                <div class="armoryAnalyticsItemName">${escapeHtml(row.name)}</div>
-                                <div class="tiny muted">${escapeHtml(labelByType[row.type] || row.type)}</div>
+                    return `
+                        <div class="armoryAnalyticsBarRow">
+                            <div class="armoryAnalyticsBarTop">
+                                <div class="armoryAnalyticsBarItem">
+                                    <div class="itemVisualCell${rainbowClass}">${imgHtml}</div>
+                                    <div>
+                                        <div class="armoryAnalyticsItemName">${escapeHtml(row.name)}</div>
+                                        <div class="tiny muted">${escapeHtml(labelByType[row.type] || row.type)} · Rolled ${Number(row.rolledCount || 0)} · MO wins ${Number(row.moSuccessCount || 0)} · MO rate ${rate.toFixed(1)}%</div>
+                                    </div>
+                                </div>
+                                <div class="armoryAnalyticsRate">${itemShare.toFixed(1)}%</div>
+                            </div>
+                            <div class="armoryAnalyticsBarTrack">
+                                <div class="armoryAnalyticsBarFill" style="width:${itemShare.toFixed(2)}%;"></div>
                             </div>
                         </div>
-                        <div class="armoryAnalyticsMetric">${Number(row.rolledCount || 0)}</div>
-                        <div class="armoryAnalyticsMetric">${Number(row.moSuccessCount || 0)}</div>
-                        <div class="armoryAnalyticsMetric">${rate.toFixed(1)}%</div>
-                    </div>
-                `;
+                    `;
+                }).join("");
             };
 
             if (groupBy === "type") {
-                const groupedHtml = typeOrder.map(type => {
+                box.innerHTML = typeOrder.map(type => {
                     const rows = list.filter(row => row.type === type);
                     if (!rows.length) return "";
                     return `
                         <div class="armoryAnalyticsGroup">
                             <div class="label" style="margin-bottom:0;">${escapeHtml(labelByType[type] || type)}</div>
-                            ${buildHeader()}
-                            ${rows.map(buildRow).join("")}
+                            <div class="armoryAnalyticsChart">${renderSlice(rows)}</div>
                         </div>
                     `;
                 }).join("");
-                box.innerHTML = groupedHtml;
                 return;
             }
 
             box.innerHTML = `
                 <div class="armoryAnalyticsGroup">
-                    ${buildHeader()}
-                    ${list.map(buildRow).join("")}
+                    <div class="armoryAnalyticsChart">${renderSlice(list)}</div>
                 </div>
             `;
+        }
+
+        function renderArmoryGridBreakdown(aggregatedRows) {
+            const box = $("#armoryCategoryGrid");
+            if (!box) return;
+            const query = normalizeText($("#itemSearch")?.value || "");
+            const showUnpicked = !!$("#armoryShowUnpicked")?.checked;
+            const typeOrder = ["primary", "sidearm", "throwable", "stratagem"];
+            const labelByType = {
+                primary: "Primary",
+                sidearm: "Sidearm",
+                throwable: "Throwable",
+                stratagem: "Stratagem"
+            };
+
+            const filtered = (Array.isArray(aggregatedRows) ? aggregatedRows : []).filter(row => {
+                if (!showUnpicked && row.rolledCount === 0) return false;
+                return matchesItemSearch({ name: row.name, warbond: "" }, labelByType[row.type] || "", query);
+            });
+
+            if (!filtered.length) {
+                box.innerHTML = `<div class="tiny">No armory grid entries match the current filters.</div>`;
+                return;
+            }
+
+            box.innerHTML = typeOrder.map(type => {
+                const rows = filtered.filter(row => row.type === type).sort((a, b) => {
+                    const diff = Number(b.rolledCount || 0) - Number(a.rolledCount || 0);
+                    if (diff !== 0) return diff;
+                    return a.name.localeCompare(b.name);
+                });
+                if (!rows.length) return "";
+
+                const cards = rows.map(row => {
+                    const visual = getItemVisual(row.name, row.type);
+                    const imgHtml = visual?.src
+                        ? `<img src="${escapeHtml(visual.src)}" alt="${escapeHtml(row.name)}" loading="lazy">`
+                        : `<span class="itemVisualFallback">N/A</span>`;
+                    const rate = row.rolledCount > 0 ? ((row.moSuccessCount / row.rolledCount) * 100) : 0;
+                    const rainbowClass = Number(row.rainbowTopCount || 0) > 0
+                        ? ` armoryRainbowGlow ${row.type === "stratagem" ? "armoryRainbowGlow--stratagem" : "armoryRainbowGlow--weapon"}`
+                        : "";
+
+                    return `
+                        <div class="armoryItemCard">
+                            <div class="itemVisualCell${rainbowClass}">${imgHtml}</div>
+                            <div style="min-width:0;">
+                                <div class="armoryAnalyticsItemName">${escapeHtml(row.name)}</div>
+                                <div class="armoryItemCardMeta">
+                                    <div>Rolls: ${Number(row.rolledCount || 0)}</div>
+                                    <div>MO wins: ${Number(row.moSuccessCount || 0)}</div>
+                                    <div>MO rate: ${rate.toFixed(1)}%</div>
+                                    <div>Rainbow: ${Number(row.rainbowTopCount || 0)}</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join("");
+
+                return `
+                    <div class="armoryCategoryGroup">
+                        <div class="label" style="margin-bottom:0;">${escapeHtml(labelByType[type] || type)}</div>
+                        <div class="armoryCategoryCards">${cards}</div>
+                    </div>
+                `;
+            }).join("");
         }
 
         function renderItemsByWarbond() {
@@ -7954,7 +8158,9 @@ ${noteContent}`
                 );
             }
 
-            renderArmoryAnalytics(buildArmoryAnalyticsData());
+            const armoryData = buildArmoryAnalyticsData();
+            renderArmoryAnalytics(armoryData);
+            renderArmoryGridBreakdown(armoryData);
             renderPlanets();
 
             if (Array.isArray(window.__apiActivePlanetsCache) && window.__apiActivePlanetsCache.length) {
@@ -8609,6 +8815,7 @@ ${noteContent}`
                 renderItems();
             });
             $("#armoryShowUnpicked")?.addEventListener("change", renderItems);
+            $("#armoryExpandAll")?.addEventListener("change", renderItems);
             $("#armoryAnalyticsGroupBy")?.addEventListener("change", renderItems);
             $("#armoryAnalyticsSortMetric")?.addEventListener("change", renderItems);
 
