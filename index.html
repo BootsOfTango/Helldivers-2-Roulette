@@ -1857,6 +1857,45 @@ END MASTER DIRECTIVE
             white-space: nowrap;
         }
 
+        #tab-items .armoryAnalyticsRateWrap {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 2px;
+        }
+
+        #tab-items .armoryAnalyticsRateLabel {
+            font-size: 11px;
+            letter-spacing: .5px;
+            text-transform: uppercase;
+            color: rgba(121, 237, 255, .95);
+            font-weight: 900;
+        }
+
+        #tab-items .armoryPickRateHero {
+            margin-top: 8px;
+            border: 1px solid rgba(121, 237, 255, .35);
+            border-radius: 12px;
+            padding: 10px 12px;
+            background: linear-gradient(90deg, rgba(52, 187, 255, .14), rgba(74, 255, 216, .08));
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        #tab-items .armoryPickRateHeroIcon {
+            width: 30px;
+            height: 30px;
+            min-width: 30px;
+            border-radius: 8px;
+            border: 1px solid rgba(121, 237, 255, .45);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            background: rgba(0, 0, 0, .26);
+        }
+
         #tab-items .armoryAnalyticsList {
             display: flex;
             flex-direction: column;
@@ -2885,6 +2924,10 @@ END MASTER DIRECTIVE
                 <div class="col">
                     <div class="label">Personal pick-rate chart</div>
                     <div class="tiny">Shows how often each item is rolled in your own history. Default view hides never-picked items.</div>
+                    <div class="armoryPickRateHero" aria-label="Pick-rate explanation">
+                        <div class="armoryPickRateHeroIcon" aria-hidden="true">📈</div>
+                        <div class="tiny">Pick-rate is the percentage shown on the right of each row. The cyan bar length visualizes that same pick-rate share.</div>
+                    </div>
                 </div>
                 <div class="col right">
                     <div class="miniRow" style="justify-content:flex-end; flex-wrap:wrap;">
@@ -4988,12 +5031,19 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 }
             }
             return {
-                src: entry.assetPath || entry.imageUrl,
-                fallbackSrc: entry.imageUrl || "",
+                src: entry.imageUrl || entry.assetPath,
+                fallbackSrc: entry.assetPath || "",
                 kind: visualKind,
                 alt: entry.name || name || "Item visual",
                 stratClass
             };
+        }
+
+        function renderItemVisualHtml(name, type) {
+            const visual = getItemVisual(name, type);
+            if (!visual?.src) return `<span class="itemVisualFallback">N/A</span>`;
+            const fallbackAttr = visual.fallbackSrc ? ` data-fallback-src="${escapeHtml(visual.fallbackSrc)}"` : "";
+            return `<img src="${escapeHtml(visual.src)}" alt="${escapeHtml(name)}" loading="lazy"${fallbackAttr} onerror="const fb=this.dataset.fallbackSrc;if(fb&&this.src!==fb){this.src=fb;return;}this.outerHTML='&lt;span class=\"itemVisualFallback\"&gt;N/A&lt;/span&gt;';">`;
         }
 
         function setSlotVisualState(el, name, category, options = {}) {
@@ -7744,10 +7794,7 @@ ${noteContent}`
             const renderSlice = (rows) => {
                 const topRows = expandAll ? rows : rows.slice(0, 18);
                 return topRows.map(row => {
-                    const visual = getItemVisual(row.name, row.type);
-                    const imgHtml = visual?.src
-                        ? `<img src="${escapeHtml(visual.src)}" alt="${escapeHtml(row.name)}" loading="lazy">`
-                        : `<span class="itemVisualFallback">N/A</span>`;
+                    const imgHtml = renderItemVisualHtml(row.name, row.type);
                     const itemShare = totalRolls > 0 ? ((Number(row.rolledCount || 0) / totalRolls) * 100) : 0;
                     const rate = row.rolledCount > 0 ? ((row.moSuccessCount / row.rolledCount) * 100) : 0;
                     const rainbowClass = Number(row.rainbowTopCount || 0) > 0
@@ -7764,7 +7811,10 @@ ${noteContent}`
                                         <div class="tiny muted">${escapeHtml(labelByType[row.type] || row.type)} · Rolled ${Number(row.rolledCount || 0)} · MO wins ${Number(row.moSuccessCount || 0)} · MO rate ${rate.toFixed(1)}%</div>
                                     </div>
                                 </div>
-                                <div class="armoryAnalyticsRate">${itemShare.toFixed(1)}%</div>
+                                <div class="armoryAnalyticsRateWrap">
+                                    <div class="armoryAnalyticsRateLabel">Pick rate</div>
+                                    <div class="armoryAnalyticsRate">${itemShare.toFixed(1)}%</div>
+                                </div>
                             </div>
                             <div class="armoryAnalyticsBarTrack">
                                 <div class="armoryAnalyticsBarFill" style="width:${itemShare.toFixed(2)}%;"></div>
@@ -7827,10 +7877,7 @@ ${noteContent}`
                 if (!rows.length) return "";
 
                 const cards = rows.map(row => {
-                    const visual = getItemVisual(row.name, row.type);
-                    const imgHtml = visual?.src
-                        ? `<img src="${escapeHtml(visual.src)}" alt="${escapeHtml(row.name)}" loading="lazy">`
-                        : `<span class="itemVisualFallback">N/A</span>`;
+                    const imgHtml = renderItemVisualHtml(row.name, row.type);
                     const rate = row.rolledCount > 0 ? ((row.moSuccessCount / row.rolledCount) * 100) : 0;
                     const rainbowClass = Number(row.rainbowTopCount || 0) > 0
                         ? ` armoryRainbowGlow ${row.type === "stratagem" ? "armoryRainbowGlow--stratagem" : "armoryRainbowGlow--weapon"}`
