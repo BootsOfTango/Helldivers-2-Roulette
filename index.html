@@ -2377,7 +2377,7 @@ END MASTER DIRECTIVE
             <div class="tabBtn active" data-tab="spin">SPIN</div>
             <div class="tabBtn" data-tab="results">RESULTS</div>
             <div class="tabBtn" data-tab="compare">COMPARE</div>
-            <div class="tabBtn" data-tab="items">ITEMS</div>
+            <div class="tabBtn" data-tab="items">ARMORY</div>
             <div class="tabBtn" data-tab="rank">RANK</div>
         </div>
 
@@ -2602,8 +2602,40 @@ END MASTER DIRECTIVE
         <section id="tab-items" class="panel" style="display:none;">
             <div class="row">
                 <div class="col">
-                    <div class="label">Edit your item pools (enable/disable, add/remove)</div>
-                    <div class="smallHelp">Everything is equal chance among ENABLED items only. Disable what you don’t own. Add new warbond stuff. The roulette does not care.</div>
+                    <div class="label">Armory overview</div>
+                    <div class="smallHelp">Monitor your editable planet pool against live campaign data so your war map context stays current.</div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col">
+                    <div class="label">Planets & sectors (edit freely)</div>
+                    <div class="smallHelp">Planet roll uses this list. Each planet must have: faction, sector, weather tags (comma separated).</div>
+                    <div id="listPlanets"></div>
+
+                    <div class="hr"></div>
+
+                    <div class="row" style="margin-top:0;">
+                        <div class="col">
+                            <div class="label">CURRENT ACTIVE PLANETS (LIVE API)</div>
+                            <div class="smallHelp">Live data from api.helldivers2.dev campaigns endpoint. Use this to verify your editable planet pool matches the current war map.</div>
+                        </div>
+                        <div class="col right">
+                            <button id="btnRefreshApiPlanets" class="btnGhost">REFRESH LIVE PLANETS</button>
+                        </div>
+                    </div>
+                    <div id="apiPlanetStatus" class="tiny muted" style="margin-bottom:8px;">Loading live planets...</div>
+                    <div id="apiActivePlanetsList"></div>
+
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="row">
+                <div class="col">
+                    <div class="label">Manual pool management</div>
+                    <div class="smallHelp">Enable or disable owned items, then add or remove entries without changing your current save wiring.</div>
                 </div>
                 <div class="col right">
                     <div class="miniRow" style="justify-content:flex-end;">
@@ -2691,31 +2723,6 @@ END MASTER DIRECTIVE
                 </div>
             </div>
 
-            </div>
-
-            <div class="divider"></div>
-
-            <div class="row">
-                <div class="col">
-                    <div class="label">Planets & sectors (edit freely)</div>
-                    <div class="smallHelp">Planet roll uses this list. Each planet must have: faction, sector, weather tags (comma separated).</div>
-                    <div id="listPlanets"></div>
-
-                    <div class="hr"></div>
-
-                    <div class="row" style="margin-top:0;">
-                        <div class="col">
-                            <div class="label">CURRENT ACTIVE PLANETS (LIVE API)</div>
-                            <div class="smallHelp">Live data from api.helldivers2.dev campaigns endpoint. Use this to verify your editable planet pool matches the current war map.</div>
-                        </div>
-                        <div class="col right">
-                            <button id="btnRefreshApiPlanets" class="btnGhost">REFRESH LIVE PLANETS</button>
-                        </div>
-                    </div>
-                    <div id="apiPlanetStatus" class="tiny muted" style="margin-bottom:8px;">Loading live planets...</div>
-                    <div id="apiActivePlanetsList"></div>
-
-                </div>
             </div>
         </section>
 
