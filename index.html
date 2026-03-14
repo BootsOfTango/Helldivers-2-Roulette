@@ -1802,6 +1802,68 @@ END MASTER DIRECTIVE
             min-width: 88px;
         }
 
+        #tab-items .armoryAnalyticsControls {
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        #tab-items .armoryAnalyticsList {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        #tab-items .armoryAnalyticsGroup {
+            border: 1px solid rgba(255,255,255,.08);
+            border-radius: 12px;
+            padding: 10px;
+            background: rgba(0,0,0,.18);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        #tab-items .armoryAnalyticsHeader {
+            display: grid;
+            grid-template-columns: minmax(240px, 1.4fr) repeat(3, minmax(90px, 1fr));
+            gap: 8px;
+            padding: 6px 10px;
+            font-size: 11px;
+            font-weight: 900;
+            letter-spacing: .6px;
+            text-transform: uppercase;
+            color: rgba(255,255,255,.72);
+        }
+
+        #tab-items .armoryAnalyticsRow {
+            display: grid;
+            grid-template-columns: minmax(240px, 1.4fr) repeat(3, minmax(90px, 1fr));
+            gap: 8px;
+            align-items: center;
+            border: 1px solid rgba(255,255,255,.06);
+            border-radius: 12px;
+            padding: 8px 10px;
+            background: rgba(0,0,0,.12);
+        }
+
+        #tab-items .armoryAnalyticsItem {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 0;
+        }
+
+        #tab-items .armoryAnalyticsItemName {
+            font-weight: 800;
+            line-height: 1.1;
+        }
+
+        #tab-items .armoryAnalyticsMetric {
+            text-align: right;
+            font-family: var(--mono);
+        }
+
         .rim-white {
             border-color: rgba(255,255,255,.70) !important;
         }
@@ -2397,7 +2459,7 @@ END MASTER DIRECTIVE
             <div class="tabBtn active" data-tab="spin">SPIN</div>
             <div class="tabBtn" data-tab="results">RESULTS</div>
             <div class="tabBtn" data-tab="compare">COMPARE</div>
-            <div class="tabBtn" data-tab="items">ITEMS</div>
+            <div class="tabBtn" data-tab="items">ARMORY</div>
             <div class="tabBtn" data-tab="rank">RANK</div>
         </div>
 
@@ -2622,8 +2684,40 @@ END MASTER DIRECTIVE
         <section id="tab-items" class="panel" style="display:none;">
             <div class="row">
                 <div class="col">
-                    <div class="label">Edit your item pools (enable/disable, add/remove)</div>
-                    <div class="smallHelp">Everything is equal chance among ENABLED items only. Disable what you don’t own. Add new warbond stuff. The roulette does not care.</div>
+                    <div class="label">Armory overview</div>
+                    <div class="smallHelp">Monitor your editable planet pool against live campaign data so your war map context stays current.</div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col">
+                    <div class="label">Planets & sectors (edit freely)</div>
+                    <div class="smallHelp">Planet roll uses this list. Each planet must have: faction, sector, weather tags (comma separated).</div>
+                    <div id="listPlanets"></div>
+
+                    <div class="hr"></div>
+
+                    <div class="row" style="margin-top:0;">
+                        <div class="col">
+                            <div class="label">CURRENT ACTIVE PLANETS (LIVE API)</div>
+                            <div class="smallHelp">Live data from api.helldivers2.dev campaigns endpoint. Use this to verify your editable planet pool matches the current war map.</div>
+                        </div>
+                        <div class="col right">
+                            <button id="btnRefreshApiPlanets" class="btnGhost">REFRESH LIVE PLANETS</button>
+                        </div>
+                    </div>
+                    <div id="apiPlanetStatus" class="tiny muted" style="margin-bottom:8px;">Loading live planets...</div>
+                    <div id="apiActivePlanetsList"></div>
+
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="row">
+                <div class="col">
+                    <div class="label">Manual pool management</div>
+                    <div class="smallHelp">Enable or disable owned items, then add or remove entries without changing your current save wiring.</div>
                 </div>
                 <div class="col right">
                     <div class="miniRow" style="justify-content:flex-end;">
@@ -2711,31 +2805,6 @@ END MASTER DIRECTIVE
                 </div>
             </div>
 
-            </div>
-
-            <div class="divider"></div>
-
-            <div class="row">
-                <div class="col">
-                    <div class="label">Planets & sectors (edit freely)</div>
-                    <div class="smallHelp">Planet roll uses this list. Each planet must have: faction, sector, weather tags (comma separated).</div>
-                    <div id="listPlanets"></div>
-
-                    <div class="hr"></div>
-
-                    <div class="row" style="margin-top:0;">
-                        <div class="col">
-                            <div class="label">CURRENT ACTIVE PLANETS (LIVE API)</div>
-                            <div class="smallHelp">Live data from api.helldivers2.dev campaigns endpoint. Use this to verify your editable planet pool matches the current war map.</div>
-                        </div>
-                        <div class="col right">
-                            <button id="btnRefreshApiPlanets" class="btnGhost">REFRESH LIVE PLANETS</button>
-                        </div>
-                    </div>
-                    <div id="apiPlanetStatus" class="tiny muted" style="margin-bottom:8px;">Loading live planets...</div>
-                    <div id="apiActivePlanetsList"></div>
-
-                </div>
             </div>
         </section>
 
@@ -6915,6 +6984,7 @@ ${noteContent}`
 
         const ITEMS_VIEW_MODE_KEY = "hd2_items_view_mode";
         const ITEMS_TYPE_FILTER_KEY = "hd2_items_type_filter";
+        const ARMORY_VIEW_MODE_KEY = "hd2_armory_view_mode";
 
         const WARBOND_ORDER = [
             "Helldiver Basics (Mobilize)",
@@ -7076,6 +7146,63 @@ ${noteContent}`
             };
         }
 
+        function sortCardsByRankOrder(cards) {
+            return (Array.isArray(cards) ? cards : [])
+                .slice()
+                .sort((a, b) => {
+                    const g = Number(b?.grade || 0) - Number(a?.grade || 0);
+                    if (g !== 0) return g;
+                    return String(b?.createdAt || "").localeCompare(String(a?.createdAt || ""));
+                });
+        }
+
+        function canonicalItemName(name) {
+            const raw = String(name || "").trim();
+            if (!raw || raw === "—") return "";
+            const key = normalizeItemKey(raw);
+            const aliasHit = itemVisuals?.aliases?.get(key);
+            return String(aliasHit || raw).trim();
+        }
+
+        // Pure derived metrics: no persistence, safe for old saves.
+        function buildArmoryStats(cards) {
+            const ordered = sortCardsByRankOrder(cards);
+            const stats = new Map();
+
+            const touchItem = (card, itemName, isRainbowTop) => {
+                const canonical = canonicalItemName(itemName);
+                if (!canonical) return;
+
+                if (!stats.has(canonical)) {
+                    stats.set(canonical, {
+                        itemName: canonical,
+                        rolledCount: 0,
+                        moSuccessCount: 0,
+                        rainbowTopCount: 0
+                    });
+                }
+
+                const row = stats.get(canonical);
+                row.rolledCount += 1;
+                if (card?.majorOrderDone === true) row.moSuccessCount += 1;
+                if (isRainbowTop) row.rainbowTopCount += 1;
+            };
+
+            ordered.forEach((card, idx) => {
+                const tier = tierForPlace(idx + 1);
+                const isRainbowTop = tier === "rainbow";
+
+                touchItem(card, card?.primary, isRainbowTop);
+                touchItem(card, card?.sidearm, isRainbowTop);
+                touchItem(card, card?.throwable, isRainbowTop);
+                (Array.isArray(card?.stratagems) ? card.stratagems : []).forEach(name => {
+                    touchItem(card, name, isRainbowTop);
+                });
+            });
+
+            return stats;
+        }
+
         /***********************
          * Items editor
          ***********************/
@@ -7225,25 +7352,158 @@ ${noteContent}`
             return normalizeText(searchable).includes(query);
         }
 
-        function buildRainbowItemUsageMap() {
-            const tierMap = buildTierMap();
-            const usage = new Map();
+        function buildArmoryAnalyticsData() {
+            const map = new Map();
+            const typeOrder = ["primary", "sidearm", "throwable", "stratagem"];
 
-            const bump = (name) => {
-                const key = normalizeText(name || "");
-                if (!key) return;
-                usage.set(key, (usage.get(key) || 0) + 1);
+            const ensure = (type, name) => {
+                const cleanName = String(name || "").trim();
+                if (!cleanName) return null;
+                const key = `${type}|${normalizeText(cleanName)}`;
+                if (!map.has(key)) {
+                    map.set(key, {
+                        key,
+                        type,
+                        name: cleanName,
+                        rolledCount: 0,
+                        moSuccessCount: 0,
+                        moRate: 0
+                    });
+                }
+                return map.get(key);
             };
 
-            state.cards.forEach(card => {
-                if (!card || tierMap.get(card.id) !== "rainbow") return;
-                bump(card.primary);
-                bump(card.sidearm);
-                bump(card.throwable);
-                (card.stratagems || []).forEach(bump);
+            ITEM_LIST_METADATA.forEach(meta => {
+                const type = meta.visualCategory;
+                const list = Array.isArray(state.items[meta.key]) ? state.items[meta.key] : [];
+                list.forEach(item => ensure(type, item?.name));
             });
 
-            return usage;
+            const bump = (type, name, moDone) => {
+                const row = ensure(type, name);
+                if (!row) return;
+                row.rolledCount += 1;
+                if (moDone) row.moSuccessCount += 1;
+            };
+
+            (state.cards || []).forEach(card => {
+                const moDone = !!card?.majorOrderDone;
+                bump("primary", card?.primary, moDone);
+                bump("sidearm", card?.sidearm, moDone);
+                bump("throwable", card?.throwable, moDone);
+                (card?.stratagems || []).forEach(name => bump("stratagem", name, moDone));
+            });
+
+            const rows = Array.from(map.values());
+            rows.forEach(row => {
+                row.moRate = row.rolledCount > 0 ? (row.moSuccessCount / row.rolledCount) : 0;
+            });
+
+            rows.sort((a, b) => {
+                const typeCmp = typeOrder.indexOf(a.type) - typeOrder.indexOf(b.type);
+                if (typeCmp !== 0) return typeCmp;
+                return a.name.localeCompare(b.name);
+            });
+
+            return rows;
+        }
+
+        function renderArmoryAnalytics(aggregatedRows) {
+            const box = $("#armoryAnalyticsList");
+            if (!box) return;
+
+            const query = normalizeText($("#itemSearch")?.value || "");
+            const showUnpicked = !!$("#armoryShowUnpicked")?.checked;
+            const groupBy = $("#armoryAnalyticsGroupBy")?.value || "none";
+            const sortMetric = $("#armoryAnalyticsSortMetric")?.value || "rolledCount";
+            const labelByType = {
+                primary: "Primary",
+                sidearm: "Sidearm",
+                throwable: "Throwable",
+                stratagem: "Stratagem"
+            };
+            const typeOrder = ["primary", "sidearm", "throwable", "stratagem"];
+
+            const list = (Array.isArray(aggregatedRows) ? aggregatedRows : []).filter(row => {
+                if (!showUnpicked && row.rolledCount === 0) return false;
+                return matchesItemSearch({ name: row.name, warbond: "" }, labelByType[row.type] || "", query);
+            });
+
+            const metricVal = (row) => {
+                if (sortMetric === "moSuccessCount") return Number(row.moSuccessCount || 0);
+                if (sortMetric === "moRate") return Number(row.moRate || 0);
+                return Number(row.rolledCount || 0);
+            };
+
+            list.sort((a, b) => {
+                const diff = metricVal(b) - metricVal(a);
+                if (diff !== 0) return diff;
+                const rolledTie = Number(b.rolledCount || 0) - Number(a.rolledCount || 0);
+                if (rolledTie !== 0) return rolledTie;
+                const typeTie = typeOrder.indexOf(a.type) - typeOrder.indexOf(b.type);
+                if (typeTie !== 0) return typeTie;
+                return a.name.localeCompare(b.name);
+            });
+
+            if (!list.length) {
+                box.innerHTML = `<div class="tiny">No analytics rows match the current filters.</div>`;
+                return;
+            }
+
+            const buildHeader = () => `
+                <div class="armoryAnalyticsHeader">
+                    <div>Item</div>
+                    <div style="text-align:right;">Rolled</div>
+                    <div style="text-align:right;">MO success</div>
+                    <div style="text-align:right;">MO rate</div>
+                </div>
+            `;
+
+            const buildRow = (row) => {
+                const visual = getItemVisual(row.name, row.type);
+                const imgHtml = visual?.src
+                    ? `<img src="${escapeHtml(visual.src)}" alt="${escapeHtml(row.name)}" loading="lazy">`
+                    : `<span class="itemVisualFallback">N/A</span>`;
+                const rate = row.rolledCount > 0 ? ((row.moSuccessCount / row.rolledCount) * 100) : 0;
+
+                return `
+                    <div class="armoryAnalyticsRow">
+                        <div class="armoryAnalyticsItem">
+                            <div class="itemVisualCell">${imgHtml}</div>
+                            <div>
+                                <div class="armoryAnalyticsItemName">${escapeHtml(row.name)}</div>
+                                <div class="tiny muted">${escapeHtml(labelByType[row.type] || row.type)}</div>
+                            </div>
+                        </div>
+                        <div class="armoryAnalyticsMetric">${Number(row.rolledCount || 0)}</div>
+                        <div class="armoryAnalyticsMetric">${Number(row.moSuccessCount || 0)}</div>
+                        <div class="armoryAnalyticsMetric">${rate.toFixed(1)}%</div>
+                    </div>
+                `;
+            };
+
+            if (groupBy === "type") {
+                const groupedHtml = typeOrder.map(type => {
+                    const rows = list.filter(row => row.type === type);
+                    if (!rows.length) return "";
+                    return `
+                        <div class="armoryAnalyticsGroup">
+                            <div class="label" style="margin-bottom:0;">${escapeHtml(labelByType[type] || type)}</div>
+                            ${buildHeader()}
+                            ${rows.map(buildRow).join("")}
+                        </div>
+                    `;
+                }).join("");
+                box.innerHTML = groupedHtml;
+                return;
+            }
+
+            box.innerHTML = `
+                <div class="armoryAnalyticsGroup">
+                    ${buildHeader()}
+                    ${list.map(buildRow).join("")}
+                </div>
+            `;
         }
 
         function renderItemsByWarbond() {
@@ -7503,6 +7763,8 @@ ${noteContent}`
         }
 
         function renderItems() {
+            renderArmoryGroupedGrid();
+
             const viewMode = getItemsViewMode();
             const warbondView = $("#itemsWarbondView");
             const categoryView = $("#itemsCategoryView");
@@ -7543,6 +7805,7 @@ ${noteContent}`
                 );
             }
 
+            renderArmoryAnalytics(buildArmoryAnalyticsData());
             renderPlanets();
 
             if (Array.isArray(window.__apiActivePlanetsCache) && window.__apiActivePlanetsCache.length) {
@@ -7958,6 +8221,9 @@ ${noteContent}`
                 localStorage.setItem(ITEMS_TYPE_FILTER_KEY, ["primary", "sidearm", "throwable", "stratagem"].includes(value) ? value : "all");
                 renderItems();
             });
+            $("#armoryShowUnpicked")?.addEventListener("change", renderItems);
+            $("#armoryAnalyticsGroupBy")?.addEventListener("change", renderItems);
+            $("#armoryAnalyticsSortMetric")?.addEventListener("change", renderItems);
 
             $("#btnExport").addEventListener("click", exportJSON);
             $("#btnRankBackupNow").addEventListener("click", exportJSON);
