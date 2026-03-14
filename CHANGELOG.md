@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-03-14
+
+### Armory catalog maintenance + icon integrity ✅
+
+- **Change:** Added a canonical `assets/item-catalog.json` source and automated item/image validation checks before release publication.
+- **Why:** Prevents ARMORY stat cards from showing missing or mismatched icons when item pools are updated.
+
+### Newly added weapons/stratagems this update
+
+- **Weapons:** None (catalog/data integrity update only).
+- **Stratagems:** None (catalog/data integrity update only).
+
+
 ## 2026-03-09
 
 ### Stable release tags
