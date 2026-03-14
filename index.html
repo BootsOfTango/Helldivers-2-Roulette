@@ -2571,6 +2571,11 @@ END MASTER DIRECTIVE
             font-weight: 900;
         }
 
+        .mode-eradication {
+            color: #ff4fa3;
+            font-weight: 900;
+        }
+
         /* ===== FACTION COLORS ===== */
 
         /* ===== FACTION COLORS (TEXT ONLY) ===== */
@@ -2895,7 +2900,7 @@ END MASTER DIRECTIVE
                     <div class="box">
                         <div class="label">Mode</div>
                         <div class="big" id="spinMode">—</div>
-                        <div class="tiny">One mission per card. Blitz = 12 minutes. Standard = 40 minutes.</div>
+                        <div class="tiny">One mission per card. Blitz = 12 minutes. Eradication = 15 minutes. Standard = 40 minutes.</div>
                     </div>
                 </div>
 
@@ -2942,6 +2947,7 @@ END MASTER DIRECTIVE
                         <select id="resFilterMode">
                             <option value="">All modes</option>
                             <option value="Blitz (12)">Blitz (12)</option>
+                            <option value="Eradication (15)">Eradication (15)</option>
                             <option value="Standard (40)">Standard (40)</option>
                         </select>
                         <select id="resFilterFaction">
@@ -4831,8 +4837,9 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
          * Spin logic
          ***********************/
         function rollMode() {
-            // equal chance: Blitz (12) or Standard (40)
-            return Math.random() < 0.5 ? "Blitz (12)" : "Standard (40)";
+            // equal chance: Blitz (12), Eradication (15), or Standard (40)
+            const modes = ["Blitz (12)", "Eradication (15)", "Standard (40)"];
+            return modes[Math.floor(Math.random() * modes.length)];
         }
         function rollFaction() {
             const roll = Math.random();
@@ -5992,7 +5999,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             // MODE colors
             const modeEl = $("#spinMode");
-            modeEl.classList.remove("mode-standard", "mode-blitz");
+            modeEl.classList.remove("mode-standard", "mode-blitz", "mode-eradication");
 
             if (!c.locked) {
                 modeEl.textContent = "—";
@@ -6002,6 +6009,9 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             } else if (c.mode === "Blitz (12)") {
                 modeEl.textContent = c.mode;
                 modeEl.classList.add("mode-blitz");
+            } else if (c.mode === "Eradication (15)") {
+                modeEl.textContent = c.mode;
+                modeEl.classList.add("mode-eradication");
             } else {
                 modeEl.textContent = "—";
             }
