@@ -2339,6 +2339,23 @@ END MASTER DIRECTIVE
 
         .itemInsightVisual {
             margin-top: 8px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .itemInsightVisual .itemInsightVisualCell {
+            width: 100%;
+            max-width: 340px;
+            aspect-ratio: 1 / 1;
+            height: auto;
+            border-radius: 10px;
+        }
+
+        .itemInsightVisual .itemInsightVisualCell img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            background: rgba(0,0,0,.5);
         }
 
         .itemPerformanceGrid {
@@ -8396,7 +8413,7 @@ ${noteContent}`
             const renderCountCard = (title, payload, fallback) => {
                 const item = payload?.item || null;
                 const count = Number(payload?.count || 0);
-                const visual = item ? `<div class="itemInsightVisual">${renderItemVisualHtml(item.name, item.slot)}</div>` : "";
+                const visual = item ? `<div class="itemInsightVisual"><div class="itemVisualCell itemInsightVisualCell">${renderItemVisualHtml(item.name, item.slot)}</div></div>` : "";
                 return `
                     <div class="itemInsightCard">
                         <div class="kicker">${title}</div>
@@ -8408,7 +8425,7 @@ ${noteContent}`
             };
 
             const renderBestCard = (title, item, type, fallback) => {
-                const visual = item ? `<div class="itemInsightVisual">${renderItemVisualHtml(item.name, type)}</div>` : "";
+                const visual = item ? `<div class="itemInsightVisual"><div class="itemVisualCell itemInsightVisualCell">${renderItemVisualHtml(item.name, type)}</div></div>` : "";
                 return `
                     <div class="itemInsightCard">
                         <div class="kicker">${title}</div>
