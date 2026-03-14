@@ -2333,9 +2333,38 @@ END MASTER DIRECTIVE
 
         .itemInsightCard .kicker {
             font-size: 11px;
-            color: var(--muted);
+            color: #d8ecff;
             text-transform: uppercase;
-            letter-spacing: .4px;
+            letter-spacing: .45px;
+            font-weight: 800;
+            line-height: 1.25;
+            text-shadow: 0 0 10px rgba(107, 175, 255, .28);
+            background: linear-gradient(90deg, rgba(35, 65, 102, .72), rgba(18, 38, 66, .4));
+            border: 1px solid rgba(135, 186, 255, .42);
+            border-radius: 7px;
+            display: inline-block;
+            padding: 3px 7px;
+        }
+
+        .itemInsightCard:nth-child(1) .kicker {
+            color: #7ad3ff;
+            border-color: rgba(108, 211, 255, .6);
+            background: linear-gradient(90deg, rgba(17, 62, 84, .85), rgba(12, 41, 60, .5));
+            text-shadow: 0 0 12px rgba(68, 201, 255, .4);
+        }
+
+        .itemInsightCard:nth-child(2) .kicker {
+            color: #afbcff;
+            border-color: rgba(163, 175, 255, .58);
+            background: linear-gradient(90deg, rgba(33, 42, 92, .85), rgba(20, 25, 58, .5));
+            text-shadow: 0 0 12px rgba(132, 150, 255, .42);
+        }
+
+        .itemInsightCard:nth-child(3) .kicker {
+            color: #ffd37f;
+            border-color: rgba(255, 203, 106, .58);
+            background: linear-gradient(90deg, rgba(93, 59, 20, .85), rgba(59, 39, 12, .5));
+            text-shadow: 0 0 12px rgba(255, 187, 69, .38);
         }
 
         .itemInsightCard .value {
