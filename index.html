@@ -2439,7 +2439,7 @@ END MASTER DIRECTIVE
             <div class="tabBtn active" data-tab="spin">SPIN</div>
             <div class="tabBtn" data-tab="results">RESULTS</div>
             <div class="tabBtn" data-tab="compare">COMPARE</div>
-            <div class="tabBtn" data-tab="items">ITEMS</div>
+            <div class="tabBtn" data-tab="items">ARMORY</div>
             <div class="tabBtn" data-tab="rank">RANK</div>
         </div>
 
@@ -2664,8 +2664,40 @@ END MASTER DIRECTIVE
         <section id="tab-items" class="panel" style="display:none;">
             <div class="row">
                 <div class="col">
-                    <div class="label">Edit your item pools (enable/disable, add/remove)</div>
-                    <div class="smallHelp">Everything is equal chance among ENABLED items only. Disable what you don’t own. Add new warbond stuff. The roulette does not care.</div>
+                    <div class="label">Armory overview</div>
+                    <div class="smallHelp">Monitor your editable planet pool against live campaign data so your war map context stays current.</div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col">
+                    <div class="label">Planets & sectors (edit freely)</div>
+                    <div class="smallHelp">Planet roll uses this list. Each planet must have: faction, sector, weather tags (comma separated).</div>
+                    <div id="listPlanets"></div>
+
+                    <div class="hr"></div>
+
+                    <div class="row" style="margin-top:0;">
+                        <div class="col">
+                            <div class="label">CURRENT ACTIVE PLANETS (LIVE API)</div>
+                            <div class="smallHelp">Live data from api.helldivers2.dev campaigns endpoint. Use this to verify your editable planet pool matches the current war map.</div>
+                        </div>
+                        <div class="col right">
+                            <button id="btnRefreshApiPlanets" class="btnGhost">REFRESH LIVE PLANETS</button>
+                        </div>
+                    </div>
+                    <div id="apiPlanetStatus" class="tiny muted" style="margin-bottom:8px;">Loading live planets...</div>
+                    <div id="apiActivePlanetsList"></div>
+
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="row">
+                <div class="col">
+                    <div class="label">Manual pool management</div>
+                    <div class="smallHelp">Enable or disable owned items, then add or remove entries without changing your current save wiring.</div>
                 </div>
                 <div class="col right">
                     <div class="miniRow" style="justify-content:flex-end;">
@@ -2753,62 +2785,6 @@ END MASTER DIRECTIVE
                 </div>
             </div>
 
-            </div>
-
-            <div class="divider"></div>
-
-            <div class="row">
-                <div class="col">
-                    <div class="label">Armory analytics</div>
-                    <div class="smallHelp">Usage ranking from saved runs. By default, items with 0 rolls are hidden.</div>
-                </div>
-            </div>
-
-            <div class="row armoryAnalyticsControls">
-                <div class="col">
-                    <div class="miniRow" style="gap:8px; flex-wrap:wrap;">
-                        <label class="tiny" style="display:inline-flex; align-items:center; gap:6px;">
-                            <input id="armoryShowUnpicked" type="checkbox" />
-                            <span>Show unpicked items (0)</span>
-                        </label>
-                        <select id="armoryAnalyticsGroupBy">
-                            <option value="none">View: mixed list</option>
-                            <option value="type">View: group by type</option>
-                        </select>
-                        <select id="armoryAnalyticsSortMetric">
-                            <option value="rolledCount">Sort: rolled count</option>
-                            <option value="moSuccessCount">Sort: MO success count</option>
-                            <option value="moRate">Sort: MO success rate</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-
-            <div id="armoryAnalyticsList" class="armoryAnalyticsList"></div>
-
-            <div class="divider"></div>
-
-            <div class="row">
-                <div class="col">
-                    <div class="label">Planets & sectors (edit freely)</div>
-                    <div class="smallHelp">Planet roll uses this list. Each planet must have: faction, sector, weather tags (comma separated).</div>
-                    <div id="listPlanets"></div>
-
-                    <div class="hr"></div>
-
-                    <div class="row" style="margin-top:0;">
-                        <div class="col">
-                            <div class="label">CURRENT ACTIVE PLANETS (LIVE API)</div>
-                            <div class="smallHelp">Live data from api.helldivers2.dev campaigns endpoint. Use this to verify your editable planet pool matches the current war map.</div>
-                        </div>
-                        <div class="col right">
-                            <button id="btnRefreshApiPlanets" class="btnGhost">REFRESH LIVE PLANETS</button>
-                        </div>
-                    </div>
-                    <div id="apiPlanetStatus" class="tiny muted" style="margin-bottom:8px;">Loading live planets...</div>
-                    <div id="apiActivePlanetsList"></div>
-
-                </div>
             </div>
         </section>
 
@@ -7147,6 +7123,63 @@ ${noteContent}`
                 src: visual.src,
                 fallbackSrc: visual.fallbackSrc
             };
+        }
+
+        function sortCardsByRankOrder(cards) {
+            return (Array.isArray(cards) ? cards : [])
+                .slice()
+                .sort((a, b) => {
+                    const g = Number(b?.grade || 0) - Number(a?.grade || 0);
+                    if (g !== 0) return g;
+                    return String(b?.createdAt || "").localeCompare(String(a?.createdAt || ""));
+                });
+        }
+
+        function canonicalItemName(name) {
+            const raw = String(name || "").trim();
+            if (!raw || raw === "—") return "";
+            const key = normalizeItemKey(raw);
+            const aliasHit = itemVisuals?.aliases?.get(key);
+            return String(aliasHit || raw).trim();
+        }
+
+        // Pure derived metrics: no persistence, safe for old saves.
+        function buildArmoryStats(cards) {
+            const ordered = sortCardsByRankOrder(cards);
+            const stats = new Map();
+
+            const touchItem = (card, itemName, isRainbowTop) => {
+                const canonical = canonicalItemName(itemName);
+                if (!canonical) return;
+
+                if (!stats.has(canonical)) {
+                    stats.set(canonical, {
+                        itemName: canonical,
+                        rolledCount: 0,
+                        moSuccessCount: 0,
+                        rainbowTopCount: 0
+                    });
+                }
+
+                const row = stats.get(canonical);
+                row.rolledCount += 1;
+                if (card?.majorOrderDone === true) row.moSuccessCount += 1;
+                if (isRainbowTop) row.rainbowTopCount += 1;
+            };
+
+            ordered.forEach((card, idx) => {
+                const tier = tierForPlace(idx + 1);
+                const isRainbowTop = tier === "rainbow";
+
+                touchItem(card, card?.primary, isRainbowTop);
+                touchItem(card, card?.sidearm, isRainbowTop);
+                touchItem(card, card?.throwable, isRainbowTop);
+                (Array.isArray(card?.stratagems) ? card.stratagems : []).forEach(name => {
+                    touchItem(card, name, isRainbowTop);
+                });
+            });
+
+            return stats;
         }
 
         /***********************
