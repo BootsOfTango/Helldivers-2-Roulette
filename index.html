@@ -6964,6 +6964,7 @@ ${noteContent}`
 
         const ITEMS_VIEW_MODE_KEY = "hd2_items_view_mode";
         const ITEMS_TYPE_FILTER_KEY = "hd2_items_type_filter";
+        const ARMORY_VIEW_MODE_KEY = "hd2_armory_view_mode";
 
         const WARBOND_ORDER = [
             "Helldiver Basics (Mobilize)",
@@ -7729,6 +7730,8 @@ ${noteContent}`
         }
 
         function renderItems() {
+            renderArmoryGroupedGrid();
+
             const viewMode = getItemsViewMode();
             const warbondView = $("#itemsWarbondView");
             const categoryView = $("#itemsCategoryView");
