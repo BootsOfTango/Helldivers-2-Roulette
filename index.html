@@ -1830,10 +1830,25 @@ END MASTER DIRECTIVE
 
         #tab-items .armoryAnalyticsBarItem {
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             gap: 10px;
             min-width: 0;
             flex: 1;
+        }
+
+        #tab-items .armoryAnalyticsItemMeta {
+            margin-top: 2px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            column-gap: 10px;
+            row-gap: 2px;
+            line-height: 1.35;
+        }
+
+        #tab-items .armoryAnalyticsItemMeta b {
+            color: rgba(226, 247, 255, .95);
+            font-weight: 800;
         }
 
         #tab-items .armoryAnalyticsBarTrack {
@@ -1874,26 +1889,44 @@ END MASTER DIRECTIVE
 
         #tab-items .armoryPickRateHero {
             margin-top: 8px;
-            border: 1px solid rgba(121, 237, 255, .35);
-            border-radius: 12px;
-            padding: 10px 12px;
-            background: linear-gradient(90deg, rgba(52, 187, 255, .14), rgba(74, 255, 216, .08));
+            border: 1px solid rgba(121, 237, 255, .45);
+            border-radius: 14px;
+            padding: 12px 14px;
+            background:
+                radial-gradient(circle at 16% 28%, rgba(73, 224, 255, .22), transparent 46%),
+                linear-gradient(120deg, rgba(12, 46, 68, .74), rgba(16, 70, 74, .58) 45%, rgba(8, 34, 39, .7));
+            box-shadow: inset 0 0 0 1px rgba(174, 245, 255, .12), 0 10px 24px rgba(3, 18, 30, .28);
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
         }
 
         #tab-items .armoryPickRateHeroIcon {
-            width: 30px;
-            height: 30px;
-            min-width: 30px;
-            border-radius: 8px;
-            border: 1px solid rgba(121, 237, 255, .45);
+            width: 38px;
+            height: 38px;
+            min-width: 38px;
+            border-radius: 10px;
+            border: 1px solid rgba(161, 241, 255, .62);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 16px;
-            background: rgba(0, 0, 0, .26);
+            font-size: 19px;
+            background: linear-gradient(140deg, rgba(4, 21, 34, .92), rgba(34, 114, 132, .4));
+            box-shadow: 0 0 0 2px rgba(6, 25, 40, .6), 0 0 22px rgba(96, 241, 255, .34);
+        }
+
+        #tab-items .armoryPickRateHeroTitle {
+            font-size: 12px;
+            letter-spacing: .7px;
+            text-transform: uppercase;
+            color: rgba(131, 237, 255, .95);
+            font-weight: 900;
+            margin-bottom: 2px;
+        }
+
+        #tab-items .armoryPickRateHero .tiny {
+            color: rgba(228, 243, 255, .92);
+            line-height: 1.35;
         }
 
         #tab-items .armoryAnalyticsList {
@@ -2922,19 +2955,22 @@ END MASTER DIRECTIVE
 
             <div class="row armoryAnalyticsControls">
                 <div class="col">
-                    <div class="label">Personal pick-rate chart</div>
+                    <div class="label">Personal roll-rate chart</div>
                     <div class="tiny">Shows how often each item is rolled in your own history. Default view hides never-picked items.</div>
-                    <div class="armoryPickRateHero" aria-label="Pick-rate explanation">
-                        <div class="armoryPickRateHeroIcon" aria-hidden="true">📈</div>
-                        <div class="tiny">Pick-rate is the percentage shown on the right of each row. The cyan bar length visualizes that same pick-rate share.</div>
+                    <div class="armoryPickRateHero" aria-label="Roll-rate explanation">
+                        <div class="armoryPickRateHeroIcon" aria-hidden="true">🚀</div>
+                        <div>
+                            <div class="armoryPickRateHeroTitle">How to read this chart</div>
+                            <div class="tiny">Roll rate is the percentage shown on the right of each row. The cyan bar length mirrors that same roll-rate share, so longer bars mean your most frequently rolled items.</div>
+                        </div>
                     </div>
                 </div>
                 <div class="col right">
                     <div class="miniRow" style="justify-content:flex-end; flex-wrap:wrap;">
                         <select id="armoryAnalyticsSortMetric">
                             <option value="rolledCount">Sort: Most rolled</option>
-                            <option value="moSuccessCount">Sort: Most MO wins</option>
-                            <option value="moRate">Sort: Best MO rate</option>
+                            <option value="moSuccessCount">Sort: Most successful MO rolls</option>
+                            <option value="moRate">Sort: Best MO success rate</option>
                         </select>
                         <select id="armoryAnalyticsGroupBy">
                             <option value="none">All types together</option>
@@ -2942,7 +2978,7 @@ END MASTER DIRECTIVE
                         </select>
                         <label class="tiny" style="display:flex; align-items:center; gap:6px;">
                             <input id="armoryShowUnpicked" type="checkbox" />
-                            Show unpicked (0)
+                            Show unrolled (0)
                         </label>
                         <label class="tiny" style="display:flex; align-items:center; gap:6px;">
                             <input id="armoryExpandAll" type="checkbox" />
@@ -7808,11 +7844,11 @@ ${noteContent}`
                                     <div class="itemVisualCell${rainbowClass}">${imgHtml}</div>
                                     <div>
                                         <div class="armoryAnalyticsItemName">${escapeHtml(row.name)}</div>
-                                        <div class="tiny muted">${escapeHtml(labelByType[row.type] || row.type)} · Rolled ${Number(row.rolledCount || 0)} · MO wins ${Number(row.moSuccessCount || 0)} · MO rate ${rate.toFixed(1)}%</div>
+                                        <div class="tiny muted armoryAnalyticsItemMeta">${escapeHtml(labelByType[row.type] || row.type)} · <span>Total rolls <b>${Number(row.rolledCount || 0)}</b></span> · <span>Successful MO rolls <b>${Number(row.moSuccessCount || 0)}</b></span> · <span>MO success rate <b>${rate.toFixed(1)}%</b></span></div>
                                     </div>
                                 </div>
                                 <div class="armoryAnalyticsRateWrap">
-                                    <div class="armoryAnalyticsRateLabel">Pick rate</div>
+                                    <div class="armoryAnalyticsRateLabel">Roll rate</div>
                                     <div class="armoryAnalyticsRate">${itemShare.toFixed(1)}%</div>
                                 </div>
                             </div>
@@ -7890,8 +7926,8 @@ ${noteContent}`
                                 <div class="armoryAnalyticsItemName">${escapeHtml(row.name)}</div>
                                 <div class="armoryItemCardMeta">
                                     <div>Rolls: ${Number(row.rolledCount || 0)}</div>
-                                    <div>MO wins: ${Number(row.moSuccessCount || 0)}</div>
-                                    <div>MO rate: ${rate.toFixed(1)}%</div>
+                                    <div>Successful MO rolls: ${Number(row.moSuccessCount || 0)}</div>
+                                    <div>MO success rate: ${rate.toFixed(1)}%</div>
                                     <div>Rainbow: ${Number(row.rainbowTopCount || 0)}</div>
                                 </div>
                             </div>
