@@ -2106,7 +2106,110 @@ END MASTER DIRECTIVE
                 letter-spacing: .2px;
             }
 
+        .itemInsightCards {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .itemInsightCard {
+            border: 1px solid var(--line2);
+            border-radius: 12px;
+            background: rgba(0,0,0,.26);
+            padding: 10px;
+        }
+
+        .itemInsightCard .kicker {
+            font-size: 11px;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: .4px;
+        }
+
+        .itemInsightCard .value {
+            margin-top: 4px;
+            font-weight: 900;
+            font-size: 15px;
+        }
+
+        .itemInsightCard .sub {
+            margin-top: 5px;
+            font-size: 11px;
+            color: var(--muted);
+        }
+
+        .itemPerformanceGrid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .itemPerfCard {
+            border: 1px solid var(--line2);
+            border-radius: 12px;
+            background: rgba(0,0,0,.22);
+            padding: 10px;
+        }
+
+        .itemPerfHead {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .itemPerfName {
+            font-weight: 800;
+            font-size: 14px;
+        }
+
+        .itemPerfMeta {
+            margin-top: 3px;
+            color: var(--muted);
+            font-size: 11px;
+        }
+
+        .itemPerfBadges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 8px;
+        }
+
+        .itemPerfBadge {
+            font-size: 10px;
+            border-radius: 999px;
+            border: 1px solid rgba(255,255,255,.18);
+            padding: 2px 7px;
+            color: #d6e1f2;
+            background: rgba(255,255,255,.06);
+        }
+
+        .itemPerfBadge.good {
+            border-color: rgba(65, 204, 131, .55);
+            color: #9ff2c5;
+            background: rgba(65, 204, 131, .15);
+        }
+
+        .itemPerfBadge.warn {
+            border-color: rgba(255, 212, 0, .55);
+            color: #ffe67a;
+            background: rgba(255, 212, 0, .12);
+        }
+
+        .itemPerfBadge.bad {
+            border-color: rgba(255, 93, 93, .55);
+            color: #ffadad;
+            background: rgba(255, 93, 93, .12);
+        }
+
         @media (max-width: 1100px) {
+            .itemInsightCards {
+                grid-template-columns: 1fr;
+            }
+
             #rankSplitView {
                 grid-template-columns: 1fr;
             }
@@ -2839,6 +2942,9 @@ END MASTER DIRECTIVE
             </div>
 
             <div class="divider"></div>
+
+            <div id="itemInsightCards" class="itemInsightCards"></div>
+            <div id="itemPerformanceGrid" class="itemPerformanceGrid"></div>
 
             <div id="rankSplitView">
                 <div>
@@ -7853,6 +7959,242 @@ ${noteContent}`
             }
         }
 
+        const ITEM_RECENT_WINDOW = 10;
+        const ITEM_DISCOVERY_WINDOW = 12;
+
+        function getCardItems(card) {
+            if (!card) return [];
+            const items = [];
+            if (card.primary) items.push({ name: card.primary, slot: "primary" });
+            if (card.sidearm) items.push({ name: card.sidearm, slot: "sidearm" });
+            if (card.throwable) items.push({ name: card.throwable, slot: "throwable" });
+            (card.stratagems || []).forEach(s => {
+                if (s) items.push({ name: s, slot: "stratagem" });
+            });
+            return items;
+        }
+
+        function getStratGroup(name = "") {
+            const lc = String(name || "").toLowerCase();
+            if (lc.startsWith("orbital ")) return "orbital";
+            if (lc.startsWith("eagle ")) return "eagle";
+            const rim = getLegacyStratRimClass("", name);
+            if (rim.includes("orbital")) return "orbital";
+            if (rim.includes("eagle")) return "eagle";
+            if (rim.includes("defensive")) return "defensive";
+            return "support";
+        }
+
+        function buildItemAnalytics(cards = []) {
+            const sorted = cards.slice().sort((a, b) => (a.createdAt || "").localeCompare(b.createdAt || ""));
+            const byKey = new Map();
+            const allEnabled = [];
+            const slotLists = ["primaries", "sidearms", "throwables", "stratagems"];
+            slotLists.forEach(key => {
+                const list = Array.isArray(state?.items?.[key]) ? state.items[key] : [];
+                list.forEach(it => {
+                    if (!it?.name || !it.enabled) return;
+                    allEnabled.push({
+                        key: `${key}:${normalizeItemKey(it.name)}`,
+                        name: it.name,
+                        slot: key
+                    });
+                });
+            });
+
+            const weaponClassCounts = { primary: 0, sidearm: 0, throwable: 0 };
+            const stratMoGroups = new Set();
+
+            sorted.forEach((card, idx) => {
+                const success = !!card.majorOrderDone;
+                const seenThisCard = new Set();
+                getCardItems(card).forEach(it => {
+                    const slotKey = (it.slot === "primary") ? "primaries"
+                        : (it.slot === "sidearm") ? "sidearms"
+                            : (it.slot === "throwable") ? "throwables" : "stratagems";
+                    const key = `${slotKey}:${normalizeItemKey(it.name)}`;
+                    if (!key) return;
+
+                    let entry = byKey.get(key);
+                    if (!entry) {
+                        entry = {
+                            key,
+                            name: it.name,
+                            slot: it.slot,
+                            total: 0,
+                            moSuccess: 0,
+                            moFail: 0,
+                            firstSeenRun: idx + 1,
+                            lastSeenRun: idx + 1,
+                            outcomes: [],
+                            currentSuccessStreak: 0,
+                            bestSuccessStreak: 0,
+                            currentFailStreak: 0,
+                            comebackCount: 0
+                        };
+                        byKey.set(key, entry);
+                    }
+
+                    entry.total += 1;
+                    entry.lastSeenRun = idx + 1;
+                    entry.outcomes.push(success ? 1 : 0);
+                    if (success) entry.moSuccess += 1;
+                    else entry.moFail += 1;
+
+                    if (success) {
+                        if (entry.currentFailStreak >= 2) entry.comebackCount += 1;
+                        entry.currentSuccessStreak += 1;
+                        entry.currentFailStreak = 0;
+                        entry.bestSuccessStreak = Math.max(entry.bestSuccessStreak, entry.currentSuccessStreak);
+                    } else {
+                        entry.currentSuccessStreak = 0;
+                        entry.currentFailStreak += 1;
+                    }
+
+                    if (!seenThisCard.has(key)) {
+                        if (it.slot === "primary" || it.slot === "sidearm" || it.slot === "throwable") {
+                            weaponClassCounts[it.slot] += 1;
+                        }
+                        if (success && it.slot === "stratagem") {
+                            stratMoGroups.add(getStratGroup(it.name));
+                        }
+                        seenThisCard.add(key);
+                    }
+                });
+            });
+
+            const itemStats = Array.from(byKey.values()).map(entry => {
+                const outcomes = entry.outcomes;
+                const recent = outcomes.slice(-ITEM_RECENT_WINDOW);
+                const lifetimeRate = outcomes.length ? (entry.moSuccess / outcomes.length) : 0;
+                const recentRate = recent.length ? (recent.reduce((a, b) => a + b, 0) / recent.length) : lifetimeRate;
+                const trendDelta = recentRate - lifetimeRate;
+                return {
+                    ...entry,
+                    lifetimeRate,
+                    recentRate,
+                    trendDelta,
+                    trendArrow: trendDelta > 0.10 ? "⬆️" : trendDelta < -0.10 ? "⬇️" : "➡️",
+                    improvedDelta: recentRate - lifetimeRate,
+                    isRecentlyDiscovered: entry.firstSeenRun > Math.max(0, sorted.length - ITEM_DISCOVERY_WINDOW)
+                };
+            });
+
+            const weeklyCounts = new Map();
+            const weekMs = 7 * 24 * 60 * 60 * 1000;
+            const now = Date.now();
+            sorted.forEach(card => {
+                const t = new Date(card.createdAt || 0).getTime();
+                if (!Number.isFinite(t) || (now - t) > weekMs) return;
+                getCardItems(card).forEach(it => {
+                    const key = `${(it.slot === "primary") ? "primaries" : (it.slot === "sidearm") ? "sidearms" : (it.slot === "throwable") ? "throwables" : "stratagems"}:${normalizeItemKey(it.name)}`;
+                    weeklyCounts.set(key, (weeklyCounts.get(key) || 0) + 1);
+                });
+            });
+
+            const usedKeys = new Set(itemStats.map(x => x.key));
+            const neverUsedCount = allEnabled.filter(x => !usedKeys.has(x.key)).length;
+            const mostRolled = itemStats.slice().sort((a, b) => (weeklyCounts.get(b.key) || 0) - (weeklyCounts.get(a.key) || 0) || b.total - a.total || a.name.localeCompare(b.name))[0] || null;
+            const bestMoItem = itemStats.filter(x => x.total >= 3).sort((a, b) => b.lifetimeRate - a.lifetimeRate || b.total - a.total)[0] || null;
+            const mostImproved = itemStats.filter(x => x.total >= 4).sort((a, b) => b.improvedDelta - a.improvedDelta || b.recentRate - a.recentRate)[0] || null;
+            const recentlyDiscovered = itemStats.filter(x => x.isRecentlyDiscovered).sort((a, b) => b.firstSeenRun - a.firstSeenRun);
+            const achievements = [];
+            if (weaponClassCounts.primary >= 100) achievements.push("🏅 100 rolls with primaries");
+            if (weaponClassCounts.sidearm >= 100) achievements.push("🏅 100 rolls with sidearms");
+            if (weaponClassCounts.throwable >= 100) achievements.push("🏅 100 rolls with throwables");
+            const neededGroups = ["orbital", "eagle", "defensive", "support"];
+            if (neededGroups.every(g => stratMoGroups.has(g))) {
+                achievements.push("🏆 MO victory with all stratagem groups");
+            }
+
+            return {
+                itemStats,
+                mostRolled,
+                mostRolledWeekCount: mostRolled ? (weeklyCounts.get(mostRolled.key) || 0) : 0,
+                bestMoItem,
+                mostImproved,
+                neverUsedCount,
+                recentlyDiscovered,
+                achievements
+            };
+        }
+
+        function renderItemInsights(cards = []) {
+            const insightBox = $("#itemInsightCards");
+            const gridBox = $("#itemPerformanceGrid");
+            if (!insightBox || !gridBox) return;
+
+            const analytics = buildItemAnalytics(cards);
+            const discoveredText = analytics.recentlyDiscovered.length
+                ? analytics.recentlyDiscovered.slice(0, 4).map(x => escapeHtml(x.name)).join(", ")
+                : "No new items in recent runs";
+
+            insightBox.innerHTML = `
+                <div class="itemInsightCard">
+                    <div class="kicker">Most rolled this week</div>
+                    <div class="value">${analytics.mostRolled ? escapeHtml(analytics.mostRolled.name) : "—"}</div>
+                    <div class="sub">${analytics.mostRolled ? `${analytics.mostRolledWeekCount} rolls in last 7 days` : "Need more cards"}</div>
+                </div>
+                <div class="itemInsightCard">
+                    <div class="kicker">Best MO success item</div>
+                    <div class="value">${analytics.bestMoItem ? escapeHtml(analytics.bestMoItem.name) : "—"}</div>
+                    <div class="sub">${analytics.bestMoItem ? `${Math.round(analytics.bestMoItem.lifetimeRate * 100)}% MO success` : "Need 3+ uses"}</div>
+                </div>
+                <div class="itemInsightCard">
+                    <div class="kicker">Most improved item</div>
+                    <div class="value">${analytics.mostImproved ? escapeHtml(analytics.mostImproved.name) : "—"}</div>
+                    <div class="sub">${analytics.mostImproved ? `Recent +${Math.round(analytics.mostImproved.improvedDelta * 100)}% vs lifetime` : "Need 4+ uses"}</div>
+                </div>
+                <div class="itemInsightCard">
+                    <div class="kicker">Never used yet</div>
+                    <div class="value">${analytics.neverUsedCount}</div>
+                    <div class="sub">Enabled items with zero rolls</div>
+                </div>
+                <div class="itemInsightCard">
+                    <div class="kicker">Recently discovered</div>
+                    <div class="value">${analytics.recentlyDiscovered.length} item(s)</div>
+                    <div class="sub">${discoveredText}</div>
+                </div>
+                <div class="itemInsightCard">
+                    <div class="kicker">Mini achievements</div>
+                    <div class="value">${analytics.achievements.length ? "Unlocked" : "None yet"}</div>
+                    <div class="sub">${analytics.achievements.length ? analytics.achievements.map(escapeHtml).join(" • ") : "Keep rolling to unlock"}</div>
+                </div>
+            `;
+
+            const top = analytics.itemStats
+                .slice()
+                .sort((a, b) => b.total - a.total || a.name.localeCompare(b.name))
+                .slice(0, 24);
+
+            if (!top.length) {
+                gridBox.innerHTML = `<div class="tiny">Item performance cards appear after you save runs.</div>`;
+                return;
+            }
+
+            gridBox.innerHTML = top.map(item => {
+                const badges = [];
+                if (item.bestSuccessStreak >= 2) badges.push(`<span class="itemPerfBadge good">🔥 MO streak ${item.bestSuccessStreak}</span>`);
+                if (item.comebackCount > 0) badges.push(`<span class="itemPerfBadge warn">🛠️ comeback x${item.comebackCount}</span>`);
+                if (item.total === 1) badges.push(`<span class="itemPerfBadge">🆕 fresh pick</span>`);
+                if (item.trendArrow === "⬇️") badges.push(`<span class="itemPerfBadge bad">Trend down</span>`);
+                const slot = item.slot.charAt(0).toUpperCase() + item.slot.slice(1);
+                return `
+                    <div class="itemPerfCard">
+                        <div class="itemPerfHead">
+                            <div>
+                                <div class="itemPerfName">${escapeHtml(item.name)}</div>
+                                <div class="itemPerfMeta">${slot} • uses ${item.total}</div>
+                            </div>
+                            <div class="badge">${item.trendArrow} ${Math.round(item.recentRate * 100)}%</div>
+                        </div>
+                        <div class="itemPerfMeta">Lifetime MO success: ${Math.round(item.lifetimeRate * 100)}% • last ${ITEM_RECENT_WINDOW}: ${Math.round(item.recentRate * 100)}%</div>
+                        <div class="itemPerfBadges">${badges.join("") || `<span class="itemPerfBadge">No badges yet</span>`}</div>
+                    </div>
+                `;
+            }).join("");
+        }
+
         /***********************
          * Rank rendering
          ***********************/
@@ -7881,6 +8223,7 @@ ${noteContent}`
             if (!filtered.length) {
                 box.innerHTML = `<div class="tiny">No cards to rank yet.</div>`;
                 renderRankDetailPanel(null, 0, getRadarMaxes(state.cards));
+                renderItemInsights(state.cards);
                 return;
             }
 
@@ -7937,6 +8280,7 @@ ${noteContent}`
             const selectedCard = list.find(c => c.id === selectedRankCardId) || filtered[0] || null;
             const selectedPlace = selectedCard ? (list.findIndex(x => x.id === selectedCard.id) + 1) : 0;
             renderRankDetailPanel(selectedCard, selectedPlace, radarMaxes);
+            renderItemInsights(state.cards);
         }
 
         /***********************
