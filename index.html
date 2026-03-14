@@ -2318,6 +2318,19 @@ END MASTER DIRECTIVE
             padding: 10px;
         }
 
+        .itemInsightMain {
+            margin-top: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .itemInsightText {
+            min-width: 0;
+            flex: 1;
+        }
+
         .itemInsightCard .kicker {
             font-size: 11px;
             color: var(--muted);
@@ -2326,7 +2339,6 @@ END MASTER DIRECTIVE
         }
 
         .itemInsightCard .value {
-            margin-top: 4px;
             font-weight: 900;
             font-size: 15px;
         }
@@ -2338,17 +2350,16 @@ END MASTER DIRECTIVE
         }
 
         .itemInsightVisual {
-            margin-top: 8px;
             display: flex;
-            justify-content: center;
+            justify-content: flex-end;
+            flex: 0 0 auto;
         }
 
         .itemInsightVisual .itemInsightVisualCell {
-            width: 100%;
-            max-width: 340px;
-            aspect-ratio: 1 / 1;
-            height: auto;
-            border-radius: 10px;
+            width: 56px;
+            height: 56px;
+            min-width: 56px;
+            border-radius: 9px;
         }
 
         .itemInsightVisual .itemInsightVisualCell img {
@@ -2427,6 +2438,12 @@ END MASTER DIRECTIVE
         @media (max-width: 1100px) {
             .itemInsightCards {
                 grid-template-columns: 1fr;
+            }
+
+            .itemInsightVisual .itemInsightVisualCell {
+                width: 52px;
+                height: 52px;
+                min-width: 52px;
             }
 
             #rankSplitView {
@@ -8417,9 +8434,13 @@ ${noteContent}`
                 return `
                     <div class="itemInsightCard">
                         <div class="kicker">${title}</div>
-                        <div class="value">${item ? escapeHtml(item.name) : "—"}</div>
-                        <div class="sub">${item ? `${count} rolls` : fallback}</div>
-                        ${visual}
+                        <div class="itemInsightMain">
+                            <div class="itemInsightText">
+                                <div class="value">${item ? escapeHtml(item.name) : "—"}</div>
+                                <div class="sub">${item ? `${count} rolls` : fallback}</div>
+                            </div>
+                            ${visual}
+                        </div>
                     </div>
                 `;
             };
@@ -8429,9 +8450,13 @@ ${noteContent}`
                 return `
                     <div class="itemInsightCard">
                         <div class="kicker">${title}</div>
-                        <div class="value">${item ? escapeHtml(item.name) : "—"}</div>
-                        <div class="sub">${item ? `Perf ${item.performanceScore.toFixed(1)} • MO ${Math.round(item.moRate * 100)}% • uses ${item.total}` : fallback}</div>
-                        ${visual}
+                        <div class="itemInsightMain">
+                            <div class="itemInsightText">
+                                <div class="value">${item ? escapeHtml(item.name) : "—"}</div>
+                                <div class="sub">${item ? `Perf ${item.performanceScore.toFixed(1)} • MO ${Math.round(item.moRate * 100)}% • uses ${item.total}` : fallback}</div>
+                            </div>
+                            ${visual}
+                        </div>
                     </div>
                 `;
             };
