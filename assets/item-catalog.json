@@ -1,0 +1,981 @@
+{
+  "version": 1,
+  "items": [
+    {
+      "name": "AR-23 Liberator",
+      "type": "primary",
+      "subgroup": "assault-rifle",
+      "warbond": "Unassigned / Custom",
+      "source": "Unassigned / Custom",
+      "assetPath": "assets/weapons/primaries/ar-23-liberator.png"
+    },
+    {
+      "name": "AR-23P Liberator Penetrator",
+      "type": "primary",
+      "subgroup": "assault-rifle",
+      "warbond": "Helldiver Basics (Mobilize)",
+      "source": "Helldiver Basics (Mobilize)",
+      "assetPath": "assets/weapons/primaries/ar-23p-liberator-penetrator.png"
+    },
+    {
+      "name": "AR-23C Liberator Concussive",
+      "type": "primary",
+      "subgroup": "assault-rifle",
+      "warbond": "Steeled Veterans",
+      "source": "Steeled Veterans",
+      "assetPath": "assets/weapons/primaries/ar-23c-liberator-concussive.png"
+    },
+    {
+      "name": "StA-52 Assault Rifle",
+      "type": "primary",
+      "subgroup": "assault-rifle",
+      "warbond": "Righteous Revenants",
+      "source": "Righteous Revenants",
+      "assetPath": "assets/weapons/primaries/sta-52-assault-rifle.png"
+    },
+    {
+      "name": "AR-32 Pacifier",
+      "type": "primary",
+      "subgroup": "assault-rifle",
+      "warbond": "Force of Law",
+      "source": "Force of Law",
+      "assetPath": "assets/weapons/primaries/ar-32-pacifier.png"
+    },
+    {
+      "name": "AR-2 Coyote",
+      "type": "primary",
+      "subgroup": "assault-rifle",
+      "warbond": "Dust Devils",
+      "source": "Dust Devils",
+      "assetPath": "assets/weapons/primaries/ar-2-coyote.png"
+    },
+    {
+      "name": "MA5C Assault Rifle",
+      "type": "primary",
+      "subgroup": "assault-rifle",
+      "warbond": "Obedient Democracy Support Troopers",
+      "source": "Obedient Democracy Support Troopers",
+      "assetPath": "assets/weapons/primaries/ma5c-assault-rifle.png"
+    },
+    {
+      "name": "AR-23A Liberator Carbine",
+      "type": "primary",
+      "subgroup": "assault-rifle",
+      "warbond": "Viper Commandos",
+      "source": "Viper Commandos",
+      "assetPath": "assets/weapons/primaries/ar-23a-liberator-carbine.png"
+    },
+    {
+      "name": "AR-61 Tenderizer",
+      "type": "primary",
+      "subgroup": "assault-rifle",
+      "warbond": "Polar Patriots",
+      "source": "Polar Patriots",
+      "assetPath": "assets/weapons/primaries/ar-61-tenderizer.png"
+    },
+    {
+      "name": "BR-14 Adjudicator",
+      "type": "primary",
+      "subgroup": "assault-rifle",
+      "warbond": "Democratic Detonation",
+      "source": "Democratic Detonation",
+      "assetPath": "assets/weapons/primaries/br-14-adjudicator.png"
+    },
+    {
+      "name": "AR/GL-21 One-Two",
+      "type": "primary",
+      "subgroup": "assault-rifle",
+      "warbond": "Python Commandos",
+      "source": "Python Commandos",
+      "assetPath": "assets/weapons/primaries/ar-gl-21-one-two.png"
+    },
+    {
+      "name": "AR-59 Suppressor",
+      "type": "primary",
+      "subgroup": "assault-rifle",
+      "warbond": "Redacted Regiment",
+      "source": "Redacted Regiment",
+      "assetPath": "assets/weapons/primaries/ar-59-suppressor.png"
+    },
+    {
+      "name": "R-2 Amendment",
+      "type": "primary",
+      "subgroup": "marksman-rifle",
+      "warbond": "Masters of Ceremony",
+      "source": "Masters of Ceremony",
+      "assetPath": "assets/weapons/primaries/r-2-amendment.png"
+    },
+    {
+      "name": "R-2124 Constitution",
+      "type": "primary",
+      "subgroup": "marksman-rifle",
+      "warbond": "Unassigned / Custom",
+      "source": "Unassigned / Custom",
+      "assetPath": "assets/weapons/primaries/r-2124-constitution.png"
+    },
+    {
+      "name": "R-6 Deadeye",
+      "type": "primary",
+      "subgroup": "marksman-rifle",
+      "warbond": "Borderline Justice",
+      "source": "Borderline Justice",
+      "assetPath": "assets/weapons/primaries/r-6-deadeye.png"
+    },
+    {
+      "name": "R-63 Diligence",
+      "type": "primary",
+      "subgroup": "marksman-rifle",
+      "warbond": "Helldiver Basics (Mobilize)",
+      "source": "Helldiver Basics (Mobilize)",
+      "assetPath": "assets/weapons/primaries/r-63-diligence.png"
+    },
+    {
+      "name": "R-63CS Diligence Counter Sniper",
+      "type": "primary",
+      "subgroup": "marksman-rifle",
+      "warbond": "Helldiver Basics (Mobilize)",
+      "source": "Helldiver Basics (Mobilize)",
+      "assetPath": "assets/weapons/primaries/r-63cs-diligence-counter-sniper.png"
+    },
+    {
+      "name": "R-72 Censor",
+      "type": "primary",
+      "subgroup": "marksman-rifle",
+      "warbond": "Redacted Regiment",
+      "source": "Redacted Regiment",
+      "assetPath": "assets/weapons/primaries/r-72-censor.png"
+    },
+    {
+      "name": "MP-98 Knight",
+      "type": "primary",
+      "subgroup": "smg",
+      "warbond": "Unassigned / Custom",
+      "source": "Unassigned / Custom",
+      "assetPath": "assets/weapons/primaries/mp-98-knight.png"
+    },
+    {
+      "name": "StA-11 SMG",
+      "type": "primary",
+      "subgroup": "assault-rifle",
+      "warbond": "Righteous Revenants",
+      "source": "Righteous Revenants",
+      "assetPath": "assets/weapons/primaries/sta-11-smg.png"
+    },
+    {
+      "name": "M7S SMG",
+      "type": "primary",
+      "subgroup": "smg",
+      "warbond": "Obedient Democracy Support Troopers",
+      "source": "Obedient Democracy Support Troopers",
+      "assetPath": "assets/weapons/primaries/m7s-smg.png"
+    },
+    {
+      "name": "SMG-32 Reprimand",
+      "type": "primary",
+      "subgroup": "smg",
+      "warbond": "Truth Enforcers",
+      "source": "Truth Enforcers",
+      "assetPath": "assets/weapons/primaries/smg-32-reprimand.png"
+    },
+    {
+      "name": "SMG-37 Defender",
+      "type": "primary",
+      "subgroup": "smg",
+      "warbond": "Helldiver Basics (Mobilize)",
+      "source": "Helldiver Basics (Mobilize)",
+      "assetPath": "assets/weapons/primaries/smg-37-defender.png"
+    },
+    {
+      "name": "SMG-72 Pummeler",
+      "type": "primary",
+      "subgroup": "smg",
+      "warbond": "Polar Patriots",
+      "source": "Polar Patriots",
+      "assetPath": "assets/weapons/primaries/smg-72-pummeler.png"
+    },
+    {
+      "name": "SG-8 Punisher",
+      "type": "primary",
+      "subgroup": "shotgun",
+      "warbond": "Helldiver Basics (Mobilize)",
+      "source": "Helldiver Basics (Mobilize)",
+      "assetPath": "assets/weapons/primaries/sg-8-punisher.png"
+    },
+    {
+      "name": "SG-8S Slugger",
+      "type": "primary",
+      "subgroup": "shotgun",
+      "warbond": "Helldiver Basics (Mobilize)",
+      "source": "Helldiver Basics (Mobilize)",
+      "assetPath": "assets/weapons/primaries/sg-8s-slugger.png"
+    },
+    {
+      "name": "SG-20 Halt",
+      "type": "primary",
+      "subgroup": "shotgun",
+      "warbond": "Truth Enforcers",
+      "source": "Truth Enforcers",
+      "assetPath": "assets/weapons/primaries/sg-20-halt.png"
+    },
+    {
+      "name": "SG-451 Cookout",
+      "type": "primary",
+      "subgroup": "shotgun",
+      "warbond": "Freedom's Flame",
+      "source": "Freedom's Flame",
+      "assetPath": "assets/weapons/primaries/sg-451-cookout.png"
+    },
+    {
+      "name": "DBS-2 Double Freedom",
+      "type": "primary",
+      "subgroup": "shotgun",
+      "warbond": "Unassigned / Custom",
+      "source": "Unassigned / Custom",
+      "assetPath": "assets/weapons/primaries/dbs-2-double-freedom.png"
+    },
+    {
+      "name": "M90A Shotgun",
+      "type": "primary",
+      "subgroup": "shotgun",
+      "warbond": "Obedient Democracy Support Troopers",
+      "source": "Obedient Democracy Support Troopers",
+      "assetPath": "assets/weapons/primaries/m90a-shotgun.png"
+    },
+    {
+      "name": "SG-225 Breaker",
+      "type": "primary",
+      "subgroup": "shotgun",
+      "warbond": "Helldiver Basics (Mobilize)",
+      "source": "Helldiver Basics (Mobilize)",
+      "assetPath": "assets/weapons/primaries/sg-225-breaker.png"
+    },
+    {
+      "name": "SG-225SP Breaker Spray&Pray",
+      "type": "primary",
+      "subgroup": "shotgun",
+      "warbond": "Helldiver Basics (Mobilize)",
+      "source": "Helldiver Basics (Mobilize)",
+      "assetPath": "assets/weapons/primaries/sg-225sp-breaker-spray-and-pray.png"
+    },
+    {
+      "name": "SG-225IE Breaker Incendiary",
+      "type": "primary",
+      "subgroup": "shotgun",
+      "warbond": "Steeled Veterans",
+      "source": "Steeled Veterans",
+      "assetPath": "assets/weapons/primaries/sg-225ie-breaker-incendiary.png"
+    },
+    {
+      "name": "CB-9 Exploding Crossbow",
+      "type": "primary",
+      "subgroup": "explosive",
+      "warbond": "Democratic Detonation",
+      "source": "Democratic Detonation",
+      "assetPath": "assets/weapons/primaries/cb-9-exploding-crossbow.png"
+    },
+    {
+      "name": "R-36 Eruptor",
+      "type": "primary",
+      "subgroup": "marksman-rifle",
+      "warbond": "Democratic Detonation",
+      "source": "Democratic Detonation",
+      "assetPath": "assets/weapons/primaries/r-36-eruptor.png"
+    },
+    {
+      "name": "SG-8P Punisher Plasma",
+      "type": "primary",
+      "subgroup": "shotgun",
+      "warbond": "Cutting Edge",
+      "source": "Cutting Edge",
+      "assetPath": "assets/weapons/primaries/sg-8p-punisher-plasma.png"
+    },
+    {
+      "name": "PLAS-39 Accelerator Rifle",
+      "type": "primary",
+      "subgroup": "energy",
+      "warbond": "Righteous Revenants",
+      "source": "Righteous Revenants",
+      "assetPath": "assets/weapons/primaries/plas-39-accelerator-rifle.png"
+    },
+    {
+      "name": "ARC-12 Blitzer",
+      "type": "primary",
+      "subgroup": "assault-rifle",
+      "warbond": "Cutting Edge",
+      "source": "Cutting Edge",
+      "assetPath": "assets/weapons/primaries/arc-12-blitzer.png"
+    },
+    {
+      "name": "LAS-5 Scythe",
+      "type": "primary",
+      "subgroup": "energy",
+      "warbond": "Helldiver Basics (Mobilize)",
+      "source": "Helldiver Basics (Mobilize)",
+      "assetPath": "assets/weapons/primaries/las-5-scythe.png"
+    },
+    {
+      "name": "LAS-16 Sickle",
+      "type": "primary",
+      "subgroup": "energy",
+      "warbond": "Cutting Edge",
+      "source": "Cutting Edge",
+      "assetPath": "assets/weapons/primaries/las-16-sickle.png"
+    },
+    {
+      "name": "LAS-17 Double-Edge Sickle",
+      "type": "primary",
+      "subgroup": "energy",
+      "warbond": "Servants of Freedom",
+      "source": "Servants of Freedom",
+      "assetPath": "assets/weapons/primaries/las-17-double-edge-sickle.png"
+    },
+    {
+      "name": "PLAS-1 Scorcher",
+      "type": "primary",
+      "subgroup": "energy",
+      "warbond": "Helldiver Basics (Mobilize)",
+      "source": "Helldiver Basics (Mobilize)",
+      "assetPath": "assets/weapons/primaries/plas-1-scorcher.png"
+    },
+    {
+      "name": "PLAS-101 Purifier",
+      "type": "primary",
+      "subgroup": "energy",
+      "warbond": "Polar Patriots",
+      "source": "Polar Patriots",
+      "assetPath": "assets/weapons/primaries/plas-101-purifier.png"
+    },
+    {
+      "name": "LAS-13 Trident",
+      "type": "primary",
+      "subgroup": "energy",
+      "warbond": "Siege Breakers",
+      "source": "Siege Breakers",
+      "assetPath": "assets/weapons/primaries/las-13-trident.png"
+    },
+    {
+      "name": "P-11 Stim Pistol",
+      "type": "sidearm",
+      "subgroup": "pistol",
+      "warbond": "Chemical Agents",
+      "source": "Chemical Agents",
+      "assetPath": "assets/weapons/sidearms/p-11-stim-pistol.png"
+    },
+    {
+      "name": "SG-22 Bushwhacker",
+      "type": "sidearm",
+      "subgroup": "special-sidearm",
+      "warbond": "Viper Commandos",
+      "source": "Viper Commandos",
+      "assetPath": "assets/weapons/sidearms/sg-22-bushwhacker.png"
+    },
+    {
+      "name": "LAS-58 Talon",
+      "type": "sidearm",
+      "subgroup": "special-sidearm",
+      "warbond": "Borderline Justice",
+      "source": "Borderline Justice",
+      "assetPath": "assets/weapons/sidearms/las-58-talon.png"
+    },
+    {
+      "name": "P-72 Crisper",
+      "type": "sidearm",
+      "subgroup": "pistol",
+      "warbond": "Freedom's Flame",
+      "source": "Freedom's Flame",
+      "assetPath": "assets/weapons/sidearms/p-72-crisper.png"
+    },
+    {
+      "name": "GP-31 Grenade Pistol",
+      "type": "sidearm",
+      "subgroup": "pistol",
+      "warbond": "Democratic Detonation",
+      "source": "Democratic Detonation",
+      "assetPath": "assets/weapons/sidearms/gp-31-grenade-pistol.png"
+    },
+    {
+      "name": "LAS-7 Dagger",
+      "type": "sidearm",
+      "subgroup": "special-sidearm",
+      "warbond": "Cutting Edge",
+      "source": "Cutting Edge",
+      "assetPath": "assets/weapons/sidearms/las-7-dagger.png"
+    },
+    {
+      "name": "GP-20 Ultimatum",
+      "type": "sidearm",
+      "subgroup": "special-sidearm",
+      "warbond": "Servants of Freedom",
+      "source": "Servants of Freedom",
+      "assetPath": "assets/weapons/sidearms/gp-20-ultimatum.png"
+    },
+    {
+      "name": "PLAS-15 Loyalist",
+      "type": "sidearm",
+      "subgroup": "special-sidearm",
+      "warbond": "Truth Enforcers",
+      "source": "Truth Enforcers",
+      "assetPath": "assets/weapons/sidearms/plas-15-loyalist.png"
+    },
+    {
+      "name": "P-35 Re-Educator",
+      "type": "sidearm",
+      "subgroup": "pistol",
+      "warbond": "Redacted Regiment",
+      "source": "Redacted Regiment",
+      "assetPath": "assets/weapons/sidearms/p-35-re-educator.png"
+    },
+    {
+      "name": "P-92 Warrant",
+      "type": "sidearm",
+      "subgroup": "pistol",
+      "warbond": "Unassigned / Custom",
+      "source": "Unassigned / Custom",
+      "assetPath": "assets/weapons/sidearms/p-92-warrant.png"
+    },
+    {
+      "name": "P-2 Peacemaker",
+      "type": "sidearm",
+      "subgroup": "pistol",
+      "warbond": "Unassigned / Custom",
+      "source": "Unassigned / Custom",
+      "assetPath": "assets/weapons/sidearms/p-2-peacemaker.png"
+    },
+    {
+      "name": "P-19 Redeemer",
+      "type": "sidearm",
+      "subgroup": "pistol",
+      "warbond": "Helldiver Basics (Mobilize)",
+      "source": "Helldiver Basics (Mobilize)",
+      "assetPath": "assets/weapons/sidearms/p-19-redeemer.png"
+    },
+    {
+      "name": "P-113 Verdict",
+      "type": "sidearm",
+      "subgroup": "pistol",
+      "warbond": "Polar Patriots",
+      "source": "Polar Patriots",
+      "assetPath": "assets/weapons/sidearms/p-113-verdict.png"
+    },
+    {
+      "name": "M6C/SOCOM Pistol",
+      "type": "sidearm",
+      "subgroup": "pistol",
+      "warbond": "Obedient Democracy Support Troopers",
+      "source": "Obedient Democracy Support Troopers",
+      "assetPath": "assets/weapons/sidearms/m6c-socom-pistol.png"
+    },
+    {
+      "name": "P-4 Senator",
+      "type": "sidearm",
+      "subgroup": "pistol",
+      "warbond": "Steeled Veterans",
+      "source": "Steeled Veterans",
+      "assetPath": "assets/weapons/sidearms/p-4-senator.png"
+    },
+    {
+      "name": "G-16 Impact",
+      "type": "throwable",
+      "subgroup": "grenade",
+      "warbond": "Helldiver Basics (Mobilize)",
+      "source": "Helldiver Basics (Mobilize)",
+      "assetPath": "assets/weapons/throwables/g-16-impact.png"
+    },
+    {
+      "name": "G-13 Incendiary Impact",
+      "type": "throwable",
+      "subgroup": "grenade",
+      "warbond": "Polar Patriots",
+      "source": "Polar Patriots",
+      "assetPath": "assets/weapons/throwables/g-13-incendiary-impact.png"
+    },
+    {
+      "name": "G-23 Stun",
+      "type": "throwable",
+      "subgroup": "grenade",
+      "warbond": "Cutting Edge",
+      "source": "Cutting Edge",
+      "assetPath": "assets/weapons/throwables/g-23-stun.png"
+    },
+    {
+      "name": "G-4 Gas",
+      "type": "throwable",
+      "subgroup": "grenade",
+      "warbond": "Chemical Agents",
+      "source": "Chemical Agents",
+      "assetPath": "assets/weapons/throwables/g-4-gas.png"
+    },
+    {
+      "name": "G-50 Seeker",
+      "type": "throwable",
+      "subgroup": "grenade",
+      "warbond": "Servants of Freedom",
+      "source": "Servants of Freedom",
+      "assetPath": "assets/weapons/throwables/g-50-seeker.png"
+    },
+    {
+      "name": "G-3 Smoke",
+      "type": "throwable",
+      "subgroup": "grenade",
+      "warbond": "Helldiver Basics (Mobilize)",
+      "source": "Helldiver Basics (Mobilize)",
+      "assetPath": "assets/weapons/throwables/g-3-smoke.png"
+    },
+    {
+      "name": "G-123 Thermite",
+      "type": "throwable",
+      "subgroup": "grenade",
+      "warbond": "Democratic Detonation",
+      "source": "Democratic Detonation",
+      "assetPath": "assets/weapons/throwables/g-123-thermite.png"
+    },
+    {
+      "name": "K-2 Throwing Knife",
+      "type": "throwable",
+      "subgroup": "throwing-weapon",
+      "warbond": "Viper Commandos",
+      "source": "Viper Commandos",
+      "assetPath": "assets/weapons/throwables/k-2-throwing-knife.png"
+    },
+    {
+      "name": "G-142 Pyrotech",
+      "type": "throwable",
+      "subgroup": "grenade",
+      "warbond": "Masters of Ceremony",
+      "source": "Masters of Ceremony",
+      "assetPath": "assets/weapons/throwables/g-142-pyrotech.png"
+    },
+    {
+      "name": "G-109 Urchin",
+      "type": "throwable",
+      "subgroup": "grenade",
+      "warbond": "Force of Law",
+      "source": "Force of Law",
+      "assetPath": "assets/weapons/throwables/g-109-urchin.png"
+    },
+    {
+      "name": "G-31 Arc",
+      "type": "throwable",
+      "subgroup": "grenade",
+      "warbond": "Control Group",
+      "source": "Control Group",
+      "assetPath": "assets/weapons/throwables/g-31-arc.png"
+    },
+    {
+      "name": "TM-1 Lure Mine",
+      "type": "throwable",
+      "subgroup": "utility-throwable",
+      "warbond": "Redacted Regiment",
+      "source": "Redacted Regiment",
+      "assetPath": "assets/weapons/throwables/tm-1-lure-mine.png"
+    },
+    {
+      "name": "G-89 Smokescreen",
+      "type": "throwable",
+      "subgroup": "grenade",
+      "warbond": "Unassigned / Custom",
+      "source": "Unassigned / Custom",
+      "assetPath": "assets/weapons/throwables/g-89-smokescreen.png"
+    },
+    {
+      "name": "G/SH-39 Shield",
+      "type": "throwable",
+      "subgroup": "utility-throwable",
+      "warbond": "Siege Breakers",
+      "source": "Siege Breakers",
+      "assetPath": "assets/weapons/throwables/g-sh-39-shield.png"
+    },
+    {
+      "name": "TED-63 Dynamite",
+      "type": "throwable",
+      "subgroup": "throwing-weapon",
+      "warbond": "Borderline Justice",
+      "source": "Borderline Justice",
+      "assetPath": "assets/weapons/throwables/ted-63-dynamite.png"
+    },
+    {
+      "name": "G-6 Frag",
+      "type": "throwable",
+      "subgroup": "grenade",
+      "warbond": "Helldiver Basics (Mobilize)",
+      "source": "Helldiver Basics (Mobilize)",
+      "assetPath": "assets/weapons/throwables/g-6-frag.png"
+    },
+    {
+      "name": "G-12 High Explosive",
+      "type": "throwable",
+      "subgroup": "grenade",
+      "warbond": "Unassigned / Custom",
+      "source": "Unassigned / Custom",
+      "assetPath": "assets/weapons/throwables/g-12-high-explosive.png"
+    },
+    {
+      "name": "G-10 Incendiary",
+      "type": "throwable",
+      "subgroup": "grenade",
+      "warbond": "Steeled Veterans",
+      "source": "Steeled Veterans",
+      "assetPath": "assets/weapons/throwables/g-10-incendiary.png"
+    },
+    {
+      "name": "G-7 Pineapple",
+      "type": "throwable",
+      "subgroup": "grenade",
+      "warbond": "Dust Devils",
+      "source": "Dust Devils",
+      "assetPath": "assets/weapons/throwables/g-7-pineapple.png"
+    },
+    {
+      "name": "GL-21 Grenade Launcher",
+      "type": "stratagem",
+      "subgroup": "support",
+      "warbond": "Unassigned / Custom",
+      "source": "Unassigned / Custom",
+      "assetPath": "assets/stratagems/support/gl-21-grenade-launcher.svg"
+    },
+    {
+      "name": "LAS-98 Laser Cannon",
+      "type": "stratagem",
+      "subgroup": "support",
+      "warbond": "Unassigned / Custom",
+      "source": "Unassigned / Custom",
+      "assetPath": "assets/stratagems/support/las-98-laser-cannon.svg"
+    },
+    {
+      "name": "ARC-3 Arc Thrower",
+      "type": "stratagem",
+      "subgroup": "support",
+      "warbond": "Unassigned / Custom",
+      "source": "Unassigned / Custom",
+      "assetPath": "assets/stratagems/support/arc-3-arc-thrower.svg"
+    },
+    {
+      "name": "LAS-99 Quasar Cannon",
+      "type": "stratagem",
+      "subgroup": "support",
+      "warbond": "Unassigned / Custom",
+      "source": "Unassigned / Custom",
+      "assetPath": "assets/stratagems/support/las-99-quasar-cannon.svg"
+    },
+    {
+      "name": "MG-43 Machine Gun",
+      "type": "stratagem",
+      "subgroup": "support",
+      "warbond": "Unassigned / Custom",
+      "source": "Unassigned / Custom",
+      "assetPath": "assets/stratagems/support/mg-43-machine-gun.svg"
+    },
+    {
+      "name": "APW-1 Anti-Materiel Rifle",
+      "type": "stratagem",
+      "subgroup": "support",
+      "warbond": "Unassigned / Custom",
+      "source": "Unassigned / Custom",
+      "assetPath": "assets/stratagems/support/apw-1-anti-materiel-rifle.svg"
+    },
+    {
+      "name": "M-105 Stalwart",
+      "type": "stratagem",
+      "subgroup": "support",
+      "warbond": "Unassigned / Custom",
+      "source": "Unassigned / Custom",
+      "assetPath": "assets/stratagems/support/m-105-stalwart.svg"
+    },
+    {
+      "name": "EAT-17 Expendable Anti-Tank",
+      "type": "stratagem",
+      "subgroup": "support",
+      "warbond": "Unassigned / Custom",
+      "source": "Unassigned / Custom",
+      "assetPath": "assets/stratagems/support/eat-17-expendable-anti-tank.svg"
+    },
+    {
+      "name": "GR-8 Recoilless Rifle",
+      "type": "stratagem",
+      "subgroup": "support",
+      "warbond": "Unassigned / Custom",
+      "source": "Unassigned / Custom",
+      "assetPath": "assets/stratagems/support/gr-8-recoilless-rifle.svg"
+    },
+    {
+      "name": "FLAM-40 Flamethrower",
+      "type": "stratagem",
+      "subgroup": "support",
+      "warbond": "Unassigned / Custom",
+      "source": "Unassigned / Custom",
+      "assetPath": "assets/stratagems/support/flam-40-flamethrower.svg"
+    },
+    {
+      "name": "AC-8 Autocannon",
+      "type": "stratagem",
+      "subgroup": "support",
+      "warbond": "Unassigned / Custom",
+      "source": "Unassigned / Custom",
+      "assetPath": "assets/stratagems/support/ac-8-autocannon.svg"
+    },
+    {
+      "name": "MG-206 Heavy Machine Gun",
+      "type": "stratagem",
+      "subgroup": "support",
+      "warbond": "Unassigned / Custom",
+      "source": "Unassigned / Custom",
+      "assetPath": "assets/stratagems/support/mg-206-heavy-machine-gun.svg"
+    },
+    {
+      "name": "RL-77 Airburst Rocket Launcher",
+      "type": "stratagem",
+      "subgroup": "support",
+      "warbond": "Unassigned / Custom",
+      "source": "Unassigned / Custom",
+      "assetPath": "assets/stratagems/support/rl-77-airburst-rocket-launcher.svg"
+    },
+    {
+      "name": "MLS-4X Commando",
+      "type": "stratagem",
+      "subgroup": "support",
+      "warbond": "Unassigned / Custom",
+      "source": "Unassigned / Custom",
+      "assetPath": "assets/stratagems/support/mls-4x-commando.svg"
+    },
+    {
+      "name": "RS-422 Railgun",
+      "type": "stratagem",
+      "subgroup": "support",
+      "warbond": "Unassigned / Custom",
+      "source": "Unassigned / Custom",
+      "assetPath": "assets/stratagems/support/rs-422-railgun.svg"
+    },
+    {
+      "name": "FAF-14 Spear",
+      "type": "stratagem",
+      "subgroup": "support",
+      "warbond": "Unassigned / Custom",
+      "source": "Unassigned / Custom",
+      "assetPath": "assets/stratagems/support/faf-14-spear.svg"
+    },
+    {
+      "name": "StA-X3 W.A.S.P. Launcher",
+      "type": "stratagem",
+      "subgroup": "support",
+      "warbond": "Unassigned / Custom",
+      "source": "Unassigned / Custom",
+      "assetPath": "assets/stratagems/support/sta-x3-w-a-s-p-launcher.svg"
+    },
+    {
+      "name": "Orbital Precision Strike",
+      "type": "stratagem",
+      "subgroup": "orbital",
+      "warbond": "Unassigned / Custom",
+      "source": "Unassigned / Custom",
+      "assetPath": "assets/stratagems/orbital/orbital-precision-strike.svg"
+    },
+    {
+      "name": "Orbital Laser",
+      "type": "stratagem",
+      "subgroup": "orbital",
+      "warbond": "Unassigned / Custom",
+      "source": "Unassigned / Custom",
+      "assetPath": "assets/stratagems/orbital/orbital-laser.svg"
+    },
+    {
+      "name": "Orbital Railcannon Strike",
+      "type": "stratagem",
+      "subgroup": "orbital",
+      "warbond": "Unassigned / Custom",
+      "source": "Unassigned / Custom",
+      "assetPath": "assets/stratagems/orbital/orbital-railcannon-strike.svg"
+    },
+    {
+      "name": "Orbital Gatling Barrage",
+      "type": "stratagem",
+      "subgroup": "orbital",
+      "warbond": "Unassigned / Custom",
+      "source": "Unassigned / Custom",
+      "assetPath": "assets/stratagems/orbital/orbital-gatling-barrage.svg"
+    },
+    {
+      "name": "Orbital Airburst Strike",
+      "type": "stratagem",
+      "subgroup": "orbital",
+      "warbond": "Unassigned / Custom",
+      "source": "Unassigned / Custom",
+      "assetPath": "assets/stratagems/orbital/orbital-airburst-strike.svg"
+    },
+    {
+      "name": "Orbital 120MM HE Barrage",
+      "type": "stratagem",
+      "subgroup": "orbital",
+      "warbond": "Unassigned / Custom",
+      "source": "Unassigned / Custom",
+      "assetPath": "assets/stratagems/orbital/orbital-120mm-he-barrage.svg"
+    },
+    {
+      "name": "Orbital 380MM HE Barrage",
+      "type": "stratagem",
+      "subgroup": "orbital",
+      "warbond": "Unassigned / Custom",
+      "source": "Unassigned / Custom",
+      "assetPath": "assets/stratagems/orbital/orbital-380mm-he-barrage.svg"
+    },
+    {
+      "name": "Orbital Smoke Strike",
+      "type": "stratagem",
+      "subgroup": "orbital",
+      "warbond": "Unassigned / Custom",
+      "source": "Unassigned / Custom",
+      "assetPath": "assets/stratagems/orbital/orbital-smoke-strike.svg"
+    },
+    {
+      "name": "Eagle Airstrike",
+      "type": "stratagem",
+      "subgroup": "eagle",
+      "warbond": "Unassigned / Custom",
+      "source": "Unassigned / Custom",
+      "assetPath": "assets/stratagems/eagle/eagle-airstrike.svg"
+    },
+    {
+      "name": "Eagle Cluster Bomb",
+      "type": "stratagem",
+      "subgroup": "eagle",
+      "warbond": "Unassigned / Custom",
+      "source": "Unassigned / Custom",
+      "assetPath": "assets/stratagems/eagle/eagle-cluster-bomb.svg"
+    },
+    {
+      "name": "Eagle Napalm Airstrike",
+      "type": "stratagem",
+      "subgroup": "eagle",
+      "warbond": "Unassigned / Custom",
+      "source": "Unassigned / Custom",
+      "assetPath": "assets/stratagems/eagle/eagle-napalm-airstrike.svg"
+    },
+    {
+      "name": "Eagle Smoke Strike",
+      "type": "stratagem",
+      "subgroup": "eagle",
+      "warbond": "Unassigned / Custom",
+      "source": "Unassigned / Custom",
+      "assetPath": "assets/stratagems/eagle/eagle-smoke-strike.svg"
+    },
+    {
+      "name": "Eagle 110MM Rocket Pods",
+      "type": "stratagem",
+      "subgroup": "eagle",
+      "warbond": "Unassigned / Custom",
+      "source": "Unassigned / Custom",
+      "assetPath": "assets/stratagems/eagle/eagle-110mm-rocket-pods.svg"
+    },
+    {
+      "name": "Rocket Sentry",
+      "type": "stratagem",
+      "subgroup": "defensive",
+      "warbond": "Unassigned / Custom",
+      "source": "Unassigned / Custom",
+      "assetPath": "assets/stratagems/defensive/rocket-sentry.svg"
+    },
+    {
+      "name": "Gatling Sentry",
+      "type": "stratagem",
+      "subgroup": "defensive",
+      "warbond": "Unassigned / Custom",
+      "source": "Unassigned / Custom",
+      "assetPath": "assets/stratagems/defensive/gatling-sentry.svg"
+    },
+    {
+      "name": "Autocannon Sentry",
+      "type": "stratagem",
+      "subgroup": "defensive",
+      "warbond": "Unassigned / Custom",
+      "source": "Unassigned / Custom",
+      "assetPath": "assets/stratagems/defensive/autocannon-sentry.svg"
+    },
+    {
+      "name": "Mortar Sentry",
+      "type": "stratagem",
+      "subgroup": "defensive",
+      "warbond": "Unassigned / Custom",
+      "source": "Unassigned / Custom",
+      "assetPath": "assets/stratagems/defensive/mortar-sentry.svg"
+    },
+    {
+      "name": "EMS Mortar Sentry",
+      "type": "stratagem",
+      "subgroup": "defensive",
+      "warbond": "Unassigned / Custom",
+      "source": "Unassigned / Custom",
+      "assetPath": "assets/stratagems/defensive/ems-mortar-sentry.svg"
+    },
+    {
+      "name": "Shield Generator Relay",
+      "type": "stratagem",
+      "subgroup": "defensive",
+      "warbond": "Unassigned / Custom",
+      "source": "Unassigned / Custom",
+      "assetPath": "assets/stratagems/backpack/shield-generator-relay.svg"
+    },
+    {
+      "name": "Ballistic Shield Backpack",
+      "type": "stratagem",
+      "subgroup": "support",
+      "warbond": "Unassigned / Custom",
+      "source": "Unassigned / Custom",
+      "assetPath": "assets/stratagems/backpack/ballistic-shield-backpack.svg"
+    },
+    {
+      "name": "Supply Pack",
+      "type": "stratagem",
+      "subgroup": "support",
+      "warbond": "Unassigned / Custom",
+      "source": "Unassigned / Custom",
+      "assetPath": "assets/stratagems/backpack/supply-pack.svg"
+    },
+    {
+      "name": "Jump Pack",
+      "type": "stratagem",
+      "subgroup": "support",
+      "warbond": "Unassigned / Custom",
+      "source": "Unassigned / Custom",
+      "assetPath": "assets/stratagems/backpack/jump-pack.svg"
+    },
+    {
+      "name": "Guard Dog Rover",
+      "type": "stratagem",
+      "subgroup": "support",
+      "warbond": "Unassigned / Custom",
+      "source": "Unassigned / Custom",
+      "assetPath": "assets/stratagems/backpack/guard-dog-rover.svg"
+    },
+    {
+      "name": "Incendiary Mines",
+      "type": "stratagem",
+      "subgroup": "defensive",
+      "warbond": "Unassigned / Custom",
+      "source": "Unassigned / Custom",
+      "assetPath": "assets/stratagems/defensive/incendiary-mines.svg"
+    },
+    {
+      "name": "Anti-Personnel Minefield",
+      "type": "stratagem",
+      "subgroup": "defensive",
+      "warbond": "Unassigned / Custom",
+      "source": "Unassigned / Custom",
+      "assetPath": "assets/stratagems/defensive/anti-personnel-minefield.svg"
+    },
+    {
+      "name": "EMS Strike",
+      "type": "stratagem",
+      "subgroup": "support",
+      "warbond": "Unassigned / Custom",
+      "source": "Unassigned / Custom",
+      "assetPath": "assets/stratagems/support/ems-strike.svg"
+    },
+    {
+      "name": "HMG Emplacement",
+      "type": "stratagem",
+      "subgroup": "defensive",
+      "warbond": "Unassigned / Custom",
+      "source": "Unassigned / Custom",
+      "assetPath": "assets/stratagems/defensive/hmg-emplacement.svg"
+    }
+  ]
+}
