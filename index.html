@@ -1694,6 +1694,26 @@ END MASTER DIRECTIVE
             display: block;
         }
 
+        .itemVisualCell.armoryRainbowGlow {
+            border-color: rgba(255,255,255,.85);
+        }
+
+        .itemVisualCell.armoryRainbowGlow.armoryRainbowGlow--stratagem {
+            box-shadow:
+                0 0 0 1px rgba(255,255,255,.45),
+                0 0 12px rgba(255,70,70,.65),
+                0 0 20px rgba(255,168,64,.55),
+                0 0 28px rgba(64,204,255,.48);
+        }
+
+        .itemVisualCell.armoryRainbowGlow.armoryRainbowGlow--weapon {
+            box-shadow:
+                inset 0 0 0 2px rgba(255,255,255,.58),
+                0 0 0 1px rgba(255,255,255,.3),
+                0 0 14px rgba(170,110,255,.58),
+                0 0 22px rgba(64,204,255,.42);
+        }
+
         .itemVisualFallback {
             font-size: 10px;
             font-weight: 900;
@@ -7206,12 +7226,15 @@ ${noteContent}`
             wrap.style.display = "flex";
             wrap.style.flexDirection = "column";
             wrap.style.gap = "8px";
+            const rainbowUsage = buildRainbowItemUsageMap();
 
             filteredList.forEach((it) => {
                 const idx = list.indexOf(it);
+                const rainbowTopCount = rainbowUsage.get(normalizeText(it.name)) || 0;
                 const row = buildItemEditorRow({
                     item: it,
                     containerId,
+                    rainbowTopCount,
                     onToggle: () => onToggle(idx)
                 });
                 wrap.appendChild(row);
@@ -7220,7 +7243,7 @@ ${noteContent}`
             box.appendChild(wrap);
         }
 
-        function buildItemEditorRow({ item, containerId, onToggle, typeLabel = "" }) {
+        function buildItemEditorRow({ item, containerId, onToggle, typeLabel = "", rainbowTopCount = 0 }) {
             const outer = document.createElement("div");
             outer.className = "rankOuter";
 
@@ -7251,6 +7274,13 @@ ${noteContent}`
                 visual.appendChild(img);
             } else {
                 visual.innerHTML = `<span class="itemVisualFallback">N/A</span>`;
+            }
+
+            if (rainbowTopCount > 0) {
+                const category = ITEM_VISUAL_CATEGORY_BY_CONTAINER[containerId];
+                const isStratagem = category === "stratagem";
+                visual.classList.add("armoryRainbowGlow", isStratagem ? "armoryRainbowGlow--stratagem" : "armoryRainbowGlow--weapon");
+                visual.title = `Used in top-performing rainbow loadout(s): ${rainbowTopCount}`;
             }
 
             const left = document.createElement("div");
@@ -7503,6 +7533,7 @@ ${noteContent}`
             wrap.style.display = "flex";
             wrap.style.flexDirection = "column";
             wrap.style.gap = "8px";
+            const rainbowUsage = buildRainbowItemUsageMap();
 
             const groups = Array.from(byWarbond.entries()).sort((a, b) => {
                 const ai = WARBOND_ORDER.indexOf(a[0]);
@@ -7534,10 +7565,12 @@ ${noteContent}`
                 groupBox.appendChild(groupHeader);
 
                 entries.forEach(({ item, index, meta }) => {
+                    const rainbowTopCount = rainbowUsage.get(normalizeText(item.name)) || 0;
                     const row = buildItemEditorRow({
                         item,
                         containerId: meta.containerId,
                         typeLabel: meta.label,
+                        rainbowTopCount,
                         onToggle: () => {
                             state.items[meta.key][index].enabled = !state.items[meta.key][index].enabled;
                             saveState();
