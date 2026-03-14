@@ -7063,6 +7063,63 @@ ${noteContent}`
             };
         }
 
+        function sortCardsByRankOrder(cards) {
+            return (Array.isArray(cards) ? cards : [])
+                .slice()
+                .sort((a, b) => {
+                    const g = Number(b?.grade || 0) - Number(a?.grade || 0);
+                    if (g !== 0) return g;
+                    return String(b?.createdAt || "").localeCompare(String(a?.createdAt || ""));
+                });
+        }
+
+        function canonicalItemName(name) {
+            const raw = String(name || "").trim();
+            if (!raw || raw === "—") return "";
+            const key = normalizeItemKey(raw);
+            const aliasHit = itemVisuals?.aliases?.get(key);
+            return String(aliasHit || raw).trim();
+        }
+
+        // Pure derived metrics: no persistence, safe for old saves.
+        function buildArmoryStats(cards) {
+            const ordered = sortCardsByRankOrder(cards);
+            const stats = new Map();
+
+            const touchItem = (card, itemName, isRainbowTop) => {
+                const canonical = canonicalItemName(itemName);
+                if (!canonical) return;
+
+                if (!stats.has(canonical)) {
+                    stats.set(canonical, {
+                        itemName: canonical,
+                        rolledCount: 0,
+                        moSuccessCount: 0,
+                        rainbowTopCount: 0
+                    });
+                }
+
+                const row = stats.get(canonical);
+                row.rolledCount += 1;
+                if (card?.majorOrderDone === true) row.moSuccessCount += 1;
+                if (isRainbowTop) row.rainbowTopCount += 1;
+            };
+
+            ordered.forEach((card, idx) => {
+                const tier = tierForPlace(idx + 1);
+                const isRainbowTop = tier === "rainbow";
+
+                touchItem(card, card?.primary, isRainbowTop);
+                touchItem(card, card?.sidearm, isRainbowTop);
+                touchItem(card, card?.throwable, isRainbowTop);
+                (Array.isArray(card?.stratagems) ? card.stratagems : []).forEach(name => {
+                    touchItem(card, name, isRainbowTop);
+                });
+            });
+
+            return stats;
+        }
+
         /***********************
          * Items editor
          ***********************/
