@@ -5122,15 +5122,43 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             return "strat-rim-support";
         }
 
+        function buildItemFallbackVisual(name, category) {
+            const label = String(name || "?")
+                .split(/[^A-Za-z0-9]+/)
+                .filter(Boolean)
+                .slice(0, 3)
+                .map(token => token[0])
+                .join("")
+                .toUpperCase()
+                .slice(0, 3) || "?";
+
+            const cat = mapSlotCategory(category);
+            const isStratagem = cat === "stratagem";
+            const stroke = isStratagem ? "%2372ff7d" : "%234fc3ff";
+            const text = isStratagem ? "%23c6ffd0" : "%23cdefff";
+            const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'>`
+                + `<rect x='2' y='2' width='92' height='92' rx='14' fill='%23090c12' stroke='${stroke}' stroke-width='4'/>`
+                + `<text x='48' y='58' text-anchor='middle' font-family='Segoe UI,Arial,sans-serif' font-size='30' font-weight='700' fill='${text}'>${label}</text>`
+                + `</svg>`;
+
+            return {
+                src: `data:image/svg+xml;utf8,${svg}`,
+                fallbackSrc: "",
+                kind: isStratagem ? "icon" : "image",
+                alt: name || "Item visual",
+                stratClass: ""
+            };
+        }
+
         function getItemVisual(name, category) {
             const cat = mapSlotCategory(category);
             const key = normalizeItemKey(name);
-            if (!key || !itemVisuals.loaded) return null;
+            if (!key || !itemVisuals.loaded) return buildItemFallbackVisual(name, cat);
 
             const canonical = itemVisuals.aliases.get(key) || name;
             const canonicalKey = normalizeItemKey(canonical);
             const entry = itemVisuals.byCategory[cat].get(canonicalKey) || itemVisuals.byCategory[cat].get(key);
-            if (!entry?.assetPath && !entry?.imageUrl) return null;
+            if (!entry?.assetPath && !entry?.imageUrl) return buildItemFallbackVisual(name, cat);
 
             const visualKind = (cat === "stratagem") ? "icon" : "image";
             let stratClass = "";
