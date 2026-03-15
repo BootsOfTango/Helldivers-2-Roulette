@@ -1694,26 +1694,6 @@ END MASTER DIRECTIVE
             display: block;
         }
 
-        .itemVisualCell.armoryRainbowGlow {
-            border-color: rgba(255,255,255,.85);
-        }
-
-        .itemVisualCell.armoryRainbowGlow.armoryRainbowGlow--stratagem {
-            box-shadow:
-                0 0 0 1px rgba(255,255,255,.45),
-                0 0 12px rgba(255,70,70,.65),
-                0 0 20px rgba(255,168,64,.55),
-                0 0 28px rgba(64,204,255,.48);
-        }
-
-        .itemVisualCell.armoryRainbowGlow.armoryRainbowGlow--weapon {
-            box-shadow:
-                inset 0 0 0 2px rgba(255,255,255,.58),
-                0 0 0 1px rgba(255,255,255,.3),
-                0 0 14px rgba(170,110,255,.58),
-                0 0 22px rgba(64,204,255,.42);
-        }
-
         .itemVisualFallback {
             font-size: 10px;
             font-weight: 900;
@@ -7608,16 +7588,7 @@ ${noteContent}`
             return stats;
         }
 
-        function buildRainbowItemUsageMap() {
-            const usage = new Map();
-            const stats = buildArmoryStats(Array.isArray(state.cards) ? state.cards : []);
-            stats.forEach((row, itemName) => {
-                const key = normalizeText(itemName);
-                if (!key) return;
-                usage.set(key, Number(row?.rainbowTopCount || 0));
-            });
-            return usage;
-        }
+
 
         /***********************
          * Items editor
@@ -7642,15 +7613,11 @@ ${noteContent}`
             wrap.style.display = "flex";
             wrap.style.flexDirection = "column";
             wrap.style.gap = "8px";
-            const rainbowUsage = buildRainbowItemUsageMap();
-
             filteredList.forEach((it) => {
                 const idx = list.indexOf(it);
-                const rainbowTopCount = rainbowUsage.get(normalizeText(it.name)) || 0;
                 const row = buildItemEditorRow({
                     item: it,
                     containerId,
-                    rainbowTopCount,
                     onToggle: () => onToggle(idx)
                 });
                 wrap.appendChild(row);
@@ -7659,7 +7626,7 @@ ${noteContent}`
             box.appendChild(wrap);
         }
 
-        function buildItemEditorRow({ item, containerId, onToggle, typeLabel = "", rainbowTopCount = 0 }) {
+        function buildItemEditorRow({ item, containerId, onToggle, typeLabel = "" }) {
             const outer = document.createElement("div");
             outer.className = "rankOuter";
 
@@ -7690,13 +7657,6 @@ ${noteContent}`
                 visual.appendChild(img);
             } else {
                 visual.innerHTML = `<span class="itemVisualFallback">N/A</span>`;
-            }
-
-            if (rainbowTopCount > 0) {
-                const category = ITEM_VISUAL_CATEGORY_BY_CONTAINER[containerId];
-                const isStratagem = category === "stratagem";
-                visual.classList.add("armoryRainbowGlow", isStratagem ? "armoryRainbowGlow--stratagem" : "armoryRainbowGlow--weapon");
-                visual.title = `Used in top-performing rainbow loadout(s): ${rainbowTopCount}`;
             }
 
             const left = document.createElement("div");
@@ -7900,15 +7860,11 @@ ${noteContent}`
                     const imgHtml = renderItemVisualHtml(row.name, row.type);
                     const itemShare = totalRolls > 0 ? ((Number(row.rolledCount || 0) / totalRolls) * 100) : 0;
                     const rate = row.rolledCount > 0 ? ((row.moSuccessCount / row.rolledCount) * 100) : 0;
-                    const rainbowClass = Number(row.rainbowTopCount || 0) > 0
-                        ? ` armoryRainbowGlow ${row.type === "stratagem" ? "armoryRainbowGlow--stratagem" : "armoryRainbowGlow--weapon"}`
-                        : "";
-
                     return `
                         <div class="armoryAnalyticsBarRow">
                             <div class="armoryAnalyticsBarTop">
                                 <div class="armoryAnalyticsBarItem">
-                                    <div class="itemVisualCell${rainbowClass}">${imgHtml}</div>
+                                    <div class="itemVisualCell">${imgHtml}</div>
                                     <div>
                                         <div class="armoryAnalyticsItemName">${escapeHtml(row.name)}</div>
                                         <div class="tiny muted armoryAnalyticsItemMeta">${escapeHtml(labelByType[row.type] || row.type)} · <span>Total rolls <b>${Number(row.rolledCount || 0)}</b></span> · <span>MO success rate <b>${rate.toFixed(1)}%</b></span></div>
@@ -7985,8 +7941,6 @@ ${noteContent}`
             wrap.style.display = "flex";
             wrap.style.flexDirection = "column";
             wrap.style.gap = "8px";
-            const rainbowUsage = buildRainbowItemUsageMap();
-
             const groups = Array.from(byWarbond.entries()).sort((a, b) => {
                 const ai = WARBOND_ORDER.indexOf(a[0]);
                 const bi = WARBOND_ORDER.indexOf(b[0]);
@@ -8017,12 +7971,10 @@ ${noteContent}`
                 groupBox.appendChild(groupHeader);
 
                 entries.forEach(({ item, index, meta }) => {
-                    const rainbowTopCount = rainbowUsage.get(normalizeText(item.name)) || 0;
                     const row = buildItemEditorRow({
                         item,
                         containerId: meta.containerId,
                         typeLabel: meta.label,
-                        rainbowTopCount,
                         onToggle: () => {
                             state.items[meta.key][index].enabled = !state.items[meta.key][index].enabled;
                             saveState();
