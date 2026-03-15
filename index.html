@@ -1887,48 +1887,6 @@ END MASTER DIRECTIVE
             font-weight: 900;
         }
 
-        #tab-items .armoryPickRateHero {
-            margin-top: 8px;
-            border: 1px solid rgba(121, 237, 255, .45);
-            border-radius: 14px;
-            padding: 12px 14px;
-            background:
-                radial-gradient(circle at 16% 28%, rgba(73, 224, 255, .22), transparent 46%),
-                linear-gradient(120deg, rgba(12, 46, 68, .74), rgba(16, 70, 74, .58) 45%, rgba(8, 34, 39, .7));
-            box-shadow: inset 0 0 0 1px rgba(174, 245, 255, .12), 0 10px 24px rgba(3, 18, 30, .28);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        #tab-items .armoryPickRateHeroIcon {
-            width: 38px;
-            height: 38px;
-            min-width: 38px;
-            border-radius: 10px;
-            border: 1px solid rgba(161, 241, 255, .62);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 19px;
-            background: linear-gradient(140deg, rgba(4, 21, 34, .92), rgba(34, 114, 132, .4));
-            box-shadow: 0 0 0 2px rgba(6, 25, 40, .6), 0 0 22px rgba(96, 241, 255, .34);
-        }
-
-        #tab-items .armoryPickRateHeroTitle {
-            font-size: 12px;
-            letter-spacing: .7px;
-            text-transform: uppercase;
-            color: rgba(131, 237, 255, .95);
-            font-weight: 900;
-            margin-bottom: 2px;
-        }
-
-        #tab-items .armoryPickRateHero .tiny {
-            color: rgba(228, 243, 255, .92);
-            line-height: 1.35;
-        }
-
         #tab-items .armoryAnalyticsList {
             display: flex;
             flex-direction: column;
@@ -3056,27 +3014,9 @@ END MASTER DIRECTIVE
 
         <!-- ITEMS TAB -->
         <section id="tab-items" class="panel" style="display:none;">
-            <div class="row">
-                <div class="col">
-                    <div class="label">Armory overview</div>
-                    <div class="smallHelp">Track your personal roll history, MO success, and top-tier item impact. Manual pool editing stays below.</div>
-                </div>
-            </div>
-
             <div class="row armoryAnalyticsControls">
-                <div class="col">
-                    <div class="label">Personal roll-rate chart</div>
-                    <div class="tiny">Shows how often each item is rolled in your own history. Default view hides never-picked items.</div>
-                    <div class="armoryPickRateHero" aria-label="Roll-rate explanation">
-                        <div class="armoryPickRateHeroIcon" aria-hidden="true">🚀</div>
-                        <div>
-                            <div class="armoryPickRateHeroTitle">How to read this chart</div>
-                            <div class="tiny">Roll rate is the percentage shown on the right of each row. The cyan bar length mirrors that same roll-rate share, so longer bars mean your most frequently rolled items.</div>
-                        </div>
-                    </div>
-                </div>
                 <div class="col right">
-                    <div class="miniRow" style="justify-content:flex-end; flex-wrap:wrap;">
+                    <div class="miniRow" style="justify-content:flex-end; flex-wrap:nowrap;">
                         <select id="armoryAnalyticsSortMetric">
                             <option value="rolledCount">Sort: Most rolled</option>
                             <option value="moSuccessCount">Sort: Most successful MO rolls</option>
@@ -3086,10 +3026,6 @@ END MASTER DIRECTIVE
                             <option value="none">All types together</option>
                             <option value="type">Group by type</option>
                         </select>
-                        <label class="tiny" style="display:flex; align-items:center; gap:6px;">
-                            <input id="armoryShowUnpicked" type="checkbox" />
-                            Show unrolled (0)
-                        </label>
                     </div>
                 </div>
             </div>
@@ -7917,7 +7853,6 @@ ${noteContent}`
             if (!box) return;
 
             const query = normalizeText($("#itemSearch")?.value || "");
-            const showUnpicked = !!$("#armoryShowUnpicked")?.checked;
             const groupBy = $("#armoryAnalyticsGroupBy")?.value || "none";
             const sortMetric = $("#armoryAnalyticsSortMetric")?.value || "rolledCount";
             const labelByType = {
@@ -7930,7 +7865,7 @@ ${noteContent}`
             const expandedGroups = getArmoryExpandedGroups();
 
             const list = (Array.isArray(aggregatedRows) ? aggregatedRows : []).filter(row => {
-                if (!showUnpicked && row.rolledCount === 0) return false;
+                if (row.rolledCount === 0) return false;
                 return matchesItemSearch({ name: row.name, warbond: "" }, labelByType[row.type] || "", query);
             });
 
@@ -8933,7 +8868,6 @@ ${noteContent}`
                 localStorage.setItem(ITEMS_TYPE_FILTER_KEY, ["primary", "sidearm", "throwable", "stratagem"].includes(value) ? value : "all");
                 renderItems();
             });
-            $("#armoryShowUnpicked")?.addEventListener("change", renderItems);
             $("#armoryAnalyticsGroupBy")?.addEventListener("change", renderItems);
             $("#armoryAnalyticsSortMetric")?.addEventListener("change", renderItems);
             $("#armoryAnalyticsList")?.addEventListener("click", (e) => {
