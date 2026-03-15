@@ -267,12 +267,12 @@
     },
     {
       "name": "FLAM-66 Torcher",
-      "assetPath": "assets/weapons/primaries/flam-66-torcher.png",
+      "assetPath": "assets/placeholders/primary/flam-66-torcher.svg",
       "kind": "image"
     },
     {
       "name": "JAR-5 Dominator",
-      "assetPath": "assets/weapons/primaries/jar-5-dominator.png",
+      "assetPath": "assets/placeholders/primary/jar-5-dominator.svg",
       "kind": "image"
     },
     {
@@ -301,7 +301,7 @@
     },
     {
       "name": "R-0 Variable",
-      "assetPath": "assets/weapons/primaries/r-0-variable.png",
+      "assetPath": "assets/placeholders/primary/r-0-variable.svg",
       "kind": "image"
     },
     {
@@ -628,27 +628,27 @@
     },
     {
       "name": "CQC-1 Saber",
-      "assetPath": "assets/weapons/sidearms/cqc-1-saber.png",
+      "assetPath": "assets/placeholders/sidearm/cqc-1-saber.svg",
       "kind": "image"
     },
     {
       "name": "CQC-19 Machete",
-      "assetPath": "assets/weapons/sidearms/cqc-19-machete.png",
+      "assetPath": "assets/placeholders/sidearm/cqc-19-machete.svg",
       "kind": "image"
     },
     {
       "name": "CQC-2 Stun Lance",
-      "assetPath": "assets/weapons/sidearms/cqc-2-stun-lance.png",
+      "assetPath": "assets/placeholders/sidearm/cqc-2-stun-lance.svg",
       "kind": "image"
     },
     {
       "name": "CQC-30 Stun Baton",
-      "assetPath": "assets/weapons/sidearms/cqc-30-stun-baton.png",
+      "assetPath": "assets/placeholders/sidearm/cqc-30-stun-baton.svg",
       "kind": "image"
     },
     {
       "name": "CQC-5 Combat Hatchet",
-      "assetPath": "assets/weapons/sidearms/cqc-5-combat-hatchet.png",
+      "assetPath": "assets/placeholders/sidearm/cqc-5-combat-hatchet.svg",
       "kind": "image"
     },
     {
@@ -876,13 +876,15 @@
     },
     {
       "name": "Orbital EMS Strike",
-      "assetPath": "assets/stratagems/orbital/orbital-ems-strike.png",
-      "kind": "icon"
+      "assetPath": "assets/placeholders/stratagem/orbital-ems-strike.svg",
+      "kind": "icon",
+      "rimCategory": "orbital"
     },
     {
       "name": "Orbital Gas Strike",
-      "assetPath": "assets/stratagems/orbital/orbital-gas-strike.png",
-      "kind": "icon"
+      "assetPath": "assets/placeholders/stratagem/orbital-gas-strike.svg",
+      "kind": "icon",
+      "rimCategory": "orbital"
     },
     {
       "name": "Orbital Gatling Barrage",
@@ -904,8 +906,9 @@
     },
     {
       "name": "Orbital Napalm Barrage",
-      "assetPath": "assets/stratagems/orbital/orbital-napalm-barrage.png",
-      "kind": "icon"
+      "assetPath": "assets/placeholders/stratagem/orbital-napalm-barrage.svg",
+      "kind": "icon",
+      "rimCategory": "orbital"
     },
     {
       "name": "Orbital Precision Strike",
@@ -936,8 +939,9 @@
     },
     {
       "name": "Orbital Walking Barrage",
-      "assetPath": "assets/stratagems/orbital/orbital-walking-barrage.png",
-      "kind": "icon"
+      "assetPath": "assets/placeholders/stratagem/orbital-walking-barrage.svg",
+      "kind": "icon",
+      "rimCategory": "orbital"
     },
     {
       "name": "Eagle 110MM Rocket Pods",
@@ -950,8 +954,9 @@
     },
     {
       "name": "Eagle 500KG Bomb",
-      "assetPath": "assets/stratagems/eagle/eagle-500kg-bomb.png",
-      "kind": "icon"
+      "assetPath": "assets/placeholders/stratagem/eagle-500kg-bomb.svg",
+      "kind": "icon",
+      "rimCategory": "eagle"
     },
     {
       "name": "Eagle Airstrike",
@@ -991,8 +996,9 @@
     },
     {
       "name": "Eagle Strafing Run",
-      "assetPath": "assets/stratagems/eagle/eagle-strafing-run.png",
-      "kind": "icon"
+      "assetPath": "assets/placeholders/stratagem/eagle-strafing-run.svg",
+      "kind": "icon",
+      "rimCategory": "eagle"
     },
     {
       "name": "Anti-Personnel Minefield",
@@ -1005,13 +1011,15 @@
     },
     {
       "name": "Anti-Tank Emplacement",
-      "assetPath": "assets/stratagems/defensive/anti-tank-emplacement.png",
-      "kind": "icon"
+      "assetPath": "assets/placeholders/stratagem/anti-tank-emplacement.svg",
+      "kind": "icon",
+      "rimCategory": "support"
     },
     {
       "name": "Anti-Tank Mines",
-      "assetPath": "assets/stratagems/defensive/anti-tank-mines.png",
-      "kind": "icon"
+      "assetPath": "assets/placeholders/stratagem/anti-tank-mines.svg",
+      "kind": "icon",
+      "rimCategory": "support"
     },
     {
       "name": "Autocannon Sentry",
@@ -1033,13 +1041,15 @@
     },
     {
       "name": "Flame Sentry",
-      "assetPath": "assets/stratagems/defensive/flame-sentry.png",
-      "kind": "icon"
+      "assetPath": "assets/placeholders/stratagem/flame-sentry.svg",
+      "kind": "icon",
+      "rimCategory": "support"
     },
     {
       "name": "Gas Mines",
-      "assetPath": "assets/stratagems/defensive/gas-mines.png",
-      "kind": "icon"
+      "assetPath": "assets/placeholders/stratagem/gas-mines.svg",
+      "kind": "icon",
+      "rimCategory": "support"
     },
     {
       "name": "Gatling Sentry",
@@ -1052,8 +1062,9 @@
     },
     {
       "name": "Grenadier Battalion",
-      "assetPath": "assets/stratagems/defensive/grenadier-battalion.png",
-      "kind": "icon"
+      "assetPath": "assets/placeholders/stratagem/grenadier-battalion.svg",
+      "kind": "icon",
+      "rimCategory": "support"
     },
     {
       "name": "HMG Emplacement",
@@ -1075,13 +1086,15 @@
     },
     {
       "name": "Laser Sentry",
-      "assetPath": "assets/stratagems/defensive/laser-sentry.png",
-      "kind": "icon"
+      "assetPath": "assets/placeholders/stratagem/laser-sentry.svg",
+      "kind": "icon",
+      "rimCategory": "support"
     },
     {
       "name": "Machine Gun Sentry",
-      "assetPath": "assets/stratagems/defensive/machine-gun-sentry.png",
-      "kind": "icon"
+      "assetPath": "assets/placeholders/stratagem/machine-gun-sentry.svg",
+      "kind": "icon",
+      "rimCategory": "support"
     },
     {
       "name": "Mortar Sentry",
@@ -1112,8 +1125,9 @@
     },
     {
       "name": "Tesla Tower",
-      "assetPath": "assets/stratagems/defensive/tesla-tower.png",
-      "kind": "icon"
+      "assetPath": "assets/placeholders/stratagem/tesla-tower.svg",
+      "kind": "icon",
+      "rimCategory": "support"
     },
     {
       "name": "AC-8 Autocannon",
@@ -1153,38 +1167,45 @@
     },
     {
       "name": "Bastion",
-      "assetPath": "assets/stratagems/support/bastion.png",
-      "kind": "icon"
+      "assetPath": "assets/placeholders/stratagem/bastion.svg",
+      "kind": "icon",
+      "rimCategory": "support"
     },
     {
       "name": "Belt-fed GL",
-      "assetPath": "assets/stratagems/support/belt-fed-gl.png",
-      "kind": "icon"
+      "assetPath": "assets/placeholders/stratagem/belt-fed-gl.svg",
+      "kind": "icon",
+      "rimCategory": "support"
     },
     {
       "name": "Breaching Hammer",
-      "assetPath": "assets/stratagems/support/breaching-hammer.png",
-      "kind": "icon"
+      "assetPath": "assets/placeholders/stratagem/breaching-hammer.svg",
+      "kind": "icon",
+      "rimCategory": "support"
     },
     {
       "name": "C4 Pack",
-      "assetPath": "assets/stratagems/support/c4-pack.png",
-      "kind": "icon"
+      "assetPath": "assets/placeholders/stratagem/c4-pack.svg",
+      "kind": "icon",
+      "rimCategory": "support"
     },
     {
       "name": "De-Escalator",
-      "assetPath": "assets/stratagems/support/de-escalator.png",
-      "kind": "icon"
+      "assetPath": "assets/placeholders/stratagem/de-escalator.svg",
+      "kind": "icon",
+      "rimCategory": "support"
     },
     {
       "name": "Detonation Tool",
-      "assetPath": "assets/stratagems/support/detonation-tool.png",
-      "kind": "icon"
+      "assetPath": "assets/placeholders/stratagem/detonation-tool.svg",
+      "kind": "icon",
+      "rimCategory": "support"
     },
     {
       "name": "Directional Shield",
-      "assetPath": "assets/stratagems/support/directional-shield.png",
-      "kind": "icon"
+      "assetPath": "assets/placeholders/stratagem/directional-shield.svg",
+      "kind": "icon",
+      "rimCategory": "support"
     },
     {
       "name": "EAT-17 Expendable Anti-Tank",
@@ -1206,18 +1227,21 @@
     },
     {
       "name": "Emancipator Exosuit",
-      "assetPath": "assets/stratagems/support/emancipator-exosuit.png",
-      "kind": "icon"
+      "assetPath": "assets/placeholders/stratagem/emancipator-exosuit.svg",
+      "kind": "icon",
+      "rimCategory": "support"
     },
     {
       "name": "Epoch",
-      "assetPath": "assets/stratagems/support/epoch.png",
-      "kind": "icon"
+      "assetPath": "assets/placeholders/stratagem/epoch.svg",
+      "kind": "icon",
+      "rimCategory": "support"
     },
     {
       "name": "Expendable Napalm",
-      "assetPath": "assets/stratagems/support/expendable-napalm.png",
-      "kind": "icon"
+      "assetPath": "assets/placeholders/stratagem/expendable-napalm.svg",
+      "kind": "icon",
+      "rimCategory": "support"
     },
     {
       "name": "FAF-14 Spear",
@@ -1239,8 +1263,9 @@
     },
     {
       "name": "Fast Recon Vehicle",
-      "assetPath": "assets/stratagems/support/fast-recon-vehicle.png",
-      "kind": "icon"
+      "assetPath": "assets/placeholders/stratagem/fast-recon-vehicle.svg",
+      "kind": "icon",
+      "rimCategory": "support"
     },
     {
       "name": "GL-21 Grenade Launcher",
@@ -1262,18 +1287,21 @@
     },
     {
       "name": "Guard Dog",
-      "assetPath": "assets/stratagems/support/guard-dog.png",
-      "kind": "icon"
+      "assetPath": "assets/placeholders/stratagem/guard-dog.svg",
+      "kind": "icon",
+      "rimCategory": "support"
     },
     {
       "name": "Guard Dog Arc",
-      "assetPath": "assets/stratagems/support/guard-dog-arc.png",
-      "kind": "icon"
+      "assetPath": "assets/placeholders/stratagem/guard-dog-arc.svg",
+      "kind": "icon",
+      "rimCategory": "support"
     },
     {
       "name": "Guard Dog Breath",
-      "assetPath": "assets/stratagems/support/guard-dog-breath.png",
-      "kind": "icon"
+      "assetPath": "assets/placeholders/stratagem/guard-dog-breath.svg",
+      "kind": "icon",
+      "rimCategory": "support"
     },
     {
       "name": "Guard Dog Rover",
@@ -1286,13 +1314,15 @@
     },
     {
       "name": "Hot Dog",
-      "assetPath": "assets/stratagems/support/hot-dog.png",
-      "kind": "icon"
+      "assetPath": "assets/placeholders/stratagem/hot-dog.svg",
+      "kind": "icon",
+      "rimCategory": "support"
     },
     {
       "name": "Hover Pack",
-      "assetPath": "assets/stratagems/support/hover-pack.png",
-      "kind": "icon"
+      "assetPath": "assets/placeholders/stratagem/hover-pack.svg",
+      "kind": "icon",
+      "rimCategory": "support"
     },
     {
       "name": "Jump Pack",
@@ -1323,8 +1353,9 @@
     },
     {
       "name": "Leveller",
-      "assetPath": "assets/stratagems/support/leveller.png",
-      "kind": "icon"
+      "assetPath": "assets/placeholders/stratagem/leveller.svg",
+      "kind": "icon",
+      "rimCategory": "support"
     },
     {
       "name": "M-105 Stalwart",
@@ -1364,23 +1395,27 @@
     },
     {
       "name": "Maxigun",
-      "assetPath": "assets/stratagems/support/maxigun.png",
-      "kind": "icon"
+      "assetPath": "assets/placeholders/stratagem/maxigun.svg",
+      "kind": "icon",
+      "rimCategory": "support"
     },
     {
       "name": "One True Flag",
-      "assetPath": "assets/stratagems/support/one-true-flag.png",
-      "kind": "icon"
+      "assetPath": "assets/placeholders/stratagem/one-true-flag.svg",
+      "kind": "icon",
+      "rimCategory": "support"
     },
     {
       "name": "Patriot Exosuit",
-      "assetPath": "assets/stratagems/support/patriot-exosuit.png",
-      "kind": "icon"
+      "assetPath": "assets/placeholders/stratagem/patriot-exosuit.svg",
+      "kind": "icon",
+      "rimCategory": "support"
     },
     {
       "name": "Portable Hellbomb",
-      "assetPath": "assets/stratagems/support/portable-hellbomb.png",
-      "kind": "icon"
+      "assetPath": "assets/placeholders/stratagem/portable-hellbomb.svg",
+      "kind": "icon",
+      "rimCategory": "support"
     },
     {
       "name": "RL-77 Airburst Rocket Launcher",
@@ -1402,18 +1437,21 @@
     },
     {
       "name": "Shield Generator Pack",
-      "assetPath": "assets/stratagems/support/shield-generator-pack.png",
-      "kind": "icon"
+      "assetPath": "assets/placeholders/stratagem/shield-generator-pack.svg",
+      "kind": "icon",
+      "rimCategory": "support"
     },
     {
       "name": "Solo Silo",
-      "assetPath": "assets/stratagems/support/solo-silo.png",
-      "kind": "icon"
+      "assetPath": "assets/placeholders/stratagem/solo-silo.svg",
+      "kind": "icon",
+      "rimCategory": "support"
     },
     {
       "name": "Speargun",
-      "assetPath": "assets/stratagems/support/speargun.png",
-      "kind": "icon"
+      "assetPath": "assets/placeholders/stratagem/speargun.svg",
+      "kind": "icon",
+      "rimCategory": "support"
     },
     {
       "name": "StA-X3 W.A.S.P. Launcher",
@@ -1426,8 +1464,9 @@
     },
     {
       "name": "Sterilizer",
-      "assetPath": "assets/stratagems/support/sterilizer.png",
-      "kind": "icon"
+      "assetPath": "assets/placeholders/stratagem/sterilizer.svg",
+      "kind": "icon",
+      "rimCategory": "support"
     },
     {
       "name": "Supply Pack",
@@ -1440,13 +1479,15 @@
     },
     {
       "name": "Warp Pack",
-      "assetPath": "assets/stratagems/support/warp-pack.png",
-      "kind": "icon"
+      "assetPath": "assets/placeholders/stratagem/warp-pack.svg",
+      "kind": "icon",
+      "rimCategory": "support"
     },
     {
       "name": "Wasp",
-      "assetPath": "assets/stratagems/support/wasp.png",
-      "kind": "icon"
+      "assetPath": "assets/placeholders/stratagem/wasp.svg",
+      "kind": "icon",
+      "rimCategory": "support"
     }
   ]
 }
