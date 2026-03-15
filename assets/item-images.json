@@ -309,7 +309,7 @@
       "name": "R-0 Variable",
       "assetPath": "assets/placeholders/primary/r-0-variable.svg",
       "kind": "image",
-      "imageUrl": "https://helldivers.wiki.gg/images/thumb/R-63_Diligence_Primary_Render.png/1200px-R-63_Diligence_Primary_Render.png?a424e6",
+      "imageUrl": "",
       "sourceUrl": "https://helldivers.wiki.gg/wiki/R-63_Diligence",
       "wikiTitle": "R-63 Diligence"
     },
@@ -639,7 +639,7 @@
       "name": "CQC-1 Saber",
       "assetPath": "assets/placeholders/sidearm/cqc-1-saber.svg",
       "kind": "image",
-      "imageUrl": "https://helldivers.wiki.gg/images/thumb/CQC-30_Stun_Baton_Secondary_Render.png/1200px-CQC-30_Stun_Baton_Secondary_Render.png?5b701f",
+      "imageUrl": "",
       "sourceUrl": "https://helldivers.wiki.gg/wiki/CQC-30_Stun_Baton",
       "wikiTitle": "CQC-30 Stun Baton"
     },
@@ -647,7 +647,7 @@
       "name": "CQC-19 Machete",
       "assetPath": "assets/placeholders/sidearm/cqc-19-machete.svg",
       "kind": "image",
-      "imageUrl": "https://helldivers.wiki.gg/images/thumb/CQC-30_Stun_Baton_Secondary_Render.png/1200px-CQC-30_Stun_Baton_Secondary_Render.png?5b701f",
+      "imageUrl": "",
       "sourceUrl": "https://helldivers.wiki.gg/wiki/CQC-30_Stun_Baton",
       "wikiTitle": "CQC-30 Stun Baton"
     },
@@ -655,7 +655,7 @@
       "name": "CQC-2 Stun Lance",
       "assetPath": "assets/placeholders/sidearm/cqc-2-stun-lance.svg",
       "kind": "image",
-      "imageUrl": "https://helldivers.wiki.gg/images/thumb/CQC-30_Stun_Baton_Secondary_Render.png/1200px-CQC-30_Stun_Baton_Secondary_Render.png?5b701f",
+      "imageUrl": "",
       "sourceUrl": "https://helldivers.wiki.gg/wiki/CQC-30_Stun_Baton",
       "wikiTitle": "CQC-30 Stun Baton"
     },
@@ -1119,7 +1119,7 @@
       "assetPath": "assets/placeholders/stratagem/grenadier-battalion.svg",
       "kind": "icon",
       "rimCategory": "support",
-      "imageUrl": "https://helldivers.wiki.gg/images/Gatling_Sentry_Stratagem_Icon.svg?44ccc6",
+      "imageUrl": "",
       "sourceUrl": "https://helldivers.wiki.gg/wiki/Gatling_Sentry",
       "wikiTitle": "Gatling Sentry"
     },
@@ -1245,7 +1245,7 @@
       "assetPath": "assets/placeholders/stratagem/belt-fed-gl.svg",
       "kind": "icon",
       "rimCategory": "support",
-      "imageUrl": "https://helldivers.wiki.gg/images/Grenade_Launcher_Stratagem_Icon.svg?5a00fc",
+      "imageUrl": "",
       "sourceUrl": "https://helldivers.wiki.gg/wiki/GL-21_Grenade_Launcher",
       "wikiTitle": "GL-21 Grenade Launcher"
     },
@@ -1281,7 +1281,7 @@
       "assetPath": "assets/placeholders/stratagem/detonation-tool.svg",
       "kind": "icon",
       "rimCategory": "support",
-      "imageUrl": "https://helldivers.wiki.gg/images/Portable_Hellbomb_Stratagem_Icon.svg?84704d",
+      "imageUrl": "",
       "sourceUrl": "https://helldivers.wiki.gg/wiki/Portable_Hellbomb",
       "wikiTitle": "B-100 Portable Hellbomb"
     },
@@ -1335,7 +1335,7 @@
       "assetPath": "assets/placeholders/stratagem/expendable-napalm.svg",
       "kind": "icon",
       "rimCategory": "support",
-      "imageUrl": "https://helldivers.wiki.gg/images/Eagle_Napalm_Airstrike_Stratagem_Icon.svg?3189c7",
+      "imageUrl": "",
       "sourceUrl": "https://helldivers.wiki.gg/wiki/Eagle_Napalm_Airstrike",
       "wikiTitle": "Eagle Napalm Airstrike"
     },
@@ -1362,7 +1362,7 @@
       "assetPath": "assets/placeholders/stratagem/fast-recon-vehicle.svg",
       "kind": "icon",
       "rimCategory": "support",
-      "imageUrl": "https://helldivers.wiki.gg/images/Patriot_Exosuit_Stratagem_Icon.svg?18fd58",
+      "imageUrl": "",
       "sourceUrl": "https://helldivers.wiki.gg/wiki/Patriot_Exosuit",
       "wikiTitle": "EXO-45 Patriot Exosuit"
     },
@@ -1372,7 +1372,7 @@
       "kind": "icon",
       "wikiTitle": "GL-21 Grenade Launcher",
       "sourceUrl": "https://helldivers.wiki.gg/wiki/GL-21_Grenade_Launcher",
-      "imageUrl": "https://helldivers.wiki.gg/images/Grenade_Launcher_Stratagem_Icon.svg?5a00fc",
+      "imageUrl": "",
       "rimCategory": "support"
     },
     {
@@ -1398,7 +1398,7 @@
       "assetPath": "assets/placeholders/stratagem/guard-dog-arc.svg",
       "kind": "icon",
       "rimCategory": "support",
-      "imageUrl": "https://helldivers.wiki.gg/images/Guard_Dog_Stratagem_Icon.svg?bf3310",
+      "imageUrl": "",
       "sourceUrl": "https://helldivers.wiki.gg/wiki/Guard_Dog",
       "wikiTitle": "Guard Dog (disambiguation)"
     },
@@ -1407,7 +1407,7 @@
       "assetPath": "assets/placeholders/stratagem/guard-dog-breath.svg",
       "kind": "icon",
       "rimCategory": "support",
-      "imageUrl": "https://helldivers.wiki.gg/images/Rover_Stratagem_Icon.svg?cdeccd",
+      "imageUrl": "",
       "sourceUrl": "https://helldivers.wiki.gg/wiki/AX/LAS-5_%22Guard_Dog%22_Rover",
       "wikiTitle": "AX/LAS-5 \"Guard Dog\" Rover"
     },
@@ -1417,7 +1417,7 @@
       "kind": "icon",
       "wikiTitle": "AX/LAS-5 \"Guard Dog\" Rover",
       "sourceUrl": "https://helldivers.wiki.gg/wiki/AX/LAS-5_%22Guard_Dog%22_Rover",
-      "imageUrl": "https://helldivers.wiki.gg/images/Rover_Stratagem_Icon.svg?cdeccd",
+      "imageUrl": "",
       "rimCategory": "support"
     },
     {
@@ -1434,7 +1434,7 @@
       "assetPath": "assets/placeholders/stratagem/hover-pack.svg",
       "kind": "icon",
       "rimCategory": "support",
-      "imageUrl": "https://helldivers.wiki.gg/images/Jump_Pack_Stratagem_Icon.svg?2262cd",
+      "imageUrl": "",
       "sourceUrl": "https://helldivers.wiki.gg/wiki/Jump_Pack",
       "wikiTitle": "Jump Pack"
     },
@@ -1507,7 +1507,7 @@
       "kind": "icon",
       "wikiTitle": "MLS-4X Commando",
       "sourceUrl": "https://helldivers.wiki.gg/wiki/MLS-4X_Commando",
-      "imageUrl": "https://helldivers.wiki.gg/images/Commando_Stratagem_Icon.svg?884668",
+      "imageUrl": "",
       "rimCategory": "support"
     },
     {
@@ -1632,7 +1632,7 @@
       "assetPath": "assets/placeholders/stratagem/wasp.svg",
       "kind": "icon",
       "rimCategory": "support",
-      "imageUrl": "https://helldivers.wiki.gg/images/Commando_Stratagem_Icon.svg?884668",
+      "imageUrl": "",
       "sourceUrl": "https://helldivers.wiki.gg/wiki/MLS-4X_Commando",
       "wikiTitle": "MLS-4X Commando"
     }
