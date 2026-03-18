@@ -1368,7 +1368,7 @@
     },
     {
       "name": "GL-21 Grenade Launcher",
-      "assetPath": "assets/stratagems/support/gl-21-grenade-launcher.svg",
+      "assetPath": "assets/placeholders/stratagem/gl-21-grenade-launcher.svg",
       "kind": "icon",
       "wikiTitle": "GL-21 Grenade Launcher",
       "sourceUrl": "https://helldivers.wiki.gg/wiki/GL-21_Grenade_Launcher",
@@ -1413,7 +1413,7 @@
     },
     {
       "name": "Guard Dog Rover",
-      "assetPath": "assets/stratagems/backpack/guard-dog-rover.svg",
+      "assetPath": "assets/placeholders/stratagem/guard-dog-rover.svg",
       "kind": "icon",
       "wikiTitle": "AX/LAS-5 \"Guard Dog\" Rover",
       "sourceUrl": "https://helldivers.wiki.gg/wiki/AX/LAS-5_%22Guard_Dog%22_Rover",
@@ -1503,7 +1503,7 @@
     },
     {
       "name": "MLS-4X Commando",
-      "assetPath": "assets/stratagems/support/mls-4x-commando.svg",
+      "assetPath": "assets/placeholders/stratagem/mls-4x-commando.svg",
       "kind": "icon",
       "wikiTitle": "MLS-4X Commando",
       "sourceUrl": "https://helldivers.wiki.gg/wiki/MLS-4X_Commando",
