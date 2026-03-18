@@ -3562,10 +3562,8 @@ END MASTER DIRECTIVE
             // Priority:
             // 1) Explicit biome on the planet object (best case)
             // 2) Internal planet database (state.items.planets) by name
-            // 3) Local biome TXT map (LOCAL_PLANET_BIOME_MAP) if loaded
-            // 4) Crosswave map (PLANET_BIOME_MAP) if loaded
-            // 5) LOCAL_PLANET_DATA hardcoded fallback table
-            // 6) Fallback to environment/weather
+            // 3) LOCAL_PLANET_DATA hardcoded fallback table
+            // 4) Fallback to environment/weather
             const direct = (p && typeof p.biome === "string") ? p.biome.trim() : "";
             if (direct && direct !== "—" && direct.toLowerCase() !== "unknown") return direct;
 
@@ -3578,16 +3576,6 @@ END MASTER DIRECTIVE
                 const hit = db.find(x => normalizePlanetKey(x && x.name) === key);
                 const b = (hit && typeof hit.biome === "string") ? hit.biome.trim() : "";
                 if (b) return b;
-            } catch (e) { }
-
-            // Local TXT biome map (loaded via fetch/file input)
-            try {
-                if (key && LOCAL_PLANET_BIOME_MAP && LOCAL_PLANET_BIOME_MAP[key]) return LOCAL_PLANET_BIOME_MAP[key];
-            } catch (e) { }
-
-            // Crosswave biome map (network)
-            try {
-                if (key && PLANET_BIOME_MAP && PLANET_BIOME_MAP[key]) return PLANET_BIOME_MAP[key];
             } catch (e) { }
 
             // Hardcoded fallback list
@@ -3735,55 +3723,6 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 // not biome-loading completion.
                 renderSpin();
             }
-        }
-
-
-        function getPlanetBiomeFromPlanet(p) {
-            // Priority:
-            // 1) Explicit biome on the planet object (best case)
-            // 2) Internal planet database (state.items.planets) by name
-            // 3) Local biome TXT map (LOCAL_PLANET_BIOME_MAP) if loaded
-            // 4) Crosswave map (PLANET_BIOME_MAP) if loaded
-            // 5) LOCAL_PLANET_DATA hardcoded fallback table
-            // 6) Fallback to environment/weather
-            const direct = (p && typeof p.biome === "string") ? p.biome.trim() : "";
-            if (direct && direct !== "—" && direct.toLowerCase() !== "unknown") return direct;
-
-            const name = (p && (p.name || p.planet || p.planetName || p.displayName)) || "";
-            const key = normalizePlanetKey(name);
-
-            // Internal planet DB (the big list in DEFAULTS / ITEMS tab)
-            try {
-                const db = (state && state.items && Array.isArray(state.items.planets)) ? state.items.planets : [];
-                const hit = db.find(x => normalizePlanetKey(x && x.name) === key);
-                const b = (hit && typeof hit.biome === "string") ? hit.biome.trim() : "";
-                if (b) return b;
-            } catch (e) { }
-
-            // Local TXT biome map (loaded via fetch/file input)
-            try {
-                if (key && LOCAL_PLANET_BIOME_MAP && LOCAL_PLANET_BIOME_MAP[key]) return LOCAL_PLANET_BIOME_MAP[key];
-            } catch (e) { }
-
-            // Crosswave biome map (network)
-            try {
-                if (key && PLANET_BIOME_MAP && PLANET_BIOME_MAP[key]) return PLANET_BIOME_MAP[key];
-            } catch (e) { }
-
-            // Hardcoded fallback list
-            try {
-                if (key && Array.isArray(LOCAL_PLANET_DATA)) {
-                    const hit2 = LOCAL_PLANET_DATA.find(x => normalizePlanetKey(x && x.name) === key);
-                    const b2 = (hit2 && typeof hit2.biome === "string") ? hit2.biome.trim() : "";
-                    if (b2) return b2;
-                }
-            } catch (e) { }
-
-            return (
-                (p && p.environment) ||
-                (p && p.weather) ||
-                "—"
-            );
         }
 
 
@@ -9240,173 +9179,6 @@ ${noteContent}`
         document.querySelector("#cmpB")
             .addEventListener("change", updateCompareRadar);
 
-
-
-
-        loadBiomes();
-
-        /* ==============================
-           CROSSWAVEOMEGA BIOME MAP (v12)
-        ================================ */
-        let PLANET_BIOME_MAP = {};
-
-        async function loadCrosswaveBiomeMap() {
-            try {
-                const res = await fetch("https://crosswaveomega.github.io/helldiversplanettable/planet_table");
-                const htmlText = await res.text();
-                const doc = new DOMParser().parseFromString(htmlText, "text/html");
-
-                doc.querySelectorAll("table tr").forEach(row => {
-                    const cols = row.querySelectorAll("td");
-                    if (cols.length < 3) return;
-                    const planet = cols[0].textContent.trim().toLowerCase();
-                    const biome = cols[2].textContent.trim();
-                    if (planet && biome) {
-                        PLANET_BIOME_MAP[planet] = biome;
-                    }
-                });
-
-                console.log("[BiomeMap] Crosswave loaded:", Object.keys(PLANET_BIOME_MAP).length);
-            } catch (e) {
-                console.warn("[BiomeMap] Crosswave load failed", e);
-            }
-        }
-
-        const __oldGetPlanetBiome = window.getPlanetBiome;
-        window.getPlanetBiome = function (p) {
-            if (!p) return "Unknown";
-            const key = (p.name || "").toLowerCase();
-            if (PLANET_BIOME_MAP[key]) return PLANET_BIOME_MAP[key];
-            if (__oldGetPlanetBiome) return __oldGetPlanetBiome(p);
-            return "Unknown";
-        };
-
-        document.addEventListener("DOMContentLoaded", () => {
-            loadCrosswaveBiomeMap();
-        });
-
-
-        /* ==============================
-           LOCAL BIOME TABLE (v14)
-           Reads: "Planet, sector, Biome, Hazards.txt" in same folder
-
-           IMPORTANT:
-           - Auto-load via fetch() works only when the HTML is served over http/https (localhost or GitHub Pages).
-           - When opened by double-click (file://), browsers block fetch() to sibling files.
-             So we provide a manual loader using <input type="file"> (works on file://).
-        ================================ */
-
-        let LOCAL_PLANET_BIOME_MAP = Object.create(null);
-        // refresh currently rolled planet
-        if (state?.spin?.planet) { renderSpin(state.spin); }
-
-        function parseLocalPlanetBiomeTxt(text) {
-            const map = Object.create(null);
-            const lines = String(text || "").split(/\r?\n/);
-            for (const raw of lines) {
-                const line = raw.trim();
-                if (!line) continue;
-                if (/planet\s+name/i.test(line) && /biome/i.test(line)) continue;
-
-                // Expected TAB format:
-                // Index \t Planet Name \t Sector \t Biome \t Hazards
-                const cols = line.split(/\t+/).map(s => s.trim());
-                if (cols.length >= 4) {
-                    const planet = (cols[1] || "").trim();
-                    const biome = (cols[3] || "").trim();
-                    if (planet && biome) map[normalizePlanetKey(planet)] = biome;
-                    continue;
-                }
-
-                // Backup: CSV-ish
-                const cols2 = line.split(",").map(s => s.trim());
-                if (cols2.length >= 3) {
-                    const planet = (cols2[0] || "").trim();
-                    const biome = (cols2[2] || "").trim();
-                    if (planet && biome) map[normalizePlanetKey(planet)] = biome;
-                }
-            }
-            return map;
-        }
-
-        async function tryAutoLoadLocalBiomeTxt() {
-            try {
-                const res = await fetch("./HD2 Roulette files/Planet, sector, Biome, Hazards.txt", { cache: "no-store" });
-                if (!res.ok) throw new Error("HTTP " + res.status);
-                const text = await res.text();
-                LOCAL_PLANET_BIOME_MAP = parseLocalPlanetBiomeTxt(text);
-
-                const help = document.querySelector("#biomeHelpRow");
-                if (help) help.style.display = "none";
-                if (state?.spin?.planet) { renderSpin(state.spin); }
-                // refresh currently rolled planet
-                if (state?.spin?.planet) { renderSpin(state.spin); }
-                console.log("[BiomeMap] Local TXT auto-loaded:", Object.keys(LOCAL_PLANET_BIOME_MAP).length);
-                const helpRow = document.getElementById("biomeHelpRow");
-                if (helpRow) helpRow.style.display = "none";
-                // refresh spin UI if planet already rolled
-                try { renderSpin && renderSpin(); } catch (e) { }
-                return true;
-            } catch (e) {
-                console.warn("[BiomeMap] Local TXT auto-load blocked/failed:", e);
-                const helpRow = document.getElementById("biomeHelpRow");
-                if (helpRow) helpRow.style.display = "block";
-                return false;
-            }
-            finally {
-                const help = document.querySelector("#biomeHelpRow");
-                const has = LOCAL_PLANET_BIOME_MAP && Object.keys(LOCAL_PLANET_BIOME_MAP).length > 0;
-                if (help) help.style.display = has ? "none" : "block";
-            }
-        }
-        // show help row toggle end
-
-        function manualLoadLocalBiomeTxtFromInput(file) {
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = () => {
-                try {
-                    LOCAL_PLANET_BIOME_MAP = parseLocalPlanetBiomeTxt(String(reader.result || ""));
-                    // refresh currently rolled planet
-                    if (state?.spin?.planet) { renderSpin(state.spin); }
-                    console.log("[BiomeMap] Local TXT loaded (manual):", Object.keys(LOCAL_PLANET_BIOME_MAP).length);
-                    const helpRow = document.getElementById("biomeHelpRow");
-                    if (helpRow) helpRow.style.display = "none";
-                    try { renderSpin && renderSpin(); } catch (e) { }
-                } catch (err) {
-                    console.warn("[BiomeMap] Manual parse failed:", err);
-                }
-            };
-            reader.readAsText(file);
-        }
-
-        document.addEventListener("DOMContentLoaded", () => {
-            // Create hidden file input once
-            let input = document.getElementById("biomeTxtFile");
-            if (!input) {
-                input = document.createElement("input");
-                input.type = "file";
-                input.accept = ".txt,text/plain";
-                input.id = "biomeTxtFile";
-                input.style.display = "none";
-                document.body.appendChild(input);
-                input.addEventListener("change", () => {
-                    manualLoadLocalBiomeTxtFromInput(input.files && input.files[0]);
-                    input.value = ""; // allow re-pick same file
-                });
-            }
-
-            const btn = document.getElementById("btnLoadBiomeTxt");
-            if (btn) {
-                btn.addEventListener("click", (ev) => {
-                    ev.preventDefault();
-                    input.click();
-                });
-            }
-
-            // Attempt auto-load first (works on localhost/GitHub)
-            tryAutoLoadLocalBiomeTxt();
-        });
 
         /* ==============================
            DEV BADGE CLEANUP GUARD
