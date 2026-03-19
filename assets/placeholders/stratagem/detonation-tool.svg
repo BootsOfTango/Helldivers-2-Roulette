@@ -1,4 +1,14 @@
-<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'>
-  <rect x='2' y='2' width='92' height='92' rx='14' fill='#0a120b' stroke='#72ff7d' stroke-width='4'/>
-  <text x='48' y='58' text-anchor='middle' font-family='Segoe UI, Arial, sans-serif' font-size='30' font-weight='700' fill='#c6ffd0'>DT</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96">
+  <rect x="2" y="2" width="92" height="92" rx="14" fill="#0a120b" stroke="#72ff7d" stroke-width="4"/>
+  <g fill="none" stroke="#f5f8eb" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M48 18v16"/>
+    <path d="M32 52h32"/>
+    <path d="M48 34l-20 18v16h40V52z" fill="#f5f8eb" stroke="none"/>
+  </g>
+  <g fill="#ff8a5b">
+    <circle cx="28" cy="26" r="5"/>
+    <circle cx="68" cy="24" r="4"/>
+    <circle cx="60" cy="18" r="3"/>
+  </g>
+  <path d="M48 15c4 0 7 3 7 7s-3 7-7 7-7-3-7-7 3-7 7-7z" fill="#f5c542"/>
 </svg>
