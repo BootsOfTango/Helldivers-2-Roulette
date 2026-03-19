@@ -1,4 +1,11 @@
-<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'>
-  <rect x='2' y='2' width='92' height='92' rx='14' fill='#0a120b' stroke='#72ff7d' stroke-width='4'/>
-  <text x='48' y='58' text-anchor='middle' font-family='Segoe UI, Arial, sans-serif' font-size='30' font-weight='700' fill='#c6ffd0'>EN</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96">
+  <rect x="2" y="2" width="92" height="92" rx="14" fill="#0a120b" stroke="#72ff7d" stroke-width="4"/>
+  <g fill="#f5f8eb">
+    <rect x="24" y="22" width="24" height="42" rx="5"/>
+    <rect x="30" y="16" width="12" height="10" rx="2"/>
+    <rect x="50" y="36" width="20" height="10" rx="3"/>
+    <rect x="66" y="33" width="8" height="16" rx="3"/>
+  </g>
+  <path d="M36 57c-7 5-9 10-9 15 0 8 6 14 15 14s15-6 15-14c0-8-6-12-10-18-2 5-4 8-11 3z" fill="#ffb347" transform="translate(16 -8) scale(.7)"/>
+  <path d="M48 60c-3 3-4 6-4 9 0 5 4 8 8 8s8-3 8-8c0-4-3-7-6-11-1 3-2 5-6 2z" fill="#ff6a3d" transform="translate(8 -3) scale(.8)"/>
 </svg>
