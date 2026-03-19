@@ -4507,11 +4507,12 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             }
 
             const makeItemCard = (label, value, kind) => {
-                const src = getImageAssetPath(kind, value);
+                const visual = getItemVisual(value, kind);
+                const fallbackAttr = visual?.fallbackSrc ? ` data-fallback-src="${escapeHtml(visual.fallbackSrc)}"` : "";
                 return `
                     <div class="rankDetailItemCard">
                         <div class="tiny muted">${escapeHtml(label)}</div>
-                        ${src ? `<img src="${escapeHtml(src)}" alt="${escapeHtml(value)}">` : `<div class="tiny muted">No image</div>`}
+                        ${visual?.src ? `<img src="${escapeHtml(visual.src)}" alt="${escapeHtml(visual.alt || value)}" loading="lazy" decoding="async" data-item-visual="true"${fallbackAttr} onerror="const fb=this.dataset.fallbackSrc;if(fb&&this.src!==fb){this.src=fb;return;}this.outerHTML='&lt;div class=&quot;tiny muted&quot;&gt;No image&lt;/div&gt;';">` : `<div class="tiny muted">No image</div>`}
                         <div class="tiny">${escapeHtml(value || "—")}</div>
                     </div>
                 `;
@@ -5173,13 +5174,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const assetPath = String(entry?.assetPath || "").trim();
             const imageUrl = String(entry?.imageUrl || "").trim();
             const hasLocalAsset = hasKnownLocalItemVisual(assetPath);
-            const usesPlaceholderAsset = hasLocalAsset && assetPath.startsWith("assets/placeholders/");
-            const primarySrc = usesPlaceholderAsset
-                ? assetPath
-                : (imageUrl || (hasLocalAsset ? assetPath : ""));
-            const fallbackSrc = usesPlaceholderAsset
-                ? (imageUrl || "")
-                : (hasLocalAsset && imageUrl ? assetPath : "");
+            const primarySrc = imageUrl || (hasLocalAsset ? assetPath : "");
+            const fallbackSrc = imageUrl && hasLocalAsset ? assetPath : "";
 
             if (!primarySrc) return buildItemFallbackVisual(name, cat);
 
@@ -5192,11 +5188,52 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             };
         }
 
+        function attachItemVisualToImage(img, itemVisual, { loading = "lazy" } = {}) {
+            if (!img || !itemVisual?.src) return;
+
+            img.src = itemVisual.src;
+            img.alt = itemVisual.alt;
+            img.loading = loading;
+            img.decoding = loading === "eager" ? "sync" : "async";
+            img.dataset.itemVisual = "true";
+
+            if (itemVisual.fallbackSrc) img.dataset.fallbackSrc = itemVisual.fallbackSrc;
+            else delete img.dataset.fallbackSrc;
+
+            img.onerror = () => {
+                const fb = img.dataset.fallbackSrc || "";
+                if (fb && img.src !== fb) {
+                    img.src = fb;
+                    return;
+                }
+
+                if (img.closest(".slotVisual")) {
+                    const visual = img.closest(".slotVisual");
+                    visual.innerHTML = "";
+                    visual.classList.remove("is-icon");
+                    return;
+                }
+
+                img.outerHTML = `<span class="itemVisualFallback">N/A</span>`;
+            };
+        }
+
         function renderItemVisualHtml(name, type) {
             const visual = getItemVisual(name, type);
             if (!visual?.src) return `<span class="itemVisualFallback">N/A</span>`;
             const fallbackAttr = visual.fallbackSrc ? ` data-fallback-src="${escapeHtml(visual.fallbackSrc)}"` : "";
-            return `<img src="${escapeHtml(visual.src)}" alt="${escapeHtml(name)}" loading="lazy"${fallbackAttr} onerror="const fb=this.dataset.fallbackSrc;if(fb&&this.src!==fb){this.src=fb;return;}this.outerHTML='&lt;span class=\"itemVisualFallback\"&gt;N/A&lt;/span&gt;';">`;
+            return `<img src="${escapeHtml(visual.src)}" alt="${escapeHtml(name)}" loading="lazy" decoding="async" data-item-visual="true"${fallbackAttr} onerror="const fb=this.dataset.fallbackSrc;if(fb&&this.src!==fb){this.src=fb;return;}this.outerHTML='&lt;span class=\"itemVisualFallback\"&gt;N/A&lt;/span&gt;';">`;
+        }
+
+        function prepareItemVisualsForPrint(root = document) {
+            const imgs = Array.from(root.querySelectorAll('img[data-item-visual="true"]'));
+            imgs.forEach(img => {
+                img.loading = "eager";
+                img.decoding = "sync";
+                if ("fetchPriority" in img) img.fetchPriority = "high";
+                const fb = img.dataset.fallbackSrc || "";
+                if (!img.getAttribute("src") && fb) img.src = fb;
+            });
         }
 
         function setSlotVisualState(el, name, category, options = {}) {
@@ -5220,19 +5257,24 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             if (itemVisual.stratClass) el.classList.add(itemVisual.stratClass);
 
             const img = document.createElement("img");
-            img.src = itemVisual.src;
-            img.alt = itemVisual.alt;
-            img.loading = "lazy";
             if (itemVisual.kind === "icon") visual.classList.add("is-icon");
-            img.onerror = () => {
-                if (itemVisual.fallbackSrc && img.src !== itemVisual.fallbackSrc) {
-                    img.src = itemVisual.fallbackSrc;
-                    return;
-                }
-                visual.innerHTML = "";
-                visual.classList.remove("is-icon");
-            };
+            attachItemVisualToImage(img, itemVisual);
             visual.appendChild(img);
+        }
+
+        if (typeof window !== "undefined") {
+            window.addEventListener("beforeprint", () => prepareItemVisualsForPrint());
+            if (window.matchMedia) {
+                const printMedia = window.matchMedia("print");
+                const onPrintMediaChange = (event) => {
+                    if (event.matches) prepareItemVisualsForPrint();
+                };
+                if (typeof printMedia.addEventListener === "function") {
+                    printMedia.addEventListener("change", onPrintMediaChange);
+                } else if (typeof printMedia.addListener === "function") {
+                    printMedia.addListener(onPrintMediaChange);
+                }
+            }
         }
 
         /***********************
@@ -7663,12 +7705,7 @@ ${noteContent}`
             const category = ITEM_VISUAL_CATEGORY_BY_CONTAINER[containerId];
             if (!category) return null;
 
-            const visual = getItemVisual(itemName, category);
-            if (!visual) return null;
-            return {
-                src: visual.src,
-                fallbackSrc: visual.fallbackSrc
-            };
+            return getItemVisual(itemName, category);
         }
 
         function sortCardsByRankOrder(cards) {
@@ -7784,15 +7821,9 @@ ${noteContent}`
             const asset = resolveItemVisualAsset(containerId, item.name);
             if (asset?.src) {
                 const img = document.createElement("img");
-                img.loading = "lazy";
-                img.alt = `${item.name} visual`;
-                img.src = asset.src;
-                img.addEventListener("error", () => {
-                    if (asset.fallbackSrc && img.src !== asset.fallbackSrc) {
-                        img.src = asset.fallbackSrc;
-                        return;
-                    }
-                    visual.innerHTML = `<span class="itemVisualFallback">N/A</span>`;
+                attachItemVisualToImage(img, {
+                    ...asset,
+                    alt: asset.alt || `${item.name} visual`
                 });
                 visual.appendChild(img);
             } else {
