@@ -74,6 +74,21 @@ def main() -> int:
         if orphans:
             errors.append(f"Orphan {t} image entries not present in DEFAULTS: {orphans}")
 
+        for entry in img_entries:
+            name = entry.get("name", "<missing name>")
+            asset_path = str(entry.get("assetPath", "")).strip()
+            image_url = str(entry.get("imageUrl", "")).strip()
+
+            if not asset_path and not image_url:
+                errors.append(f"{t} item '{name}' is missing both assetPath and imageUrl")
+
+            if asset_path:
+                file_path = ROOT / asset_path
+                if not file_path.exists():
+                    errors.append(f"{t} item '{name}' references missing assetPath: {asset_path}")
+                if "assets/placeholders/" in asset_path:
+                    errors.append(f"{t} item '{name}' still points to placeholder art: {asset_path}")
+
     # ensure defaults are catalog-derived
     for t, defaults_key in TYPE_TO_DEFAULTS_KEY.items():
         catalog_names = [item["name"] for item in catalog_items if item["type"] == t]

@@ -4983,61 +4983,6 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             support: "strat-rim-support"
         };
 
-        const KNOWN_LOCAL_ITEM_VISUALS = new Set([
-            "assets/placeholders/primary/flam-66-torcher.svg",
-            "assets/placeholders/primary/jar-5-dominator.svg",
-            "assets/placeholders/primary/r-0-variable.svg",
-            "assets/placeholders/sidearm/cqc-1-saber.svg",
-            "assets/placeholders/sidearm/cqc-19-machete.svg",
-            "assets/placeholders/sidearm/cqc-2-stun-lance.svg",
-            "assets/placeholders/sidearm/cqc-30-stun-baton.svg",
-            "assets/placeholders/sidearm/cqc-5-combat-hatchet.svg",
-            "assets/placeholders/stratagem/anti-tank-emplacement.svg",
-            "assets/placeholders/stratagem/anti-tank-mines.svg",
-            "assets/placeholders/stratagem/bastion.svg",
-            "assets/placeholders/stratagem/belt-fed-gl.svg",
-            "assets/placeholders/stratagem/breaching-hammer.svg",
-            "assets/placeholders/stratagem/c4-pack.svg",
-            "assets/placeholders/stratagem/de-escalator.svg",
-            "assets/placeholders/stratagem/detonation-tool.svg",
-            "assets/placeholders/stratagem/directional-shield.svg",
-            "assets/placeholders/stratagem/eagle-500kg-bomb.svg",
-            "assets/placeholders/stratagem/eagle-strafing-run.svg",
-            "assets/placeholders/stratagem/emancipator-exosuit.svg",
-            "assets/placeholders/stratagem/epoch.svg",
-            "assets/placeholders/stratagem/expendable-napalm.svg",
-            "assets/placeholders/stratagem/fast-recon-vehicle.svg",
-            "assets/placeholders/stratagem/flame-sentry.svg",
-            "assets/placeholders/stratagem/gas-mines.svg",
-            "assets/placeholders/stratagem/gl-21-grenade-launcher.svg",
-            "assets/placeholders/stratagem/grenadier-battalion.svg",
-            "assets/placeholders/stratagem/guard-dog.svg",
-            "assets/placeholders/stratagem/guard-dog-arc.svg",
-            "assets/placeholders/stratagem/guard-dog-breath.svg",
-            "assets/placeholders/stratagem/guard-dog-rover.svg",
-            "assets/placeholders/stratagem/hot-dog.svg",
-            "assets/placeholders/stratagem/hover-pack.svg",
-            "assets/placeholders/stratagem/laser-sentry.svg",
-            "assets/placeholders/stratagem/leveller.svg",
-            "assets/placeholders/stratagem/machine-gun-sentry.svg",
-            "assets/placeholders/stratagem/maxigun.svg",
-            "assets/placeholders/stratagem/mls-4x-commando.svg",
-            "assets/placeholders/stratagem/one-true-flag.svg",
-            "assets/placeholders/stratagem/orbital-ems-strike.svg",
-            "assets/placeholders/stratagem/orbital-gas-strike.svg",
-            "assets/placeholders/stratagem/orbital-napalm-barrage.svg",
-            "assets/placeholders/stratagem/orbital-walking-barrage.svg",
-            "assets/placeholders/stratagem/patriot-exosuit.svg",
-            "assets/placeholders/stratagem/portable-hellbomb.svg",
-            "assets/placeholders/stratagem/shield-generator-pack.svg",
-            "assets/placeholders/stratagem/solo-silo.svg",
-            "assets/placeholders/stratagem/speargun.svg",
-            "assets/placeholders/stratagem/sterilizer.svg",
-            "assets/placeholders/stratagem/tesla-tower.svg",
-            "assets/placeholders/stratagem/warp-pack.svg",
-            "assets/placeholders/stratagem/wasp.svg"
-        ]);
-
         function normalizeItemKey(name) {
             return String(name || "")
                 .toLowerCase()
@@ -5117,11 +5062,6 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             return "strat-rim-support";
         }
 
-        function hasKnownLocalItemVisual(assetPath) {
-            const path = String(assetPath || "").trim();
-            return !!path && KNOWN_LOCAL_ITEM_VISUALS.has(path);
-        }
-
         function buildItemFallbackVisual(name, category) {
             const cat = mapSlotCategory(category);
             const isStratagem = cat === "stratagem";
@@ -5167,9 +5107,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             const assetPath = String(entry?.assetPath || "").trim();
             const imageUrl = String(entry?.imageUrl || "").trim();
-            const hasLocalAsset = hasKnownLocalItemVisual(assetPath);
-            const primarySrc = imageUrl || (hasLocalAsset ? assetPath : "");
-            const fallbackSrc = imageUrl && hasLocalAsset ? assetPath : "";
+            const primarySrc = assetPath || imageUrl || "";
+            const fallbackSrc = assetPath && imageUrl ? imageUrl : "";
 
             if (!primarySrc) return buildItemFallbackVisual(name, cat);
 
