@@ -16,6 +16,10 @@ TYPE_TO_DEFAULTS_KEY = {
 }
 
 
+def local_asset_exists(asset_path: str) -> bool:
+    return bool(asset_path) and (ROOT / asset_path).exists()
+
+
 def normalize_key(value: str) -> str:
     value = (value or '').lower().replace('&', ' and ')
     value = re.sub(r'[^a-z0-9]+', ' ', value)
@@ -114,7 +118,8 @@ def sync_item_images(catalog_items):
         out = []
         for item in [i for i in catalog_items if i['type'] == t]:
             prev = existing_by_type.get(t, {}).get(item['name'], {})
-            asset_path = item.get('assetPath') or prev.get('assetPath', '')
+            catalog_asset_path = item.get('assetPath') or ''
+            asset_path = catalog_asset_path if local_asset_exists(catalog_asset_path) else prev.get('assetPath', '')
             entry = {
                 'name': item['name'],
                 'assetPath': asset_path,

@@ -9,6 +9,7 @@ from urllib.request import Request, urlopen
 
 ROOT = Path(__file__).resolve().parents[1]
 INDEX_HTML = ROOT / 'index.html'
+CATALOG_JSON = ROOT / 'assets' / 'item-catalog.json'
 OUTPUT_JSON = ROOT / 'assets' / 'item-images.json'
 WIKI_BASE = 'https://helldivers.wiki.gg'
 API_ENDPOINT = f'{WIKI_BASE}/api.php'
@@ -33,6 +34,12 @@ WIKI_TITLE_ALIASES: Dict[str, str] = {
     'Orbital 120MM HE Barrage': 'Orbital 120mm HE Barrage',
     'Orbital 380MM HE Barrage': 'Orbital 380mm HE Barrage',
     'Eagle 110MM Rocket Pods': 'Eagle 110mm Rocket Pods',
+    'Detonation Tool': 'Defoliation Tool',
+    'Fast Recon Vehicle': 'M-102 Fast Recon Vehicle',
+    'Grenadier Battalion': 'Grenadier battlement',
+    'Guard Dog Arc': 'AX/ARC-3 K-9',
+    'Guard Dog Breath': 'AX/TX-13 Dog Breath',
+    'R-0 Variable': 'VG-70 Variable',
 }
 NAME_ALIASES = {
     'sg-225sp breaker spray and pray': 'SG-225SP Breaker Spray&Pray',
@@ -72,6 +79,17 @@ def parse_defaults_items(text: str) -> Dict[str, List[str]]:
         out[key] = [unescape(x) for x in re.findall(r'"([^"]+)"', m.group(1))]
     return out
 
+def parse_catalog_items() -> List[Dict[str, str]]:
+    catalog = json.loads(CATALOG_JSON.read_text(encoding='utf-8'))
+    out: List[Dict[str, str]] = []
+    for item in catalog.get('items', []):
+        item_type = str(item.get('type', '')).strip()
+        name = str(item.get('name', '')).strip()
+        subgroup = str(item.get('subgroup', '')).strip()
+        if item_type and name:
+            out.append({'type': item_type, 'name': name, 'subgroup': subgroup})
+    return out
+
 def resolve_wiki_titles(name: str) -> List[str]:
     candidates = []
     if name in WIKI_TITLE_ALIASES: candidates.append(WIKI_TITLE_ALIASES[name])
@@ -100,11 +118,25 @@ def stratagem_group(name:str)->str:
         if t in n: return g
     return 'support'
 
+def rim_category_for_group(group: str) -> str:
+    return group if group in {'support', 'orbital', 'eagle', 'defensive'} else 'support'
+
+def stratagem_group_from_subgroup(subgroup: str, name: str) -> str:
+    subgroup = normalize_name(subgroup)
+    if subgroup in {'support', 'orbital', 'eagle', 'defensive', 'backpack'}:
+        return subgroup
+    if subgroup in {'exosuit', 'exosuits'}:
+        return 'exosuit'
+    return stratagem_group(name)
+
 def stable_write(path:Path, content:bytes):
     if path.exists() and path.read_bytes()==content: return
     path.parent.mkdir(parents=True, exist_ok=True); path.write_bytes(content)
 
-def sync_item(name:str, category:str)->Dict[str,str]:
+def should_store_local_asset(category: str, ext: str) -> bool:
+    return category == 'stratagem' and ext == '.svg'
+
+def sync_item(name:str, category:str, subgroup:str='')->Dict[str,str]:
     last=None; wiki_title=''; page_url=''; html=''
     for t in resolve_wiki_titles(name):
         try:
@@ -118,24 +150,34 @@ def sync_item(name:str, category:str)->Dict[str,str]:
     img=urljoin(WIKI_BASE,img)
     ext=pick_ext(img); slug=slugify(name)
     if category=='stratagem':
-        rel=Path(STRATAGEM_GROUP_DIRS[stratagem_group(name)]) / f'{slug}{ext}'; kind='icon'
+        group = stratagem_group_from_subgroup(subgroup, name)
+        rel=Path(STRATAGEM_GROUP_DIRS[group]) / f'{slug}{ext}'; kind='icon'
     else:
         rel=Path(CATEGORY_TO_ASSET_DIR[category]) / f'{slug}{ext}'; kind='image'
-    stable_write(ROOT/rel, fetch_bytes(img))
-    return {'name':name,'assetPath':rel.as_posix(),'kind':kind,'wikiTitle':wiki_title,'sourceUrl':page_url,'imageUrl':img}
+    asset_path = rel.as_posix() if should_store_local_asset(category, ext) else ''
+    if asset_path:
+        stable_write(ROOT/rel, fetch_bytes(img))
+    payload = {'name':name,'assetPath':asset_path,'kind':kind,'wikiTitle':wiki_title,'sourceUrl':page_url,'imageUrl':img}
+    if category == 'stratagem':
+        payload['rimCategory'] = rim_category_for_group(group)
+    return payload
 
 def main():
-    parsed=parse_defaults_items(INDEX_HTML.read_text(encoding='utf-8'))
+    catalog_items=parse_catalog_items()
     mapping={'primary':[],'sidearm':[],'throwable':[],'stratagem':[]}
     failures=[]
-    for category,key in [('primary','primaries'),('sidearm','sidearms'),('throwable','throwables'),('stratagem','stratagems')]:
-        for name in parsed[key]:
-            try:
-                e=sync_item(name,category); mapping[category].append(e); print(f"Synced {category:<9} {name} -> {e['assetPath']}")
-            except Exception as ex:
-                failures.append(f'{category}:{name}: {ex}'); print(f'FAILED {category:<9} {name}: {ex}')
+    for item in catalog_items:
+        category = item['type']
+        name = item['name']
+        subgroup = item.get('subgroup', '')
+        if category not in mapping:
+            continue
+        try:
+            e=sync_item(name,category,subgroup); mapping[category].append(e); print(f"Synced {category:<9} {name} -> {e['assetPath']}")
+        except Exception as ex:
+            failures.append(f'{category}:{name}: {ex}'); print(f'FAILED {category:<9} {name}: {ex}')
     for k in mapping: mapping[k]=sorted(mapping[k], key=lambda x:x['name'])
-    aliases={normalize_name(n):n for n in parsed['primaries']+parsed['sidearms']+parsed['throwables']+parsed['stratagems']}
+    aliases={normalize_name(item['name']):item['name'] for item in catalog_items}
     aliases.update(NAME_ALIASES)
     payload={'generatedAt':'deterministic-v1','source':WIKI_BASE,'nameAliases':dict(sorted(aliases.items())),**mapping}
     stable_write(OUTPUT_JSON,(json.dumps(payload,indent=2,ensure_ascii=False)+'\n').encode())
