@@ -1368,6 +1368,150 @@
       "warbond": "Unassigned / Custom",
       "source": "Unassigned / Custom",
       "assetPath": "assets/stratagems/support/wasp.png"
+    },
+    {
+      "name": "Hellpod Space Optimization",
+      "type": "booster",
+      "subgroup": "booster",
+      "warbond": "Helldiver Basics (Mobilize)",
+      "source": "Helldiver Basics (Mobilize)",
+      "assetPath": "assets/boosters/hellpod-space-optimization.svg"
+    },
+    {
+      "name": "Vitality Enhancement",
+      "type": "booster",
+      "subgroup": "booster",
+      "warbond": "Helldiver Basics (Mobilize)",
+      "source": "Helldiver Basics (Mobilize)",
+      "assetPath": "assets/boosters/vitality-enhancement.svg"
+    },
+    {
+      "name": "UAV Recon Booster",
+      "type": "booster",
+      "subgroup": "booster",
+      "warbond": "Helldiver Basics (Mobilize)",
+      "source": "Helldiver Basics (Mobilize)",
+      "assetPath": "assets/boosters/uav-recon-booster.svg"
+    },
+    {
+      "name": "Stamina Enhancement",
+      "type": "booster",
+      "subgroup": "booster",
+      "warbond": "Helldiver Basics (Mobilize)",
+      "source": "Helldiver Basics (Mobilize)",
+      "assetPath": "assets/boosters/stamina-enhancement.svg"
+    },
+    {
+      "name": "Muscle Enhancement",
+      "type": "booster",
+      "subgroup": "booster",
+      "warbond": "Helldiver Basics (Mobilize)",
+      "source": "Helldiver Basics (Mobilize)",
+      "assetPath": "assets/boosters/muscle-enhancement.svg"
+    },
+    {
+      "name": "Increased Reinforcement Budget",
+      "type": "booster",
+      "subgroup": "booster",
+      "warbond": "Helldiver Basics (Mobilize)",
+      "source": "Helldiver Basics (Mobilize)",
+      "assetPath": "assets/boosters/increased-reinforcement-budget.svg"
+    },
+    {
+      "name": "Flexible Reinforcement Budget",
+      "type": "booster",
+      "subgroup": "booster",
+      "warbond": "Steeled Veterans",
+      "source": "Steeled Veterans",
+      "assetPath": "assets/boosters/flexible-reinforcement-budget.svg"
+    },
+    {
+      "name": "Localization Confusion",
+      "type": "booster",
+      "subgroup": "booster",
+      "warbond": "Cutting Edge",
+      "source": "Cutting Edge",
+      "assetPath": "assets/boosters/localization-confusion.svg"
+    },
+    {
+      "name": "Expert Extraction Pilot",
+      "type": "booster",
+      "subgroup": "booster",
+      "warbond": "Democratic Detonation",
+      "source": "Democratic Detonation",
+      "assetPath": "assets/boosters/expert-extraction-pilot.svg"
+    },
+    {
+      "name": "Motivational Shocks",
+      "type": "booster",
+      "subgroup": "booster",
+      "warbond": "Polar Patriots",
+      "source": "Polar Patriots",
+      "assetPath": "assets/boosters/motivational-shocks.svg"
+    },
+    {
+      "name": "Experimental Infusion",
+      "type": "booster",
+      "subgroup": "booster",
+      "warbond": "Viper Commandos",
+      "source": "Viper Commandos",
+      "assetPath": "assets/boosters/experimental-infusion.svg"
+    },
+    {
+      "name": "Firebomb Hellpods",
+      "type": "booster",
+      "subgroup": "booster",
+      "warbond": "Freedom's Flame",
+      "source": "Freedom's Flame",
+      "assetPath": "assets/boosters/firebomb-hellpods.svg"
+    },
+    {
+      "name": "Dead Sprint",
+      "type": "booster",
+      "subgroup": "booster",
+      "warbond": "Truth Enforcers",
+      "source": "Truth Enforcers",
+      "assetPath": "assets/boosters/dead-sprint.svg"
+    },
+    {
+      "name": "Armed Resupply Pods",
+      "type": "booster",
+      "subgroup": "booster",
+      "warbond": "Urban Legends",
+      "source": "Urban Legends",
+      "assetPath": "assets/boosters/armed-resupply-pods.svg"
+    },
+    {
+      "name": "Sample Extractor",
+      "type": "booster",
+      "subgroup": "booster",
+      "warbond": "Borderline Justice",
+      "source": "Borderline Justice",
+      "assetPath": "assets/boosters/sample-extractor.svg"
+    },
+    {
+      "name": "Sample Scanner",
+      "type": "booster",
+      "subgroup": "booster",
+      "warbond": "Masters of Ceremony",
+      "source": "Masters of Ceremony",
+      "assetPath": "assets/boosters/sample-scanner.svg"
+    },
+    {
+      "name": "Stun Pods",
+      "type": "booster",
+      "subgroup": "booster",
+      "warbond": "Force of Law",
+      "source": "Force of Law",
+      "assetPath": "assets/boosters/stun-pods.svg"
+    },
+    {
+      "name": "Concealed Insertion",
+      "type": "booster",
+      "subgroup": "booster",
+      "warbond": "Redacted Regiment",
+      "source": "Redacted Regiment",
+      "assetPath": "assets/boosters/concealed-insertion.svg"
     }
   ]
 }
