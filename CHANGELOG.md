@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-03-22
+
+### Official stable release tag
+
+- **v1.0.0:** First official 1.0 release of **HD2 TANGO Roulette**.
+- **Status:** UI version tag, release notes, and release prep now align on the official 1.0 designation.
+
+### Release focus ✅
+
+- **Change:** Promoted the current Roulette build to the official **1.0** release milestone.
+- **Why:** Establishes a clear stable launch point for GitHub tagging and future release notes.
+
 ## 2026-03-14
 
 ### Armory catalog maintenance + icon integrity ✅
@@ -18,7 +30,8 @@
 ### Stable release tags
 
 - **v0.1:** First stable version.
-- **v0.2:** Second stable version (current baseline, marked stable).
+- **v0.2:** Second stable version.
+- **v1.0.0:** Official 1.0 baseline release.
 
 ### Spin tab – Manual planet search + choose ✅
 
