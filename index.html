@@ -3293,7 +3293,10 @@ END MASTER DIRECTIVE
             const btn = document.querySelector("#btnRollPlanet");
             if (btn) btn.disabled = true;
 
+            window.__apiPlanetsLoadedOnce = true;
+
             await loadItemImageDb();
+            await loadAndRenderApiActivePlanets();
 
             // Kick off biome load, but do NOT block the app.
             // Biomes are a UI enhancement, not a dependency.
@@ -4477,7 +4480,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             ui: {
                 activeResultCardId: null,
                 modalOpen: false,
-                resultsBackupNudgeSeen: false
+                resultsBackupNudgeSeen: false,
+                apiPlanetSyncInProgress: false
             },
 
             // current spin
@@ -6120,7 +6124,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             // Buttons
             $("#btnLock").disabled = !c.loadout || c.locked || c.spinning;
-            $("#btnRollPlanet").disabled = !c.loadout || !c.locked || c.spinning;
+            $("#btnRollPlanet").disabled = !c.loadout || !c.locked || c.spinning || isApiPlanetSyncInProgress();
             $("#btnUse").disabled = !c.loadout || !c.locked || c.spinning;
 
 
@@ -8248,10 +8252,14 @@ ${noteContent}`
         function normalizeFactionFromOwner(owner) {
             const raw = String(owner || "").toLowerCase().trim();
             if (raw === "terminids") return "Terminids";
-            if (raw === "automatons") return "Automatons";
+            if (raw === "automaton" || raw === "automatons") return "Automatons";
             if (raw === "illuminate") return "Illuminate";
             if (raw === "humans" || raw === "super earth") return "Super Earth";
             return owner || "Unknown";
+        }
+
+        function isApiPlanetSyncInProgress() {
+            return !!state?.ui?.apiPlanetSyncInProgress;
         }
 
         function syncEditablePlanetsToLiveActive(active) {
@@ -8323,8 +8331,10 @@ ${noteContent}`
             const box = $("#apiActivePlanetsList");
             if (!status || !box) return;
 
+            state.ui.apiPlanetSyncInProgress = true;
             status.textContent = "Loading live planets from API...";
             box.innerHTML = "";
+            renderSpin();
 
             try {
                 const res = await fetch("https://api.helldivers2.dev/api/v1/campaigns", {
@@ -8356,6 +8366,9 @@ ${noteContent}`
                 console.warn("[API planets] failed", err);
                 status.textContent = "Unable to load live planets from API right now.";
                 box.innerHTML = `<div class="tiny">Check internet connection, CORS policy, or try refresh again.</div>`;
+            } finally {
+                state.ui.apiPlanetSyncInProgress = false;
+                renderSpin();
             }
         }
 
@@ -8829,6 +8842,10 @@ ${noteContent}`
         }
         function doRollPlanet() {
             if (!state.current.loadout || !state.current.locked) return;
+            if (isApiPlanetSyncInProgress()) {
+                alert("Active planets are still syncing from the live API. Try again in a moment.");
+                return;
+            }
             const p = rollPlanetForFaction(state.current.faction);
             if (!p) {
                 alert("No planets available for that faction. Add planets in ITEMS tab.");
@@ -8851,6 +8868,10 @@ ${noteContent}`
         function doClearPlanet() {
             // Renamed behavior: "REROLL PLANET" (roll again instead of clearing)
             if (!state.current.loadout || !state.current.locked) return;
+            if (isApiPlanetSyncInProgress()) {
+                alert("Active planets are still syncing from the live API. Try again in a moment.");
+                return;
+            }
 
             const p = rollPlanetForFaction(state.current.faction);
             if (!p) {
@@ -9059,6 +9080,7 @@ ${noteContent}`
                 refreshCompareOptions();
                 renderRank();
                 renderItems();
+                loadAndRenderApiActivePlanets();
             });
 
             $("#btnRecalcRanks").addEventListener("click", () => {
