@@ -1659,92 +1659,146 @@
     {
       "name": "Hellpod Space Optimization",
       "assetPath": "assets/boosters/hellpod-space-optimization.svg",
-      "kind": "icon"
+      "kind": "icon",
+      "wikiTitle": "Hellpod Space Optimization",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/Hellpod_Space_Optimization",
+      "imageUrl": "https://helldivers.wiki.gg/images/Hellpod_Space_Optimization_Booster_Icon.svg"
     },
     {
       "name": "Vitality Enhancement",
       "assetPath": "assets/boosters/vitality-enhancement.svg",
-      "kind": "icon"
+      "kind": "icon",
+      "wikiTitle": "Vitality Enhancement",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/Vitality_Enhancement",
+      "imageUrl": "https://helldivers.wiki.gg/images/Vitality_Enhancement_Booster_Icon.svg"
     },
     {
       "name": "UAV Recon Booster",
       "assetPath": "assets/boosters/uav-recon-booster.svg",
-      "kind": "icon"
+      "kind": "icon",
+      "wikiTitle": "UAV Recon Booster",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/UAV_Recon_Booster",
+      "imageUrl": "https://helldivers.wiki.gg/images/UAV_Recon_Booster_Booster_Icon.svg"
     },
     {
       "name": "Stamina Enhancement",
       "assetPath": "assets/boosters/stamina-enhancement.svg",
-      "kind": "icon"
+      "kind": "icon",
+      "wikiTitle": "Stamina Enhancement",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/Stamina_Enhancement",
+      "imageUrl": "https://helldivers.wiki.gg/images/Stamina_Enhancement_Booster_Icon.svg"
     },
     {
       "name": "Muscle Enhancement",
       "assetPath": "assets/boosters/muscle-enhancement.svg",
-      "kind": "icon"
+      "kind": "icon",
+      "wikiTitle": "Muscle Enhancement",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/Muscle_Enhancement",
+      "imageUrl": "https://helldivers.wiki.gg/images/Muscle_Enhancement_Booster_Icon.svg"
     },
     {
       "name": "Increased Reinforcement Budget",
       "assetPath": "assets/boosters/increased-reinforcement-budget.svg",
-      "kind": "icon"
+      "kind": "icon",
+      "wikiTitle": "Increased Reinforcement Budget",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/Increased_Reinforcement_Budget",
+      "imageUrl": "https://helldivers.wiki.gg/images/Increased_Reinforcement_Budget_Booster_Icon.svg"
     },
     {
       "name": "Flexible Reinforcement Budget",
       "assetPath": "assets/boosters/flexible-reinforcement-budget.svg",
-      "kind": "icon"
+      "kind": "icon",
+      "wikiTitle": "Flexible Reinforcement Budget",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/Flexible_Reinforcement_Budget",
+      "imageUrl": "https://helldivers.wiki.gg/images/Flexible_Reinforcement_Budget_Booster_Icon.svg"
     },
     {
       "name": "Localization Confusion",
       "assetPath": "assets/boosters/localization-confusion.svg",
-      "kind": "icon"
+      "kind": "icon",
+      "wikiTitle": "Localization Confusion",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/Localization_Confusion",
+      "imageUrl": "https://helldivers.wiki.gg/images/Localization_Confusion_Booster_Icon.svg"
     },
     {
       "name": "Expert Extraction Pilot",
       "assetPath": "assets/boosters/expert-extraction-pilot.svg",
-      "kind": "icon"
+      "kind": "icon",
+      "wikiTitle": "Expert Extraction Pilot",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/Expert_Extraction_Pilot",
+      "imageUrl": "https://helldivers.wiki.gg/images/Expert_Extraction_Pilot_Booster_Icon.svg"
     },
     {
       "name": "Motivational Shocks",
       "assetPath": "assets/boosters/motivational-shocks.svg",
-      "kind": "icon"
+      "kind": "icon",
+      "wikiTitle": "Motivational Shocks",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/Motivational_Shocks",
+      "imageUrl": "https://helldivers.wiki.gg/images/Motivational_Shocks_Booster_Icon.svg"
     },
     {
       "name": "Experimental Infusion",
       "assetPath": "assets/boosters/experimental-infusion.svg",
-      "kind": "icon"
+      "kind": "icon",
+      "wikiTitle": "Experimental Infusion",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/Experimental_Infusion",
+      "imageUrl": "https://helldivers.wiki.gg/images/Experimental_Infusion_Booster_Icon.svg"
     },
     {
       "name": "Firebomb Hellpods",
       "assetPath": "assets/boosters/firebomb-hellpods.svg",
-      "kind": "icon"
+      "kind": "icon",
+      "wikiTitle": "Firebomb Hellpods",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/Firebomb_Hellpods",
+      "imageUrl": "https://helldivers.wiki.gg/images/Firebomb_Hellpods_Booster_Icon.svg"
     },
     {
       "name": "Dead Sprint",
       "assetPath": "assets/boosters/dead-sprint.svg",
-      "kind": "icon"
+      "kind": "icon",
+      "wikiTitle": "Dead Sprint",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/Dead_Sprint",
+      "imageUrl": "https://helldivers.wiki.gg/images/Dead_Sprint_Booster_Icon.svg"
     },
     {
       "name": "Armed Resupply Pods",
       "assetPath": "assets/boosters/armed-resupply-pods.svg",
-      "kind": "icon"
+      "kind": "icon",
+      "wikiTitle": "Armed Resupply Pods",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/Armed_Resupply_Pods",
+      "imageUrl": "https://helldivers.wiki.gg/images/Armed_Resupply_Pods_Booster_Icon.svg"
     },
     {
       "name": "Sample Extractor",
       "assetPath": "assets/boosters/sample-extractor.svg",
-      "kind": "icon"
+      "kind": "icon",
+      "wikiTitle": "Sample Extractor",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/Sample_Extractor",
+      "imageUrl": "https://helldivers.wiki.gg/images/Sample_Extractor_Booster_Icon.svg"
     },
     {
       "name": "Sample Scanner",
       "assetPath": "assets/boosters/sample-scanner.svg",
-      "kind": "icon"
+      "kind": "icon",
+      "wikiTitle": "Sample Scanner",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/Sample_Scanner",
+      "imageUrl": "https://helldivers.wiki.gg/images/Sample_Scanner_Booster_Icon.svg"
     },
     {
       "name": "Stun Pods",
       "assetPath": "assets/boosters/stun-pods.svg",
-      "kind": "icon"
+      "kind": "icon",
+      "wikiTitle": "Stun Pods",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/Stun_Pods",
+      "imageUrl": "https://helldivers.wiki.gg/images/Stun_Pods_Booster_Icon.svg"
     },
     {
       "name": "Concealed Insertion",
       "assetPath": "assets/boosters/concealed-insertion.svg",
-      "kind": "icon"
+      "kind": "icon",
+      "wikiTitle": "Concealed Insertion",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/Concealed_Insertion",
+      "imageUrl": "https://helldivers.wiki.gg/images/Concealed_Insertion_Booster_Icon.svg"
     }
   ]
 }

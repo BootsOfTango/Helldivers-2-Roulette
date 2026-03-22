@@ -698,7 +698,18 @@ END MASTER DIRECTIVE
             /* Intentional icon policy: preserve source icon artwork, tint the slot chrome only. */
             border: 2px solid rgba(255,255,255,.12);
             background: rgba(0,0,0,.35);
-            color: #0a0a0a;
+            color: #dbe6f7;
+        }
+
+        .slot-booster {
+            border-color: rgba(245,220,84,.5);
+            background: rgba(245,220,84,.08);
+            color: #f5dc54;
+        }
+
+        .slot-booster .slotVisual {
+            border-color: rgba(245,220,84,.35);
+            background: rgba(0,0,0,.22);
         }
 
         .slot.slot-strat.skeleton {
@@ -2801,7 +2812,7 @@ END MASTER DIRECTIVE
                     <div class="slotRow"><span class="slotTag">Strat 2</span><div class="slot slot-strat" id="slotStrat2"><div class="slotVisual" aria-hidden="true"></div><div class="slotLabel">—</div></div></div>
                     <div class="slotRow"><span class="slotTag">Strat 3</span><div class="slot slot-strat" id="slotStrat3"><div class="slotVisual" aria-hidden="true"></div><div class="slotLabel">—</div></div></div>
                     <div class="slotRow"><span class="slotTag">Strat 4</span><div class="slot slot-strat" id="slotStrat4"><div class="slotVisual" aria-hidden="true"></div><div class="slotLabel">—</div></div></div>
-                    <div class="slotRow"><span class="slotTag">Booster</span><div class="slot slot-strat" id="slotBooster"><div class="slotVisual" aria-hidden="true"></div><div class="slotLabel">—</div></div></div>
+                    <div class="slotRow"><span class="slotTag">Booster</span><div class="slot slot-strat slot-booster" id="slotBooster"><div class="slotVisual" aria-hidden="true"></div><div class="slotLabel">—</div></div></div>
                 </div>
             </div>
 
@@ -5149,8 +5160,11 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             const assetPath = String(entry?.assetPath || "").trim();
             const imageUrl = String(entry?.imageUrl || "").trim();
-            const primarySrc = assetPath || imageUrl || "";
-            const fallbackSrc = assetPath && imageUrl ? imageUrl : "";
+            const preferRemote = cat === "booster";
+            const primarySrc = preferRemote ? (imageUrl || assetPath || "") : (assetPath || imageUrl || "");
+            const fallbackSrc = assetPath && imageUrl
+                ? (preferRemote ? assetPath : imageUrl)
+                : "";
 
             if (!primarySrc) return buildItemFallbackVisual(name, cat);
 
