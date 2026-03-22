@@ -16,6 +16,7 @@ TYPE_TO_DEFAULTS_KEY = {
     "sidearm": "sidearms",
     "throwable": "throwables",
     "stratagem": "stratagems",
+    "booster": "boosters",
 }
 
 
@@ -27,7 +28,7 @@ def normalize_key(value: str) -> str:
 
 def parse_defaults(index_text: str):
     results = {}
-    for key in ["primaries", "sidearms", "throwables", "stratagems"]:
+    for key in ["primaries", "sidearms", "throwables", "stratagems", "boosters"]:
         match = re.search(rf"{key}: \[(.*?)\],", index_text, flags=re.S)
         if not match:
             raise RuntimeError(f"Could not find DEFAULTS.items.{key} in index.html")
@@ -58,7 +59,7 @@ def main() -> int:
 
     alias_map = {normalize_key(k): v for k, v in (images.get("nameAliases") or {}).items()}
 
-    for t in ["primary", "sidearm", "throwable", "stratagem"]:
+    for t in ["primary", "sidearm", "throwable", "stratagem", "booster"]:
         img_entries = images.get(t, [])
         img_names = {entry.get("name", "") for entry in img_entries if entry.get("name")}
 

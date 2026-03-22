@@ -19,6 +19,7 @@ CATEGORY_TO_ASSET_DIR = {
     'primary': 'assets/weapons/primaries',
     'sidearm': 'assets/weapons/sidearms',
     'throwable': 'assets/weapons/throwables',
+    'booster': 'assets/boosters',
 }
 STRATAGEM_GROUP_DIRS = {
     'support': 'assets/stratagems/support',
@@ -153,7 +154,7 @@ def sync_item(name:str, category:str, subgroup:str='')->Dict[str,str]:
         group = stratagem_group_from_subgroup(subgroup, name)
         rel=Path(STRATAGEM_GROUP_DIRS[group]) / f'{slug}{ext}'; kind='icon'
     else:
-        rel=Path(CATEGORY_TO_ASSET_DIR[category]) / f'{slug}{ext}'; kind='image'
+        rel=Path(CATEGORY_TO_ASSET_DIR[category]) / f'{slug}{ext}'; kind='icon' if category=='booster' else 'image'
     asset_path = rel.as_posix() if should_store_local_asset(category, ext) else ''
     if asset_path:
         stable_write(ROOT/rel, fetch_bytes(img))
@@ -164,7 +165,7 @@ def sync_item(name:str, category:str, subgroup:str='')->Dict[str,str]:
 
 def main():
     catalog_items=parse_catalog_items()
-    mapping={'primary':[],'sidearm':[],'throwable':[],'stratagem':[]}
+    mapping={'primary':[],'sidearm':[],'throwable':[],'stratagem':[],'booster':[]}
     failures=[]
     for item in catalog_items:
         category = item['type']

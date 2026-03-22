@@ -13,6 +13,7 @@ TYPE_TO_DEFAULTS_KEY = {
     'sidearm': 'sidearms',
     'throwable': 'throwables',
     'stratagem': 'stratagems',
+    'booster': 'boosters',
 }
 
 
@@ -48,7 +49,7 @@ def render_defaults_block(catalog_items):
         grouped[TYPE_TO_DEFAULTS_KEY[item['type']]].append(item)
 
     lines = ['            items: {']
-    order = ['primaries', 'sidearms', 'throwables', 'stratagems']
+    order = ['primaries', 'sidearms', 'throwables', 'stratagems', 'boosters']
     for idx, group_key in enumerate(order):
         lines.append(f'                {group_key}: [')
         for item in grouped[group_key]:
@@ -114,7 +115,7 @@ def sync_item_images(catalog_items):
         'nameAliases': build_aliases(catalog_items),
     }
 
-    for t in ['primary', 'sidearm', 'throwable', 'stratagem']:
+    for t in ['primary', 'sidearm', 'throwable', 'stratagem', 'booster']:
         out = []
         for item in [i for i in catalog_items if i['type'] == t]:
             prev = existing_by_type.get(t, {}).get(item['name'], {})
@@ -123,7 +124,7 @@ def sync_item_images(catalog_items):
             entry = {
                 'name': item['name'],
                 'assetPath': asset_path,
-                'kind': prev.get('kind', 'icon' if t == 'stratagem' else 'image'),
+                'kind': prev.get('kind', 'icon' if t in {'stratagem', 'booster'} else 'image'),
             }
             for key in ['wikiTitle', 'sourceUrl', 'imageUrl', 'rimCategory']:
                 if prev.get(key):

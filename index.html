@@ -2780,7 +2780,6 @@ END MASTER DIRECTIVE
                 <button class="btnPrimary" id="btnSpin">SPIN LOADOUT</button>
                 <button id="btnLock" class="btnGhost" disabled>LOCK LOADOUT</button>
                 <button id="btnRollPlanet" class="btnGhost" disabled>ROLL PLANET</button>
-                <button id="btnSearchPlanet" class="btnGhost" disabled>SEARCH PLANET</button>
                 <button id="btnUse" class="btnPrimary" disabled>CONFIRM</button>
                 <button id="btnReroll" class="btnDanger" style="display:none;">SPECIAL EVENT: REROLL (3)</button>
 
@@ -2802,10 +2801,11 @@ END MASTER DIRECTIVE
                     <div class="slotRow"><span class="slotTag">Strat 2</span><div class="slot slot-strat" id="slotStrat2"><div class="slotVisual" aria-hidden="true"></div><div class="slotLabel">—</div></div></div>
                     <div class="slotRow"><span class="slotTag">Strat 3</span><div class="slot slot-strat" id="slotStrat3"><div class="slotVisual" aria-hidden="true"></div><div class="slotLabel">—</div></div></div>
                     <div class="slotRow"><span class="slotTag">Strat 4</span><div class="slot slot-strat" id="slotStrat4"><div class="slotVisual" aria-hidden="true"></div><div class="slotLabel">—</div></div></div>
+                    <div class="slotRow"><span class="slotTag">Booster</span><div class="slot slot-strat" id="slotBooster"><div class="slotVisual" aria-hidden="true"></div><div class="slotLabel">—</div></div></div>
                 </div>
             </div>
 
-            <div class="smallHelp">Reels spin in order and slow down on reveal (especially stratagems). Equal odds. Pure chaos.</div>
+            <div class="smallHelp">Reels spin in order and slow down on reveal. Booster now auto-rolls after the weapon and stratagem reels finish. Equal odds. Pure chaos.</div>
 
             <div id="planetSearchPanel" class="box planetSearchPanel" style="display:none;">
                 <div class="label">Manual planet selection</div>
@@ -2852,6 +2852,9 @@ END MASTER DIRECTIVE
                         <div class="big" id="dispPlanet">—</div>
 
                         <div id="planetInfoCards" class="planetCardWrap" style="margin-top:10px; display:none;"></div>
+                        <div class="miniRow" id="planetManualSearchWrap" style="margin-top:10px; display:none;">
+                            <button id="btnSearchPlanetInline" class="btnGhost">MANUALLY SEARCH FOR PLANET?</button>
+                        </div>
 
                         <div class="tiny" id="dispPlanetTiny" style="display:none;"></div>
 
@@ -3087,6 +3090,7 @@ END MASTER DIRECTIVE
                             <option value="sidearm">Sidearm only</option>
                             <option value="throwable">Throwable only</option>
                             <option value="stratagem">Stratagem only</option>
+                            <option value="booster">Booster only</option>
                         </select>
                     </div>
                 </div>
@@ -3136,6 +3140,18 @@ END MASTER DIRECTIVE
                         <button id="btnAddStrat" class="btnGhost">ADD</button>
                     </div>
                 </div>
+            </div>
+
+            <div class="row">
+                <div class="col">
+                    <div class="label">Boosters</div>
+                    <div id="listBoosters"></div>
+                    <div class="miniRow" style="margin-top:10px;">
+                        <input id="addBooster" placeholder="Add booster..." />
+                        <button id="btnAddBooster" class="btnGhost">ADD</button>
+                    </div>
+                </div>
+                <div class="col"></div>
             </div>
 
                 </div>
@@ -3779,7 +3795,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 "Reform", "Compliance", "Salute", "Ration", "Tax", "Boot", "Directive", "Glory", "Witness"
             ],
 
-                                                items: {
+                                                            items: {
                 primaries: [
                     { name: "AR-2 Coyote", enabled: true, warbond: "Dust Devils", subgroup: "assault-rifle", source: "Dust Devils" },
                     { name: "AR-23 Liberator", enabled: true, warbond: "Unassigned / Custom", subgroup: "assault-rifle", source: "Unassigned / Custom" },
@@ -3961,6 +3977,27 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                     { name: "Supply Pack", enabled: true, warbond: "Unassigned / Custom", subgroup: "support", source: "Unassigned / Custom" },
                     { name: "Warp Pack", enabled: true, warbond: "Unassigned / Custom", subgroup: "support", source: "Unassigned / Custom" },
                     { name: "Wasp", enabled: true, warbond: "Unassigned / Custom", subgroup: "support", source: "Unassigned / Custom" },
+                ],
+
+                boosters: [
+                    { name: "Hellpod Space Optimization", enabled: true, warbond: "Helldiver Basics (Mobilize)", subgroup: "booster", source: "Helldiver Basics (Mobilize)" },
+                    { name: "Vitality Enhancement", enabled: true, warbond: "Helldiver Basics (Mobilize)", subgroup: "booster", source: "Helldiver Basics (Mobilize)" },
+                    { name: "UAV Recon Booster", enabled: true, warbond: "Helldiver Basics (Mobilize)", subgroup: "booster", source: "Helldiver Basics (Mobilize)" },
+                    { name: "Stamina Enhancement", enabled: true, warbond: "Helldiver Basics (Mobilize)", subgroup: "booster", source: "Helldiver Basics (Mobilize)" },
+                    { name: "Muscle Enhancement", enabled: true, warbond: "Helldiver Basics (Mobilize)", subgroup: "booster", source: "Helldiver Basics (Mobilize)" },
+                    { name: "Increased Reinforcement Budget", enabled: true, warbond: "Helldiver Basics (Mobilize)", subgroup: "booster", source: "Helldiver Basics (Mobilize)" },
+                    { name: "Flexible Reinforcement Budget", enabled: true, warbond: "Steeled Veterans", subgroup: "booster", source: "Steeled Veterans" },
+                    { name: "Localization Confusion", enabled: true, warbond: "Cutting Edge", subgroup: "booster", source: "Cutting Edge" },
+                    { name: "Expert Extraction Pilot", enabled: true, warbond: "Democratic Detonation", subgroup: "booster", source: "Democratic Detonation" },
+                    { name: "Motivational Shocks", enabled: true, warbond: "Polar Patriots", subgroup: "booster", source: "Polar Patriots" },
+                    { name: "Experimental Infusion", enabled: true, warbond: "Viper Commandos", subgroup: "booster", source: "Viper Commandos" },
+                    { name: "Firebomb Hellpods", enabled: true, warbond: "Freedom's Flame", subgroup: "booster", source: "Freedom's Flame" },
+                    { name: "Dead Sprint", enabled: true, warbond: "Truth Enforcers", subgroup: "booster", source: "Truth Enforcers" },
+                    { name: "Armed Resupply Pods", enabled: true, warbond: "Urban Legends", subgroup: "booster", source: "Urban Legends" },
+                    { name: "Sample Extractor", enabled: true, warbond: "Borderline Justice", subgroup: "booster", source: "Borderline Justice" },
+                    { name: "Sample Scanner", enabled: true, warbond: "Masters of Ceremony", subgroup: "booster", source: "Masters of Ceremony" },
+                    { name: "Stun Pods", enabled: true, warbond: "Force of Law", subgroup: "booster", source: "Force of Law" },
+                    { name: "Concealed Insertion", enabled: true, warbond: "Redacted Regiment", subgroup: "booster", source: "Redacted Regiment" },
                 ],
             },
 
@@ -4438,7 +4475,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 seedBase: null,
                 mode: null,
                 faction: null,
-                loadout: null,      // {primary, sidearm, throwable, stratagems[4], fingerprint}
+                loadout: null,      // {primary, sidearm, throwable, stratagems[4], booster, fingerprint}
                 locked: false,
                 planet: null,       // {name, sector, biome, weather}
                 planetBiome: null,
@@ -4538,6 +4575,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                     ${makeItemCard("Primary", card.primary, "primary")}
                     ${makeItemCard("Sidearm", card.sidearm, "sidearm")}
                     ${makeItemCard("Throwable", card.throwable, "throwable")}
+                    ${makeItemCard("Booster", card.booster, "booster")}
                 </div>
 
                 <div style="margin-top:10px;" class="label">Stratagems</div>
@@ -4639,6 +4677,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             card.primary = String(card.primary || "—");
             card.sidearm = String(card.sidearm || "—");
             card.throwable = String(card.throwable || "—");
+            card.booster = String(card.booster || "—");
 
             // Backward compatibility: some older saves/imports had a string here.
             if (!Array.isArray(card.stratagems)) {
@@ -4729,7 +4768,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const parts = [
                 l.mode, l.faction,
                 l.primary, l.sidearm, l.throwable,
-                ...l.stratagems
+                ...l.stratagems,
+                l.booster
             ];
             return parts.map(normalizeText).join("|");
         }
@@ -4761,8 +4801,9 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const sidearm = pickOne(state.items.sidearms);
             const throwable = pickOne(state.items.throwables);
             const stratagems = pickManyUnique(state.items.stratagems, 4);
+            const booster = pickOne(state.items.boosters);
 
-            const temp = { mode, faction, primary, sidearm, throwable, stratagems };
+            const temp = { mode, faction, primary, sidearm, throwable, stratagems, booster };
             const fp = fingerprintLoadout(temp);
             return {
                 seed,
@@ -4772,6 +4813,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 sidearm,
                 throwable,
                 stratagems,
+                booster,
                 fingerprint: fp
             };
         }
@@ -4971,7 +5013,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
         const itemVisuals = {
             loaded: false,
-            byCategory: { primary: new Map(), sidearm: new Map(), throwable: new Map(), stratagem: new Map() },
+            byCategory: { primary: new Map(), sidearm: new Map(), throwable: new Map(), stratagem: new Map(), booster: new Map() },
             aliases: new Map(),
             validation: { errors: [] }
         };
@@ -5000,7 +5042,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                     return res.json();
                 })
                 .then(data => {
-                    ["primary", "sidearm", "throwable", "stratagem"].forEach(cat => {
+                    ["primary", "sidearm", "throwable", "stratagem", "booster"].forEach(cat => {
                         const map = itemVisuals.byCategory[cat];
                         (data?.[cat] || []).forEach(entry => {
                             map.set(normalizeItemKey(entry?.name), entry);
@@ -5045,7 +5087,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         }
 
         function mapSlotCategory(slotCategory) {
-            if (slotCategory === "primary" || slotCategory === "sidearm" || slotCategory === "throwable") return slotCategory;
+            if (slotCategory === "primary" || slotCategory === "sidearm" || slotCategory === "throwable" || slotCategory === "booster") return slotCategory;
             return "stratagem";
         }
 
@@ -5064,7 +5106,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
         function buildItemFallbackVisual(name, category) {
             const cat = mapSlotCategory(category);
-            const isStratagem = cat === "stratagem";
+            const isStratagem = cat === "stratagem" || cat === "booster";
             const stroke = isStratagem ? "%2372ff7d" : "%234fc3ff";
             const accent = isStratagem ? "%23c6ffd0" : "%23cdefff";
             const glow = isStratagem ? "%234fc3ff" : "%2372ff7d";
@@ -5094,7 +5136,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const entry = itemVisuals.byCategory[cat].get(canonicalKey) || itemVisuals.byCategory[cat].get(key);
             if (!entry?.assetPath && !entry?.imageUrl) return buildItemFallbackVisual(name, cat);
 
-            const visualKind = (cat === "stratagem") ? "icon" : "image";
+            const visualKind = (cat === "stratagem" || cat === "booster") ? "icon" : "image";
             let stratClass = "";
             if (cat === "stratagem") {
                 const rimCategory = String(entry?.rimCategory || "").toLowerCase();
@@ -5278,6 +5320,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 s2: $("#slotStrat2"),
                 s3: $("#slotStrat3"),
                 s4: $("#slotStrat4"),
+                booster: $("#slotBooster"),
             };
 
             Object.values(els).forEach(e => {
@@ -5295,6 +5338,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 [els.s2, "stratagem", () => sampleEnabledText(state.items.stratagems), loadout.stratagems?.[1], 1250, 1.45],
                 [els.s3, "stratagem", () => sampleEnabledText(state.items.stratagems), loadout.stratagems?.[2], 1400, 1.60],
                 [els.s4, "stratagem", () => sampleEnabledText(state.items.stratagems), loadout.stratagems?.[3], 1600, 1.80],
+                [els.booster, "booster", () => sampleEnabledText(state.items.boosters), loadout.booster, 1750, 1.95],
             ];
             for (const entry of sequence) {
                 const [el, slotCategory, sampler, finalValue, dur, slow, cb] = entry;
@@ -6057,10 +6101,12 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 }
             }
 
+            const planetManualWrap = $("#planetManualSearchWrap");
+            if (planetManualWrap) planetManualWrap.style.display = c.planet ? "" : "none";
+
             // Buttons
             $("#btnLock").disabled = !c.loadout || c.locked || c.spinning;
             $("#btnRollPlanet").disabled = !c.loadout || !c.locked || c.spinning;
-            $("#btnSearchPlanet").disabled = !c.loadout || !c.locked || c.spinning;
             $("#btnUse").disabled = !c.loadout || !c.locked || c.spinning;
 
 
@@ -6093,7 +6139,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 list = list.filter(c => {
                     const hay = normalizeText([
                         getPlayerName(c), c.seed, c.title, c.mode, c.faction,
-                        c.primary, c.sidearm, c.throwable,
+                        c.primary, c.sidearm, c.throwable, c.booster,
                         (c.stratagems || []).join(" "),
                         c.planet?.name, c.planet?.sector, (c.planet?.weatherText || c.planet?.weather)
                     ].join(" "));
@@ -6168,7 +6214,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         }
 
         function renderModalLoadoutItem(label, value, kind) {
-            const src = getImageAssetPath(kind, value);
+            const visual = getItemVisual(value, kind);
+            const src = visual?.src || getImageAssetPath(kind, value);
             return `
                 <div class="modalLoadoutItem">
                     ${src ? `<img class="modalLoadoutIcon" src="${escapeHtml(src)}" alt="${escapeHtml(value || label)}">` : `<div class="modalLoadoutIcon"></div>`}
@@ -6200,6 +6247,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                           ${renderModalLoadoutItem("Primary", card.primary, "primary")}
                           ${renderModalLoadoutItem("Sidearm", card.sidearm, "sidearm")}
                           ${renderModalLoadoutItem("Throwable", card.throwable, "throwable")}
+                          ${renderModalLoadoutItem("Booster", card.booster, "booster")}
                         </div>
                         <div class="modalLoadoutColumn">
                           ${(card.stratagems || []).map((s, i) => renderModalLoadoutItem(`Strat ${i + 1}`, s, "stratagem")).join("")}
@@ -6341,6 +6389,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
       <div><span style="color:#f5dc54;font-weight:800;">Sidearm:</span> ${escapeHtml(card.sidearm || "—")}</div>
       <div><span style="color:#f5dc54;font-weight:800;">Throwable:</span> ${escapeHtml(card.throwable || "—")}</div>
       <div><span style="color:#f5dc54;font-weight:800;">Strats:</span> ${escapeHtml((card.stratagems || []).join(" • ") || "—")}</div>
+      <div><span style="color:#f5dc54;font-weight:800;">Booster:</span> ${escapeHtml(card.booster || "—")}</div>
       <div><span style="color:#f5dc54;font-weight:800;">Planet:</span> ${escapeHtml(card.planet?.name || "—")} (${escapeHtml(card.planet?.sector || "—")})</div>
       <div style="margin-top:8px;color:#aab8ce;">Environment: ${escapeHtml(planetWeatherTags.length ? planetWeatherTags.join(" / ") : (planetWeatherText || "None"))}</div>
     </div>
@@ -6451,6 +6500,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const sidearm = card.sidearm || "—";
             const throwable = card.throwable || "—";
             const stratagems = (card.stratagems || []).join(" • ") || "—";
+            const booster = card.booster || "—";
             const tier = getCardTierClass(card);
             const borderColor = {
                 gold: "#ffcc4d",
@@ -6523,6 +6573,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             y = drawWrapped(`Sidearm: ${sidearm}`, 56, y + 4, 600, 42, "#e7edf8");
             y = drawWrapped(`Throwable: ${throwable}`, 56, y + 4, 600, 42, "#e7edf8");
             y = drawWrapped(`Strats: ${stratagems}`, 56, y + 4, 600, 42, "#e7edf8");
+            y = drawWrapped(`Booster: ${booster}`, 56, y + 4, 600, 42, "#e7edf8");
             y = drawWrapped(`Planet: ${card.planet?.name || "—"} (${card.planet?.sector || "—"})`, 56, y + 4, 600, 42, "#e7edf8");
             drawWrapped(`Environment: ${weatherText || "None"}`, 56, y + 4, 1088, 38, "#9fb0cb");
 
@@ -6606,7 +6657,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                             `**Primary:** ${card.primary || "—"}`,
                             `**Sidearm:** ${card.sidearm || "—"}`,
                             `**Throwable:** ${card.throwable || "—"}`,
-                            `**Strats:** ${(card.stratagems || []).join(" • ") || "—"}`
+                            `**Strats:** ${(card.stratagems || []).join(" • ") || "—"}`,
+                            `**Booster:** ${card.booster || "—"}`
                         ].join("\n")
                     },
                     {
@@ -7135,6 +7187,7 @@ ${noteContent}`
                         <div class="tLine"><span class="tMuted">Sidearm:</span> ${escapeHtml(card.sidearm || "—")}</div>
                         <div class="tLine"><span class="tMuted">Throwable:</span> ${escapeHtml(card.throwable || "—")}</div>
                         <div class="tLine"><span class="tMuted">Strats:</span> ${escapeHtml((card.stratagems || []).join(" • ") || "—")}</div>
+                        <div class="tLine"><span class="tMuted">Booster:</span> ${escapeHtml(card.booster || "—")}</div>
 
                         <div class="tLine"><span class="tMuted">Planet:</span> ${escapeHtml(planet)}</div>
                         <div class="tLine"><span class="tMuted">Weather:</span> ${escapeHtml(weather)}</div>
@@ -7366,14 +7419,16 @@ ${noteContent}`
             listPrimaries: "primary",
             listSidearms: "sidearm",
             listThrowables: "throwable",
-            listStrats: "stratagem"
+            listStrats: "stratagem",
+            listBoosters: "booster"
         };
 
         const ITEM_LIST_METADATA = [
             { key: "primaries", label: "Primary", containerId: "listPrimaries", visualCategory: "primary" },
             { key: "sidearms", label: "Sidearm", containerId: "listSidearms", visualCategory: "sidearm" },
             { key: "throwables", label: "Throwable", containerId: "listThrowables", visualCategory: "throwable" },
-            { key: "stratagems", label: "Stratagem", containerId: "listStrats", visualCategory: "stratagem" }
+            { key: "stratagems", label: "Stratagem", containerId: "listStrats", visualCategory: "stratagem" },
+            { key: "boosters", label: "Booster", containerId: "listBoosters", visualCategory: "booster" }
         ];
 
         const ITEMS_VIEW_MODE_KEY = "hd2_items_view_mode";
@@ -7432,6 +7487,7 @@ ${noteContent}`
             "Obedient Democracy Support Troopers": "https://helldivers.wiki.gg/images/thumb/Halo_ODST_Legendary_Warbond_Cover.png/1920px-Halo_ODST_Legendary_Warbond_Cover.png?3e16b0",
             "Righteous Revenants": "https://helldivers.wiki.gg/images/Righteous_Revenants_Legendary_Warbond_Cover.png?da3de4"
         };
+
 
 
 
@@ -7608,6 +7664,24 @@ ${noteContent}`
             "Supply Pack": "Unassigned / Custom",
             "Warp Pack": "Unassigned / Custom",
             "Wasp": "Unassigned / Custom",
+            "Hellpod Space Optimization": "Helldiver Basics (Mobilize)",
+            "Vitality Enhancement": "Helldiver Basics (Mobilize)",
+            "UAV Recon Booster": "Helldiver Basics (Mobilize)",
+            "Stamina Enhancement": "Helldiver Basics (Mobilize)",
+            "Muscle Enhancement": "Helldiver Basics (Mobilize)",
+            "Increased Reinforcement Budget": "Helldiver Basics (Mobilize)",
+            "Flexible Reinforcement Budget": "Steeled Veterans",
+            "Localization Confusion": "Cutting Edge",
+            "Expert Extraction Pilot": "Democratic Detonation",
+            "Motivational Shocks": "Polar Patriots",
+            "Experimental Infusion": "Viper Commandos",
+            "Firebomb Hellpods": "Freedom's Flame",
+            "Dead Sprint": "Truth Enforcers",
+            "Armed Resupply Pods": "Urban Legends",
+            "Sample Extractor": "Borderline Justice",
+            "Sample Scanner": "Masters of Ceremony",
+            "Stun Pods": "Force of Law",
+            "Concealed Insertion": "Redacted Regiment",
         };
 
         function getItemWarbond(item) {
@@ -7817,7 +7891,7 @@ ${noteContent}`
 
         function getItemsTypeFilter() {
             const saved = localStorage.getItem(ITEMS_TYPE_FILTER_KEY);
-            return ["primary", "sidearm", "throwable", "stratagem"].includes(saved) ? saved : "all";
+            return ["primary", "sidearm", "throwable", "stratagem", "booster"].includes(saved) ? saved : "all";
         }
 
         function shouldShowItemCategory(category) {
@@ -7834,7 +7908,7 @@ ${noteContent}`
 
         function buildArmoryAnalyticsData() {
             const map = new Map();
-            const typeOrder = ["primary", "sidearm", "throwable", "stratagem"];
+            const typeOrder = ["primary", "sidearm", "throwable", "stratagem", "booster"];
 
             const ensure = (type, name) => {
                 const cleanName = String(name || "").trim();
@@ -7923,9 +7997,10 @@ ${noteContent}`
                 primary: "Primary",
                 sidearm: "Sidearm",
                 throwable: "Throwable",
-                stratagem: "Stratagem"
+                stratagem: "Stratagem",
+                booster: "Booster"
             };
-            const typeOrder = ["primary", "sidearm", "throwable", "stratagem"];
+            const typeOrder = ["primary", "sidearm", "throwable", "stratagem", "booster"];
             const expandedGroups = getArmoryExpandedGroups();
 
             const list = (Array.isArray(aggregatedRows) ? aggregatedRows : []).filter(row => {
@@ -8289,10 +8364,12 @@ ${noteContent}`
             const sidearmCol = $("#listSidearms")?.closest(".col");
             const throwableCol = $("#listThrowables")?.closest(".col");
             const stratCol = $("#listStrats")?.closest(".col");
+            const boosterCol = $("#listBoosters")?.closest(".col");
             if (primaryCol) primaryCol.style.display = (viewMode === "category" && shouldShowItemCategory("primary")) ? "block" : "none";
             if (sidearmCol) sidearmCol.style.display = (viewMode === "category" && shouldShowItemCategory("sidearm")) ? "block" : "none";
             if (throwableCol) throwableCol.style.display = (viewMode === "category" && shouldShowItemCategory("throwable")) ? "block" : "none";
             if (stratCol) stratCol.style.display = (viewMode === "category" && shouldShowItemCategory("stratagem")) ? "block" : "none";
+            if (boosterCol) boosterCol.style.display = (viewMode === "category" && shouldShowItemCategory("booster")) ? "block" : "none";
 
             if (viewMode === "warbond") {
                 renderItemsByWarbond();
@@ -8308,6 +8385,9 @@ ${noteContent}`
                 );
                 if (shouldShowItemCategory("stratagem")) renderItemList("listStrats", state.items.stratagems,
                     (i) => { state.items.stratagems[i].enabled = !state.items.stratagems[i].enabled; saveState(); renderItems(); }
+                );
+                if (shouldShowItemCategory("booster")) renderItemList("listBoosters", state.items.boosters,
+                    (i) => { state.items.boosters[i].enabled = !state.items.boosters[i].enabled; saveState(); renderItems(); }
                 );
             }
 
@@ -8336,6 +8416,7 @@ ${noteContent}`
             (card.stratagems || []).forEach(s => {
                 if (s) items.push({ name: s, slot: "stratagem" });
             });
+            if (card.booster && card.booster !== "—") items.push({ name: card.booster, slot: "booster" });
             return items;
         }
 
@@ -8448,7 +8529,8 @@ ${noteContent}`
                 bestPrimary: bestBySlot("primary"),
                 bestSidearm: bestBySlot("sidearm"),
                 bestThrowable: bestBySlot("throwable"),
-                bestStratagem: bestBySlot("stratagem")
+                bestStratagem: bestBySlot("stratagem"),
+                bestBooster: bestBySlot("booster")
             };
         }
 
@@ -8499,6 +8581,7 @@ ${noteContent}`
                 ${renderBestCard("Best performing side arm", analytics.bestSidearm, "sidearm", "Need 2+ sidearm uses")}
                 ${renderBestCard("Best performing throwables", analytics.bestThrowable, "throwable", "Need 2+ throwable uses")}
                 ${renderBestCard("Best performed stratagem", analytics.bestStratagem, "stratagem", "Need 2+ stratagem uses")}
+                ${renderBestCard("Best performed booster", analytics.bestBooster, "booster", "Need 2+ booster uses")}
             `;
         }
 
@@ -8788,6 +8871,7 @@ ${noteContent}`
                 sidearm: c.loadout.sidearm,
                 throwable: c.loadout.throwable,
                 stratagems: c.loadout.stratagems.slice(),
+                booster: c.loadout.booster || "—",
                 fingerprint: c.loadout.fingerprint,
 
                 planet: c.planet ? deepClone(c.planet) : null,
@@ -8921,7 +9005,7 @@ ${noteContent}`
             });
             $("#itemsTypeFilter").addEventListener("change", (e) => {
                 const value = String(e.target.value || "all");
-                localStorage.setItem(ITEMS_TYPE_FILTER_KEY, ["primary", "sidearm", "throwable", "stratagem"].includes(value) ? value : "all");
+                localStorage.setItem(ITEMS_TYPE_FILTER_KEY, ["primary", "sidearm", "throwable", "stratagem", "booster"].includes(value) ? value : "all");
                 renderItems();
             });
             $("#armoryAnalyticsGroupBy")?.addEventListener("change", renderItems);
@@ -9018,6 +9102,14 @@ ${noteContent}`
                 saveState(); renderItems();
             });
 
+            $("#btnAddBooster").addEventListener("click", () => {
+                const v = $("#addBooster").value.trim();
+                if (!v) return;
+                state.items.boosters.push({ name: v, enabled: true, warbond: "Unassigned / Custom", subgroup: "booster", source: "Unassigned / Custom" });
+                $("#addBooster").value = "";
+                saveState(); renderItems();
+            });
+
             // Optional: let the planet button reroll instead of “roll once”
             // You already wrote doClearPlanet() as “reroll planet” behavior.
             // If you want the same button to reroll after the first roll, use this:
@@ -9027,7 +9119,7 @@ ${noteContent}`
                 else doClearPlanet();
             });
 
-            $("#btnSearchPlanet").addEventListener("click", () => {
+            $("#btnSearchPlanetInline").addEventListener("click", () => {
                 togglePlanetSearchPanel();
             });
 
@@ -9068,7 +9160,7 @@ ${noteContent}`
                 list = list.filter(c => {
                     const hay = normalizeText([
                         getPlayerName(c), c.seed, c.title, c.mode, c.faction,
-                        c.primary, c.sidearm, c.throwable,
+                        c.primary, c.sidearm, c.throwable, c.booster,
                         (c.stratagems || []).join(" "),
                         c.planet?.name, c.planet?.sector, (c.planet?.weatherText || c.planet?.weather)
                     ].join(" "));
