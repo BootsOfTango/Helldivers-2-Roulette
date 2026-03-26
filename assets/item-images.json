@@ -1,6 +1,6 @@
 {
   "generatedAt": "deterministic-v1",
-  "source": "Derived from assets/item-catalog.json via scripts/sync_item_catalog.py",
+  "source": "https://helldivers.wiki.gg",
   "nameAliases": {
     "ac 8 autocannon": "AC-8 Autocannon",
     "anti personnel minefield": "Anti-Personnel Minefield",
@@ -170,12 +170,12 @@
     "sg 225 breaker": "SG-225 Breaker",
     "sg 225ie breaker incendiary": "SG-225IE Breaker Incendiary",
     "sg 225sp breaker spray and pray": "SG-225SP Breaker Spray&Pray",
-    "sg 225sp breaker sprayandpray": "SG-225SP Breaker Spray&Pray",
-    "sg 225sp breaker spraypray": "SG-225SP Breaker Spray&Pray",
+    "sg 225sp breaker spray pray": "SG-225SP Breaker Spray&Pray",
     "sg 451 cookout": "SG-451 Cookout",
     "sg 8 punisher": "SG-8 Punisher",
     "sg 8p punisher plasma": "SG-8P Punisher Plasma",
     "sg 8s slugger": "SG-8S Slugger",
+    "sg-225sp breaker spray and pray": "SG-225SP Breaker Spray&Pray",
     "shield generator pack": "Shield Generator Pack",
     "shield generator relay": "Shield Generator Relay",
     "smg 32 reprimand": "SMG-32 Reprimand",
@@ -186,6 +186,7 @@
     "sta 11 smg": "StA-11 SMG",
     "sta 52 assault rifle": "StA-52 Assault Rifle",
     "sta x3 w a s p launcher": "StA-X3 W.A.S.P. Launcher",
+    "sta x3 wasp launcher": "StA-X3 W.A.S.P. Launcher",
     "stamina enhancement": "Stamina Enhancement",
     "sterilizer": "Sterilizer",
     "stoker": "Stoker",
@@ -291,6 +292,22 @@
       "imageUrl": "https://helldivers.wiki.gg/images/thumb/BR-14_Adjudicator_Primary_Render.png/1200px-BR-14_Adjudicator_Primary_Render.png?e74a3d"
     },
     {
+      "name": "CB-9 Exploding Crossbow",
+      "assetPath": "",
+      "kind": "image",
+      "wikiTitle": "CB-9 Exploding Crossbow",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/CB-9_Exploding_Crossbow",
+      "imageUrl": "https://helldivers.wiki.gg/images/thumb/CB-9_Exploding_Crossbow_Primary_Render.png/1200px-CB-9_Exploding_Crossbow_Primary_Render.png?1aa01f"
+    },
+    {
+      "name": "DBS-2 Double Freedom",
+      "assetPath": "",
+      "kind": "image",
+      "wikiTitle": "DBS-2 Double Freedom",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/DBS-2_Double_Freedom",
+      "imageUrl": "https://helldivers.wiki.gg/images/thumb/DBS-2_Shotgun_Primary_Render.png/1200px-DBS-2_Shotgun_Primary_Render.png?fd2b05"
+    },
+    {
       "name": "FLAM-66 Torcher",
       "assetPath": "",
       "kind": "image",
@@ -307,6 +324,54 @@
       "imageUrl": "https://helldivers.wiki.gg/images/thumb/JAR-5_Dominator_Primary_Render.png/1200px-JAR-5_Dominator_Primary_Render.png?81a672"
     },
     {
+      "name": "LAS-13 Trident",
+      "assetPath": "",
+      "kind": "image",
+      "wikiTitle": "LAS-13 Trident",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/LAS-13_Trident",
+      "imageUrl": "https://helldivers.wiki.gg/images/thumb/LAS-13_Trident_Primary_Render.png/1200px-LAS-13_Trident_Primary_Render.png?615ace"
+    },
+    {
+      "name": "LAS-16 Sickle",
+      "assetPath": "",
+      "kind": "image",
+      "wikiTitle": "LAS-16 Sickle",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/LAS-16_Sickle",
+      "imageUrl": "https://helldivers.wiki.gg/images/thumb/LAS-16_Sickle_Primary_Render.png/1200px-LAS-16_Sickle_Primary_Render.png?43d245"
+    },
+    {
+      "name": "LAS-17 Double-Edge Sickle",
+      "assetPath": "",
+      "kind": "image",
+      "wikiTitle": "LAS-17 Double-Edge Sickle",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/LAS-17_Double-Edge_Sickle",
+      "imageUrl": "https://helldivers.wiki.gg/images/thumb/LAS-17_Double-Edge_Sickle_Primary_Render.png/1200px-LAS-17_Double-Edge_Sickle_Primary_Render.png?c64fae"
+    },
+    {
+      "name": "LAS-5 Scythe",
+      "assetPath": "",
+      "kind": "image",
+      "wikiTitle": "LAS-5 Scythe",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/LAS-5_Scythe",
+      "imageUrl": "https://helldivers.wiki.gg/images/thumb/LAS-5_Scythe_Primary_Render.png/1200px-LAS-5_Scythe_Primary_Render.png?fd3c7d"
+    },
+    {
+      "name": "M7S SMG",
+      "assetPath": "",
+      "kind": "image",
+      "wikiTitle": "M7S SMG",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/M7S_SMG",
+      "imageUrl": "https://helldivers.wiki.gg/images/thumb/M7S_SMG_Primary_Render.png/1200px-M7S_SMG_Primary_Render.png?80963e"
+    },
+    {
+      "name": "M90A Shotgun",
+      "assetPath": "",
+      "kind": "image",
+      "wikiTitle": "M90A Shotgun",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/M90A_Shotgun",
+      "imageUrl": "https://helldivers.wiki.gg/images/thumb/M90A_Shotgun_Primary_Render.png/1200px-M90A_Shotgun_Primary_Render.png?d8aadb"
+    },
+    {
       "name": "MA5C Assault Rifle",
       "assetPath": "",
       "kind": "image",
@@ -315,20 +380,36 @@
       "imageUrl": "https://helldivers.wiki.gg/images/thumb/MA5C_Assault_Rifle_Primary_Render.png/1200px-MA5C_Assault_Rifle_Primary_Render.png?ed9b79"
     },
     {
-      "name": "StA-11 SMG",
+      "name": "MP-98 Knight",
       "assetPath": "",
       "kind": "image",
-      "wikiTitle": "StA-11 SMG",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/StA-11_SMG",
-      "imageUrl": "https://helldivers.wiki.gg/images/thumb/StA-11_SMG_Primary_Render.png/1200px-StA-11_SMG_Primary_Render.png?bd19ee"
+      "wikiTitle": "MP-98 Knight",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/MP-98_Knight",
+      "imageUrl": "https://helldivers.wiki.gg/images/thumb/MP-98_Knight_Primary_Render.png/1200px-MP-98_Knight_Primary_Render.png?4573f0"
     },
     {
-      "name": "StA-52 Assault Rifle",
+      "name": "PLAS-1 Scorcher",
       "assetPath": "",
       "kind": "image",
-      "wikiTitle": "StA-52 Assault Rifle",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/StA-52_Assault_Rifle",
-      "imageUrl": "https://helldivers.wiki.gg/images/thumb/StA-52_Assault_Rifle_Primary_Render.png/1200px-StA-52_Assault_Rifle_Primary_Render.png?94bd97"
+      "wikiTitle": "PLAS-1 Scorcher",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/PLAS-1_Scorcher",
+      "imageUrl": "https://helldivers.wiki.gg/images/thumb/PLAS-1_Scorcher_Primary_Render.png/1200px-PLAS-1_Scorcher_Primary_Render.png?732708"
+    },
+    {
+      "name": "PLAS-101 Purifier",
+      "assetPath": "",
+      "kind": "image",
+      "wikiTitle": "PLAS-101 Purifier",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/PLAS-101_Purifier",
+      "imageUrl": "https://helldivers.wiki.gg/images/thumb/PLAS-101_Purifier_Primary_Render.png/1200px-PLAS-101_Purifier_Primary_Render.png?c08896"
+    },
+    {
+      "name": "PLAS-39 Accelerator Rifle",
+      "assetPath": "",
+      "kind": "image",
+      "wikiTitle": "PLAS-39 Accelerator Rifle",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/PLAS-39_Accelerator_Rifle",
+      "imageUrl": "https://helldivers.wiki.gg/images/thumb/PLAS-39_Accelerator_Rifle_Primary_Render.png/1200px-PLAS-39_Accelerator_Rifle_Primary_Render.png?a8ff98"
     },
     {
       "name": "R-0 Variable",
@@ -395,62 +476,6 @@
       "imageUrl": "https://helldivers.wiki.gg/images/thumb/R-72_Censor_Primary_Render.png/1200px-R-72_Censor_Primary_Render.png?27d671"
     },
     {
-      "name": "M7S SMG",
-      "assetPath": "",
-      "kind": "image",
-      "wikiTitle": "M7S SMG",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/M7S_SMG",
-      "imageUrl": "https://helldivers.wiki.gg/images/thumb/M7S_SMG_Primary_Render.png/1200px-M7S_SMG_Primary_Render.png?80963e"
-    },
-    {
-      "name": "MP-98 Knight",
-      "assetPath": "",
-      "kind": "image",
-      "wikiTitle": "MP-98 Knight",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/MP-98_Knight",
-      "imageUrl": "https://helldivers.wiki.gg/images/thumb/MP-98_Knight_Primary_Render.png/1200px-MP-98_Knight_Primary_Render.png?4573f0"
-    },
-    {
-      "name": "SMG-32 Reprimand",
-      "assetPath": "",
-      "kind": "image",
-      "wikiTitle": "SMG-32 Reprimand",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/SMG-32_Reprimand",
-      "imageUrl": "https://helldivers.wiki.gg/images/thumb/SMG-32_Reprimand_Primary_Render.png/1200px-SMG-32_Reprimand_Primary_Render.png?19d16d"
-    },
-    {
-      "name": "SMG-37 Defender",
-      "assetPath": "",
-      "kind": "image",
-      "wikiTitle": "SMG-37 Defender",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/SMG-37_Defender",
-      "imageUrl": "https://helldivers.wiki.gg/images/thumb/SMG-37_Defender_Primary_Render.png/1200px-SMG-37_Defender_Primary_Render.png?b3da92"
-    },
-    {
-      "name": "SMG-72 Pummeler",
-      "assetPath": "",
-      "kind": "image",
-      "wikiTitle": "SMG-72 Pummeler",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/SMG-72_Pummeler",
-      "imageUrl": "https://helldivers.wiki.gg/images/thumb/SMG-72_Pummeler_Primary_Render.png/1200px-SMG-72_Pummeler_Primary_Render.png?2acd0e"
-    },
-    {
-      "name": "DBS-2 Double Freedom",
-      "assetPath": "",
-      "kind": "image",
-      "wikiTitle": "DBS-2 Double Freedom",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/DBS-2_Double_Freedom",
-      "imageUrl": "https://helldivers.wiki.gg/images/thumb/DBS-2_Shotgun_Primary_Render.png/1200px-DBS-2_Shotgun_Primary_Render.png?fd2b05"
-    },
-    {
-      "name": "M90A Shotgun",
-      "assetPath": "",
-      "kind": "image",
-      "wikiTitle": "M90A Shotgun",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/M90A_Shotgun",
-      "imageUrl": "https://helldivers.wiki.gg/images/thumb/M90A_Shotgun_Primary_Render.png/1200px-M90A_Shotgun_Primary_Render.png?d8aadb"
-    },
-    {
       "name": "SG-20 Halt",
       "assetPath": "",
       "kind": "image",
@@ -515,81 +540,119 @@
       "imageUrl": "https://helldivers.wiki.gg/images/thumb/SG-8S_Slugger_Primary_Render.png/1200px-SG-8S_Slugger_Primary_Render.png?6296ba"
     },
     {
-      "name": "CB-9 Exploding Crossbow",
+      "name": "SMG-32 Reprimand",
       "assetPath": "",
       "kind": "image",
-      "wikiTitle": "CB-9 Exploding Crossbow",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/CB-9_Exploding_Crossbow",
-      "imageUrl": "https://helldivers.wiki.gg/images/thumb/CB-9_Exploding_Crossbow_Primary_Render.png/1200px-CB-9_Exploding_Crossbow_Primary_Render.png?1aa01f"
+      "wikiTitle": "SMG-32 Reprimand",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/SMG-32_Reprimand",
+      "imageUrl": "https://helldivers.wiki.gg/images/thumb/SMG-32_Reprimand_Primary_Render.png/1200px-SMG-32_Reprimand_Primary_Render.png?19d16d"
     },
     {
-      "name": "LAS-13 Trident",
+      "name": "SMG-37 Defender",
       "assetPath": "",
       "kind": "image",
-      "wikiTitle": "LAS-13 Trident",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/LAS-13_Trident",
-      "imageUrl": "https://helldivers.wiki.gg/images/thumb/LAS-13_Trident_Primary_Render.png/1200px-LAS-13_Trident_Primary_Render.png?615ace"
+      "wikiTitle": "SMG-37 Defender",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/SMG-37_Defender",
+      "imageUrl": "https://helldivers.wiki.gg/images/thumb/SMG-37_Defender_Primary_Render.png/1200px-SMG-37_Defender_Primary_Render.png?b3da92"
     },
     {
-      "name": "LAS-16 Sickle",
+      "name": "SMG-72 Pummeler",
       "assetPath": "",
       "kind": "image",
-      "wikiTitle": "LAS-16 Sickle",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/LAS-16_Sickle",
-      "imageUrl": "https://helldivers.wiki.gg/images/thumb/LAS-16_Sickle_Primary_Render.png/1200px-LAS-16_Sickle_Primary_Render.png?43d245"
+      "wikiTitle": "SMG-72 Pummeler",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/SMG-72_Pummeler",
+      "imageUrl": "https://helldivers.wiki.gg/images/thumb/SMG-72_Pummeler_Primary_Render.png/1200px-SMG-72_Pummeler_Primary_Render.png?2acd0e"
     },
     {
-      "name": "LAS-17 Double-Edge Sickle",
+      "name": "StA-11 SMG",
       "assetPath": "",
       "kind": "image",
-      "wikiTitle": "LAS-17 Double-Edge Sickle",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/LAS-17_Double-Edge_Sickle",
-      "imageUrl": "https://helldivers.wiki.gg/images/thumb/LAS-17_Double-Edge_Sickle_Primary_Render.png/1200px-LAS-17_Double-Edge_Sickle_Primary_Render.png?c64fae"
+      "wikiTitle": "StA-11 SMG",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/StA-11_SMG",
+      "imageUrl": "https://helldivers.wiki.gg/images/thumb/StA-11_SMG_Primary_Render.png/1200px-StA-11_SMG_Primary_Render.png?bd19ee"
     },
     {
-      "name": "LAS-5 Scythe",
+      "name": "StA-52 Assault Rifle",
       "assetPath": "",
       "kind": "image",
-      "wikiTitle": "LAS-5 Scythe",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/LAS-5_Scythe",
-      "imageUrl": "https://helldivers.wiki.gg/images/thumb/LAS-5_Scythe_Primary_Render.png/1200px-LAS-5_Scythe_Primary_Render.png?fd3c7d"
-    },
-    {
-      "name": "PLAS-1 Scorcher",
-      "assetPath": "",
-      "kind": "image",
-      "wikiTitle": "PLAS-1 Scorcher",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/PLAS-1_Scorcher",
-      "imageUrl": "https://helldivers.wiki.gg/images/thumb/PLAS-1_Scorcher_Primary_Render.png/1200px-PLAS-1_Scorcher_Primary_Render.png?732708"
-    },
-    {
-      "name": "PLAS-101 Purifier",
-      "assetPath": "",
-      "kind": "image",
-      "wikiTitle": "PLAS-101 Purifier",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/PLAS-101_Purifier",
-      "imageUrl": "https://helldivers.wiki.gg/images/thumb/PLAS-101_Purifier_Primary_Render.png/1200px-PLAS-101_Purifier_Primary_Render.png?c08896"
-    },
-    {
-      "name": "PLAS-39 Accelerator Rifle",
-      "assetPath": "",
-      "kind": "image",
-      "wikiTitle": "PLAS-39 Accelerator Rifle",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/PLAS-39_Accelerator_Rifle",
-      "imageUrl": "https://helldivers.wiki.gg/images/thumb/PLAS-39_Accelerator_Rifle_Primary_Render.png/1200px-PLAS-39_Accelerator_Rifle_Primary_Render.png?a8ff98"
+      "wikiTitle": "StA-52 Assault Rifle",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/StA-52_Assault_Rifle",
+      "imageUrl": "https://helldivers.wiki.gg/images/thumb/StA-52_Assault_Rifle_Primary_Render.png/1200px-StA-52_Assault_Rifle_Primary_Render.png?94bd97"
     },
     {
       "name": "Stoker",
-      "assetPath": "assets/weapons/primaries/stoker.svg",
-      "kind": "image"
+      "assetPath": "",
+      "kind": "image",
+      "wikiTitle": "Stoker",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/Stoker",
+      "imageUrl": "https://helldivers.wiki.gg/images/thumb/SMGFLAM-34_Stoker_Primary_Icon.png/1200px-SMGFLAM-34_Stoker_Primary_Icon.png?fb6998"
     },
     {
       "name": "Sweeper",
-      "assetPath": "assets/weapons/primaries/sweeper.svg",
-      "kind": "image"
+      "assetPath": "",
+      "kind": "image",
+      "wikiTitle": "Sweeper",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/Sweeper",
+      "imageUrl": "https://helldivers.wiki.gg/images/thumb/SG-97_Shotgun_Primary_Render.png/1200px-SG-97_Shotgun_Primary_Render.png?255318"
     }
   ],
   "sidearm": [
+    {
+      "name": "CQC-1 Saber",
+      "assetPath": "",
+      "kind": "image",
+      "wikiTitle": "CQC-2 Saber",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/CQC-2_Saber",
+      "imageUrl": "https://helldivers.wiki.gg/images/thumb/CQC-2_Saber_Secondary_Render.png/1200px-CQC-2_Saber_Secondary_Render.png?459c5b"
+    },
+    {
+      "name": "CQC-19 Machete",
+      "assetPath": "",
+      "kind": "image",
+      "wikiTitle": "CQC-42 Machete",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/CQC-42_Machete",
+      "imageUrl": "https://helldivers.wiki.gg/images/thumb/CQC-42_Machete_Secondary_Render.png/1200px-CQC-42_Machete_Secondary_Render.png?25973a"
+    },
+    {
+      "name": "CQC-2 Stun Lance",
+      "assetPath": "",
+      "kind": "image",
+      "wikiTitle": "CQC-19 Stun Lance",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/CQC-19_Stun_Lance",
+      "imageUrl": "https://helldivers.wiki.gg/images/thumb/CQC-19_Stun_Lance_Secondary_Render.png/1200px-CQC-19_Stun_Lance_Secondary_Render.png?9a9709"
+    },
+    {
+      "name": "CQC-30 Stun Baton",
+      "assetPath": "",
+      "kind": "image",
+      "wikiTitle": "CQC-30 Stun Baton",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/CQC-30_Stun_Baton",
+      "imageUrl": "https://helldivers.wiki.gg/images/thumb/CQC-30_Stun_Baton_Secondary_Render.png/1200px-CQC-30_Stun_Baton_Secondary_Render.png?5b701f"
+    },
+    {
+      "name": "CQC-5 Combat Hatchet",
+      "assetPath": "",
+      "kind": "image",
+      "wikiTitle": "CQC-5 Combat Hatchet",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/CQC-5_Combat_Hatchet",
+      "imageUrl": "https://helldivers.wiki.gg/images/thumb/CQC-5_Combat_Hatchet_Secondary_Render.png/1200px-CQC-5_Combat_Hatchet_Secondary_Render.png?eb83de"
+    },
+    {
+      "name": "Entrenchment Tool",
+      "assetPath": "",
+      "kind": "image",
+      "wikiTitle": "Entrenchment Tool",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/Entrenchment_Tool",
+      "imageUrl": "https://helldivers.wiki.gg/images/CQC-72_Entrenchment_Tool_Support_Render.png?2adde9"
+    },
+    {
+      "name": "GP-20 Ultimatum",
+      "assetPath": "",
+      "kind": "image",
+      "wikiTitle": "GP-20 Ultimatum",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/GP-20_Ultimatum",
+      "imageUrl": "https://helldivers.wiki.gg/images/thumb/GP-20_Ultimatum_Secondary_Render.png/1200px-GP-20_Ultimatum_Secondary_Render.png?3d51dc"
+    },
     {
       "name": "GP-31 Grenade Pistol",
       "assetPath": "",
@@ -597,6 +660,22 @@
       "wikiTitle": "GP-31 Grenade Pistol",
       "sourceUrl": "https://helldivers.wiki.gg/wiki/GP-31_Grenade_Pistol",
       "imageUrl": "https://helldivers.wiki.gg/images/thumb/GP-31_Grenade_Pistol_Secondary_Render.png/1200px-GP-31_Grenade_Pistol_Secondary_Render.png?4f6aba"
+    },
+    {
+      "name": "LAS-58 Talon",
+      "assetPath": "",
+      "kind": "image",
+      "wikiTitle": "LAS-58 Talon",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/LAS-58_Talon",
+      "imageUrl": "https://helldivers.wiki.gg/images/thumb/LAS-58_Talon_Secondary_Render.png/1200px-LAS-58_Talon_Secondary_Render.png?8621df"
+    },
+    {
+      "name": "LAS-7 Dagger",
+      "assetPath": "",
+      "kind": "image",
+      "wikiTitle": "LAS-7 Dagger",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/LAS-7_Dagger",
+      "imageUrl": "https://helldivers.wiki.gg/images/thumb/LAS-7_Dagger_Secondary_Render.png/1200px-LAS-7_Dagger_Secondary_Render.png?bcfb59"
     },
     {
       "name": "M6C/SOCOM Pistol",
@@ -671,70 +750,6 @@
       "imageUrl": "https://helldivers.wiki.gg/images/thumb/P-92_Warrant_Secondary_Render.png/1200px-P-92_Warrant_Secondary_Render.png?ac350b"
     },
     {
-      "name": "CQC-1 Saber",
-      "assetPath": "",
-      "kind": "image",
-      "wikiTitle": "CQC-2 Saber",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/CQC-2_Saber",
-      "imageUrl": "https://helldivers.wiki.gg/images/thumb/CQC-2_Saber_Secondary_Render.png/1200px-CQC-2_Saber_Secondary_Render.png?459c5b"
-    },
-    {
-      "name": "CQC-19 Machete",
-      "assetPath": "",
-      "kind": "image",
-      "wikiTitle": "CQC-42 Machete",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/CQC-42_Machete",
-      "imageUrl": "https://helldivers.wiki.gg/images/thumb/CQC-42_Machete_Secondary_Render.png/1200px-CQC-42_Machete_Secondary_Render.png?25973a"
-    },
-    {
-      "name": "CQC-2 Stun Lance",
-      "assetPath": "",
-      "kind": "image",
-      "wikiTitle": "CQC-19 Stun Lance",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/CQC-19_Stun_Lance",
-      "imageUrl": "https://helldivers.wiki.gg/images/thumb/CQC-19_Stun_Lance_Secondary_Render.png/1200px-CQC-19_Stun_Lance_Secondary_Render.png?9a9709"
-    },
-    {
-      "name": "CQC-30 Stun Baton",
-      "assetPath": "",
-      "kind": "image",
-      "wikiTitle": "CQC-30 Stun Baton",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/CQC-30_Stun_Baton",
-      "imageUrl": "https://helldivers.wiki.gg/images/thumb/CQC-30_Stun_Baton_Secondary_Render.png/1200px-CQC-30_Stun_Baton_Secondary_Render.png?5b701f"
-    },
-    {
-      "name": "CQC-5 Combat Hatchet",
-      "assetPath": "",
-      "kind": "image",
-      "wikiTitle": "CQC-5 Combat Hatchet",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/CQC-5_Combat_Hatchet",
-      "imageUrl": "https://helldivers.wiki.gg/images/thumb/CQC-5_Combat_Hatchet_Secondary_Render.png/1200px-CQC-5_Combat_Hatchet_Secondary_Render.png?eb83de"
-    },
-    {
-      "name": "GP-20 Ultimatum",
-      "assetPath": "",
-      "kind": "image",
-      "wikiTitle": "GP-20 Ultimatum",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/GP-20_Ultimatum",
-      "imageUrl": "https://helldivers.wiki.gg/images/GP-20_Ultimatum_Secondary_Weaponry.png?8bc861"
-    },
-    {
-      "name": "LAS-58 Talon",
-      "assetPath": "",
-      "kind": "image",
-      "wikiTitle": "LAS-58 Talon",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/LAS-58_Talon",
-      "imageUrl": "https://helldivers.wiki.gg/images/thumb/LAS-58_Talon_Secondary_Render.png/1200px-LAS-58_Talon_Secondary_Render.png?8621df"
-    },
-    {
-      "name": "LAS-7 Dagger",
-      "assetPath": "",
-      "kind": "image",
-      "wikiTitle": "LAS-7 Dagger",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/LAS-7_Dagger",
-      "imageUrl": "https://helldivers.wiki.gg/images/thumb/LAS-7_Dagger_Secondary_Render.png/1200px-LAS-7_Dagger_Secondary_Render.png?bcfb59"
-    },
-    {
       "name": "PLAS-15 Loyalist",
       "assetPath": "",
       "kind": "image",
@@ -751,14 +766,12 @@
       "imageUrl": "https://helldivers.wiki.gg/images/thumb/SG-22_Bushwhacker_Secondary_Render.png/1200px-SG-22_Bushwhacker_Secondary_Render.png?96bab5"
     },
     {
-      "name": "Entrenchment Tool",
-      "assetPath": "assets/weapons/sidearms/entrenchment-tool.svg",
-      "kind": "image"
-    },
-    {
       "name": "Veto",
-      "assetPath": "assets/weapons/sidearms/veto.svg",
-      "kind": "image"
+      "assetPath": "",
+      "kind": "image",
+      "wikiTitle": "Veto",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/Veto",
+      "imageUrl": "https://helldivers.wiki.gg/images/thumb/P-69_Veto_Secondary_Icon.png/1200px-P-69_Veto_Secondary_Icon.png?e02465"
     }
   ],
   "throwable": [
@@ -883,6 +896,22 @@
       "imageUrl": "https://helldivers.wiki.gg/images/thumb/G-89_Smokescreen_Throwable_Render.png/1200px-G-89_Smokescreen_Throwable_Render.png?bf4187"
     },
     {
+      "name": "G/SH-39 Shield",
+      "assetPath": "",
+      "kind": "image",
+      "wikiTitle": "G/SH-39 Shield",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/G/SH-39_Shield",
+      "imageUrl": "https://helldivers.wiki.gg/images/thumb/G-SH-39_Shield_Throwable_Render.png/1200px-G-SH-39_Shield_Throwable_Render.png?153510"
+    },
+    {
+      "name": "Giga Grenade",
+      "assetPath": "",
+      "kind": "image",
+      "wikiTitle": "Giga Grenade",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/Giga_Grenade",
+      "imageUrl": "https://helldivers.wiki.gg/images/thumb/G-48_Giga_Grenade_Throwable_Render.png/1200px-G-48_Giga_Grenade_Throwable_Render.png?f00d38"
+    },
+    {
       "name": "K-2 Throwing Knife",
       "assetPath": "",
       "kind": "image",
@@ -899,28 +928,555 @@
       "imageUrl": "https://helldivers.wiki.gg/images/thumb/TED-63_Dynamite_Throwable_Render.png/1200px-TED-63_Dynamite_Throwable_Render.png?e607be"
     },
     {
-      "name": "G/SH-39 Shield",
-      "assetPath": "",
-      "kind": "image",
-      "wikiTitle": "G/SH-39 Shield",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/G/SH-39_Shield",
-      "imageUrl": "https://helldivers.wiki.gg/images/thumb/G-SH-39_Shield_Throwable_Render.png/1200px-G-SH-39_Shield_Throwable_Render.png?153510"
-    },
-    {
       "name": "TM-1 Lure Mine",
       "assetPath": "",
       "kind": "image",
       "wikiTitle": "TM-1 Lure Mine",
       "sourceUrl": "https://helldivers.wiki.gg/wiki/TM-1_Lure_Mine",
       "imageUrl": "https://helldivers.wiki.gg/images/thumb/TM-1_Lure_Mine_Throwable_Render.png/1200px-TM-1_Lure_Mine_Throwable_Render.png?42e657"
-    },
-    {
-      "name": "Giga Grenade",
-      "assetPath": "assets/weapons/throwables/giga-grenade.svg",
-      "kind": "image"
     }
   ],
   "stratagem": [
+    {
+      "name": "AC-8 Autocannon",
+      "assetPath": "assets/stratagems/support/ac-8-autocannon.svg",
+      "kind": "icon",
+      "wikiTitle": "AC-8 Autocannon",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/AC-8_Autocannon",
+      "imageUrl": "https://helldivers.wiki.gg/images/Autocannon_Stratagem_Icon.svg?67957f",
+      "rimCategory": "support"
+    },
+    {
+      "name": "APW-1 Anti-Materiel Rifle",
+      "assetPath": "assets/stratagems/support/apw-1-anti-materiel-rifle.svg",
+      "kind": "icon",
+      "wikiTitle": "APW-1 Anti-Materiel Rifle",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/APW-1_Anti-Materiel_Rifle",
+      "imageUrl": "https://helldivers.wiki.gg/images/Anti-Materiel_Rifle_Stratagem_Icon.svg?3012d6",
+      "rimCategory": "support"
+    },
+    {
+      "name": "ARC-3 Arc Thrower",
+      "assetPath": "assets/stratagems/support/arc-3-arc-thrower.svg",
+      "kind": "icon",
+      "wikiTitle": "ARC-3 Arc Thrower",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/ARC-3_Arc_Thrower",
+      "imageUrl": "https://helldivers.wiki.gg/images/Arc_Thrower_Stratagem_Icon.svg?989f0a",
+      "rimCategory": "support"
+    },
+    {
+      "name": "Anti-Personnel Minefield",
+      "assetPath": "assets/stratagems/defensive/anti-personnel-minefield.svg",
+      "kind": "icon",
+      "wikiTitle": "Anti-Personnel Minefield",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/Anti-Personnel_Minefield",
+      "imageUrl": "https://helldivers.wiki.gg/images/Anti-Personnel_Minefield_Stratagem_Icon.svg?ccc429",
+      "rimCategory": "defensive"
+    },
+    {
+      "name": "Anti-Tank Emplacement",
+      "assetPath": "assets/stratagems/defensive/anti-tank-emplacement.svg",
+      "kind": "icon",
+      "wikiTitle": "Anti-Tank Emplacement",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/Anti-Tank_Emplacement",
+      "imageUrl": "https://helldivers.wiki.gg/images/Anti-Tank_Emplacement_Stratagem_Icon.svg?6c5737",
+      "rimCategory": "defensive"
+    },
+    {
+      "name": "Anti-Tank Mines",
+      "assetPath": "assets/stratagems/defensive/anti-tank-mines.svg",
+      "kind": "icon",
+      "wikiTitle": "Anti-Tank Mines",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/Anti-Tank_Mines",
+      "imageUrl": "https://helldivers.wiki.gg/images/Anti-Tank_Mines_Stratagem_Icon.svg?b36aca",
+      "rimCategory": "defensive"
+    },
+    {
+      "name": "Autocannon Sentry",
+      "assetPath": "assets/stratagems/defensive/autocannon-sentry.svg",
+      "kind": "icon",
+      "wikiTitle": "Autocannon Sentry",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/Autocannon_Sentry",
+      "imageUrl": "https://helldivers.wiki.gg/images/Autocannon_Sentry_Stratagem_Icon.svg?cb2722",
+      "rimCategory": "defensive"
+    },
+    {
+      "name": "Ballistic Shield Backpack",
+      "assetPath": "assets/stratagems/support/ballistic-shield-backpack.svg",
+      "kind": "icon",
+      "wikiTitle": "Ballistic Shield Backpack",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/Ballistic_Shield_Backpack",
+      "imageUrl": "https://helldivers.wiki.gg/images/Ballistic_Shield_Backpack_Stratagem_Icon.svg?9ea21d",
+      "rimCategory": "support"
+    },
+    {
+      "name": "Bastion",
+      "assetPath": "assets/stratagems/support/bastion.svg",
+      "kind": "icon",
+      "wikiTitle": "Bastion",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/Bastion",
+      "imageUrl": "https://helldivers.wiki.gg/images/Bastion_MK_XVI_Stratagem_Icon.svg?3895cb",
+      "rimCategory": "support"
+    },
+    {
+      "name": "Belt-fed GL",
+      "assetPath": "assets/stratagems/support/belt-fed-gl.svg",
+      "kind": "icon",
+      "wikiTitle": "Belt-Fed Grenade Launcher",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/Belt-Fed_Grenade_Launcher",
+      "imageUrl": "https://helldivers.wiki.gg/images/Belt-Fed_Grenade_Launcher_Stratagem_Icon.svg?315364",
+      "rimCategory": "support"
+    },
+    {
+      "name": "Breaching Hammer",
+      "assetPath": "assets/stratagems/support/breaching-hammer.svg",
+      "kind": "icon",
+      "wikiTitle": "Breaching Hammer",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/Breaching_Hammer",
+      "imageUrl": "https://helldivers.wiki.gg/images/Breaching_Hammer_Stratagem_Icon.svg?afd444",
+      "rimCategory": "support"
+    },
+    {
+      "name": "C4 Pack",
+      "assetPath": "assets/stratagems/support/c4-pack.svg",
+      "kind": "icon",
+      "wikiTitle": "C4 Pack",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/C4_Pack",
+      "imageUrl": "https://helldivers.wiki.gg/images/C4_Pack_Stratagem_Icon.svg?cfb679",
+      "rimCategory": "support"
+    },
+    {
+      "name": "Cremator",
+      "assetPath": "assets/stratagems/support/cremator.svg",
+      "kind": "icon",
+      "wikiTitle": "Cremator",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/Cremator",
+      "imageUrl": "https://helldivers.wiki.gg/images/Cremator_Stratagem_Icon.svg?a0a2d3",
+      "rimCategory": "support"
+    },
+    {
+      "name": "De-Escalator",
+      "assetPath": "assets/stratagems/support/de-escalator.svg",
+      "kind": "icon",
+      "wikiTitle": "De-Escalator",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/De-Escalator",
+      "imageUrl": "https://helldivers.wiki.gg/images/De-Escalator_Stratagem_Icon.svg?9f2324",
+      "rimCategory": "support"
+    },
+    {
+      "name": "Detonation Tool",
+      "assetPath": "assets/stratagems/support/detonation-tool.svg",
+      "kind": "icon",
+      "wikiTitle": "Defoliation Tool",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/Defoliation_Tool",
+      "imageUrl": "https://helldivers.wiki.gg/images/Defoliation_Tool_Stratagem_Icon.svg?10a3bf",
+      "rimCategory": "support"
+    },
+    {
+      "name": "Directional Shield",
+      "assetPath": "assets/stratagems/support/directional-shield.svg",
+      "kind": "icon",
+      "wikiTitle": "Directional Shield",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/Directional_Shield",
+      "imageUrl": "https://helldivers.wiki.gg/images/Directional_Shield_Stratagem_Icon.svg?ee4281",
+      "rimCategory": "support"
+    },
+    {
+      "name": "EAT-17 Expendable Anti-Tank",
+      "assetPath": "assets/stratagems/support/eat-17-expendable-anti-tank.svg",
+      "kind": "icon",
+      "wikiTitle": "EAT-17 Expendable Anti-Tank",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/EAT-17_Expendable_Anti-Tank",
+      "imageUrl": "https://helldivers.wiki.gg/images/Expendable_Anti-Tank_Stratagem_Icon.svg?504a15",
+      "rimCategory": "support"
+    },
+    {
+      "name": "EMS Mortar Sentry",
+      "assetPath": "assets/stratagems/defensive/ems-mortar-sentry.svg",
+      "kind": "icon",
+      "wikiTitle": "EMS Mortar Sentry",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/EMS_Mortar_Sentry",
+      "imageUrl": "https://helldivers.wiki.gg/images/EMS_Mortar_Sentry_Stratagem_Icon.svg?3e0d88",
+      "rimCategory": "defensive"
+    },
+    {
+      "name": "EMS Strike",
+      "assetPath": "assets/stratagems/support/ems-strike.svg",
+      "kind": "icon",
+      "wikiTitle": "Orbital EMS Strike",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/Orbital_EMS_Strike",
+      "imageUrl": "https://helldivers.wiki.gg/images/Orbital_EMS_Strike_Stratagem_Icon.svg?964fec",
+      "rimCategory": "support"
+    },
+    {
+      "name": "Eagle 110MM Rocket Pods",
+      "assetPath": "assets/stratagems/eagle/eagle-110mm-rocket-pods.svg",
+      "kind": "icon",
+      "wikiTitle": "Eagle 110mm Rocket Pods",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/Eagle_110mm_Rocket_Pods",
+      "imageUrl": "https://helldivers.wiki.gg/images/Eagle_110mm_Rocket_Pods_Stratagem_Icon.svg?54c976",
+      "rimCategory": "eagle"
+    },
+    {
+      "name": "Eagle 500KG Bomb",
+      "assetPath": "assets/stratagems/eagle/eagle-500kg-bomb.svg",
+      "kind": "icon",
+      "wikiTitle": "Eagle 500KG Bomb",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/Eagle_500KG_Bomb",
+      "imageUrl": "https://helldivers.wiki.gg/images/Eagle_500kg_Bomb_Stratagem_Icon.svg?61faff",
+      "rimCategory": "eagle"
+    },
+    {
+      "name": "Eagle Airstrike",
+      "assetPath": "assets/stratagems/eagle/eagle-airstrike.svg",
+      "kind": "icon",
+      "wikiTitle": "Eagle Airstrike",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/Eagle_Airstrike",
+      "imageUrl": "https://helldivers.wiki.gg/images/Eagle_Airstrike_Stratagem_Icon.svg?c5e1e8",
+      "rimCategory": "eagle"
+    },
+    {
+      "name": "Eagle Cluster Bomb",
+      "assetPath": "assets/stratagems/eagle/eagle-cluster-bomb.svg",
+      "kind": "icon",
+      "wikiTitle": "Eagle Cluster Bomb",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/Eagle_Cluster_Bomb",
+      "imageUrl": "https://helldivers.wiki.gg/images/Eagle_Cluster_Bomb_Stratagem_Icon.svg?6d03ee",
+      "rimCategory": "eagle"
+    },
+    {
+      "name": "Eagle Napalm Airstrike",
+      "assetPath": "assets/stratagems/eagle/eagle-napalm-airstrike.svg",
+      "kind": "icon",
+      "wikiTitle": "Eagle Napalm Airstrike",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/Eagle_Napalm_Airstrike",
+      "imageUrl": "https://helldivers.wiki.gg/images/Eagle_Napalm_Airstrike_Stratagem_Icon.svg?e059df",
+      "rimCategory": "eagle"
+    },
+    {
+      "name": "Eagle Smoke Strike",
+      "assetPath": "assets/stratagems/eagle/eagle-smoke-strike.svg",
+      "kind": "icon",
+      "wikiTitle": "Eagle Smoke Strike",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/Eagle_Smoke_Strike",
+      "imageUrl": "https://helldivers.wiki.gg/images/Eagle_Smoke_Strike_Stratagem_Icon.svg?751626",
+      "rimCategory": "eagle"
+    },
+    {
+      "name": "Eagle Strafing Run",
+      "assetPath": "assets/stratagems/eagle/eagle-strafing-run.svg",
+      "kind": "icon",
+      "wikiTitle": "Eagle Strafing Run",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/Eagle_Strafing_Run",
+      "imageUrl": "https://helldivers.wiki.gg/images/Eagle_Strafing_Run_Stratagem_Icon.svg?bbc684",
+      "rimCategory": "eagle"
+    },
+    {
+      "name": "Emancipator Exosuit",
+      "assetPath": "assets/stratagems/support/emancipator-exosuit.svg",
+      "kind": "icon",
+      "wikiTitle": "Emancipator Exosuit",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/Emancipator_Exosuit",
+      "imageUrl": "https://helldivers.wiki.gg/images/Emancipator_Exosuit_Stratagem_Icon.svg?2917bc",
+      "rimCategory": "support"
+    },
+    {
+      "name": "Epoch",
+      "assetPath": "assets/stratagems/support/epoch.svg",
+      "kind": "icon",
+      "wikiTitle": "Epoch",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/Epoch",
+      "imageUrl": "https://helldivers.wiki.gg/images/Epoch_Stratagem_Icon.svg?7f20cc",
+      "rimCategory": "support"
+    },
+    {
+      "name": "Expendable Napalm",
+      "assetPath": "assets/stratagems/support/expendable-napalm.svg",
+      "kind": "icon",
+      "wikiTitle": "EAT-700 Expendable Napalm",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/EAT-700_Expendable_Napalm",
+      "imageUrl": "https://helldivers.wiki.gg/images/Expendable_Napalm_Stratagem_Icon.svg?4b2d70",
+      "rimCategory": "support"
+    },
+    {
+      "name": "FAF-14 Spear",
+      "assetPath": "assets/stratagems/support/faf-14-spear.svg",
+      "kind": "icon",
+      "wikiTitle": "FAF-14 Spear",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/FAF-14_Spear",
+      "imageUrl": "https://helldivers.wiki.gg/images/Spear_Stratagem_Icon.svg?c3f9af",
+      "rimCategory": "support"
+    },
+    {
+      "name": "FLAM-40 Flamethrower",
+      "assetPath": "assets/stratagems/support/flam-40-flamethrower.svg",
+      "kind": "icon",
+      "wikiTitle": "FLAM-40 Flamethrower",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/FLAM-40_Flamethrower",
+      "imageUrl": "https://helldivers.wiki.gg/images/Flamethrower_Stratagem_Icon.svg?95194d",
+      "rimCategory": "support"
+    },
+    {
+      "name": "Fast Recon Vehicle",
+      "assetPath": "assets/stratagems/support/fast-recon-vehicle.svg",
+      "kind": "icon",
+      "wikiTitle": "M-102 Fast Recon Vehicle",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/M-102_Fast_Recon_Vehicle",
+      "imageUrl": "https://helldivers.wiki.gg/images/Fast_Recon_Vehicle_Stratagem_Icon.svg?3c3758",
+      "rimCategory": "support"
+    },
+    {
+      "name": "Flame Sentry",
+      "assetPath": "assets/stratagems/defensive/flame-sentry.svg",
+      "kind": "icon",
+      "wikiTitle": "Flame Sentry",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/Flame_Sentry",
+      "imageUrl": "https://helldivers.wiki.gg/images/Flame_Sentry_Stratagem_Icon.svg?97ca77",
+      "rimCategory": "defensive"
+    },
+    {
+      "name": "GL-21 Grenade Launcher",
+      "assetPath": "assets/stratagems/support/gl-21-grenade-launcher.svg",
+      "kind": "icon",
+      "wikiTitle": "GL-21 Grenade Launcher",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/GL-21_Grenade_Launcher",
+      "imageUrl": "https://helldivers.wiki.gg/images/Grenade_Launcher_Stratagem_Icon.svg?c5905c",
+      "rimCategory": "support"
+    },
+    {
+      "name": "GR-8 Recoilless Rifle",
+      "assetPath": "assets/stratagems/support/gr-8-recoilless-rifle.svg",
+      "kind": "icon",
+      "wikiTitle": "GR-8 Recoilless Rifle",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/GR-8_Recoilless_Rifle",
+      "imageUrl": "https://helldivers.wiki.gg/images/Recoilless_Rifle_Stratagem_Icon.svg?270863",
+      "rimCategory": "support"
+    },
+    {
+      "name": "Gas Mines",
+      "assetPath": "assets/stratagems/defensive/gas-mines.svg",
+      "kind": "icon",
+      "wikiTitle": "Gas Mines",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/Gas_Mines",
+      "imageUrl": "https://helldivers.wiki.gg/images/Gas_Mines_Stratagem_Icon.svg?3181af",
+      "rimCategory": "defensive"
+    },
+    {
+      "name": "Gas Mortar",
+      "assetPath": "assets/stratagems/defensive/gas-mortar.svg",
+      "kind": "icon",
+      "wikiTitle": "Gas Mortar Sentry",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/Gas_Mortar_Sentry",
+      "imageUrl": "https://helldivers.wiki.gg/images/Gas_Mortar_Sentry_Stratagem_Icon.svg?faaf07",
+      "rimCategory": "defensive"
+    },
+    {
+      "name": "Gatling Sentry",
+      "assetPath": "assets/stratagems/defensive/gatling-sentry.svg",
+      "kind": "icon",
+      "wikiTitle": "Gatling Sentry",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/Gatling_Sentry",
+      "imageUrl": "https://helldivers.wiki.gg/images/Gatling_Sentry_Stratagem_Icon.svg?e3c78d",
+      "rimCategory": "defensive"
+    },
+    {
+      "name": "Grenadier Battalion",
+      "assetPath": "assets/stratagems/defensive/grenadier-battalion.svg",
+      "kind": "icon",
+      "wikiTitle": "Grenadier battlement",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/Grenadier_battlement",
+      "imageUrl": "https://helldivers.wiki.gg/images/Grenadier_Battlement_Stratagem_Icon.svg?64eda4",
+      "rimCategory": "defensive"
+    },
+    {
+      "name": "Guard Dog",
+      "assetPath": "assets/stratagems/support/guard-dog.svg",
+      "kind": "icon",
+      "wikiTitle": "Guard Dog",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/Guard_Dog",
+      "imageUrl": "https://helldivers.wiki.gg/images/Guard_Dog_Stratagem_Icon.svg?bf3310",
+      "rimCategory": "support"
+    },
+    {
+      "name": "Guard Dog Arc",
+      "assetPath": "assets/stratagems/support/guard-dog-arc.svg",
+      "kind": "icon",
+      "wikiTitle": "AX/ARC-3 K-9",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/AX/ARC-3_K-9",
+      "imageUrl": "https://helldivers.wiki.gg/images/K-9_Stratagem_Icon.svg?adfb74",
+      "rimCategory": "support"
+    },
+    {
+      "name": "Guard Dog Breath",
+      "assetPath": "assets/stratagems/support/guard-dog-breath.svg",
+      "kind": "icon",
+      "wikiTitle": "AX/TX-13 Dog Breath",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/AX/TX-13_Dog_Breath",
+      "imageUrl": "https://helldivers.wiki.gg/images/Dog_Breath_Stratagem_Icon.svg?833287",
+      "rimCategory": "support"
+    },
+    {
+      "name": "Guard Dog Rover",
+      "assetPath": "assets/stratagems/support/guard-dog-rover.svg",
+      "kind": "icon",
+      "wikiTitle": "AX/LAS-5 \"Guard Dog\" Rover",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/AX/LAS-5_%22Guard_Dog%22_Rover",
+      "imageUrl": "https://helldivers.wiki.gg/images/Rover_Stratagem_Icon.svg?80445d",
+      "rimCategory": "support"
+    },
+    {
+      "name": "HMG Emplacement",
+      "assetPath": "assets/stratagems/defensive/hmg-emplacement.svg",
+      "kind": "icon",
+      "wikiTitle": "HMG Emplacement",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/HMG_Emplacement",
+      "imageUrl": "https://helldivers.wiki.gg/images/HMG_Emplacement_Stratagem_Icon.svg?b5de1a",
+      "rimCategory": "defensive"
+    },
+    {
+      "name": "Hot Dog",
+      "assetPath": "assets/stratagems/support/hot-dog.svg",
+      "kind": "icon",
+      "wikiTitle": "Hot Dog",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/Hot_Dog",
+      "imageUrl": "https://helldivers.wiki.gg/images/Hot_Dog_Stratagem_Icon.svg?21ad0f",
+      "rimCategory": "support"
+    },
+    {
+      "name": "Hover Pack",
+      "assetPath": "assets/stratagems/support/hover-pack.svg",
+      "kind": "icon",
+      "wikiTitle": "Hover Pack",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/Hover_Pack",
+      "imageUrl": "https://helldivers.wiki.gg/images/Hover_Pack_Stratagem_Icon.svg?c5f32f",
+      "rimCategory": "support"
+    },
+    {
+      "name": "Incendiary Mines",
+      "assetPath": "assets/stratagems/defensive/incendiary-mines.svg",
+      "kind": "icon",
+      "wikiTitle": "Incendiary Mines",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/Incendiary_Mines",
+      "imageUrl": "https://helldivers.wiki.gg/images/Incendiary_Mines_Stratagem_Icon.svg?241736",
+      "rimCategory": "defensive"
+    },
+    {
+      "name": "Jump Pack",
+      "assetPath": "assets/stratagems/support/jump-pack.svg",
+      "kind": "icon",
+      "wikiTitle": "Jump Pack",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/Jump_Pack",
+      "imageUrl": "https://helldivers.wiki.gg/images/Jump_Pack_Stratagem_Icon.svg?68659f",
+      "rimCategory": "support"
+    },
+    {
+      "name": "LAS-98 Laser Cannon",
+      "assetPath": "assets/stratagems/support/las-98-laser-cannon.svg",
+      "kind": "icon",
+      "wikiTitle": "LAS-98 Laser Cannon",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/LAS-98_Laser_Cannon",
+      "imageUrl": "https://helldivers.wiki.gg/images/Laser_Cannon_Stratagem_Icon.svg?a6c147",
+      "rimCategory": "support"
+    },
+    {
+      "name": "LAS-99 Quasar Cannon",
+      "assetPath": "assets/stratagems/support/las-99-quasar-cannon.svg",
+      "kind": "icon",
+      "wikiTitle": "LAS-99 Quasar Cannon",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/LAS-99_Quasar_Cannon",
+      "imageUrl": "https://helldivers.wiki.gg/images/Quasar_Cannon_Stratagem_Icon.svg?8aa6f0",
+      "rimCategory": "support"
+    },
+    {
+      "name": "Laser Sentry",
+      "assetPath": "assets/stratagems/defensive/laser-sentry.svg",
+      "kind": "icon",
+      "wikiTitle": "Laser Sentry",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/Laser_Sentry",
+      "imageUrl": "https://helldivers.wiki.gg/images/Laser_Sentry_Stratagem_Icon.svg?72c5b8",
+      "rimCategory": "defensive"
+    },
+    {
+      "name": "Leveller",
+      "assetPath": "assets/stratagems/support/leveller.svg",
+      "kind": "icon",
+      "wikiTitle": "Leveller",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/Leveller",
+      "imageUrl": "https://helldivers.wiki.gg/images/Leveller_Stratagem_Icon.svg?c94491",
+      "rimCategory": "support"
+    },
+    {
+      "name": "M-105 Stalwart",
+      "assetPath": "assets/stratagems/support/m-105-stalwart.svg",
+      "kind": "icon",
+      "wikiTitle": "M-105 Stalwart",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/M-105_Stalwart",
+      "imageUrl": "https://helldivers.wiki.gg/images/Stalwart_Stratagem_Icon.svg?f9f3f5",
+      "rimCategory": "support"
+    },
+    {
+      "name": "MG-206 Heavy Machine Gun",
+      "assetPath": "assets/stratagems/support/mg-206-heavy-machine-gun.svg",
+      "kind": "icon",
+      "wikiTitle": "MG-206 Heavy Machine Gun",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/MG-206_Heavy_Machine_Gun",
+      "imageUrl": "https://helldivers.wiki.gg/images/Heavy_Machine_Gun_Stratagem_Icon.svg?59c94f",
+      "rimCategory": "support"
+    },
+    {
+      "name": "MG-43 Machine Gun",
+      "assetPath": "assets/stratagems/support/mg-43-machine-gun.svg",
+      "kind": "icon",
+      "wikiTitle": "MG-43 Machine Gun",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/MG-43_Machine_Gun",
+      "imageUrl": "https://helldivers.wiki.gg/images/Machine_Gun_Stratagem_Icon.svg?54c36c",
+      "rimCategory": "support"
+    },
+    {
+      "name": "MLS-4X Commando",
+      "assetPath": "assets/stratagems/support/mls-4x-commando.svg",
+      "kind": "icon",
+      "wikiTitle": "MLS-4X Commando",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/MLS-4X_Commando",
+      "imageUrl": "https://helldivers.wiki.gg/images/Commando_Stratagem_Icon.svg?524e93",
+      "rimCategory": "support"
+    },
+    {
+      "name": "Machine Gun Sentry",
+      "assetPath": "assets/stratagems/defensive/machine-gun-sentry.svg",
+      "kind": "icon",
+      "wikiTitle": "Machine Gun Sentry",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/Machine_Gun_Sentry",
+      "imageUrl": "https://helldivers.wiki.gg/images/Machine_Gun_Sentry_Stratagem_Icon.svg?a8045d",
+      "rimCategory": "defensive"
+    },
+    {
+      "name": "Maxigun",
+      "assetPath": "assets/stratagems/support/maxigun.svg",
+      "kind": "icon",
+      "wikiTitle": "Maxigun",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/Maxigun",
+      "imageUrl": "https://helldivers.wiki.gg/images/Maxigun_Stratagem_Icon.svg?54e54b",
+      "rimCategory": "support"
+    },
+    {
+      "name": "Mortar Sentry",
+      "assetPath": "assets/stratagems/defensive/mortar-sentry.svg",
+      "kind": "icon",
+      "wikiTitle": "Mortar Sentry",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/Mortar_Sentry",
+      "imageUrl": "https://helldivers.wiki.gg/images/Mortar_Sentry_Stratagem_Icon.svg?5bf6cc",
+      "rimCategory": "defensive"
+    },
+    {
+      "name": "One True Flag",
+      "assetPath": "assets/stratagems/support/one-true-flag.svg",
+      "kind": "icon",
+      "wikiTitle": "One True Flag",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/One_True_Flag",
+      "imageUrl": "https://helldivers.wiki.gg/images/One_True_Flag_Stratagem_Icon.svg?268e93",
+      "rimCategory": "support"
+    },
     {
       "name": "Orbital 120MM HE Barrage",
       "assetPath": "assets/stratagems/orbital/orbital-120mm-he-barrage.svg",
@@ -1030,555 +1586,6 @@
       "rimCategory": "orbital"
     },
     {
-      "name": "Eagle 110MM Rocket Pods",
-      "assetPath": "assets/stratagems/eagle/eagle-110mm-rocket-pods.svg",
-      "kind": "icon",
-      "wikiTitle": "Eagle 110mm Rocket Pods",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/Eagle_110mm_Rocket_Pods",
-      "imageUrl": "https://helldivers.wiki.gg/images/Eagle_110mm_Rocket_Pods_Stratagem_Icon.svg?54c976",
-      "rimCategory": "eagle"
-    },
-    {
-      "name": "Eagle 500KG Bomb",
-      "assetPath": "assets/stratagems/eagle/eagle-500kg-bomb.svg",
-      "kind": "icon",
-      "wikiTitle": "Eagle 500KG Bomb",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/Eagle_500KG_Bomb",
-      "imageUrl": "https://helldivers.wiki.gg/images/Eagle_500kg_Bomb_Stratagem_Icon.svg?61faff",
-      "rimCategory": "eagle"
-    },
-    {
-      "name": "Eagle Airstrike",
-      "assetPath": "assets/stratagems/eagle/eagle-airstrike.svg",
-      "kind": "icon",
-      "wikiTitle": "Eagle Airstrike",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/Eagle_Airstrike",
-      "imageUrl": "https://helldivers.wiki.gg/images/Eagle_Airstrike_Stratagem_Icon.svg?c5e1e8",
-      "rimCategory": "eagle"
-    },
-    {
-      "name": "Eagle Cluster Bomb",
-      "assetPath": "assets/stratagems/eagle/eagle-cluster-bomb.svg",
-      "kind": "icon",
-      "wikiTitle": "Eagle Cluster Bomb",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/Eagle_Cluster_Bomb",
-      "imageUrl": "https://helldivers.wiki.gg/images/Eagle_Cluster_Bomb_Stratagem_Icon.svg?6d03ee",
-      "rimCategory": "eagle"
-    },
-    {
-      "name": "Eagle Napalm Airstrike",
-      "assetPath": "assets/stratagems/eagle/eagle-napalm-airstrike.svg",
-      "kind": "icon",
-      "wikiTitle": "Eagle Napalm Airstrike",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/Eagle_Napalm_Airstrike",
-      "imageUrl": "https://helldivers.wiki.gg/images/Eagle_Napalm_Airstrike_Stratagem_Icon.svg?e059df",
-      "rimCategory": "eagle"
-    },
-    {
-      "name": "Eagle Smoke Strike",
-      "assetPath": "assets/stratagems/eagle/eagle-smoke-strike.svg",
-      "kind": "icon",
-      "wikiTitle": "Eagle Smoke Strike",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/Eagle_Smoke_Strike",
-      "imageUrl": "https://helldivers.wiki.gg/images/Eagle_Smoke_Strike_Stratagem_Icon.svg?751626",
-      "rimCategory": "eagle"
-    },
-    {
-      "name": "Eagle Strafing Run",
-      "assetPath": "assets/stratagems/eagle/eagle-strafing-run.svg",
-      "kind": "icon",
-      "wikiTitle": "Eagle Strafing Run",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/Eagle_Strafing_Run",
-      "imageUrl": "https://helldivers.wiki.gg/images/Eagle_Strafing_Run_Stratagem_Icon.svg?bbc684",
-      "rimCategory": "eagle"
-    },
-    {
-      "name": "Anti-Personnel Minefield",
-      "assetPath": "assets/stratagems/defensive/anti-personnel-minefield.svg",
-      "kind": "icon",
-      "wikiTitle": "Anti-Personnel Minefield",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/Anti-Personnel_Minefield",
-      "imageUrl": "https://helldivers.wiki.gg/images/Anti-Personnel_Minefield_Stratagem_Icon.svg?ccc429",
-      "rimCategory": "defensive"
-    },
-    {
-      "name": "Anti-Tank Emplacement",
-      "assetPath": "assets/stratagems/defensive/anti-tank-emplacement.svg",
-      "kind": "icon",
-      "wikiTitle": "Anti-Tank Emplacement",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/Anti-Tank_Emplacement",
-      "imageUrl": "https://helldivers.wiki.gg/images/Anti-Tank_Emplacement_Stratagem_Icon.svg?6c5737",
-      "rimCategory": "defensive"
-    },
-    {
-      "name": "Anti-Tank Mines",
-      "assetPath": "assets/stratagems/defensive/anti-tank-mines.svg",
-      "kind": "icon",
-      "wikiTitle": "Anti-Tank Mines",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/Anti-Tank_Mines",
-      "imageUrl": "https://helldivers.wiki.gg/images/Anti-Tank_Mines_Stratagem_Icon.svg?b36aca",
-      "rimCategory": "defensive"
-    },
-    {
-      "name": "Autocannon Sentry",
-      "assetPath": "assets/stratagems/defensive/autocannon-sentry.svg",
-      "kind": "icon",
-      "wikiTitle": "Autocannon Sentry",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/Autocannon_Sentry",
-      "imageUrl": "https://helldivers.wiki.gg/images/Autocannon_Sentry_Stratagem_Icon.svg?cb2722",
-      "rimCategory": "defensive"
-    },
-    {
-      "name": "EMS Mortar Sentry",
-      "assetPath": "assets/stratagems/defensive/ems-mortar-sentry.svg",
-      "kind": "icon",
-      "wikiTitle": "EMS Mortar Sentry",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/EMS_Mortar_Sentry",
-      "imageUrl": "https://helldivers.wiki.gg/images/EMS_Mortar_Sentry_Stratagem_Icon.svg?3e0d88",
-      "rimCategory": "defensive"
-    },
-    {
-      "name": "Flame Sentry",
-      "assetPath": "assets/stratagems/defensive/flame-sentry.svg",
-      "kind": "icon",
-      "wikiTitle": "Flame Sentry",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/Flame_Sentry",
-      "imageUrl": "https://helldivers.wiki.gg/images/Flame_Sentry_Stratagem_Icon.svg?97ca77",
-      "rimCategory": "defensive"
-    },
-    {
-      "name": "Gas Mines",
-      "assetPath": "assets/stratagems/defensive/gas-mines.svg",
-      "kind": "icon",
-      "wikiTitle": "Gas Mines",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/Gas_Mines",
-      "imageUrl": "https://helldivers.wiki.gg/images/Gas_Mines_Stratagem_Icon.svg?3181af",
-      "rimCategory": "defensive"
-    },
-    {
-      "name": "Gatling Sentry",
-      "assetPath": "assets/stratagems/defensive/gatling-sentry.svg",
-      "kind": "icon",
-      "wikiTitle": "Gatling Sentry",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/Gatling_Sentry",
-      "imageUrl": "https://helldivers.wiki.gg/images/Gatling_Sentry_Stratagem_Icon.svg?e3c78d",
-      "rimCategory": "defensive"
-    },
-    {
-      "name": "Grenadier Battalion",
-      "assetPath": "assets/stratagems/defensive/grenadier-battalion.svg",
-      "kind": "icon",
-      "wikiTitle": "Grenadier battlement",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/Grenadier_battlement",
-      "imageUrl": "https://helldivers.wiki.gg/images/Grenadier_Battlement_Stratagem_Icon.svg?64eda4",
-      "rimCategory": "defensive"
-    },
-    {
-      "name": "HMG Emplacement",
-      "assetPath": "assets/stratagems/defensive/hmg-emplacement.svg",
-      "kind": "icon",
-      "wikiTitle": "HMG Emplacement",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/HMG_Emplacement",
-      "imageUrl": "https://helldivers.wiki.gg/images/HMG_Emplacement_Stratagem_Icon.svg?b5de1a",
-      "rimCategory": "defensive"
-    },
-    {
-      "name": "Incendiary Mines",
-      "assetPath": "assets/stratagems/defensive/incendiary-mines.svg",
-      "kind": "icon",
-      "wikiTitle": "Incendiary Mines",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/Incendiary_Mines",
-      "imageUrl": "https://helldivers.wiki.gg/images/Incendiary_Mines_Stratagem_Icon.svg?241736",
-      "rimCategory": "defensive"
-    },
-    {
-      "name": "Laser Sentry",
-      "assetPath": "assets/stratagems/defensive/laser-sentry.svg",
-      "kind": "icon",
-      "wikiTitle": "Laser Sentry",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/Laser_Sentry",
-      "imageUrl": "https://helldivers.wiki.gg/images/Laser_Sentry_Stratagem_Icon.svg?72c5b8",
-      "rimCategory": "defensive"
-    },
-    {
-      "name": "Machine Gun Sentry",
-      "assetPath": "assets/stratagems/defensive/machine-gun-sentry.svg",
-      "kind": "icon",
-      "wikiTitle": "Machine Gun Sentry",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/Machine_Gun_Sentry",
-      "imageUrl": "https://helldivers.wiki.gg/images/Machine_Gun_Sentry_Stratagem_Icon.svg?a8045d",
-      "rimCategory": "defensive"
-    },
-    {
-      "name": "Mortar Sentry",
-      "assetPath": "assets/stratagems/defensive/mortar-sentry.svg",
-      "kind": "icon",
-      "wikiTitle": "Mortar Sentry",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/Mortar_Sentry",
-      "imageUrl": "https://helldivers.wiki.gg/images/Mortar_Sentry_Stratagem_Icon.svg?5bf6cc",
-      "rimCategory": "defensive"
-    },
-    {
-      "name": "Rocket Sentry",
-      "assetPath": "assets/stratagems/defensive/rocket-sentry.svg",
-      "kind": "icon",
-      "wikiTitle": "Rocket Sentry",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/Rocket_Sentry",
-      "imageUrl": "https://helldivers.wiki.gg/images/Rocket_Sentry_Stratagem_Icon.svg?9e05dc",
-      "rimCategory": "defensive"
-    },
-    {
-      "name": "Shield Generator Relay",
-      "assetPath": "assets/stratagems/defensive/shield-generator-relay.svg",
-      "kind": "icon",
-      "wikiTitle": "Shield Generator Relay",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/Shield_Generator_Relay",
-      "imageUrl": "https://helldivers.wiki.gg/images/Shield_Generator_Relay_Stratagem_Icon.svg?6f5e09",
-      "rimCategory": "defensive"
-    },
-    {
-      "name": "Tesla Tower",
-      "assetPath": "assets/stratagems/defensive/tesla-tower.svg",
-      "kind": "icon",
-      "wikiTitle": "Tesla Tower",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/Tesla_Tower",
-      "imageUrl": "https://helldivers.wiki.gg/images/Tesla_Tower_Stratagem_Icon.svg?a30c81",
-      "rimCategory": "defensive"
-    },
-    {
-      "name": "AC-8 Autocannon",
-      "assetPath": "assets/stratagems/support/ac-8-autocannon.svg",
-      "kind": "icon",
-      "wikiTitle": "AC-8 Autocannon",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/AC-8_Autocannon",
-      "imageUrl": "https://helldivers.wiki.gg/images/Autocannon_Stratagem_Icon.svg?67957f",
-      "rimCategory": "support"
-    },
-    {
-      "name": "APW-1 Anti-Materiel Rifle",
-      "assetPath": "assets/stratagems/support/apw-1-anti-materiel-rifle.svg",
-      "kind": "icon",
-      "wikiTitle": "APW-1 Anti-Materiel Rifle",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/APW-1_Anti-Materiel_Rifle",
-      "imageUrl": "https://helldivers.wiki.gg/images/Anti-Materiel_Rifle_Stratagem_Icon.svg?3012d6",
-      "rimCategory": "support"
-    },
-    {
-      "name": "ARC-3 Arc Thrower",
-      "assetPath": "assets/stratagems/support/arc-3-arc-thrower.svg",
-      "kind": "icon",
-      "wikiTitle": "ARC-3 Arc Thrower",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/ARC-3_Arc_Thrower",
-      "imageUrl": "https://helldivers.wiki.gg/images/Arc_Thrower_Stratagem_Icon.svg?989f0a",
-      "rimCategory": "support"
-    },
-    {
-      "name": "Ballistic Shield Backpack",
-      "assetPath": "assets/stratagems/support/ballistic-shield-backpack.svg",
-      "kind": "icon",
-      "wikiTitle": "Ballistic Shield Backpack",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/Ballistic_Shield_Backpack",
-      "imageUrl": "https://helldivers.wiki.gg/images/Ballistic_Shield_Backpack_Stratagem_Icon.svg?9ea21d",
-      "rimCategory": "support"
-    },
-    {
-      "name": "Bastion",
-      "assetPath": "assets/stratagems/support/bastion.svg",
-      "kind": "icon",
-      "wikiTitle": "Bastion",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/Bastion",
-      "imageUrl": "https://helldivers.wiki.gg/images/Bastion_MK_XVI_Stratagem_Icon.svg?3895cb",
-      "rimCategory": "support"
-    },
-    {
-      "name": "Belt-fed GL",
-      "assetPath": "assets/stratagems/support/belt-fed-gl.svg",
-      "kind": "icon",
-      "wikiTitle": "Belt-Fed Grenade Launcher",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/Belt-Fed_Grenade_Launcher",
-      "imageUrl": "https://helldivers.wiki.gg/images/Belt-Fed_Grenade_Launcher_Stratagem_Icon.svg?315364",
-      "rimCategory": "support"
-    },
-    {
-      "name": "Breaching Hammer",
-      "assetPath": "assets/stratagems/support/breaching-hammer.svg",
-      "kind": "icon",
-      "wikiTitle": "Breaching Hammer",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/Breaching_Hammer",
-      "imageUrl": "https://helldivers.wiki.gg/images/Breaching_Hammer_Stratagem_Icon.svg?afd444",
-      "rimCategory": "support"
-    },
-    {
-      "name": "C4 Pack",
-      "assetPath": "assets/stratagems/support/c4-pack.svg",
-      "kind": "icon",
-      "wikiTitle": "C4 Pack",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/C4_Pack",
-      "imageUrl": "https://helldivers.wiki.gg/images/C4_Pack_Stratagem_Icon.svg?cfb679",
-      "rimCategory": "support"
-    },
-    {
-      "name": "De-Escalator",
-      "assetPath": "assets/stratagems/support/de-escalator.svg",
-      "kind": "icon",
-      "wikiTitle": "De-Escalator",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/De-Escalator",
-      "imageUrl": "https://helldivers.wiki.gg/images/De-Escalator_Stratagem_Icon.svg?9f2324",
-      "rimCategory": "support"
-    },
-    {
-      "name": "Detonation Tool",
-      "assetPath": "assets/stratagems/support/detonation-tool.svg",
-      "kind": "icon",
-      "wikiTitle": "Defoliation Tool",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/Defoliation_Tool",
-      "imageUrl": "https://helldivers.wiki.gg/images/Defoliation_Tool_Stratagem_Icon.svg?10a3bf",
-      "rimCategory": "support"
-    },
-    {
-      "name": "Directional Shield",
-      "assetPath": "assets/stratagems/support/directional-shield.svg",
-      "kind": "icon",
-      "wikiTitle": "Directional Shield",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/Directional_Shield",
-      "imageUrl": "https://helldivers.wiki.gg/images/Directional_Shield_Stratagem_Icon.svg?ee4281",
-      "rimCategory": "support"
-    },
-    {
-      "name": "EAT-17 Expendable Anti-Tank",
-      "assetPath": "assets/stratagems/support/eat-17-expendable-anti-tank.svg",
-      "kind": "icon",
-      "wikiTitle": "EAT-17 Expendable Anti-Tank",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/EAT-17_Expendable_Anti-Tank",
-      "imageUrl": "https://helldivers.wiki.gg/images/Expendable_Anti-Tank_Stratagem_Icon.svg?504a15",
-      "rimCategory": "support"
-    },
-    {
-      "name": "EMS Strike",
-      "assetPath": "assets/stratagems/support/ems-strike.svg",
-      "kind": "icon",
-      "wikiTitle": "Orbital EMS Strike",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/Orbital_EMS_Strike",
-      "imageUrl": "https://helldivers.wiki.gg/images/Orbital_EMS_Strike_Stratagem_Icon.svg?964fec",
-      "rimCategory": "support"
-    },
-    {
-      "name": "Emancipator Exosuit",
-      "assetPath": "assets/stratagems/support/emancipator-exosuit.svg",
-      "kind": "icon",
-      "wikiTitle": "Emancipator Exosuit",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/Emancipator_Exosuit",
-      "imageUrl": "https://helldivers.wiki.gg/images/Emancipator_Exosuit_Stratagem_Icon.svg?2917bc",
-      "rimCategory": "support"
-    },
-    {
-      "name": "Epoch",
-      "assetPath": "assets/stratagems/support/epoch.svg",
-      "kind": "icon",
-      "wikiTitle": "Epoch",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/Epoch",
-      "imageUrl": "https://helldivers.wiki.gg/images/Epoch_Stratagem_Icon.svg?7f20cc",
-      "rimCategory": "support"
-    },
-    {
-      "name": "Expendable Napalm",
-      "assetPath": "assets/stratagems/support/expendable-napalm.svg",
-      "kind": "icon",
-      "wikiTitle": "EAT-700 Expendable Napalm",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/EAT-700_Expendable_Napalm",
-      "imageUrl": "https://helldivers.wiki.gg/images/Expendable_Napalm_Stratagem_Icon.svg?4b2d70",
-      "rimCategory": "support"
-    },
-    {
-      "name": "FAF-14 Spear",
-      "assetPath": "assets/stratagems/support/faf-14-spear.svg",
-      "kind": "icon",
-      "wikiTitle": "FAF-14 Spear",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/FAF-14_Spear",
-      "imageUrl": "https://helldivers.wiki.gg/images/Spear_Stratagem_Icon.svg?c3f9af",
-      "rimCategory": "support"
-    },
-    {
-      "name": "FLAM-40 Flamethrower",
-      "assetPath": "assets/stratagems/support/flam-40-flamethrower.svg",
-      "kind": "icon",
-      "wikiTitle": "FLAM-40 Flamethrower",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/FLAM-40_Flamethrower",
-      "imageUrl": "https://helldivers.wiki.gg/images/Flamethrower_Stratagem_Icon.svg?95194d",
-      "rimCategory": "support"
-    },
-    {
-      "name": "Fast Recon Vehicle",
-      "assetPath": "assets/stratagems/support/fast-recon-vehicle.svg",
-      "kind": "icon",
-      "wikiTitle": "M-102 Fast Recon Vehicle",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/M-102_Fast_Recon_Vehicle",
-      "imageUrl": "https://helldivers.wiki.gg/images/Fast_Recon_Vehicle_Stratagem_Icon.svg?3c3758",
-      "rimCategory": "support"
-    },
-    {
-      "name": "GL-21 Grenade Launcher",
-      "assetPath": "assets/stratagems/support/gl-21-grenade-launcher.svg",
-      "kind": "icon",
-      "wikiTitle": "GL-21 Grenade Launcher",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/GL-21_Grenade_Launcher",
-      "imageUrl": "https://helldivers.wiki.gg/images/Grenade_Launcher_Stratagem_Icon.svg?c5905c",
-      "rimCategory": "support"
-    },
-    {
-      "name": "GR-8 Recoilless Rifle",
-      "assetPath": "assets/stratagems/support/gr-8-recoilless-rifle.svg",
-      "kind": "icon",
-      "wikiTitle": "GR-8 Recoilless Rifle",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/GR-8_Recoilless_Rifle",
-      "imageUrl": "https://helldivers.wiki.gg/images/Recoilless_Rifle_Stratagem_Icon.svg?270863",
-      "rimCategory": "support"
-    },
-    {
-      "name": "Guard Dog",
-      "assetPath": "assets/stratagems/support/guard-dog.svg",
-      "kind": "icon",
-      "wikiTitle": "Guard Dog",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/Guard_Dog",
-      "imageUrl": "https://helldivers.wiki.gg/images/Guard_Dog_Stratagem_Icon.svg?bf3310",
-      "rimCategory": "support"
-    },
-    {
-      "name": "Guard Dog Arc",
-      "assetPath": "assets/stratagems/support/guard-dog-arc.svg",
-      "kind": "icon",
-      "wikiTitle": "AX/ARC-3 K-9",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/AX/ARC-3_K-9",
-      "imageUrl": "https://helldivers.wiki.gg/images/K-9_Stratagem_Icon.svg?adfb74",
-      "rimCategory": "support"
-    },
-    {
-      "name": "Guard Dog Breath",
-      "assetPath": "assets/stratagems/support/guard-dog-breath.svg",
-      "kind": "icon",
-      "wikiTitle": "AX/TX-13 Dog Breath",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/AX/TX-13_Dog_Breath",
-      "imageUrl": "https://helldivers.wiki.gg/images/Dog_Breath_Stratagem_Icon.svg?833287",
-      "rimCategory": "support"
-    },
-    {
-      "name": "Guard Dog Rover",
-      "assetPath": "assets/stratagems/support/guard-dog-rover.svg",
-      "kind": "icon",
-      "wikiTitle": "AX/LAS-5 \"Guard Dog\" Rover",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/AX/LAS-5_%22Guard_Dog%22_Rover",
-      "imageUrl": "https://helldivers.wiki.gg/images/Rover_Stratagem_Icon.svg?80445d",
-      "rimCategory": "support"
-    },
-    {
-      "name": "Hot Dog",
-      "assetPath": "assets/stratagems/support/hot-dog.svg",
-      "kind": "icon",
-      "wikiTitle": "Hot Dog",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/Hot_Dog",
-      "imageUrl": "https://helldivers.wiki.gg/images/Hot_Dog_Stratagem_Icon.svg?21ad0f",
-      "rimCategory": "support"
-    },
-    {
-      "name": "Hover Pack",
-      "assetPath": "assets/stratagems/support/hover-pack.svg",
-      "kind": "icon",
-      "wikiTitle": "LIFT-860 Hover Pack",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/LIFT-860_Hover_Pack",
-      "imageUrl": "https://helldivers.wiki.gg/images/Hover_Pack_Stratagem_Icon.svg?c5f32f",
-      "rimCategory": "support"
-    },
-    {
-      "name": "Jump Pack",
-      "assetPath": "assets/stratagems/support/jump-pack.svg",
-      "kind": "icon",
-      "wikiTitle": "Jump Pack",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/Jump_Pack",
-      "imageUrl": "https://helldivers.wiki.gg/images/Jump_Pack_Stratagem_Icon.svg?68659f",
-      "rimCategory": "support"
-    },
-    {
-      "name": "LAS-98 Laser Cannon",
-      "assetPath": "assets/stratagems/support/las-98-laser-cannon.svg",
-      "kind": "icon",
-      "wikiTitle": "LAS-98 Laser Cannon",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/LAS-98_Laser_Cannon",
-      "imageUrl": "https://helldivers.wiki.gg/images/Laser_Cannon_Stratagem_Icon.svg?a6c147",
-      "rimCategory": "support"
-    },
-    {
-      "name": "LAS-99 Quasar Cannon",
-      "assetPath": "assets/stratagems/support/las-99-quasar-cannon.svg",
-      "kind": "icon",
-      "wikiTitle": "LAS-99 Quasar Cannon",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/LAS-99_Quasar_Cannon",
-      "imageUrl": "https://helldivers.wiki.gg/images/Quasar_Cannon_Stratagem_Icon.svg?8aa6f0",
-      "rimCategory": "support"
-    },
-    {
-      "name": "Leveller",
-      "assetPath": "assets/stratagems/support/leveller.svg",
-      "kind": "icon",
-      "wikiTitle": "Leveller",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/Leveller",
-      "imageUrl": "https://helldivers.wiki.gg/images/Leveller_Stratagem_Icon.svg?c94491",
-      "rimCategory": "support"
-    },
-    {
-      "name": "M-105 Stalwart",
-      "assetPath": "assets/stratagems/support/m-105-stalwart.svg",
-      "kind": "icon",
-      "wikiTitle": "M-105 Stalwart",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/M-105_Stalwart",
-      "imageUrl": "https://helldivers.wiki.gg/images/Stalwart_Stratagem_Icon.svg?f9f3f5",
-      "rimCategory": "support"
-    },
-    {
-      "name": "MG-206 Heavy Machine Gun",
-      "assetPath": "assets/stratagems/support/mg-206-heavy-machine-gun.svg",
-      "kind": "icon",
-      "wikiTitle": "MG-206 Heavy Machine Gun",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/MG-206_Heavy_Machine_Gun",
-      "imageUrl": "https://helldivers.wiki.gg/images/Heavy_Machine_Gun_Stratagem_Icon.svg?59c94f",
-      "rimCategory": "support"
-    },
-    {
-      "name": "MG-43 Machine Gun",
-      "assetPath": "assets/stratagems/support/mg-43-machine-gun.svg",
-      "kind": "icon",
-      "wikiTitle": "MG-43 Machine Gun",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/MG-43_Machine_Gun",
-      "imageUrl": "https://helldivers.wiki.gg/images/Machine_Gun_Stratagem_Icon.svg?54c36c",
-      "rimCategory": "support"
-    },
-    {
-      "name": "MLS-4X Commando",
-      "assetPath": "assets/stratagems/support/mls-4x-commando.svg",
-      "kind": "icon",
-      "wikiTitle": "MLS-4X Commando",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/MLS-4X_Commando",
-      "imageUrl": "https://helldivers.wiki.gg/images/Commando_Stratagem_Icon.svg?524e93",
-      "rimCategory": "support"
-    },
-    {
-      "name": "Maxigun",
-      "assetPath": "assets/stratagems/support/maxigun.svg",
-      "kind": "icon",
-      "wikiTitle": "Maxigun",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/Maxigun",
-      "imageUrl": "https://helldivers.wiki.gg/images/Maxigun_Stratagem_Icon.svg?54e54b",
-      "rimCategory": "support"
-    },
-    {
-      "name": "One True Flag",
-      "assetPath": "assets/stratagems/support/one-true-flag.svg",
-      "kind": "icon",
-      "wikiTitle": "One True Flag",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/One_True_Flag",
-      "imageUrl": "https://helldivers.wiki.gg/images/One_True_Flag_Stratagem_Icon.svg?268e93",
-      "rimCategory": "support"
-    },
-    {
       "name": "Patriot Exosuit",
       "assetPath": "assets/stratagems/support/patriot-exosuit.svg",
       "kind": "icon",
@@ -1615,6 +1622,15 @@
       "rimCategory": "support"
     },
     {
+      "name": "Rocket Sentry",
+      "assetPath": "assets/stratagems/defensive/rocket-sentry.svg",
+      "kind": "icon",
+      "wikiTitle": "Rocket Sentry",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/Rocket_Sentry",
+      "imageUrl": "https://helldivers.wiki.gg/images/Rocket_Sentry_Stratagem_Icon.svg?9e05dc",
+      "rimCategory": "defensive"
+    },
+    {
       "name": "Shield Generator Pack",
       "assetPath": "assets/stratagems/support/shield-generator-pack.svg",
       "kind": "icon",
@@ -1622,6 +1638,15 @@
       "sourceUrl": "https://helldivers.wiki.gg/wiki/Shield_Generator_Pack",
       "imageUrl": "https://helldivers.wiki.gg/images/Shield_Generator_Pack_Stratagem_Icon.svg?babfa4",
       "rimCategory": "support"
+    },
+    {
+      "name": "Shield Generator Relay",
+      "assetPath": "assets/stratagems/defensive/shield-generator-relay.svg",
+      "kind": "icon",
+      "wikiTitle": "Shield Generator Relay",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/Shield_Generator_Relay",
+      "imageUrl": "https://helldivers.wiki.gg/images/Shield_Generator_Relay_Stratagem_Icon.svg?6f5e09",
+      "rimCategory": "defensive"
     },
     {
       "name": "Solo Silo",
@@ -1669,6 +1694,15 @@
       "rimCategory": "support"
     },
     {
+      "name": "Tesla Tower",
+      "assetPath": "assets/stratagems/defensive/tesla-tower.svg",
+      "kind": "icon",
+      "wikiTitle": "Tesla Tower",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/Tesla_Tower",
+      "imageUrl": "https://helldivers.wiki.gg/images/Tesla_Tower_Stratagem_Icon.svg?a30c81",
+      "rimCategory": "defensive"
+    },
+    {
       "name": "Warp Pack",
       "assetPath": "assets/stratagems/support/warp-pack.svg",
       "kind": "icon",
@@ -1685,162 +1719,152 @@
       "sourceUrl": "https://helldivers.wiki.gg/wiki/WASP",
       "imageUrl": "https://helldivers.wiki.gg/images/W.A.S.P._Launcher_Stratagem_Icon.svg?db7fac",
       "rimCategory": "support"
-    },
-    {
-      "name": "Gas Mortar",
-      "assetPath": "assets/stratagems/defensive/gas-mortar.svg",
-      "kind": "icon"
-    },
-    {
-      "name": "Cremator",
-      "assetPath": "assets/stratagems/support/cremator.svg",
-      "kind": "icon"
     }
   ],
   "booster": [
     {
-      "name": "Hellpod Space Optimization",
-      "assetPath": "assets/boosters/hellpod-space-optimization.svg",
-      "kind": "icon",
-      "wikiTitle": "Hellpod Space Optimization",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/Hellpod_Space_Optimization",
-      "imageUrl": "https://helldivers.wiki.gg/images/Hellpod_Space_Optimization_Booster_Icon.svg"
-    },
-    {
-      "name": "Vitality Enhancement",
-      "assetPath": "assets/boosters/vitality-enhancement.svg",
-      "kind": "icon",
-      "wikiTitle": "Vitality Enhancement",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/Vitality_Enhancement",
-      "imageUrl": "https://helldivers.wiki.gg/images/Vitality_Enhancement_Booster_Icon.svg"
-    },
-    {
-      "name": "UAV Recon Booster",
-      "assetPath": "assets/boosters/uav-recon-booster.svg",
-      "kind": "icon",
-      "wikiTitle": "UAV Recon Booster",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/UAV_Recon_Booster",
-      "imageUrl": "https://helldivers.wiki.gg/images/UAV_Recon_Booster_Booster_Icon.svg"
-    },
-    {
-      "name": "Stamina Enhancement",
-      "assetPath": "assets/boosters/stamina-enhancement.svg",
-      "kind": "icon",
-      "wikiTitle": "Stamina Enhancement",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/Stamina_Enhancement",
-      "imageUrl": "https://helldivers.wiki.gg/images/Stamina_Enhancement_Booster_Icon.svg"
-    },
-    {
-      "name": "Muscle Enhancement",
-      "assetPath": "assets/boosters/muscle-enhancement.svg",
-      "kind": "icon",
-      "wikiTitle": "Muscle Enhancement",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/Muscle_Enhancement",
-      "imageUrl": "https://helldivers.wiki.gg/images/Muscle_Enhancement_Booster_Icon.svg"
-    },
-    {
-      "name": "Increased Reinforcement Budget",
-      "assetPath": "assets/boosters/increased-reinforcement-budget.svg",
-      "kind": "icon",
-      "wikiTitle": "Increased Reinforcement Budget",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/Increased_Reinforcement_Budget",
-      "imageUrl": "https://helldivers.wiki.gg/images/Increased_Reinforcement_Budget_Booster_Icon.svg"
-    },
-    {
-      "name": "Flexible Reinforcement Budget",
-      "assetPath": "assets/boosters/flexible-reinforcement-budget.svg",
-      "kind": "icon",
-      "wikiTitle": "Flexible Reinforcement Budget",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/Flexible_Reinforcement_Budget",
-      "imageUrl": "https://helldivers.wiki.gg/images/Flexible_Reinforcement_Budget_Booster_Icon.svg"
-    },
-    {
-      "name": "Localization Confusion",
-      "assetPath": "assets/boosters/localization-confusion.svg",
-      "kind": "icon",
-      "wikiTitle": "Localization Confusion",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/Localization_Confusion",
-      "imageUrl": "https://helldivers.wiki.gg/images/Localization_Confusion_Booster_Icon.svg"
-    },
-    {
-      "name": "Expert Extraction Pilot",
-      "assetPath": "assets/boosters/expert-extraction-pilot.svg",
-      "kind": "icon",
-      "wikiTitle": "Expert Extraction Pilot",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/Expert_Extraction_Pilot",
-      "imageUrl": "https://helldivers.wiki.gg/images/Expert_Extraction_Pilot_Booster_Icon.svg"
-    },
-    {
-      "name": "Motivational Shocks",
-      "assetPath": "assets/boosters/motivational-shocks.svg",
-      "kind": "icon",
-      "wikiTitle": "Motivational Shocks",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/Motivational_Shocks",
-      "imageUrl": "https://helldivers.wiki.gg/images/Motivational_Shocks_Booster_Icon.svg"
-    },
-    {
-      "name": "Experimental Infusion",
-      "assetPath": "assets/boosters/experimental-infusion.svg",
-      "kind": "icon",
-      "wikiTitle": "Experimental Infusion",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/Experimental_Infusion",
-      "imageUrl": "https://helldivers.wiki.gg/images/Experimental_Infusion_Booster_Icon.svg"
-    },
-    {
-      "name": "Firebomb Hellpods",
-      "assetPath": "assets/boosters/firebomb-hellpods.svg",
-      "kind": "icon",
-      "wikiTitle": "Firebomb Hellpods",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/Firebomb_Hellpods",
-      "imageUrl": "https://helldivers.wiki.gg/images/Firebomb_Hellpods_Booster_Icon.svg"
-    },
-    {
-      "name": "Dead Sprint",
-      "assetPath": "assets/boosters/dead-sprint.svg",
-      "kind": "icon",
-      "wikiTitle": "Dead Sprint",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/Dead_Sprint",
-      "imageUrl": "https://helldivers.wiki.gg/images/Dead_Sprint_Booster_Icon.svg"
-    },
-    {
       "name": "Armed Resupply Pods",
-      "assetPath": "assets/boosters/armed-resupply-pods.svg",
+      "assetPath": "",
       "kind": "icon",
       "wikiTitle": "Armed Resupply Pods",
       "sourceUrl": "https://helldivers.wiki.gg/wiki/Armed_Resupply_Pods",
-      "imageUrl": "https://helldivers.wiki.gg/images/Armed_Resupply_Pods_Booster_Icon.svg"
-    },
-    {
-      "name": "Sample Extractor",
-      "assetPath": "assets/boosters/sample-extractor.svg",
-      "kind": "icon",
-      "wikiTitle": "Sample Extractor",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/Sample_Extractor",
-      "imageUrl": "https://helldivers.wiki.gg/images/Sample_Extractor_Booster_Icon.svg"
-    },
-    {
-      "name": "Sample Scanner",
-      "assetPath": "assets/boosters/sample-scanner.svg",
-      "kind": "icon",
-      "wikiTitle": "Sample Scanner",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/Sample_Scanner",
-      "imageUrl": "https://helldivers.wiki.gg/images/Sample_Scanner_Booster_Icon.svg"
-    },
-    {
-      "name": "Stun Pods",
-      "assetPath": "assets/boosters/stun-pods.svg",
-      "kind": "icon",
-      "wikiTitle": "Stun Pods",
-      "sourceUrl": "https://helldivers.wiki.gg/wiki/Stun_Pods",
-      "imageUrl": "https://helldivers.wiki.gg/images/Stun_Pods_Booster_Icon.svg"
+      "imageUrl": "https://helldivers.wiki.gg/images/Armed_Resupply_Pods_Booster_Icon.svg?60e831"
     },
     {
       "name": "Concealed Insertion",
-      "assetPath": "assets/boosters/concealed-insertion.svg",
+      "assetPath": "",
       "kind": "icon",
       "wikiTitle": "Concealed Insertion",
       "sourceUrl": "https://helldivers.wiki.gg/wiki/Concealed_Insertion",
-      "imageUrl": "https://helldivers.wiki.gg/images/Concealed_Insertion_Booster_Icon.svg"
+      "imageUrl": "https://helldivers.wiki.gg/images/Concealed_Insertion_Booster_Icon.svg?232d24"
+    },
+    {
+      "name": "Dead Sprint",
+      "assetPath": "",
+      "kind": "icon",
+      "wikiTitle": "Dead Sprint",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/Dead_Sprint",
+      "imageUrl": "https://helldivers.wiki.gg/images/Dead_Sprint_Booster_Icon.svg?ad8a2b"
+    },
+    {
+      "name": "Experimental Infusion",
+      "assetPath": "",
+      "kind": "icon",
+      "wikiTitle": "Experimental Infusion",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/Experimental_Infusion",
+      "imageUrl": "https://helldivers.wiki.gg/images/Experimental_Infusion_Booster_Icon.svg?3bb23a"
+    },
+    {
+      "name": "Expert Extraction Pilot",
+      "assetPath": "",
+      "kind": "icon",
+      "wikiTitle": "Expert Extraction Pilot",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/Expert_Extraction_Pilot",
+      "imageUrl": "https://helldivers.wiki.gg/images/Expert_Extraction_Pilot_Booster_Icon.svg?e0a588"
+    },
+    {
+      "name": "Firebomb Hellpods",
+      "assetPath": "",
+      "kind": "icon",
+      "wikiTitle": "Firebomb Hellpods",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/Firebomb_Hellpods",
+      "imageUrl": "https://helldivers.wiki.gg/images/Firebomb_Hellpods_Booster_Icon.svg?b0cb2a"
+    },
+    {
+      "name": "Flexible Reinforcement Budget",
+      "assetPath": "",
+      "kind": "icon",
+      "wikiTitle": "Flexible Reinforcement Budget",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/Flexible_Reinforcement_Budget",
+      "imageUrl": "https://helldivers.wiki.gg/images/Flexible_Reinforcement_Budget_Booster_Icon.svg?1d940b"
+    },
+    {
+      "name": "Hellpod Space Optimization",
+      "assetPath": "",
+      "kind": "icon",
+      "wikiTitle": "Hellpod Space Optimization",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/Hellpod_Space_Optimization",
+      "imageUrl": "https://helldivers.wiki.gg/images/Hellpod_Space_Optimization_Booster_Icon.svg?aa4762"
+    },
+    {
+      "name": "Increased Reinforcement Budget",
+      "assetPath": "",
+      "kind": "icon",
+      "wikiTitle": "Increased Reinforcement Budget",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/Increased_Reinforcement_Budget",
+      "imageUrl": "https://helldivers.wiki.gg/images/Increased_Reinforcement_Budget_Booster_Icon.svg?7f04a9"
+    },
+    {
+      "name": "Localization Confusion",
+      "assetPath": "",
+      "kind": "icon",
+      "wikiTitle": "Localization Confusion",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/Localization_Confusion",
+      "imageUrl": "https://helldivers.wiki.gg/images/Localization_Confusion_Booster_Icon.svg?95b1f1"
+    },
+    {
+      "name": "Motivational Shocks",
+      "assetPath": "",
+      "kind": "icon",
+      "wikiTitle": "Motivational Shocks",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/Motivational_Shocks",
+      "imageUrl": "https://helldivers.wiki.gg/images/Motivational_Shocks_Booster_Icon.svg?b83499"
+    },
+    {
+      "name": "Muscle Enhancement",
+      "assetPath": "",
+      "kind": "icon",
+      "wikiTitle": "Muscle Enhancement",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/Muscle_Enhancement",
+      "imageUrl": "https://helldivers.wiki.gg/images/Muscle_Enhancement_Booster_Icon.svg?f1d14b"
+    },
+    {
+      "name": "Sample Extractor",
+      "assetPath": "",
+      "kind": "icon",
+      "wikiTitle": "Sample Extricator",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/Sample_Extricator",
+      "imageUrl": "https://helldivers.wiki.gg/images/Sample_Extricator_Booster_Icon.svg?13722c"
+    },
+    {
+      "name": "Sample Scanner",
+      "assetPath": "",
+      "kind": "icon",
+      "wikiTitle": "Sample Scanner",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/Sample_Scanner",
+      "imageUrl": "https://helldivers.wiki.gg/images/Sample_Scanner_Booster_Icon.svg?894450"
+    },
+    {
+      "name": "Stamina Enhancement",
+      "assetPath": "",
+      "kind": "icon",
+      "wikiTitle": "Stamina Enhancement",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/Stamina_Enhancement",
+      "imageUrl": "https://helldivers.wiki.gg/images/Stamina_Enhancement_Booster_Icon.svg?d76555"
+    },
+    {
+      "name": "Stun Pods",
+      "assetPath": "",
+      "kind": "icon",
+      "wikiTitle": "Stun Pods",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/Stun_Pods",
+      "imageUrl": "https://helldivers.wiki.gg/images/Stun_Pods_Booster_Icon.svg?63b648"
+    },
+    {
+      "name": "UAV Recon Booster",
+      "assetPath": "",
+      "kind": "icon",
+      "wikiTitle": "UAV Recon Booster",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/UAV_Recon_Booster",
+      "imageUrl": "https://helldivers.wiki.gg/images/UAV_Recon_Booster_Booster_Icon.svg?3e5a87"
+    },
+    {
+      "name": "Vitality Enhancement",
+      "assetPath": "",
+      "kind": "icon",
+      "wikiTitle": "Vitality Enhancement",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/Vitality_Enhancement",
+      "imageUrl": "https://helldivers.wiki.gg/images/Vitality_Enhancement_Booster_Icon.svg?873a4b"
     }
   ]
 }
