@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <rect width="512" height="512" fill="#10161f"/>
+  <rect x="130" y="236" width="230" height="34" rx="10" fill="#72808f"/>
+  <rect x="346" y="244" width="80" height="18" rx="9" fill="#9eacba"/>
+  <path d="M400 210 C420 184, 454 184, 440 220 C454 210,470 226,454 242 C440 258,412 252,404 236 Z" fill="#6dd6ff"/>
+  <path d="M416 210 C424 196,438 196,434 214 C440 208,448 216,440 224 C432 232,420 228,416 220 Z" fill="#ffffff" opacity="0.75"/>
+  <text x="256" y="446" font-family="Arial,sans-serif" font-size="42" text-anchor="middle" fill="#f1f5f9">Cremator</text>
+</svg>

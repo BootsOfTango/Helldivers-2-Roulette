@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <rect width="512" height="512" fill="#121820"/>
+  <rect x="218" y="96" width="24" height="258" rx="10" fill="#9aa8b6"/>
+  <path d="M170 98 L290 98 L246 178 L214 178 Z" fill="#c8d0d8"/>
+  <rect x="206" y="356" width="48" height="72" rx="12" fill="#7a5b3f"/>
+  <text x="256" y="468" font-family="Arial,sans-serif" font-size="34" text-anchor="middle" fill="#f1f5f9">Entrenchment Tool</text>
+</svg>

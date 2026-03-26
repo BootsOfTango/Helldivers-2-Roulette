@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <rect width="512" height="512" fill="#121820"/>
+  <rect x="90" y="210" width="260" height="52" rx="12" fill="#5f6d7a"/>
+  <rect x="340" y="220" width="86" height="14" rx="6" fill="#8a98a6"/>
+  <rect x="340" y="238" width="128" height="10" rx="5" fill="#8a98a6"/>
+  <rect x="116" y="260" width="64" height="36" rx="8" fill="#7f5e3d"/>
+  <text x="256" y="446" font-family="Arial,sans-serif" font-size="42" text-anchor="middle" fill="#f1f5f9">Stoker</text>
+</svg>

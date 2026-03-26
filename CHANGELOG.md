@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-03-26
+
+### Entrenched Division warbond content update ✅
+
+- **Change:** Added the Entrenched Division warbond gear to the catalog, defaults, and image mappings.
+- **Weapons/Equipment:** Entrenchment Tool, Veto, Stoker, Sweeper, Giga Grenade.
+- **Stratagems:** Gas Mortar, Cremator.
+- **Why:** Keeps roulette pools aligned with newly released warbond content so new items can be rolled immediately.
+
 ## 2026-03-22
 
 ### Official stable release tag

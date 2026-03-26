@@ -33,6 +33,7 @@
     "cqc 2 stun lance": "CQC-2 Stun Lance",
     "cqc 30 stun baton": "CQC-30 Stun Baton",
     "cqc 5 combat hatchet": "CQC-5 Combat Hatchet",
+    "cremator": "Cremator",
     "dbs 2 double freedom": "DBS-2 Double Freedom",
     "de escalator": "De-Escalator",
     "dead sprint": "Dead Sprint",
@@ -49,6 +50,7 @@
     "emancipator exosuit": "Emancipator Exosuit",
     "ems mortar sentry": "EMS Mortar Sentry",
     "ems strike": "EMS Strike",
+    "entrenchment tool": "Entrenchment Tool",
     "epoch": "Epoch",
     "expendable napalm": "Expendable Napalm",
     "experimental infusion": "Experimental Infusion",
@@ -77,7 +79,9 @@
     "g 89 smokescreen": "G-89 Smokescreen",
     "g sh 39 shield": "G/SH-39 Shield",
     "gas mines": "Gas Mines",
+    "gas mortar": "Gas Mortar",
     "gatling sentry": "Gatling Sentry",
+    "giga grenade": "Giga Grenade",
     "gl 21 grenade launcher": "GL-21 Grenade Launcher",
     "gp 20 ultimatum": "GP-20 Ultimatum",
     "gp 31 grenade pistol": "GP-31 Grenade Pistol",
@@ -184,12 +188,15 @@
     "sta x3 w a s p launcher": "StA-X3 W.A.S.P. Launcher",
     "stamina enhancement": "Stamina Enhancement",
     "sterilizer": "Sterilizer",
+    "stoker": "Stoker",
     "stun pods": "Stun Pods",
     "supply pack": "Supply Pack",
+    "sweeper": "Sweeper",
     "ted 63 dynamite": "TED-63 Dynamite",
     "tesla tower": "Tesla Tower",
     "tm 1 lure mine": "TM-1 Lure Mine",
     "uav recon booster": "UAV Recon Booster",
+    "veto": "Veto",
     "vitality enhancement": "Vitality Enhancement",
     "warp pack": "Warp Pack",
     "wasp": "Wasp"
@@ -570,6 +577,16 @@
       "wikiTitle": "PLAS-39 Accelerator Rifle",
       "sourceUrl": "https://helldivers.wiki.gg/wiki/PLAS-39_Accelerator_Rifle",
       "imageUrl": "https://helldivers.wiki.gg/images/thumb/PLAS-39_Accelerator_Rifle_Primary_Render.png/1200px-PLAS-39_Accelerator_Rifle_Primary_Render.png?a8ff98"
+    },
+    {
+      "name": "Stoker",
+      "assetPath": "assets/weapons/primaries/stoker.svg",
+      "kind": "image"
+    },
+    {
+      "name": "Sweeper",
+      "assetPath": "assets/weapons/primaries/sweeper.svg",
+      "kind": "image"
     }
   ],
   "sidearm": [
@@ -732,6 +749,16 @@
       "wikiTitle": "SG-22 Bushwhacker",
       "sourceUrl": "https://helldivers.wiki.gg/wiki/SG-22_Bushwhacker",
       "imageUrl": "https://helldivers.wiki.gg/images/thumb/SG-22_Bushwhacker_Secondary_Render.png/1200px-SG-22_Bushwhacker_Secondary_Render.png?96bab5"
+    },
+    {
+      "name": "Entrenchment Tool",
+      "assetPath": "assets/weapons/sidearms/entrenchment-tool.svg",
+      "kind": "image"
+    },
+    {
+      "name": "Veto",
+      "assetPath": "assets/weapons/sidearms/veto.svg",
+      "kind": "image"
     }
   ],
   "throwable": [
@@ -886,6 +913,11 @@
       "wikiTitle": "TM-1 Lure Mine",
       "sourceUrl": "https://helldivers.wiki.gg/wiki/TM-1_Lure_Mine",
       "imageUrl": "https://helldivers.wiki.gg/images/thumb/TM-1_Lure_Mine_Throwable_Render.png/1200px-TM-1_Lure_Mine_Throwable_Render.png?42e657"
+    },
+    {
+      "name": "Giga Grenade",
+      "assetPath": "assets/weapons/throwables/giga-grenade.svg",
+      "kind": "image"
     }
   ],
   "stratagem": [
@@ -1653,6 +1685,16 @@
       "sourceUrl": "https://helldivers.wiki.gg/wiki/WASP",
       "imageUrl": "https://helldivers.wiki.gg/images/W.A.S.P._Launcher_Stratagem_Icon.svg?db7fac",
       "rimCategory": "support"
+    },
+    {
+      "name": "Gas Mortar",
+      "assetPath": "assets/stratagems/defensive/gas-mortar.svg",
+      "kind": "icon"
+    },
+    {
+      "name": "Cremator",
+      "assetPath": "assets/stratagems/support/cremator.svg",
+      "kind": "icon"
     }
   ],
   "booster": [
