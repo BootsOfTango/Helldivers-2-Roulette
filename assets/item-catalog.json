@@ -1512,6 +1512,62 @@
       "warbond": "Redacted Regiment",
       "source": "Redacted Regiment",
       "assetPath": "assets/boosters/concealed-insertion.svg"
+    },
+    {
+      "name": "Stoker",
+      "type": "primary",
+      "subgroup": "shotgun",
+      "warbond": "Entrenched Division",
+      "source": "Entrenched Division",
+      "assetPath": "assets/weapons/primaries/stoker.svg"
+    },
+    {
+      "name": "Sweeper",
+      "type": "primary",
+      "subgroup": "marksman-rifle",
+      "warbond": "Entrenched Division",
+      "source": "Entrenched Division",
+      "assetPath": "assets/weapons/primaries/sweeper.svg"
+    },
+    {
+      "name": "Entrenchment Tool",
+      "type": "sidearm",
+      "subgroup": "special-sidearm",
+      "warbond": "Entrenched Division",
+      "source": "Entrenched Division",
+      "assetPath": "assets/weapons/sidearms/entrenchment-tool.svg"
+    },
+    {
+      "name": "Veto",
+      "type": "sidearm",
+      "subgroup": "pistol",
+      "warbond": "Entrenched Division",
+      "source": "Entrenched Division",
+      "assetPath": "assets/weapons/sidearms/veto.svg"
+    },
+    {
+      "name": "Giga Grenade",
+      "type": "throwable",
+      "subgroup": "grenade",
+      "warbond": "Entrenched Division",
+      "source": "Entrenched Division",
+      "assetPath": "assets/weapons/throwables/giga-grenade.svg"
+    },
+    {
+      "name": "Gas Mortar",
+      "type": "stratagem",
+      "subgroup": "defensive",
+      "warbond": "Entrenched Division",
+      "source": "Entrenched Division",
+      "assetPath": "assets/stratagems/defensive/gas-mortar.svg"
+    },
+    {
+      "name": "Cremator",
+      "type": "stratagem",
+      "subgroup": "support",
+      "warbond": "Entrenched Division",
+      "source": "Entrenched Division",
+      "assetPath": "assets/stratagems/support/cremator.svg"
     }
   ]
 }

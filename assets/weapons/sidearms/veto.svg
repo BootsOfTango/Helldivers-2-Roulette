@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <rect width="512" height="512" fill="#10161f"/>
+  <rect x="128" y="204" width="220" height="44" rx="10" fill="#6c7785"/>
+  <rect x="306" y="218" width="86" height="12" rx="6" fill="#9aa7b5"/>
+  <rect x="190" y="248" width="56" height="76" rx="8" fill="#6e5138"/>
+  <text x="256" y="446" font-family="Arial,sans-serif" font-size="46" text-anchor="middle" fill="#f1f5f9">Veto</text>
+</svg>

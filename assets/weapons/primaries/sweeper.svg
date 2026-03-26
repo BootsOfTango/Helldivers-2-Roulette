@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <rect width="512" height="512" fill="#111720"/>
+  <rect x="92" y="224" width="276" height="36" rx="10" fill="#6b7785"/>
+  <rect x="368" y="236" width="108" height="8" rx="4" fill="#97a3af"/>
+  <rect x="126" y="260" width="68" height="34" rx="6" fill="#73563b"/>
+  <line x1="430" y1="240" x2="494" y2="200" stroke="#adb8c4" stroke-width="5"/>
+  <text x="256" y="446" font-family="Arial,sans-serif" font-size="42" text-anchor="middle" fill="#f1f5f9">Sweeper</text>
+</svg>

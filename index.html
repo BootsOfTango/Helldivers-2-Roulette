@@ -3809,7 +3809,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 "Reform", "Compliance", "Salute", "Ration", "Tax", "Boot", "Directive", "Glory", "Witness"
             ],
 
-                                                            items: {
+                                                                        items: {
                 primaries: [
                     { name: "AR-2 Coyote", enabled: true, warbond: "Dust Devils", subgroup: "assault-rifle", source: "Dust Devils" },
                     { name: "AR-23 Liberator", enabled: true, warbond: "Unassigned / Custom", subgroup: "assault-rifle", source: "Unassigned / Custom" },
@@ -3858,6 +3858,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                     { name: "PLAS-1 Scorcher", enabled: true, warbond: "Helldiver Basics (Mobilize)", subgroup: "energy", source: "Helldiver Basics (Mobilize)" },
                     { name: "PLAS-101 Purifier", enabled: true, warbond: "Polar Patriots", subgroup: "energy", source: "Polar Patriots" },
                     { name: "PLAS-39 Accelerator Rifle", enabled: true, warbond: "Righteous Revenants", subgroup: "energy", source: "Righteous Revenants" },
+                    { name: "Stoker", enabled: true, warbond: "Entrenched Division", subgroup: "shotgun", source: "Entrenched Division" },
+                    { name: "Sweeper", enabled: true, warbond: "Entrenched Division", subgroup: "marksman-rifle", source: "Entrenched Division" },
                 ],
 
                 sidearms: [
@@ -3881,6 +3883,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                     { name: "LAS-7 Dagger", enabled: true, warbond: "Cutting Edge", subgroup: "special-sidearm", source: "Cutting Edge" },
                     { name: "PLAS-15 Loyalist", enabled: true, warbond: "Truth Enforcers", subgroup: "special-sidearm", source: "Truth Enforcers" },
                     { name: "SG-22 Bushwhacker", enabled: true, warbond: "Viper Commandos", subgroup: "special-sidearm", source: "Viper Commandos" },
+                    { name: "Entrenchment Tool", enabled: true, warbond: "Entrenched Division", subgroup: "special-sidearm", source: "Entrenched Division" },
+                    { name: "Veto", enabled: true, warbond: "Entrenched Division", subgroup: "pistol", source: "Entrenched Division" },
                 ],
 
                 throwables: [
@@ -3903,6 +3907,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                     { name: "TED-63 Dynamite", enabled: true, warbond: "Borderline Justice", subgroup: "throwing-weapon", source: "Borderline Justice" },
                     { name: "G/SH-39 Shield", enabled: true, warbond: "Siege Breakers", subgroup: "utility-throwable", source: "Siege Breakers" },
                     { name: "TM-1 Lure Mine", enabled: true, warbond: "Redacted Regiment", subgroup: "utility-throwable", source: "Redacted Regiment" },
+                    { name: "Giga Grenade", enabled: true, warbond: "Entrenched Division", subgroup: "grenade", source: "Entrenched Division" },
                 ],
 
                 stratagems: [
@@ -3991,6 +3996,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                     { name: "Supply Pack", enabled: true, warbond: "Unassigned / Custom", subgroup: "support", source: "Unassigned / Custom" },
                     { name: "Warp Pack", enabled: true, warbond: "Unassigned / Custom", subgroup: "support", source: "Unassigned / Custom" },
                     { name: "Wasp", enabled: true, warbond: "Unassigned / Custom", subgroup: "support", source: "Unassigned / Custom" },
+                    { name: "Gas Mortar", enabled: true, warbond: "Entrenched Division", subgroup: "defensive", source: "Entrenched Division" },
+                    { name: "Cremator", enabled: true, warbond: "Entrenched Division", subgroup: "support", source: "Entrenched Division" },
                 ],
 
                 boosters: [
@@ -7510,6 +7517,7 @@ ${noteContent}`
 
 
 
+
         const ITEM_WARBOND_BY_NAME = {
             "AR-2 Coyote": "Dust Devils",
             "AR-23 Liberator": "Unassigned / Custom",
@@ -7700,6 +7708,13 @@ ${noteContent}`
             "Sample Scanner": "Masters of Ceremony",
             "Stun Pods": "Force of Law",
             "Concealed Insertion": "Redacted Regiment",
+            "Stoker": "Entrenched Division",
+            "Sweeper": "Entrenched Division",
+            "Entrenchment Tool": "Entrenched Division",
+            "Veto": "Entrenched Division",
+            "Giga Grenade": "Entrenched Division",
+            "Gas Mortar": "Entrenched Division",
+            "Cremator": "Entrenched Division",
         };
 
         function getItemWarbond(item) {
