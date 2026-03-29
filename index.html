@@ -2843,6 +2843,18 @@ END MASTER DIRECTIVE
                         <div class="label">Current Seed</div>
                         <div class="big" id="spinSeed">—</div>
                     </div>
+
+                    <div class="box" style="margin-top:12px;">
+                        <div class="label">Planet (rolled separately)</div>
+                        <div class="big" id="dispPlanet">—</div>
+
+                        <div id="planetInfoCards" class="planetCardWrap" style="margin-top:10px; display:none;"></div>
+                        <div class="miniRow" id="planetManualSearchWrap" style="margin-top:10px; display:none;">
+                            <button id="btnSearchPlanetInline" class="btnGhost">MANUALLY SEARCH FOR PLANET?</button>
+                        </div>
+
+                        <div class="tiny" id="dispPlanetTiny" style="display:none;"></div>
+                    </div>
                 </div>
 
                 <div class="col">
@@ -2858,25 +2870,6 @@ END MASTER DIRECTIVE
                             <button id="btnApplyManualMode" class="btnPrimary">APPLY MODE</button>
                         </div>
                         <div class="tiny">One mission per card. Blitz = 12 minutes. Eradication = 15 minutes. Standard = 40 minutes.</div>
-                    </div>
-                </div>
-
-
-            </div>
-
-            <div class="row" style="margin-top:12px;">
-                <div class="col">
-                    <div class="box">
-                        <div class="label">Planet (rolled separately)</div>
-                        <div class="big" id="dispPlanet">—</div>
-
-                        <div id="planetInfoCards" class="planetCardWrap" style="margin-top:10px; display:none;"></div>
-                        <div class="miniRow" id="planetManualSearchWrap" style="margin-top:10px; display:none;">
-                            <button id="btnSearchPlanetInline" class="btnGhost">MANUALLY SEARCH FOR PLANET?</button>
-                        </div>
-
-                        <div class="tiny" id="dispPlanetTiny" style="display:none;"></div>
-
                     </div>
                 </div>
             </div>
@@ -8777,6 +8770,10 @@ ${noteContent}`
             }
             if (tab === "items") renderItems();
             if (tab === "rank") renderRank();
+            if (tab === "spin") {
+                renderSpin();
+                if (!state.current?.loadout) clearSpinReelSlots();
+            }
         }
 
         function doSpin(forceReroll = false) {
