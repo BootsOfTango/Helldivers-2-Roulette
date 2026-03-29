@@ -5474,12 +5474,6 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             return { fill: "rgba(255,212,0,.18)", stroke: "#ffd400" };
         }
 
-        function getRadarScale(card) {
-            const gradeScale = clamp(Number(card?.grade || 0) / 100, 0, 1);
-            const moScale = card?.majorOrderDone ? 1 : MO_FAIL_MULTIPLIER;
-            return clamp(gradeScale * moScale, 0, 1);
-        }
-
         function buildRadarSVG(card, maxes) {
             const s = card.stats || {};
             const combo = Number(s.deaths || 0) + Number(s.stims || 0);
@@ -5494,14 +5488,12 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 normPos(s.stratUses, maxes.maxStratUses),
             ];
 
-            const radarScale = getRadarScale(card);
-
             const renderSize = 250;
             const viewSize = 320;
             const cx = viewSize / 2;
             const cy = viewSize / 2;
             const rOuter = 74;
-            const r = rOuter * radarScale;
+            const r = rOuter;
 
             const angles = [-90, -18, 54, 126, 198].map(a => a * Math.PI / 180);
 
@@ -5547,12 +5539,11 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 return `<polygon points="${pts}" />`;
             };
 
-            const penaltyNote = ` (scaled by Grade${card.majorOrderDone ? "" : ` and MO -${Math.round((1 - MO_FAIL_MULTIPLIER) * 100)}%`})`;
             const col = getTierRadarColor(card);
 
             return `
                   <div class="radarWrap">
-                    <svg viewBox="0 0 ${viewSize} ${viewSize}" width="${renderSize}" height="${renderSize}" aria-label="Performance pentagon${penaltyNote}">
+                    <svg viewBox="0 0 ${viewSize} ${viewSize}" width="${renderSize}" height="${renderSize}" aria-label="Performance pentagon">
                       <g class="radarGrid">
                         ${ring(0.33)}
                         ${ring(0.66)}
