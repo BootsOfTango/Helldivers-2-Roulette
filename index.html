@@ -8924,6 +8924,7 @@ ${noteContent}`
         }
 
         function resetCurrentSpinState() {
+            reelToken++;
             state.current.seed = null;
             state.current.seedBase = null;
             state.current.mode = null;
@@ -8940,6 +8941,29 @@ ${noteContent}`
             state.current._pendingMode = null;
             state.current._pendingFaction = null;
             togglePlanetSearchPanel(false);
+            clearSpinReelSlots();
+        }
+
+        function clearSpinReelSlots() {
+            const slots = [
+                ["#slotPrimary", "primary"],
+                ["#slotSidearm", "sidearm"],
+                ["#slotThrowable", "throwable"],
+                ["#slotStrat1", "stratagem"],
+                ["#slotStrat2", "stratagem"],
+                ["#slotStrat3", "stratagem"],
+                ["#slotStrat4", "stratagem"],
+                ["#slotBooster", "booster"],
+            ];
+
+            slots.forEach(([selector, category]) => {
+                const el = $(selector);
+                if (!el) return;
+                el.classList.remove("slot-spinning");
+                el.style.transform = "scale(1)";
+                el.style.transition = "";
+                setSlotVisualState(el, "—", category);
+            });
         }
 
         function applyManualMode(mode) {
