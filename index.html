@@ -5424,14 +5424,25 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             return clamp((maxV - v) / (maxV - minV), 0, 1);
         }
 
+        // Baseline caps keep radar shape meaningful even when there is only one saved card.
+        // Without these floors, single-card normalization makes every axis look "maxed",
+        // which collapses the pentagon into a misleading near-regular shape.
+        const RADAR_BASELINE_MAXES = {
+            kills: 300,
+            accuracy: 100,
+            distanceKm: 12,
+            stratUses: 30,
+            deathsPlusStims: 25
+        };
+
         function getRadarMaxes(cards) {
             const out = {
-                maxKills: 0,
-                maxAccuracy: 0,
-                maxDistanceKm: 0,
-                maxStratUses: 0,
-                minDeathsPlusStims: null,
-                maxDeathsPlusStims: 0
+                maxKills: RADAR_BASELINE_MAXES.kills,
+                maxAccuracy: RADAR_BASELINE_MAXES.accuracy,
+                maxDistanceKm: RADAR_BASELINE_MAXES.distanceKm,
+                maxStratUses: RADAR_BASELINE_MAXES.stratUses,
+                minDeathsPlusStims: 0,
+                maxDeathsPlusStims: RADAR_BASELINE_MAXES.deathsPlusStims
             };
 
             for (const c of (cards || [])) {
@@ -5443,11 +5454,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 out.maxStratUses = Math.max(out.maxStratUses, Number(s.stratUses || 0));
 
                 out.maxDeathsPlusStims = Math.max(out.maxDeathsPlusStims, combo);
-                if (out.minDeathsPlusStims === null) out.minDeathsPlusStims = combo;
                 out.minDeathsPlusStims = Math.min(out.minDeathsPlusStims, combo);
             }
-
-            if (out.minDeathsPlusStims === null) out.minDeathsPlusStims = 0;
             return out;
         }
 
