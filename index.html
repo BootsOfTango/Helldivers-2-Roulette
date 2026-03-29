@@ -770,12 +770,23 @@ END MASTER DIRECTIVE
             filter: none;
         }
 
+        .spinTopLayout {
+            display: grid;
+            grid-template-columns: minmax(0, 2fr) minmax(300px, 1fr);
+            gap: 14px;
+            align-items: start;
+        }
+
+        .spinMetaCol {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
         .slotGrid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 14px 18px;
-            max-width: 980px;
-            margin: 0 auto;
             margin-top: 8px;
         }
 
@@ -811,6 +822,12 @@ END MASTER DIRECTIVE
             background: rgba(255,255,255,.03);
             text-align: center;
             white-space: nowrap;
+        }
+
+        @media (max-width: 1200px) {
+            .spinTopLayout {
+                grid-template-columns: 1fr;
+            }
         }
 
 
@@ -2800,23 +2817,60 @@ END MASTER DIRECTIVE
                 </div>
             </div>
 
-            <div class="label">Spin reels</div>
-            <div class="slotGrid" id="slotGrid">
-                <div class="slotCol">
-                    <div class="slotRow slotRow-weapon"><span class="slotTag">Primary</span><div class="slot slot-primary" id="slotPrimary"><div class="slotVisual" aria-hidden="true"></div><div class="slotLabel">—</div></div></div>
-                    <div class="slotRow slotRow-weapon"><span class="slotTag">Sidearm</span><div class="slot slot-sidearm" id="slotSidearm"><div class="slotVisual" aria-hidden="true"></div><div class="slotLabel">—</div></div></div>
-                    <div class="slotRow slotRow-weapon"><span class="slotTag">Throwable</span><div class="slot slot-throwable" id="slotThrowable"><div class="slotVisual" aria-hidden="true"></div><div class="slotLabel">—</div></div></div>
+            <div class="spinTopLayout">
+                <div>
+                    <div class="label">Spin reels</div>
+                    <div class="slotGrid" id="slotGrid">
+                        <div class="slotCol">
+                            <div class="slotRow slotRow-weapon"><span class="slotTag">Primary</span><div class="slot slot-primary" id="slotPrimary"><div class="slotVisual" aria-hidden="true"></div><div class="slotLabel">—</div></div></div>
+                            <div class="slotRow slotRow-weapon"><span class="slotTag">Sidearm</span><div class="slot slot-sidearm" id="slotSidearm"><div class="slotVisual" aria-hidden="true"></div><div class="slotLabel">—</div></div></div>
+                            <div class="slotRow slotRow-weapon"><span class="slotTag">Throwable</span><div class="slot slot-throwable" id="slotThrowable"><div class="slotVisual" aria-hidden="true"></div><div class="slotLabel">—</div></div></div>
+                        </div>
+                        <div class="slotCol">
+                            <div class="slotRow"><span class="slotTag">Strat 1</span><div class="slot slot-strat" id="slotStrat1"><div class="slotVisual" aria-hidden="true"></div><div class="slotLabel">—</div></div></div>
+                            <div class="slotRow"><span class="slotTag">Strat 2</span><div class="slot slot-strat" id="slotStrat2"><div class="slotVisual" aria-hidden="true"></div><div class="slotLabel">—</div></div></div>
+                            <div class="slotRow"><span class="slotTag">Strat 3</span><div class="slot slot-strat" id="slotStrat3"><div class="slotVisual" aria-hidden="true"></div><div class="slotLabel">—</div></div></div>
+                            <div class="slotRow"><span class="slotTag">Strat 4</span><div class="slot slot-strat" id="slotStrat4"><div class="slotVisual" aria-hidden="true"></div><div class="slotLabel">—</div></div></div>
+                            <div class="slotRow"><span class="slotTag">Booster</span><div class="slot slot-strat slot-booster" id="slotBooster"><div class="slotVisual" aria-hidden="true"></div><div class="slotLabel">—</div></div></div>
+                        </div>
+                    </div>
+
+                    <div class="smallHelp">Reels spin in order and slow down on reveal. Booster now auto-rolls after the weapon and stratagem reels finish. Equal odds. Pure chaos.</div>
                 </div>
-                <div class="slotCol">
-                    <div class="slotRow"><span class="slotTag">Strat 1</span><div class="slot slot-strat" id="slotStrat1"><div class="slotVisual" aria-hidden="true"></div><div class="slotLabel">—</div></div></div>
-                    <div class="slotRow"><span class="slotTag">Strat 2</span><div class="slot slot-strat" id="slotStrat2"><div class="slotVisual" aria-hidden="true"></div><div class="slotLabel">—</div></div></div>
-                    <div class="slotRow"><span class="slotTag">Strat 3</span><div class="slot slot-strat" id="slotStrat3"><div class="slotVisual" aria-hidden="true"></div><div class="slotLabel">—</div></div></div>
-                    <div class="slotRow"><span class="slotTag">Strat 4</span><div class="slot slot-strat" id="slotStrat4"><div class="slotVisual" aria-hidden="true"></div><div class="slotLabel">—</div></div></div>
-                    <div class="slotRow"><span class="slotTag">Booster</span><div class="slot slot-strat slot-booster" id="slotBooster"><div class="slotVisual" aria-hidden="true"></div><div class="slotLabel">—</div></div></div>
+
+                <div class="spinMetaCol">
+                    <div class="box">
+                        <div class="label">Current Seed</div>
+                        <div class="big" id="spinSeed">—</div>
+                    </div>
+
+                    <div class="box">
+                        <div class="label">Planet (rolled separately)</div>
+                        <div class="big" id="dispPlanet">—</div>
+
+                        <div id="planetInfoCards" class="planetCardWrap" style="margin-top:10px; display:none;"></div>
+                        <div class="miniRow" id="planetManualSearchWrap" style="margin-top:10px; display:none;">
+                            <button id="btnSearchPlanetInline" class="btnGhost">MANUALLY SEARCH FOR PLANET?</button>
+                        </div>
+
+                        <div class="tiny" id="dispPlanetTiny" style="display:none;"></div>
+                    </div>
+
+                    <div class="box">
+                        <div class="label">Mode</div>
+                        <div class="big" id="spinMode">—</div>
+                        <div class="miniRow" id="manualModeWrap" style="margin-top:10px;">
+                            <select id="manualModeSelect">
+                                <option value="Blitz (12)">Blitz (12)</option>
+                                <option value="Eradication (15)">Eradication (15)</option>
+                                <option value="Standard (40)">Standard (40)</option>
+                            </select>
+                            <button id="btnApplyManualMode" class="btnPrimary">APPLY MODE</button>
+                        </div>
+                        <div class="tiny">One mission per card. Blitz = 12 minutes. Eradication = 15 minutes. Standard = 40 minutes.</div>
+                    </div>
                 </div>
             </div>
-
-            <div class="smallHelp">Reels spin in order and slow down on reveal. Booster now auto-rolls after the weapon and stratagem reels finish. Equal odds. Pure chaos.</div>
 
             <div id="planetSearchPanel" class="box planetSearchPanel" style="display:none;">
                 <div class="label">Manual planet selection</div>
@@ -2833,45 +2887,6 @@ END MASTER DIRECTIVE
                 <div id="planetSearchSelectionCue" class="tiny planetSearchSelectionCue" style="display:none;"></div>
                 <div class="tiny" style="margin-top:8px;">Manual search includes the full known planet list, grouped by sector with alphabetical planet order.</div>
                 <div id="planetSearchResults" class="planetSearchResults"></div>
-            </div>
-
-            <div class="divider"></div>
-
-            <div class="row">
-                <div class="col">
-                    <div class="box">
-                        <div class="label">Current Seed</div>
-                        <div class="big" id="spinSeed">—</div>
-                    </div>
-
-                    <div class="box" style="margin-top:12px;">
-                        <div class="label">Planet (rolled separately)</div>
-                        <div class="big" id="dispPlanet">—</div>
-
-                        <div id="planetInfoCards" class="planetCardWrap" style="margin-top:10px; display:none;"></div>
-                        <div class="miniRow" id="planetManualSearchWrap" style="margin-top:10px; display:none;">
-                            <button id="btnSearchPlanetInline" class="btnGhost">MANUALLY SEARCH FOR PLANET?</button>
-                        </div>
-
-                        <div class="tiny" id="dispPlanetTiny" style="display:none;"></div>
-                    </div>
-                </div>
-
-                <div class="col">
-                    <div class="box">
-                        <div class="label">Mode</div>
-                        <div class="big" id="spinMode">—</div>
-                        <div class="miniRow" id="manualModeWrap" style="margin-top:10px;">
-                            <select id="manualModeSelect">
-                                <option value="Blitz (12)">Blitz (12)</option>
-                                <option value="Eradication (15)">Eradication (15)</option>
-                                <option value="Standard (40)">Standard (40)</option>
-                            </select>
-                            <button id="btnApplyManualMode" class="btnPrimary">APPLY MODE</button>
-                        </div>
-                        <div class="tiny">One mission per card. Blitz = 12 minutes. Eradication = 15 minutes. Standard = 40 minutes.</div>
-                    </div>
-                </div>
             </div>
         </section>
 
