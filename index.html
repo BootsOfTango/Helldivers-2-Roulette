@@ -6146,7 +6146,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             // Buttons
             $("#btnLock").disabled = !c.loadout || c.locked || c.spinning;
-            $("#btnRollPlanet").disabled = !c.loadout || !c.locked || c.spinning || isApiPlanetSyncInProgress();
+            $("#btnRollPlanet").disabled = !c.loadout || !c.locked || c.spinning;
             $("#btnUse").disabled = !c.loadout || !c.locked || c.spinning;
             if (manualModeSelect) manualModeSelect.disabled = !c.loadout || !c.locked || c.spinning;
             const btnApplyManualMode = $("#btnApplyManualMode");
@@ -8879,10 +8879,6 @@ ${noteContent}`
         }
         function doRollPlanet() {
             if (!state.current.loadout || !state.current.locked) return;
-            if (isApiPlanetSyncInProgress()) {
-                alert("Active planets are still syncing from the live API. Try again in a moment.");
-                return;
-            }
             const p = rollPlanetForFaction(state.current.faction);
             if (!p) {
                 alert("No planets available for that faction. Add planets in ITEMS tab.");
@@ -8905,10 +8901,6 @@ ${noteContent}`
         function doClearPlanet() {
             // Renamed behavior: "REROLL PLANET" (roll again instead of clearing)
             if (!state.current.loadout || !state.current.locked) return;
-            if (isApiPlanetSyncInProgress()) {
-                alert("Active planets are still syncing from the live API. Try again in a moment.");
-                return;
-            }
 
             const p = rollPlanetForFaction(state.current.faction);
             if (!p) {
