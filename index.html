@@ -2790,7 +2790,6 @@ END MASTER DIRECTIVE
             <div class="btnRow">
                 <button class="btnPrimary" id="btnSpin">SPIN LOADOUT</button>
                 <button id="btnLock" class="btnGhost" disabled>LOCK LOADOUT</button>
-                <button id="btnChooseMode" class="btnGhost" disabled>MANUAL MODE</button>
                 <button id="btnRollPlanet" class="btnGhost" disabled>ROLL PLANET</button>
                 <button id="btnUse" class="btnPrimary" disabled>CONFIRM</button>
                 <button id="btnReroll" class="btnDanger" style="display:none;">SPECIAL EVENT: REROLL (3)</button>
@@ -2850,7 +2849,7 @@ END MASTER DIRECTIVE
                     <div class="box">
                         <div class="label">Mode</div>
                         <div class="big" id="spinMode">—</div>
-                        <div class="miniRow" id="manualModeWrap" style="margin-top:10px; display:none;">
+                        <div class="miniRow" id="manualModeWrap" style="margin-top:10px;">
                             <select id="manualModeSelect">
                                 <option value="Blitz (12)">Blitz (12)</option>
                                 <option value="Eradication (15)">Eradication (15)</option>
@@ -6085,7 +6084,6 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             const manualModeSelect = $("#manualModeSelect");
             if (manualModeSelect) manualModeSelect.value = c.mode || "Blitz (12)";
-            toggleManualModeControls(false);
 
             // Planet display (name + info cards)
             $("#dispPlanet").textContent = c.planet ? c.planet.name : "—";
@@ -6147,9 +6145,11 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             // Buttons
             $("#btnLock").disabled = !c.loadout || c.locked || c.spinning;
-            $("#btnChooseMode").disabled = !c.loadout || !c.locked || c.spinning;
             $("#btnRollPlanet").disabled = !c.loadout || !c.locked || c.spinning || isApiPlanetSyncInProgress();
             $("#btnUse").disabled = !c.loadout || !c.locked || c.spinning;
+            if (manualModeSelect) manualModeSelect.disabled = !c.loadout || !c.locked || c.spinning;
+            const btnApplyManualMode = $("#btnApplyManualMode");
+            if (btnApplyManualMode) btnApplyManualMode.disabled = !c.loadout || !c.locked || c.spinning;
 
 
             // Special event reroll
@@ -8942,23 +8942,6 @@ ${noteContent}`
             togglePlanetSearchPanel(false);
         }
 
-        function toggleManualModeControls(forceState) {
-            const wrap = $("#manualModeWrap");
-            if (!wrap) return;
-
-            const c = state.current || {};
-            const canShow = !!(c.loadout && c.locked && !c.spinning);
-            if (!canShow) {
-                wrap.style.display = "none";
-                return;
-            }
-
-            const show = (typeof forceState === "boolean")
-                ? forceState
-                : wrap.style.display === "none";
-            wrap.style.display = show ? "" : "none";
-        }
-
         function applyManualMode(mode) {
             if (!state.current.loadout || !state.current.locked) return;
             const allowed = ["Blitz (12)", "Eradication (15)", "Standard (40)"];
@@ -9089,10 +9072,8 @@ ${noteContent}`
             $("#btnSpin").addEventListener("click", () => doSpin());
             $("#btnReroll").addEventListener("click", () => doReroll());
             $("#btnLock").addEventListener("click", () => doLock());
-            $("#btnChooseMode").addEventListener("click", () => toggleManualModeControls());
             $("#btnApplyManualMode").addEventListener("click", () => {
                 applyManualMode($("#manualModeSelect")?.value || "");
-                toggleManualModeControls(false);
             });
             $("#btnUse").addEventListener("click", () => doUseThisRun());
 
