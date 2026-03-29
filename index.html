@@ -5252,6 +5252,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             el.classList.remove("strat-rim-defensive", "strat-rim-orbital", "strat-rim-eagle", "strat-rim-support");
 
             if (options.skeleton) return;
+            const normalizedText = String(text || "").trim();
+            if (!normalizedText || normalizedText === "—" || normalizedText === "-") return;
 
             const itemVisual = getItemVisual(name, category);
             if (!itemVisual) return;
