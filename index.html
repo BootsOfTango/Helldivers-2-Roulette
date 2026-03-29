@@ -2790,6 +2790,7 @@ END MASTER DIRECTIVE
             <div class="btnRow">
                 <button class="btnPrimary" id="btnSpin">SPIN LOADOUT</button>
                 <button id="btnLock" class="btnGhost" disabled>LOCK LOADOUT</button>
+                <button id="btnChooseMode" class="btnGhost" disabled>MANUAL MODE</button>
                 <button id="btnRollPlanet" class="btnGhost" disabled>ROLL PLANET</button>
                 <button id="btnUse" class="btnPrimary" disabled>CONFIRM</button>
                 <button id="btnReroll" class="btnDanger" style="display:none;">SPECIAL EVENT: REROLL (3)</button>
@@ -2849,6 +2850,14 @@ END MASTER DIRECTIVE
                     <div class="box">
                         <div class="label">Mode</div>
                         <div class="big" id="spinMode">—</div>
+                        <div class="miniRow" id="manualModeWrap" style="margin-top:10px; display:none;">
+                            <select id="manualModeSelect">
+                                <option value="Blitz (12)">Blitz (12)</option>
+                                <option value="Eradication (15)">Eradication (15)</option>
+                                <option value="Standard (40)">Standard (40)</option>
+                            </select>
+                            <button id="btnApplyManualMode" class="btnPrimary">APPLY MODE</button>
+                        </div>
                         <div class="tiny">One mission per card. Blitz = 12 minutes. Eradication = 15 minutes. Standard = 40 minutes.</div>
                     </div>
                 </div>
@@ -6074,10 +6083,9 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 modeEl.textContent = "—";
             }
 
-
-
-
-
+            const manualModeSelect = $("#manualModeSelect");
+            if (manualModeSelect) manualModeSelect.value = c.mode || "Blitz (12)";
+            toggleManualModeControls(false);
 
             // Planet display (name + info cards)
             $("#dispPlanet").textContent = c.planet ? c.planet.name : "—";
@@ -6139,6 +6147,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             // Buttons
             $("#btnLock").disabled = !c.loadout || c.locked || c.spinning;
+            $("#btnChooseMode").disabled = !c.loadout || !c.locked || c.spinning;
             $("#btnRollPlanet").disabled = !c.loadout || !c.locked || c.spinning || isApiPlanetSyncInProgress();
             $("#btnUse").disabled = !c.loadout || !c.locked || c.spinning;
 
@@ -8914,6 +8923,53 @@ ${noteContent}`
             renderSpin();
         }
 
+        function resetCurrentSpinState() {
+            state.current.seed = null;
+            state.current.seedBase = null;
+            state.current.mode = null;
+            state.current.faction = null;
+            state.current.loadout = null;
+            state.current.locked = false;
+            state.current.planet = null;
+            state.current.planetLocked = false;
+            state.current.planetBiome = null;
+            state.current.manualPlanetCandidate = null;
+            state.current.specialActive = false;
+            state.current.rerollsLeft = 0;
+            state.current.spinning = false;
+            state.current._pendingMode = null;
+            state.current._pendingFaction = null;
+            togglePlanetSearchPanel(false);
+        }
+
+        function toggleManualModeControls(forceState) {
+            const wrap = $("#manualModeWrap");
+            if (!wrap) return;
+
+            const c = state.current || {};
+            const canShow = !!(c.loadout && c.locked && !c.spinning);
+            if (!canShow) {
+                wrap.style.display = "none";
+                return;
+            }
+
+            const show = (typeof forceState === "boolean")
+                ? forceState
+                : wrap.style.display === "none";
+            wrap.style.display = show ? "" : "none";
+        }
+
+        function applyManualMode(mode) {
+            if (!state.current.loadout || !state.current.locked) return;
+            const allowed = ["Blitz (12)", "Eradication (15)", "Standard (40)"];
+            if (!allowed.includes(mode)) return;
+
+            state.current.mode = mode;
+            if (state.current.loadout) state.current.loadout.mode = mode;
+            if (state.current.loadout) state.current.loadout.fingerprint = fingerprintLoadout(state.current.loadout);
+            renderSpin();
+        }
+
         function doUseThisRun() {
             // create card only if locked
             const c = state.current;
@@ -8969,7 +9025,9 @@ ${noteContent}`
             recalcGrades();
             saveState();
 
-            // After using, keep the current loadout visible but prevent accidental re-use without spinning again
+            // After creating a card, reset the spin tab so previous run details do not linger.
+            resetCurrentSpinState();
+            renderSpin();
             switchTab("results");
         }
 
@@ -9031,6 +9089,11 @@ ${noteContent}`
             $("#btnSpin").addEventListener("click", () => doSpin());
             $("#btnReroll").addEventListener("click", () => doReroll());
             $("#btnLock").addEventListener("click", () => doLock());
+            $("#btnChooseMode").addEventListener("click", () => toggleManualModeControls());
+            $("#btnApplyManualMode").addEventListener("click", () => {
+                applyManualMode($("#manualModeSelect")?.value || "");
+                toggleManualModeControls(false);
+            });
             $("#btnUse").addEventListener("click", () => doUseThisRun());
 
             $("#btnCloseResultModal").addEventListener("click", closeResultCardModal);
