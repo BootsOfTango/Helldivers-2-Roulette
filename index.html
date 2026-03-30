@@ -535,6 +535,12 @@ END MASTER DIRECTIVE
             letter-spacing: .2px;
         }
 
+        .big.seedReveal {
+            font-size: 30px;
+            letter-spacing: .35px;
+            line-height: 1.05;
+        }
+
         #spinSeed,
         #pillSeed {
             transition: filter .28s ease, text-shadow .32s ease, transform .22s ease, opacity .2s ease;
@@ -543,9 +549,9 @@ END MASTER DIRECTIVE
 
         #spinSeed.seed-spinning,
         #pillSeed.seed-spinning {
-            animation: seedNameSpinJitter .12s linear infinite;
-            filter: blur(.15px);
-            opacity: .96;
+            animation: seedNameSpinWhip .08s linear infinite;
+            filter: blur(3.2px) brightness(1.08);
+            opacity: .88;
         }
 
         #spinSeed.seed-settled,
@@ -553,10 +559,22 @@ END MASTER DIRECTIVE
             animation: seedNameSettleGlow 1.15s ease-out 1;
         }
 
-        @keyframes seedNameSpinJitter {
-            0% { transform: translateY(-1px); }
-            50% { transform: translateY(1px); }
-            100% { transform: translateY(-1px); }
+        @keyframes seedNameSpinWhip {
+            0% {
+                transform: translateX(-8px) rotate(-10deg) scale(.96);
+            }
+            25% {
+                transform: translateX(7px) rotate(8deg) scale(1.03);
+            }
+            50% {
+                transform: translateX(-6px) rotate(-7deg) scale(.98);
+            }
+            75% {
+                transform: translateX(8px) rotate(10deg) scale(1.02);
+            }
+            100% {
+                transform: translateX(-8px) rotate(-10deg) scale(.96);
+            }
         }
 
         @keyframes seedNameSettleGlow {
@@ -2873,6 +2891,11 @@ END MASTER DIRECTIVE
                             <div class="slotRow"><span class="slotTag">Strat 4</span><div class="slot slot-strat" id="slotStrat4"><div class="slotVisual" aria-hidden="true"></div><div class="slotLabel">—</div></div></div>
                         </div>
                     </div>
+
+                    <div class="box" style="margin-top:12px;">
+                        <div class="label">Current Seed</div>
+                        <div class="big seedReveal" id="spinSeed">—</div>
+                    </div>
                 </div>
 
                 <div class="spinMetaCol">
@@ -2887,11 +2910,6 @@ END MASTER DIRECTIVE
                             </select>
                             <button id="btnApplyManualMode" class="btnPrimary">Apply mode?</button>
                         </div>
-                    </div>
-
-                    <div class="box">
-                        <div class="label">Current Seed</div>
-                        <div class="big" id="spinSeed">—</div>
                     </div>
 
                     <div class="box" id="playerEntryBox" style="display:none;">
