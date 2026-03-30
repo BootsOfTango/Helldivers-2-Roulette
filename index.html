@@ -2907,6 +2907,15 @@ END MASTER DIRECTIVE
                         <div class="label">Current Seed</div>
                         <div class="big seedReveal" id="spinSeed">—</div>
                     </div>
+
+                    <div class="box" id="playerEntryBox" style="display:none; margin-top:12px;">
+                        <div class="label">Player Name</div>
+                        <div class="miniRow" style="margin-top:8px;">
+                            <input id="spinPlayerName" type="text" maxlength="40" placeholder="Enter player name..." />
+                            <button id="btnConfirmPlayer" class="btnPrimary">CONFIRM PLAYER</button>
+                        </div>
+                        <div class="tiny" style="margin-top:8px;">After planet confirmation finishes the seed reveal, confirm player name to create the card.</div>
+                    </div>
                 </div>
 
                 <div class="spinMetaCol">
@@ -2921,15 +2930,6 @@ END MASTER DIRECTIVE
                             </select>
                             <button id="btnApplyManualMode" class="btnPrimary">Apply mode?</button>
                         </div>
-                    </div>
-
-                    <div class="box" id="playerEntryBox" style="display:none;">
-                        <div class="label">Player Name</div>
-                        <div class="miniRow" style="margin-top:8px;">
-                            <input id="spinPlayerName" type="text" maxlength="40" placeholder="Enter player name..." />
-                            <button id="btnConfirmPlayer" class="btnPrimary">CONFIRM PLAYER</button>
-                        </div>
-                        <div class="tiny" style="margin-top:8px;">After planet confirmation finishes the seed reveal, confirm player name to create the card.</div>
                     </div>
 
                     <div class="box">
