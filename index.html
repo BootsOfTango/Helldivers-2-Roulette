@@ -2855,6 +2855,14 @@ END MASTER DIRECTIVE
                         <div class="big" id="spinSeed">—</div>
                     </div>
 
+                    <div class="box" id="playerEntryBox" style="display:none;">
+                        <div class="label">Player Name</div>
+                        <div class="miniRow" style="margin-top:8px;">
+                            <input id="spinPlayerName" type="text" maxlength="40" placeholder="Enter player name..." />
+                        </div>
+                        <div class="tiny" style="margin-top:8px;">After seed is confirmed, enter player name and press CONFIRM again to create the card.</div>
+                    </div>
+
                     <div class="box">
                         <div class="label">Planet (rolled separately)</div>
                         <div class="big" id="dispPlanet">—</div>
@@ -3278,6 +3286,22 @@ END MASTER DIRECTIVE
                     gain.gain.value = 0.1;
                     osc.start();
                     osc.stop(ctx.currentTime + 0.25);
+                }
+
+                if (type === "seedTick") {
+                    osc.type = "square";
+                    osc.frequency.value = 520;
+                    gain.gain.value = 0.04;
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.045);
+                }
+
+                if (type === "seedFinal") {
+                    osc.type = "sawtooth";
+                    osc.frequency.value = 720;
+                    gain.gain.value = 0.09;
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.22);
                 }
 
             } catch (e) { }
@@ -4517,6 +4541,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 planetBiome: null,
                 planetLocked: false,
                 manualPlanetCandidate: null,
+                playerNameDraft: "",
 
                 specialActive: false,
                 rerollsLeft: 0,
@@ -4983,14 +5008,14 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             state.current.planetLocked = true;
             state.current.manualPlanetCandidate = null;
             state.current.spinning = true;
+            state.current.seed = null;
+            state.current.seedBase = null;
+            state.current.playerNameDraft = "";
 
             if ($("#planetSearchInput")) $("#planetSearchInput").value = "";
             togglePlanetSearchPanel(false);
             renderSpin();
             playQuickPlanetSpin(chosen.name).then(() => {
-                const seedBase = makeSeedFromCurrent();
-                state.current.seedBase = seedBase;
-                state.current.seed = ensureUniqueSeed(`Seed: ${seedBase}`);
                 state.current.spinning = false;
                 renderSpin();
                 renderPlanetSearchResults();
@@ -6098,6 +6123,13 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const c = state.current;
 
             $("#spinSeed").textContent = c.seed || "???";
+            const playerEntryBox = $("#playerEntryBox");
+            const playerInput = $("#spinPlayerName");
+            if (playerEntryBox) playerEntryBox.style.display = c.seed ? "" : "none";
+            if (playerInput) {
+                playerInput.value = String(c.playerNameDraft || "");
+                playerInput.disabled = !c.seed || c.spinning;
+            }
 
             // MODE colors
             const modeEl = $("#spinMode");
@@ -6182,7 +6214,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             // Buttons
             $("#btnLock").disabled = !c.loadout || c.locked || c.spinning;
             $("#btnRollPlanet").disabled = !c.loadout || !c.locked || !c.modeApplied || c.spinning;
-            $("#btnUse").disabled = !c.loadout || !c.locked || !c.planetLocked || !c.seed || c.spinning;
+            $("#btnUse").disabled = !c.loadout || !c.locked || !c.modeApplied || !c.planetLocked || c.spinning;
+            $("#btnUse").textContent = c.seed ? "CONFIRM (CREATE CARD)" : "CONFIRM";
             if (manualModeSelect) manualModeSelect.disabled = !c.loadout || !c.locked || c.spinning;
             const btnApplyManualMode = $("#btnApplyManualMode");
             if (btnApplyManualMode) {
@@ -8851,6 +8884,7 @@ ${noteContent}`
             state.current.planetLocked = false;
             state.current.planetBiome = null;
             state.current.manualPlanetCandidate = null;
+            state.current.playerNameDraft = "";
 
             // special event: only if EXACT same fingerprint already exists in saved cards
             if (hasDuplicateFingerprint(loadout.fingerprint)) {
@@ -8888,6 +8922,7 @@ ${noteContent}`
             state.current.planetLocked = false;
             state.current.planetBiome = null;
             state.current.manualPlanetCandidate = null;
+            state.current.playerNameDraft = "";
 
             // if reroll produced non-duplicate, disable special mode immediately
             if (!hasDuplicateFingerprint(loadout.fingerprint)) {
@@ -8925,6 +8960,21 @@ ${noteContent}`
             }
             target.textContent = finalPlanetName || "—";
         }
+        async function playQuickSeedSpin(finalSeedName) {
+            const target = $("#spinSeed");
+            if (!target) return;
+            const start = performance.now();
+            const total = 700;
+            while (performance.now() - start < total) {
+                const sampleBase = makeSeedFromCurrent();
+                const sampleSeed = ensureUniqueSeed(`Seed: ${sampleBase}`);
+                target.textContent = sampleSeed;
+                playTone("seedTick");
+                await new Promise(res => setTimeout(res, 55));
+            }
+            target.textContent = finalSeedName || "—";
+            playTone("seedFinal");
+        }
         function doRollPlanet() {
             if (!state.current.loadout || !state.current.locked || !state.current.modeApplied) return;
             const p = rollPlanetForFaction(state.current.faction);
@@ -8944,11 +8994,11 @@ ${noteContent}`
             state.current.planetLocked = true;
             state.current.manualPlanetCandidate = null;
             state.current.spinning = true;
+            state.current.seed = null;
+            state.current.seedBase = null;
+            state.current.playerNameDraft = "";
             renderSpin();
             playQuickPlanetSpin(pc.name).then(() => {
-                const seedBase = makeSeedFromCurrent();
-                state.current.seedBase = seedBase;
-                state.current.seed = ensureUniqueSeed(`Seed: ${seedBase}`);
                 state.current.spinning = false;
                 renderSpin();
             });
@@ -8974,11 +9024,11 @@ ${noteContent}`
             state.current.planetLocked = true;
             state.current.manualPlanetCandidate = null;
             state.current.spinning = true;
+            state.current.seed = null;
+            state.current.seedBase = null;
+            state.current.playerNameDraft = "";
             renderSpin();
             playQuickPlanetSpin(pc.name).then(() => {
-                const seedBase = makeSeedFromCurrent();
-                state.current.seedBase = seedBase;
-                state.current.seed = ensureUniqueSeed(`Seed: ${seedBase}`);
                 state.current.spinning = false;
                 renderSpin();
             });
@@ -8997,6 +9047,7 @@ ${noteContent}`
             state.current.planetLocked = false;
             state.current.planetBiome = null;
             state.current.manualPlanetCandidate = null;
+            state.current.playerNameDraft = "";
             state.current.specialActive = false;
             state.current.rerollsLeft = 0;
             state.current.spinning = false;
@@ -9043,7 +9094,23 @@ ${noteContent}`
         function doUseThisRun() {
             // create card only if locked
             const c = state.current;
-            if (!c.loadout || !c.locked) return;
+            if (!c.loadout || !c.locked || !c.modeApplied || !c.planetLocked) return;
+
+            if (!c.seed) {
+                c.spinning = true;
+                renderSpin();
+                const seedBase = makeSeedFromCurrent();
+                const seed = ensureUniqueSeed(`Seed: ${seedBase}`);
+                playQuickSeedSpin(seed).then(() => {
+                    c.seedBase = seedBase;
+                    c.seed = seed;
+                    c.spinning = false;
+                    renderSpin();
+                    const input = $("#spinPlayerName");
+                    if (input) input.focus();
+                });
+                return;
+            }
 
             const card = {
                 id: uid(),
@@ -9083,10 +9150,12 @@ ${noteContent}`
             try { card.planetBiome = (card.planetBiome || getPlanetBiomeFromPlanet(card.planet)); } catch (e) { }
 
             const existingName = getPlayerName(card);
-            const typedName = window.prompt("Enter player name for this run:", existingName) || "";
+            const typedName = String(c.playerNameDraft || existingName || "");
             const cleanName = typedName.trim();
             if (!cleanName) {
-                alert("Card not created. Player name is required.");
+                alert("Card not created. Player name is required in the Spin tab entry box.");
+                const input = $("#spinPlayerName");
+                if (input) input.focus();
                 return;
             }
             card.playerName = cleanName;
@@ -9173,11 +9242,18 @@ ${noteContent}`
                 }
                 state.current.seed = null;
                 state.current.seedBase = null;
+                state.current.playerNameDraft = "";
                 if (state.current.loadout) {
                     state.current.loadout.mode = state.current.mode;
                     state.current.loadout.fingerprint = fingerprintLoadout(state.current.loadout);
                 }
                 renderSpin();
+            });
+            $("#spinPlayerName")?.addEventListener("input", (e) => {
+                state.current.playerNameDraft = String(e.target?.value || "");
+            });
+            $("#spinPlayerName")?.addEventListener("keydown", (e) => {
+                if (e.key === "Enter") doUseThisRun();
             });
             $("#btnUse").addEventListener("click", () => doUseThisRun());
 
@@ -9245,7 +9321,7 @@ ${noteContent}`
                 saveState();
                 renderResults();
                 updateSavedCount();
-                state.current = { seed: null, seedBase: null, mode: null, modeApplied: false, faction: null, loadout: null, locked: false, planet: null, planetLocked: false, planetBiome: null, manualPlanetCandidate: null, specialActive: false, rerollsLeft: 0, spinning: false };
+                state.current = { seed: null, seedBase: null, mode: null, modeApplied: false, faction: null, loadout: null, locked: false, planet: null, planetLocked: false, planetBiome: null, manualPlanetCandidate: null, playerNameDraft: "", specialActive: false, rerollsLeft: 0, spinning: false };
                 renderSpin();
                 renderResults();
                 refreshCompareOptions();
