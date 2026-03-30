@@ -2996,12 +2996,6 @@ END MASTER DIRECTIVE
 
             <div class="sub">Solo only • D10 • weighted mission chaos • one mission = one card</div>
         </div>
-        <div class="pillRow">
-            <div class="pill"><strong id="pillSaved">0</strong> saved</div>
-            <div class="pill"><strong id="pillMode">—</strong> mode</div>
-            <div class="pill"><strong id="pillFaction">—</strong> faction</div>
-            <div class="pill yellow">Seed: <strong id="pillSeed">—</strong></div>
-        </div>
     </header>
 
     <main>
@@ -6445,33 +6439,40 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
          * UI Rendering
          ***********************/
         function updateHeaderPills() {
-            $("#pillSaved").textContent = String(state.cards.length);
-            $("#spinSavedCount").textContent = String(state.cards.length);
+            const pillSaved = $("#pillSaved");
+            const spinSavedCount = $("#spinSavedCount");
+            if (pillSaved) pillSaved.textContent = String(state.cards.length);
+            if (spinSavedCount) spinSavedCount.textContent = String(state.cards.length);
 
             const c = state.current;
 
             // MODE: show after LOCK
-            $("#pillMode").textContent = c.locked ? (c.mode || "—") : "—";
+            const pillMode = $("#pillMode");
+            if (pillMode) pillMode.textContent = c.locked ? (c.mode || "—") : "—";
 
             // FACTION: show only after ROLL PLANET
             const pillFactionText = $("#pillFaction");
-            const pillFactionWrap = pillFactionText.parentElement;
+            if (pillFactionText) {
+                const pillFactionWrap = pillFactionText.parentElement;
+                if (pillFactionWrap) {
+                    pillFactionWrap.classList.remove(
+                        "faction-terminids",
+                        "faction-automatons",
+                        "faction-illuminate"
+                    );
+                }
 
-            pillFactionWrap.classList.remove(
-                "faction-terminids",
-                "faction-automatons",
-                "faction-illuminate"
-            );
-
-            if (c.planetLocked) {
-                pillFactionText.textContent = c.faction || "—";
-                pillFactionWrap.classList.add(getFactionClass(c.faction));
-            } else {
-                pillFactionText.textContent = "—";
+                if (c.planetLocked) {
+                    pillFactionText.textContent = c.faction || "—";
+                    if (pillFactionWrap) pillFactionWrap.classList.add(getFactionClass(c.faction));
+                } else {
+                    pillFactionText.textContent = "—";
+                }
             }
 
             // SEED: always show
-            $("#pillSeed").textContent = c.seed || "???";
+            const pillSeed = $("#pillSeed");
+            if (pillSeed) pillSeed.textContent = c.seed || "???";
         }
 
         function setSeedAnimationState(stateName) {
