@@ -2960,8 +2960,6 @@ END MASTER DIRECTIVE
             <div class="btnRow">
                 <button class="btnPrimary" id="btnSpin">SPIN LOADOUT</button>
                 <button id="btnLock" class="btnGhost" disabled>LOCK LOADOUT</button>
-                <button id="btnRollPlanet" class="btnGhost" disabled>ROLL PLANET</button>
-                <button id="btnUse" class="btnPrimary" disabled>CONFIRM PLANET</button>
                 <button id="btnReroll" class="btnDanger" style="display:none;">SPECIAL EVENT: REROLL (3)</button>
 
                 <div class="pillRow" style="margin-left:auto;">
@@ -2997,7 +2995,7 @@ END MASTER DIRECTIVE
                         <div class="label">Player Name</div>
                         <div class="miniRow" style="margin-top:8px;">
                             <input id="spinPlayerName" type="text" maxlength="40" placeholder="Enter player name..." />
-                            <button id="btnConfirmPlayer" class="btnPrimary">CONFIRM PLAYER</button>
+                            <button id="btnConfirmPlayer" class="btnPrimary">CONFIRM PLAYER AND CREATE CARD</button>
                         </div>
                         <div class="tiny" style="margin-top:8px;">After planet confirmation finishes the seed reveal, confirm player name to create the card.</div>
                     </div>
@@ -3014,6 +3012,9 @@ END MASTER DIRECTIVE
                                 <option value="Standard (40)">Standard (40)</option>
                             </select>
                             <button id="btnApplyManualMode" class="btnPrimary">Apply mode?</button>
+                        </div>
+                        <div class="miniRow" style="margin-top:10px;">
+                            <button id="btnRollPlanet" class="btnGhost" disabled>ROLL PLANET</button>
                         </div>
                     </div>
 
@@ -6502,12 +6503,10 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             // Buttons
             $("#btnLock").disabled = !c.loadout || c.locked || c.spinning;
             $("#btnRollPlanet").disabled = !c.loadout || !c.locked || !c.modeApplied || c.spinning || c.planetConfirmed;
-            $("#btnUse").disabled = !isReadyForPlanetConfirm;
-            $("#btnUse").textContent = "CONFIRM PLANET";
-            if (manualModeSelect) manualModeSelect.disabled = !c.loadout || !c.locked || c.spinning;
+            if (manualModeSelect) manualModeSelect.disabled = !c.loadout || !c.locked || c.spinning || c.modeApplied;
             const btnApplyManualMode = $("#btnApplyManualMode");
             if (btnApplyManualMode) {
-                btnApplyManualMode.disabled = !c.loadout || !c.locked || c.spinning;
+                btnApplyManualMode.disabled = !c.loadout || !c.locked || c.spinning || c.modeApplied;
                 btnApplyManualMode.textContent = c.modeApplied ? "Applied!" : "Apply mode?";
             }
 
@@ -6516,7 +6515,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 ["btnLock", !!(c.loadout && !c.locked && !c.spinning)],
                 ["btnApplyManualMode", !!(c.loadout && c.locked && !c.modeApplied && !c.spinning)],
                 ["btnRollPlanet", !!(c.loadout && c.locked && c.modeApplied && !c.planetLocked && !c.spinning && !c.planetConfirmed)],
-                ["btnUse", isReadyForPlanetConfirm],
+                ["btnConfirmPlanetInline", isReadyForPlanetConfirm],
                 ["btnConfirmPlayer", isReadyForPlayerConfirm]
             ];
             actionMap.forEach(([id, active]) => {
@@ -9555,7 +9554,7 @@ ${noteContent}`
                 applyManualMode($("#manualModeSelect")?.value || "");
             });
             $("#manualModeSelect").addEventListener("change", (e) => {
-                if (!state.current.loadout || !state.current.locked) return;
+                if (!state.current.loadout || !state.current.locked || state.current.modeApplied) return;
                 state.current.mode = String(e.target?.value || state.current.mode || "");
                 state.current.modeApplied = false;
                 if (state.current.planetLocked) {
@@ -9580,7 +9579,6 @@ ${noteContent}`
                 if (e.key === "Enter") doConfirmPlayerName();
             });
             $("#btnConfirmPlayer")?.addEventListener("click", () => doConfirmPlayerName());
-            $("#btnUse").addEventListener("click", () => doUseThisRun());
 
             $("#btnCloseResultModal").addEventListener("click", closeResultCardModal);
             $("#resultCardModal").addEventListener("click", (e) => {
