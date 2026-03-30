@@ -1806,6 +1806,31 @@ END MASTER DIRECTIVE
             transition: border-color .2s ease, box-shadow .2s ease;
         }
 
+        .rankRow.isSelected {
+            border-color: rgba(255, 233, 112, .95) !important;
+            box-shadow:
+                0 0 0 1px rgba(255, 233, 112, .50),
+                0 0 14px rgba(255, 221, 87, .42),
+                inset 0 0 10px rgba(255, 233, 112, .16);
+            animation: rankSelectedGlow 2.1s ease-in-out infinite;
+        }
+
+        @keyframes rankSelectedGlow {
+            0%, 100% {
+                box-shadow:
+                    0 0 0 1px rgba(255, 233, 112, .45),
+                    0 0 12px rgba(255, 221, 87, .30),
+                    inset 0 0 8px rgba(255, 233, 112, .12);
+            }
+
+            50% {
+                box-shadow:
+                    0 0 0 1px rgba(255, 233, 112, .75),
+                    0 0 24px rgba(255, 221, 87, .60),
+                    inset 0 0 14px rgba(255, 233, 112, .24);
+            }
+        }
+
         .itemVisualCell {
             width: 28px;
             height: 28px;
