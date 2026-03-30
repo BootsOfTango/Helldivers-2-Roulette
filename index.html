@@ -2761,6 +2761,49 @@ END MASTER DIRECTIVE
             text-transform: uppercase;
         }
 
+        .planetSearchGroup {
+            border: 1px solid var(--line2);
+            border-radius: 10px;
+            background: rgba(0,0,0,.2);
+            overflow: hidden;
+        }
+
+        .planetSearchGroupToggle {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            border: 0;
+            background: rgba(255,255,255,.03);
+            color: #e7edf8;
+            cursor: pointer;
+            font-weight: 900;
+            letter-spacing: .3px;
+            text-align: left;
+            padding: 10px 12px;
+        }
+
+        .planetSearchGroupToggle:hover {
+            background: rgba(255,255,255,.06);
+        }
+
+        .planetSearchGroupMeta {
+            font-size: 10px;
+            color: var(--muted);
+            font-weight: 700;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .planetSearchGroupRows {
+            padding: 8px;
+            border-top: 1px solid var(--line2);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
         .planetSearchRow {
             border: 1px solid var(--line2);
             border-radius: 10px;
@@ -2951,16 +2994,16 @@ END MASTER DIRECTIVE
                 <div class="label">Manual planet selection</div>
                 <div class="planetSearchControls">
                     <select id="planetSearchMode">
-                        <option value="all">Name + biome + environment + sector</option>
-                        <option value="name">Planet name only</option>
-                        <option value="biome">Biome only</option>
-                        <option value="environment">Environment / hazards only</option>
+                        <option value="sector">Sector</option>
+                        <option value="name">Name</option>
+                        <option value="biome">Biome</option>
+                        <option value="hazard">Hazard</option>
                     </select>
-                    <input id="planetSearchInput" placeholder="Type planet name, biome, hazard, or sector..." />
+                    <input id="planetSearchInput" placeholder="Search planet name..." />
                     <button id="btnPlanetSearchClear" class="btnGhost">CLEAR</button>
                 </div>
                 <div id="planetSearchSelectionCue" class="tiny planetSearchSelectionCue" style="display:none;"></div>
-                <div class="tiny" style="margin-top:8px;">Manual search includes the full known planet list, grouped by sector with alphabetical planet order.</div>
+                <div id="planetSearchHelp" class="tiny" style="margin-top:8px;">Grouped by sector. Groups and planets are listed alphabetically.</div>
                 <div id="planetSearchResults" class="planetSearchResults"></div>
             </div>
         </section>
@@ -4619,7 +4662,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 activeResultCardId: null,
                 modalOpen: false,
                 resultsBackupNudgeSeen: false,
-                apiPlanetSyncInProgress: false
+                apiPlanetSyncInProgress: false,
+                manualPlanetExpandedGroups: {}
             },
 
             // current spin
@@ -5061,17 +5105,56 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             });
         }
 
-        function getPlanetSearchHaystack(planet, mode) {
-            const name = planet?.name || "";
-            const biome = planet?.biome || "";
-            const weather = getPlanetWeatherText(planet) || planet?.weather || "";
-            const sector = planet?.sector || "";
+        function getHazardTagsForPlanet(planet) {
+            const tags = splitWeatherTags(getPlanetWeatherText(planet) || planet?.weather || "");
+            return tags.length ? tags : ["None"];
+        }
 
-            if (mode === "name") return normalizeText(name);
-            if (mode === "biome") return normalizeText(biome);
-            if (mode === "environment") return normalizeText(weather);
+        function getManualPlanetGroupBuckets(planets, mode) {
+            const map = new Map();
+            const addToGroup = (key, label, planet) => {
+                const mapKey = normalizeText(key || label || "unknown");
+                if (!map.has(mapKey)) map.set(mapKey, { label: label || "Unknown", planets: [] });
+                map.get(mapKey).planets.push(planet);
+            };
 
-            return normalizeText([name, biome, weather, sector].join(" "));
+            planets.forEach(planet => {
+                if (mode === "name") {
+                    const letter = (String(planet?.name || "").trim().charAt(0) || "#").toUpperCase();
+                    addToGroup(letter, letter, planet);
+                    return;
+                }
+
+                if (mode === "biome") {
+                    addToGroup(planet?.biome || "Unknown", planet?.biome || "Unknown", planet);
+                    return;
+                }
+
+                if (mode === "hazard") {
+                    getHazardTagsForPlanet(planet).forEach(tag => addToGroup(tag, tag, planet));
+                    return;
+                }
+
+                const sector = normalizeSectorLabel(planet?.sector || "Unknown Sector");
+                addToGroup(sector, sector, planet);
+            });
+
+            return Array.from(map.values())
+                .map(group => ({
+                    label: group.label,
+                    planets: group.planets.sort((a, b) => String(a.name || "").localeCompare(String(b.name || "")))
+                }))
+                .sort((a, b) => String(a.label || "").localeCompare(String(b.label || "")));
+        }
+
+        function isManualGroupExpanded(mode, label) {
+            const key = `${mode}:${normalizeText(label)}`;
+            return state.ui.manualPlanetExpandedGroups[key] !== false;
+        }
+
+        function setManualGroupExpanded(mode, label, expanded) {
+            const key = `${mode}:${normalizeText(label)}`;
+            state.ui.manualPlanetExpandedGroups[key] = !!expanded;
         }
 
         function selectManualPlanetCandidate(planet) {
@@ -5087,6 +5170,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
         function confirmManualPlanetSelection() {
             if (!state.current.loadout || !state.current.locked || !state.current.modeApplied) return;
+            if (state.current.planetConfirmed) return;
 
             const planet = state.current.manualPlanetCandidate;
             if (!planet?.name) return;
@@ -5124,8 +5208,17 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const box = $("#planetSearchResults");
             const cue = $("#planetSearchSelectionCue");
             const input = $("#planetSearchInput");
-            const mode = $("#planetSearchMode")?.value || "all";
+            const mode = $("#planetSearchMode")?.value || "sector";
+            const help = $("#planetSearchHelp");
             if (!panel || !box || panel.style.display === "none") return;
+
+            const searchEnabled = mode === "name";
+            if (input) input.disabled = !searchEnabled;
+            if (help) {
+                help.textContent = searchEnabled
+                    ? "Grouped by planet name initial. Search filters planet names only."
+                    : `Grouped by ${mode}. Groups and planets are listed alphabetically.`;
+            }
 
             const selectedKey = normalizePlanetKey(state.current?.planet?.name || "");
             const pendingKey = normalizePlanetKey(state.current?.manualPlanetCandidate?.name || "");
@@ -5142,10 +5235,10 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 }
             }
 
-            const q = normalizeText(input?.value || "");
+            const q = searchEnabled ? normalizeText(input?.value || "") : "";
             const planets = getUniquePlanetsByName(getAllPlanetsSortedBySector()).filter(p => {
                 if (!q) return true;
-                return getPlanetSearchHaystack(p, mode).includes(q);
+                return normalizeText(p?.name || "").includes(q);
             });
 
             box.innerHTML = "";
@@ -5154,49 +5247,73 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 return;
             }
 
-            let currentSector = null;
-            planets.forEach(planet => {
-                const sector = normalizeSectorLabel(planet.sector || "Unknown Sector");
-                if (sector !== currentSector) {
-                    currentSector = sector;
-                    const head = document.createElement("div");
-                    head.className = "planetSearchSector";
-                    head.textContent = sector;
-                    box.appendChild(head);
+            const groups = getManualPlanetGroupBuckets(planets, mode);
+            groups.forEach(group => {
+                const groupWrap = document.createElement("div");
+                groupWrap.className = "planetSearchGroup";
+                const expanded = isManualGroupExpanded(mode, group.label);
+
+                const toggle = document.createElement("button");
+                toggle.type = "button";
+                toggle.className = "planetSearchGroupToggle";
+                toggle.innerHTML = `
+                    <span>${expanded ? "▼" : "▶"} ${escapeHtml(group.label)}</span>
+                    <span class="planetSearchGroupMeta">${group.planets.length} planet${group.planets.length === 1 ? "" : "s"}</span>
+                `;
+                toggle.addEventListener("click", () => {
+                    setManualGroupExpanded(mode, group.label, !expanded);
+                    renderPlanetSearchResults();
+                });
+                groupWrap.appendChild(toggle);
+
+                if (!expanded) {
+                    box.appendChild(groupWrap);
+                    return;
                 }
 
-                const row = document.createElement("div");
-                const isSelected = selectedKey && normalizePlanetKey(planet.name) === selectedKey;
-                const isPending = pendingKey && normalizePlanetKey(planet.name) === pendingKey;
-                row.className = `planetSearchRow${isSelected ? " is-selected" : ""}`;
+                const rowsWrap = document.createElement("div");
+                rowsWrap.className = "planetSearchGroupRows";
+                group.planets.forEach(planet => {
+                    const row = document.createElement("div");
+                    const isSelected = selectedKey && normalizePlanetKey(planet.name) === selectedKey;
+                    const isPending = pendingKey && normalizePlanetKey(planet.name) === pendingKey;
+                    row.className = `planetSearchRow${isSelected ? " is-selected" : ""}`;
 
-                const left = document.createElement("div");
-                left.innerHTML = `
-                    <div style="font-weight:900; font-size:12px;">${escapeHtml(planet.name || "Unknown")}</div>
-                    <div class="planetSearchMeta">${escapeHtml(planet.faction || "Unknown")} • ${escapeHtml(planet.biome || "—")} • ${escapeHtml(getPlanetWeatherText(planet) || planet.weather || "None")}</div>
-                `;
+                    const left = document.createElement("div");
+                    left.innerHTML = `
+                        <div style="font-weight:900; font-size:12px;">${escapeHtml(planet.name || "Unknown")}</div>
+                        <div class="planetSearchMeta">${escapeHtml(planet.faction || "Unknown")} • ${escapeHtml(planet.biome || "—")} • ${escapeHtml(getPlanetWeatherText(planet) || planet.weather || "None")} • ${escapeHtml(normalizeSectorLabel(planet.sector || "Unknown Sector"))}</div>
+                    `;
 
-                const pickBtn = document.createElement("button");
-                pickBtn.className = isPending ? "btnDanger" : "btnPrimary";
-                pickBtn.textContent = isSelected ? "SELECTED" : (isPending ? "CONFIRM?" : "CHOOSE");
-                pickBtn.disabled = !state.current.loadout || !state.current.locked || !state.current.modeApplied || state.current.spinning;
-                pickBtn.addEventListener("click", () => {
-                    if (isPending) {
-                        confirmManualPlanetSelection();
-                    } else {
-                        selectManualPlanetCandidate(planet);
-                    }
+                    const pickBtn = document.createElement("button");
+                    pickBtn.className = isPending ? "btnDanger" : "btnPrimary";
+                    pickBtn.textContent = isSelected ? "SELECTED" : (isPending ? "CONFIRM?" : "CHOOSE");
+                    pickBtn.disabled = !state.current.loadout || !state.current.locked || !state.current.modeApplied || state.current.spinning || state.current.planetConfirmed;
+                    pickBtn.addEventListener("click", () => {
+                        if (isPending) {
+                            confirmManualPlanetSelection();
+                        } else {
+                            selectManualPlanetCandidate(planet);
+                        }
+                    });
+
+                    row.appendChild(left);
+                    row.appendChild(pickBtn);
+                    rowsWrap.appendChild(row);
                 });
 
-                row.appendChild(left);
-                row.appendChild(pickBtn);
-                box.appendChild(row);
+                groupWrap.appendChild(rowsWrap);
+                box.appendChild(groupWrap);
             });
         }
 
         function togglePlanetSearchPanel(forceState) {
             const panel = $("#planetSearchPanel");
             if (!panel) return;
+            if (state.current.planetConfirmed) {
+                panel.style.display = "none";
+                return;
+            }
             const show = (typeof forceState === "boolean") ? forceState : panel.style.display === "none";
             panel.style.display = show ? "" : "none";
             if (show) renderPlanetSearchResults();
@@ -6328,12 +6445,21 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             const planetManualWrap = $("#planetManualSearchWrap");
             if (planetManualWrap) planetManualWrap.style.display = c.planet ? "" : "none";
+            const btnSearchPlanetInline = $("#btnSearchPlanetInline");
+            if (btnSearchPlanetInline) btnSearchPlanetInline.disabled = c.spinning || c.planetConfirmed;
             const btnConfirmPlanetInline = $("#btnConfirmPlanetInline");
             if (btnConfirmPlanetInline) btnConfirmPlanetInline.disabled = !isReadyForPlanetConfirm;
+            const planetSearchMode = $("#planetSearchMode");
+            const planetSearchInput = $("#planetSearchInput");
+            const btnPlanetSearchClear = $("#btnPlanetSearchClear");
+            if (planetSearchMode) planetSearchMode.disabled = c.spinning || c.planetConfirmed;
+            if (planetSearchInput) planetSearchInput.disabled = c.spinning || c.planetConfirmed || (planetSearchMode?.value !== "name");
+            if (btnPlanetSearchClear) btnPlanetSearchClear.disabled = c.spinning || c.planetConfirmed;
+            if (c.planetConfirmed) togglePlanetSearchPanel(false);
 
             // Buttons
             $("#btnLock").disabled = !c.loadout || c.locked || c.spinning;
-            $("#btnRollPlanet").disabled = !c.loadout || !c.locked || !c.modeApplied || c.spinning;
+            $("#btnRollPlanet").disabled = !c.loadout || !c.locked || !c.modeApplied || c.spinning || c.planetConfirmed;
             $("#btnUse").disabled = !isReadyForPlanetConfirm;
             $("#btnUse").textContent = "CONFIRM PLANET";
             if (manualModeSelect) manualModeSelect.disabled = !c.loadout || !c.locked || c.spinning;
@@ -6347,7 +6473,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 ["btnSpin", !c.loadout && !c.spinning],
                 ["btnLock", !!(c.loadout && !c.locked && !c.spinning)],
                 ["btnApplyManualMode", !!(c.loadout && c.locked && !c.modeApplied && !c.spinning)],
-                ["btnRollPlanet", !!(c.loadout && c.locked && c.modeApplied && !c.planetLocked && !c.spinning)],
+                ["btnRollPlanet", !!(c.loadout && c.locked && c.modeApplied && !c.planetLocked && !c.spinning && !c.planetConfirmed)],
                 ["btnUse", isReadyForPlanetConfirm],
                 ["btnConfirmPlayer", isReadyForPlayerConfirm]
             ];
@@ -9123,6 +9249,7 @@ ${noteContent}`
         }
         function doRollPlanet() {
             if (!state.current.loadout || !state.current.locked || !state.current.modeApplied) return;
+            if (state.current.planetConfirmed) return;
             const p = rollPlanetForFaction(state.current.faction);
             if (!p) {
                 alert("No planets available for that faction. Add planets in ITEMS tab.");
@@ -9154,6 +9281,7 @@ ${noteContent}`
         function doClearPlanet() {
             // Renamed behavior: "REROLL PLANET" (roll again instead of clearing)
             if (!state.current.loadout || !state.current.locked || !state.current.modeApplied) return;
+            if (state.current.planetConfirmed) return;
 
             const p = rollPlanetForFaction(state.current.faction);
             if (!p) {
@@ -9558,6 +9686,7 @@ ${noteContent}`
             });
 
             $("#btnSearchPlanetInline").addEventListener("click", () => {
+                if (state.current.planetConfirmed) return;
                 togglePlanetSearchPanel();
             });
             $("#btnConfirmPlanetInline")?.addEventListener("click", () => doUseThisRun());
@@ -9567,6 +9696,7 @@ ${noteContent}`
             });
 
             $("#planetSearchMode").addEventListener("change", () => {
+                $("#planetSearchInput").value = "";
                 renderPlanetSearchResults();
             });
 
