@@ -2898,9 +2898,10 @@ END MASTER DIRECTIVE
             display: flex;
             flex-direction: column;
             gap: 8px;
-            max-height: 240px;
-            overflow-y: auto;
-            overflow-x: hidden;
+        }
+
+        .planetSearchGroup.is-collapsed .planetSearchGroupRows {
+            display: none;
         }
 
         .planetSearchRow {
@@ -4818,6 +4819,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         let selectedRankCardId = null;
         let lastActionCue = "";
         let pendingNewCardHighlightId = null;
+        const manualPlanetSearchGroupState = new Map();
 
         function loadItemImageDb() {
             return fetch("assets/item-images.json")
@@ -5270,6 +5272,18 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 .sort((a, b) => String(a.label || "").localeCompare(String(b.label || "")));
         }
 
+        function getManualPlanetSearchPlaceholder(mode) {
+            if (mode === "name") return "Search planet name...";
+            if (mode === "biome") return "Filter by biome or planet name...";
+            if (mode === "hazard") return "Filter by condition or planet name...";
+            return "Filter by sector or planet name...";
+        }
+
+        function getDefaultManualGroupExpanded(totalGroups, hasFocusedPlanet) {
+            if (hasFocusedPlanet) return true;
+            return totalGroups <= 6;
+        }
+
         function selectManualPlanetCandidate(planet) {
             if (!state.current.loadout || !state.current.locked || !state.current.modeApplied) return;
             state.current.manualPlanetCandidate = {
@@ -5325,12 +5339,14 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const help = $("#planetSearchHelp");
             if (!panel || !box || panel.style.display === "none") return;
 
-            const searchEnabled = mode === "name";
-            if (input) input.disabled = !searchEnabled;
+            if (input) {
+                input.disabled = !!(state.current.spinning || state.current.planetConfirmed);
+                input.placeholder = getManualPlanetSearchPlaceholder(mode);
+            }
             if (help) {
-                help.textContent = searchEnabled
-                    ? "Grouped by planet name initial. Search filters planet names only."
-                    : `Grouped by ${mode === "hazard" ? "conditions" : mode}. Groups and planets are listed alphabetically.`;
+                help.textContent = mode === "name"
+                    ? "Grouped by planet name initial. Filter applies to planet names."
+                    : `Grouped by ${mode === "hazard" ? "conditions" : mode}. Filter matches groups and planet names.`;
             }
 
             const selectedKey = normalizePlanetKey(state.current?.planet?.name || "");
@@ -5348,10 +5364,23 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 }
             }
 
-            const q = searchEnabled ? normalizeText(input?.value || "") : "";
+            const q = normalizeText(input?.value || "");
             const planets = getUniquePlanetsByName(getAllPlanetsSortedBySector()).filter(p => {
                 if (!q) return true;
-                return normalizeText(p?.name || "").includes(q);
+                const name = normalizeText(p?.name || "");
+                if (mode === "name") return name.includes(q);
+
+                if (mode === "biome") {
+                    return normalizeText(p?.biome || "").includes(q) || name.includes(q);
+                }
+
+                if (mode === "hazard") {
+                    const hazards = getHazardTagsForPlanet(p).some(tag => normalizeText(tag).includes(q));
+                    return hazards || name.includes(q);
+                }
+
+                const sector = normalizeText(normalizeSectorLabel(p?.sector || "Unknown Sector"));
+                return sector.includes(q) || name.includes(q);
             });
 
             box.innerHTML = "";
@@ -5365,12 +5394,30 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 const groupWrap = document.createElement("div");
                 groupWrap.className = "planetSearchGroup";
 
-                const groupHeader = document.createElement("div");
+                const groupKey = normalizeText(group.label || "unknown");
+                const hasFocusedPlanet = group.planets.some(planet => {
+                    const key = normalizePlanetKey(planet?.name || "");
+                    return (selectedKey && key === selectedKey) || (pendingKey && key === pendingKey);
+                });
+                const storedExpanded = manualPlanetSearchGroupState.get(groupKey);
+                const expanded = hasFocusedPlanet ? true : (typeof storedExpanded === "boolean"
+                    ? storedExpanded
+                    : getDefaultManualGroupExpanded(groups.length, hasFocusedPlanet));
+
+                groupWrap.classList.toggle("is-collapsed", !expanded);
+
+                const groupHeader = document.createElement("button");
                 groupHeader.className = "planetSearchGroupToggle";
+                groupHeader.type = "button";
+                groupHeader.setAttribute("aria-expanded", expanded ? "true" : "false");
                 groupHeader.innerHTML = `
-                    <span class="planetSearchGroupTitle">${escapeHtml(group.label)}</span>
+                    <span class="planetSearchGroupTitle">${expanded ? "▼" : "▶"} ${escapeHtml(group.label)}</span>
                     <span class="planetSearchGroupMeta">${group.planets.length} planet${group.planets.length === 1 ? "" : "s"}</span>
                 `;
+                groupHeader.addEventListener("click", () => {
+                    manualPlanetSearchGroupState.set(groupKey, !expanded);
+                    renderPlanetSearchResults();
+                });
                 groupWrap.appendChild(groupHeader);
 
                 const rowsWrap = document.createElement("div");
@@ -6555,7 +6602,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const planetSearchInput = $("#planetSearchInput");
             const btnPlanetSearchClear = $("#btnPlanetSearchClear");
             if (planetSearchMode) planetSearchMode.disabled = c.spinning || c.planetConfirmed;
-            if (planetSearchInput) planetSearchInput.disabled = c.spinning || c.planetConfirmed || (planetSearchMode?.value !== "name");
+            if (planetSearchInput) planetSearchInput.disabled = c.spinning || c.planetConfirmed;
             if (btnPlanetSearchClear) btnPlanetSearchClear.disabled = c.spinning || c.planetConfirmed;
             if (c.planetConfirmed) togglePlanetSearchPanel(false);
 
@@ -9818,13 +9865,14 @@ ${noteContent}`
             });
 
             $("#planetSearchMode").addEventListener("change", () => {
-                $("#planetSearchInput").value = "";
+                manualPlanetSearchGroupState.clear();
                 renderPlanetSearchResults();
             });
 
             $("#btnPlanetSearchClear").addEventListener("click", () => {
                 $("#planetSearchInput").value = "";
                 state.current.manualPlanetCandidate = null;
+                manualPlanetSearchGroupState.clear();
                 renderPlanetSearchResults();
             });
 
