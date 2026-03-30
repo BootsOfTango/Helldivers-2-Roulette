@@ -2825,20 +2825,31 @@ END MASTER DIRECTIVE
                             <div class="slotRow slotRow-weapon"><span class="slotTag">Primary</span><div class="slot slot-primary" id="slotPrimary"><div class="slotVisual" aria-hidden="true"></div><div class="slotLabel">—</div></div></div>
                             <div class="slotRow slotRow-weapon"><span class="slotTag">Sidearm</span><div class="slot slot-sidearm" id="slotSidearm"><div class="slotVisual" aria-hidden="true"></div><div class="slotLabel">—</div></div></div>
                             <div class="slotRow slotRow-weapon"><span class="slotTag">Throwable</span><div class="slot slot-throwable" id="slotThrowable"><div class="slotVisual" aria-hidden="true"></div><div class="slotLabel">—</div></div></div>
+                            <div class="slotRow"><span class="slotTag">Booster</span><div class="slot slot-strat slot-booster" id="slotBooster"><div class="slotVisual" aria-hidden="true"></div><div class="slotLabel">—</div></div></div>
                         </div>
                         <div class="slotCol">
                             <div class="slotRow"><span class="slotTag">Strat 1</span><div class="slot slot-strat" id="slotStrat1"><div class="slotVisual" aria-hidden="true"></div><div class="slotLabel">—</div></div></div>
                             <div class="slotRow"><span class="slotTag">Strat 2</span><div class="slot slot-strat" id="slotStrat2"><div class="slotVisual" aria-hidden="true"></div><div class="slotLabel">—</div></div></div>
                             <div class="slotRow"><span class="slotTag">Strat 3</span><div class="slot slot-strat" id="slotStrat3"><div class="slotVisual" aria-hidden="true"></div><div class="slotLabel">—</div></div></div>
                             <div class="slotRow"><span class="slotTag">Strat 4</span><div class="slot slot-strat" id="slotStrat4"><div class="slotVisual" aria-hidden="true"></div><div class="slotLabel">—</div></div></div>
-                            <div class="slotRow"><span class="slotTag">Booster</span><div class="slot slot-strat slot-booster" id="slotBooster"><div class="slotVisual" aria-hidden="true"></div><div class="slotLabel">—</div></div></div>
                         </div>
                     </div>
-
-                    <div class="smallHelp">Reels spin in order and slow down on reveal. Booster now auto-rolls after the weapon and stratagem reels finish. Weighted mission odds. Pure chaos.</div>
                 </div>
 
                 <div class="spinMetaCol">
+                    <div class="box">
+                        <div class="label">Mode</div>
+                        <div class="big" id="spinMode">—</div>
+                        <div class="miniRow" id="manualModeWrap" style="margin-top:10px;">
+                            <select id="manualModeSelect">
+                                <option value="Blitz (12)">Blitz (12)</option>
+                                <option value="Eradication (15)">Eradication (15)</option>
+                                <option value="Standard (40)">Standard (40)</option>
+                            </select>
+                            <button id="btnApplyManualMode" class="btnPrimary">Apply mode?</button>
+                        </div>
+                    </div>
+
                     <div class="box">
                         <div class="label">Current Seed</div>
                         <div class="big" id="spinSeed">—</div>
@@ -2854,20 +2865,6 @@ END MASTER DIRECTIVE
                         </div>
 
                         <div class="tiny" id="dispPlanetTiny" style="display:none;"></div>
-                    </div>
-
-                    <div class="box">
-                        <div class="label">Mode</div>
-                        <div class="big" id="spinMode">—</div>
-                        <div class="miniRow" id="manualModeWrap" style="margin-top:10px;">
-                            <select id="manualModeSelect">
-                                <option value="Blitz (12)">Blitz (12)</option>
-                                <option value="Eradication (15)">Eradication (15)</option>
-                                <option value="Standard (40)">Standard (40)</option>
-                            </select>
-                            <button id="btnApplyManualMode" class="btnPrimary">APPLY MODE</button>
-                        </div>
-                        <div class="tiny">One mission per card. Blitz = 12 minutes (15%). Eradication = 15 minutes (15%). Standard = 40 minutes (70%).</div>
                     </div>
                 </div>
             </div>
@@ -4512,6 +4509,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 seed: null,
                 seedBase: null,
                 mode: null,
+                modeApplied: false,
                 faction: null,
                 loadout: null,      // {primary, sidearm, throwable, stratagems[4], booster, fingerprint}
                 locked: false,
@@ -4762,6 +4760,33 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             while (existing.has(`${seedBase}#${i}`)) i++;
             return `${seedBase}#${i}`;
         }
+        function hashText(text) {
+            const s = String(text || "");
+            let hash = 2166136261 >>> 0;
+            for (let i = 0; i < s.length; i++) {
+                hash ^= s.charCodeAt(i);
+                hash = Math.imul(hash, 16777619);
+            }
+            return hash >>> 0;
+        }
+        function makeSeedFromCurrent() {
+            const c = state.current || {};
+            const parts = [
+                c?.loadout?.mode || "",
+                c?.loadout?.faction || "",
+                c?.loadout?.primary || "",
+                c?.loadout?.sidearm || "",
+                c?.loadout?.throwable || "",
+                ...(Array.isArray(c?.loadout?.stratagems) ? c.loadout.stratagems : []),
+                c?.loadout?.booster || "",
+                c?.planet?.name || "",
+                c?.planet?.sector || ""
+            ].join("|");
+            const hash = hashText(parts);
+            const a = DEFAULTS.seedWordsA[hash % DEFAULTS.seedWordsA.length];
+            const b = DEFAULTS.seedWordsB[(Math.floor(hash / DEFAULTS.seedWordsA.length)) % DEFAULTS.seedWordsB.length];
+            return `${a} ${b}`;
+        }
 
         /***********************
          * Random selection
@@ -4929,7 +4954,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         }
 
         function selectManualPlanetCandidate(planet) {
-            if (!state.current.loadout || !state.current.locked) return;
+            if (!state.current.loadout || !state.current.locked || !state.current.modeApplied) return;
             state.current.manualPlanetCandidate = {
                 name: planet.name,
                 sector: planet.sector || "—",
@@ -4940,7 +4965,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         }
 
         function confirmManualPlanetSelection() {
-            if (!state.current.loadout || !state.current.locked) return;
+            if (!state.current.loadout || !state.current.locked || !state.current.modeApplied) return;
 
             const planet = state.current.manualPlanetCandidate;
             if (!planet?.name) return;
@@ -4957,11 +4982,19 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             state.current.planetBiome = chosen.biome;
             state.current.planetLocked = true;
             state.current.manualPlanetCandidate = null;
+            state.current.spinning = true;
 
             if ($("#planetSearchInput")) $("#planetSearchInput").value = "";
             togglePlanetSearchPanel(false);
             renderSpin();
-            renderPlanetSearchResults();
+            playQuickPlanetSpin(chosen.name).then(() => {
+                const seedBase = makeSeedFromCurrent();
+                state.current.seedBase = seedBase;
+                state.current.seed = ensureUniqueSeed(`Seed: ${seedBase}`);
+                state.current.spinning = false;
+                renderSpin();
+                renderPlanetSearchResults();
+            });
         }
 
         function renderPlanetSearchResults() {
@@ -5024,7 +5057,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 const pickBtn = document.createElement("button");
                 pickBtn.className = isPending ? "btnDanger" : "btnPrimary";
                 pickBtn.textContent = isSelected ? "SELECTED" : (isPending ? "CONFIRM?" : "CHOOSE");
-                pickBtn.disabled = !state.current.loadout || !state.current.locked || state.current.spinning;
+                pickBtn.disabled = !state.current.loadout || !state.current.locked || !state.current.modeApplied || state.current.spinning;
                 pickBtn.addEventListener("click", () => {
                     if (isPending) {
                         confirmManualPlanetSelection();
@@ -6050,7 +6083,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             }
 
             // SEED: always show
-            $("#pillSeed").textContent = c.seed || "—";
+            $("#pillSeed").textContent = c.seed || "???";
         }
         function getFactionClass(f) {
             if (!f) return "";
@@ -6064,7 +6097,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         function renderSpin() {
             const c = state.current;
 
-            $("#spinSeed").textContent = c.seed || "—";
+            $("#spinSeed").textContent = c.seed || "???";
 
             // MODE colors
             const modeEl = $("#spinMode");
@@ -6148,11 +6181,14 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             // Buttons
             $("#btnLock").disabled = !c.loadout || c.locked || c.spinning;
-            $("#btnRollPlanet").disabled = !c.loadout || !c.locked || c.spinning;
-            $("#btnUse").disabled = !c.loadout || !c.locked || c.spinning;
+            $("#btnRollPlanet").disabled = !c.loadout || !c.locked || !c.modeApplied || c.spinning;
+            $("#btnUse").disabled = !c.loadout || !c.locked || !c.planetLocked || !c.seed || c.spinning;
             if (manualModeSelect) manualModeSelect.disabled = !c.loadout || !c.locked || c.spinning;
             const btnApplyManualMode = $("#btnApplyManualMode");
-            if (btnApplyManualMode) btnApplyManualMode.disabled = !c.loadout || !c.locked || c.spinning;
+            if (btnApplyManualMode) {
+                btnApplyManualMode.disabled = !c.loadout || !c.locked || c.spinning;
+                btnApplyManualMode.textContent = c.modeApplied ? "Applied!" : "Apply mode?";
+            }
 
 
             // Special event reroll
@@ -8792,10 +8828,7 @@ ${noteContent}`
                 state.current = {};
             }
 
-            const seedBase = makeSeedBase();
-            const seed = ensureUniqueSeed(`Seed: ${seedBase}`);
-
-            const loadout = rollLoadout(seed);
+            const loadout = rollLoadout(null);
 
             if (!loadout) {
                 alert("LOADOUT FAILED: No enabled items found.");
@@ -8803,9 +8836,10 @@ ${noteContent}`
                 return;
             }
 
-            state.current.seedBase = seedBase;
-            state.current.seed = seed;
+            state.current.seedBase = null;
+            state.current.seed = null;
             state.current.mode = null;
+            state.current.modeApplied = false;
             state.current.faction = null;
             state.current._pendingMode = loadout.mode;
             state.current._pendingFaction = normalizeFactionName(loadout.faction);
@@ -8842,13 +8876,11 @@ ${noteContent}`
             if (!state.current.specialActive || state.current.rerollsLeft <= 0) return;
             state.current.rerollsLeft -= 1;
 
-            // keep seed unique even on reroll
-            const seedBase = state.current.seedBase || makeSeedBase();
-            const seed = ensureUniqueSeed(`Seed:${seedBase}`);
-
-            const loadout = rollLoadout(seed);
-            state.current.seed = seed;
+            const loadout = rollLoadout(null);
+            state.current.seed = null;
+            state.current.seedBase = null;
             state.current.mode = loadout.mode;
+            state.current.modeApplied = false;
             state.current.faction = normalizeFactionName(loadout.faction);
             state.current.loadout = loadout;
             state.current.locked = false;
@@ -8875,12 +8907,26 @@ ${noteContent}`
 
             state.current.mode = state.current._pendingMode;
             state.current.faction = state.current._pendingFaction;
+            state.current.modeApplied = false;
 
             state.current.locked = true;
             renderSpin();
         }
+        async function playQuickPlanetSpin(finalPlanetName) {
+            const target = $("#dispPlanet");
+            if (!target) return;
+            const start = performance.now();
+            const total = 520;
+            const samplePool = (state.items.planets || []).map(p => p.name).filter(Boolean);
+            while (performance.now() - start < total) {
+                const randomName = samplePool.length ? samplePool[randInt(samplePool.length)] : "SCANNING...";
+                target.textContent = randomName;
+                await new Promise(res => setTimeout(res, 45));
+            }
+            target.textContent = finalPlanetName || "—";
+        }
         function doRollPlanet() {
-            if (!state.current.loadout || !state.current.locked) return;
+            if (!state.current.loadout || !state.current.locked || !state.current.modeApplied) return;
             const p = rollPlanetForFaction(state.current.faction);
             if (!p) {
                 alert("No planets available for that faction. Add planets in ITEMS tab.");
@@ -8897,12 +8943,20 @@ ${noteContent}`
             state.current.planetBiome = pc.biome; // cached for UI + card persistence
             state.current.planetLocked = true;
             state.current.manualPlanetCandidate = null;
+            state.current.spinning = true;
             renderSpin();
+            playQuickPlanetSpin(pc.name).then(() => {
+                const seedBase = makeSeedFromCurrent();
+                state.current.seedBase = seedBase;
+                state.current.seed = ensureUniqueSeed(`Seed: ${seedBase}`);
+                state.current.spinning = false;
+                renderSpin();
+            });
         }
 
         function doClearPlanet() {
             // Renamed behavior: "REROLL PLANET" (roll again instead of clearing)
-            if (!state.current.loadout || !state.current.locked) return;
+            if (!state.current.loadout || !state.current.locked || !state.current.modeApplied) return;
 
             const p = rollPlanetForFaction(state.current.faction);
             if (!p) {
@@ -8919,7 +8973,15 @@ ${noteContent}`
             state.current.planetBiome = pc.biome;
             state.current.planetLocked = true;
             state.current.manualPlanetCandidate = null;
+            state.current.spinning = true;
             renderSpin();
+            playQuickPlanetSpin(pc.name).then(() => {
+                const seedBase = makeSeedFromCurrent();
+                state.current.seedBase = seedBase;
+                state.current.seed = ensureUniqueSeed(`Seed: ${seedBase}`);
+                state.current.spinning = false;
+                renderSpin();
+            });
         }
 
         function resetCurrentSpinState() {
@@ -8927,6 +8989,7 @@ ${noteContent}`
             state.current.seed = null;
             state.current.seedBase = null;
             state.current.mode = null;
+            state.current.modeApplied = false;
             state.current.faction = null;
             state.current.loadout = null;
             state.current.locked = false;
@@ -8971,6 +9034,7 @@ ${noteContent}`
             if (!allowed.includes(mode)) return;
 
             state.current.mode = mode;
+            state.current.modeApplied = true;
             if (state.current.loadout) state.current.loadout.mode = mode;
             if (state.current.loadout) state.current.loadout.fingerprint = fingerprintLoadout(state.current.loadout);
             renderSpin();
@@ -9098,6 +9162,23 @@ ${noteContent}`
             $("#btnApplyManualMode").addEventListener("click", () => {
                 applyManualMode($("#manualModeSelect")?.value || "");
             });
+            $("#manualModeSelect").addEventListener("change", (e) => {
+                if (!state.current.loadout || !state.current.locked) return;
+                state.current.mode = String(e.target?.value || state.current.mode || "");
+                state.current.modeApplied = false;
+                if (state.current.planetLocked) {
+                    state.current.planet = null;
+                    state.current.planetLocked = false;
+                    state.current.planetBiome = null;
+                }
+                state.current.seed = null;
+                state.current.seedBase = null;
+                if (state.current.loadout) {
+                    state.current.loadout.mode = state.current.mode;
+                    state.current.loadout.fingerprint = fingerprintLoadout(state.current.loadout);
+                }
+                renderSpin();
+            });
             $("#btnUse").addEventListener("click", () => doUseThisRun());
 
             $("#btnCloseResultModal").addEventListener("click", closeResultCardModal);
@@ -9164,7 +9245,7 @@ ${noteContent}`
                 saveState();
                 renderResults();
                 updateSavedCount();
-                state.current = { seed: null, seedBase: null, mode: null, faction: null, loadout: null, locked: false, planet: null, planetLocked: false, planetBiome: null, manualPlanetCandidate: null, specialActive: false, rerollsLeft: 0 };
+                state.current = { seed: null, seedBase: null, mode: null, modeApplied: false, faction: null, loadout: null, locked: false, planet: null, planetLocked: false, planetBiome: null, manualPlanetCandidate: null, specialActive: false, rerollsLeft: 0, spinning: false };
                 renderSpin();
                 renderResults();
                 refreshCompareOptions();
