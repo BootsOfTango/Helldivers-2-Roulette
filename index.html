@@ -2763,6 +2763,15 @@ END MASTER DIRECTIVE
             background: rgba(255,255,255,.05);
         }
 
+        .planetConditionList {
+            margin: 0;
+            padding-left: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            font-size: 12px;
+        }
+
         .planetSearchPanel {
             margin-top: 12px;
         }
@@ -3051,7 +3060,7 @@ END MASTER DIRECTIVE
                         <option value="sector">Sector</option>
                         <option value="name">Name</option>
                         <option value="biome">Biome</option>
-                        <option value="hazard">Hazard</option>
+                        <option value="hazard">Conditions</option>
                     </select>
                     <input id="planetSearchInput" placeholder="Search planet name..." />
                     <button id="btnPlanetSearchClear" class="btnGhost">CLEAR</button>
@@ -3220,7 +3229,7 @@ END MASTER DIRECTIVE
                     <div class="row">
                 <div class="col">
                     <div class="label">Planets & sectors (edit freely)</div>
-                    <div class="smallHelp">Planet roll uses this list. Each planet must have: faction, sector, weather tags (comma separated).</div>
+                    <div class="smallHelp">Planet roll uses this list. Each planet must have: faction, sector, conditions tags (semicolon/comma separated).</div>
                     <div id="listPlanets"></div>
                 </div>
             </div>
@@ -3961,11 +3970,37 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             return out.length ? out.join("; ") : "None";
         }
 
+        function getFallbackPlanetConditionsByName(name) {
+            const key = normalizePlanetKey(name);
+            if (!key) return "";
+
+            try {
+                const db = (state && state.items && Array.isArray(state.items.planets)) ? state.items.planets : [];
+                const hit = db.find(x => normalizePlanetKey(x && x.name) === key);
+                const weather = (hit && typeof hit.weather === "string") ? hit.weather.trim() : "";
+                if (weather && weather !== "—") return weather;
+            } catch (e) { }
+
+            try {
+                const defaults = (DEFAULTS && Array.isArray(DEFAULTS.planets)) ? DEFAULTS.planets : [];
+                const hit2 = defaults.find(x => normalizePlanetKey(x && x.name) === key);
+                const weather2 = (hit2 && typeof hit2.weather === "string") ? hit2.weather.trim() : "";
+                if (weather2 && weather2 !== "—") return weather2;
+            } catch (e) { }
+
+            return "";
+        }
+
         function getPlanetWeatherText(planet) {
             if (!planet) return "None";
             const wt = planet.weatherText;
             if (typeof wt === "string" && wt.trim()) return wt.trim();
-            return envToWeather(planet.weather || planet.environment || planet.env || planet.modifiers || planet.effects);
+
+            const direct = envToWeather(planet.weather || planet.environment || planet.env || planet.modifiers || planet.effects);
+            if (direct && direct !== "None") return direct;
+
+            const fallback = getFallbackPlanetConditionsByName(planet.name || planet.planet || planet.planetName || planet.displayName);
+            return fallback || "None";
         }
 
         /* ===== BIOME RESOLUTION (API + LOCAL) ===== */
@@ -5271,7 +5306,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             if (help) {
                 help.textContent = searchEnabled
                     ? "Grouped by planet name initial. Search filters planet names only."
-                    : `Grouped by ${mode}. Groups and planets are listed alphabetically.`;
+                    : `Grouped by ${mode === "hazard" ? "conditions" : mode}. Groups and planets are listed alphabetically.`;
             }
 
             const selectedKey = normalizePlanetKey(state.current?.planet?.name || "");
@@ -6475,10 +6510,10 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                         </div>
 
                         <div class="planetMiniCard">
-                          <div class="planetMiniLabel">Hazard</div>
-                          <div class="planetTagRow">
-                            ${(tags.length ? tags : [weatherRaw || "None"]).map(t => `<span class="planetTag">${envEmoji(t)} ${escapeHtml(t)}</span>`).join("")}
-                          </div>
+                          <div class="planetMiniLabel">Conditions</div>
+                          <ul class="planetConditionList">
+                            ${(tags.length ? tags : [weatherRaw || "None"]).map(t => `<li>${envEmoji(t)} ${escapeHtml(t)}</li>`).join("")}
+                          </ul>
                         </div>
                       `;
 
@@ -6696,11 +6731,10 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                         </div>
 
                         <div class="planetMiniCard">
-                          <div class="planetMiniLabel">Hazard</div>
-                          <div class="planetMiniValue">${escapeHtml(planetWeatherTags.length ? planetWeatherTags.slice(0, 3).join(" / ") : (planetWeatherText || "None"))}${planetWeatherTags.length > 3 ? ` (+${planetWeatherTags.length - 3})` : ""}</div>
-                          <div class="planetTagRow">
-                            ${(planetWeatherTags.length ? planetWeatherTags : [planetWeatherText || "None"]).map(t => `<span class="planetTag">${envEmoji(t)} ${escapeHtml(t)}</span>`).join("")}
-                          </div>
+                          <div class="planetMiniLabel">Conditions</div>
+                          <ul class="planetConditionList">
+                            ${(planetWeatherTags.length ? planetWeatherTags : [planetWeatherText || "None"]).map(t => `<li>${envEmoji(t)} ${escapeHtml(t)}</li>`).join("")}
+                          </ul>
                         </div>
 
                         <div class="planetMiniCard">
@@ -8695,7 +8729,7 @@ ${noteContent}`
                     faction: p.faction || prev?.faction || "Unknown",
                     sector: p.sector || prev?.sector || "—",
                     biome: p.biome || prev?.biome || "—",
-                    weather: prev?.weather || "—",
+                    weather: prev?.weather || getFallbackPlanetConditionsByName(p.name) || "—",
                     enabled: (typeof prev?.enabled === "boolean") ? prev.enabled : true
                 };
             });
