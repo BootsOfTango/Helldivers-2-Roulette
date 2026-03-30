@@ -2783,7 +2783,7 @@ END MASTER DIRECTIVE
 
             </div>
 
-            <div class="sub">Solo only • D10 • equal chance chaos • one mission = one card</div>
+            <div class="sub">Solo only • D10 • weighted mission chaos • one mission = one card</div>
         </div>
         <div class="pillRow">
             <div class="pill"><strong id="pillSaved">0</strong> saved</div>
@@ -2835,7 +2835,7 @@ END MASTER DIRECTIVE
                         </div>
                     </div>
 
-                    <div class="smallHelp">Reels spin in order and slow down on reveal. Booster now auto-rolls after the weapon and stratagem reels finish. Equal odds. Pure chaos.</div>
+                    <div class="smallHelp">Reels spin in order and slow down on reveal. Booster now auto-rolls after the weapon and stratagem reels finish. Weighted mission odds. Pure chaos.</div>
                 </div>
 
                 <div class="spinMetaCol">
@@ -2867,7 +2867,7 @@ END MASTER DIRECTIVE
                             </select>
                             <button id="btnApplyManualMode" class="btnPrimary">APPLY MODE</button>
                         </div>
-                        <div class="tiny">One mission per card. Blitz = 12 minutes. Eradication = 15 minutes. Standard = 40 minutes.</div>
+                        <div class="tiny">One mission per card. Blitz = 12 minutes (15%). Eradication = 15 minutes (15%). Standard = 40 minutes (70%).</div>
                     </div>
                 </div>
             </div>
@@ -4764,7 +4764,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         }
 
         /***********************
-         * Random selection (equal chance)
+         * Random selection
          ***********************/
         function enabledNames(list) {
 
@@ -4820,9 +4820,11 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
          * Spin logic
          ***********************/
         function rollMode() {
-            // equal chance: Blitz (12), Eradication (15), or Standard (40)
-            const modes = ["Blitz (12)", "Eradication (15)", "Standard (40)"];
-            return modes[Math.floor(Math.random() * modes.length)];
+            // weighted chance: 15% Blitz (12), 15% Eradication (15), 70% Standard (40)
+            const roll = Math.random();
+            if (roll < 0.15) return "Blitz (12)";
+            if (roll < 0.30) return "Eradication (15)";
+            return "Standard (40)";
         }
         function rollFaction() {
             const roll = Math.random();
