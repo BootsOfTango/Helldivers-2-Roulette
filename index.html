@@ -949,6 +949,36 @@ END MASTER DIRECTIVE
             padding: 10px;
         }
 
+        .resultCard.resultCard-newly-created {
+            animation: resultCardPulseGlow 2.2s ease-in-out 3;
+        }
+
+        .resultCard.resultCard-newly-created .resultSummary {
+            animation: resultCardBlink 0.55s step-end 6;
+        }
+
+        @keyframes resultCardPulseGlow {
+            0%, 100% {
+                box-shadow: 0 0 0 rgba(255, 212, 0, 0);
+                border-color: rgba(255, 255, 255, .10);
+            }
+            40% {
+                box-shadow: 0 0 12px rgba(255, 212, 0, .55), 0 0 28px rgba(255, 212, 0, .28);
+                border-color: rgba(255, 231, 102, .95);
+            }
+        }
+
+        @keyframes resultCardBlink {
+            0%, 100% {
+                background: rgba(255, 255, 255, .02);
+                border-color: var(--line2);
+            }
+            50% {
+                background: rgba(255, 212, 0, .09);
+                border-color: rgba(255, 231, 102, .95);
+            }
+        }
+
         .resultSummary {
             cursor: pointer;
             border: 1px solid var(--line2);
@@ -4784,6 +4814,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         let itemImageDb = null;
         let selectedRankCardId = null;
         let lastActionCue = "";
+        let pendingNewCardHighlightId = null;
 
         function loadItemImageDb() {
             return fetch("assets/item-images.json")
@@ -6635,12 +6666,17 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             }
 
             const radarMaxes = getRadarMaxes(state.cards);
+            let highlightedCardEl = null;
 
             for (const card of list) {
                 const moBadge = card.majorOrderDone ? `<span class="badge good">MO DONE</span>` : `<span class="badge red">MO NO</span>`;
                 const tier = tierMap.get(card.id) || "";
                 const el = document.createElement("div");
                 el.className = "card resultCard" + (tier ? ` tier-${tier}` : "");
+                if (pendingNewCardHighlightId && card.id === pendingNewCardHighlightId) {
+                    el.classList.add("resultCard-newly-created");
+                    highlightedCardEl = el;
+                }
 
                 el.innerHTML = `
                       <button class="resultSummary" data-act="toggleCard" data-id="${card.id}">
@@ -6665,6 +6701,14 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                       </button>`;
 
                 grid.appendChild(el);
+            }
+
+            if (highlightedCardEl) {
+                highlightedCardEl.scrollIntoView({ block: "nearest", behavior: "smooth" });
+                highlightedCardEl.addEventListener("animationend", () => {
+                    highlightedCardEl.classList.remove("resultCard-newly-created");
+                }, { once: true });
+                pendingNewCardHighlightId = null;
             }
 
             grid.querySelectorAll('button[data-act="toggleCard"]').forEach(btn => {
@@ -9529,7 +9573,9 @@ ${noteContent}`
             }
             card.playerName = cleanName;
 
-            state.cards.unshift(normalizeCardRecord(card));
+            const normalizedCard = normalizeCardRecord(card);
+            state.cards.unshift(normalizedCard);
+            pendingNewCardHighlightId = normalizedCard?.id || null;
             recalcGrades();
             saveState();
 
