@@ -535,6 +535,45 @@ END MASTER DIRECTIVE
             letter-spacing: .2px;
         }
 
+        #spinSeed,
+        #pillSeed {
+            transition: filter .28s ease, text-shadow .32s ease, transform .22s ease, opacity .2s ease;
+            will-change: transform, filter, text-shadow;
+        }
+
+        #spinSeed.seed-spinning,
+        #pillSeed.seed-spinning {
+            animation: seedNameSpinJitter .12s linear infinite;
+            filter: blur(.15px);
+            opacity: .96;
+        }
+
+        #spinSeed.seed-settled,
+        #pillSeed.seed-settled {
+            animation: seedNameSettleGlow 1.15s ease-out 1;
+        }
+
+        @keyframes seedNameSpinJitter {
+            0% { transform: translateY(-1px); }
+            50% { transform: translateY(1px); }
+            100% { transform: translateY(-1px); }
+        }
+
+        @keyframes seedNameSettleGlow {
+            0% {
+                text-shadow: 0 0 0 rgba(245,220,84,0);
+                filter: brightness(1);
+            }
+            30% {
+                text-shadow: 0 0 8px rgba(245,220,84,.24), 0 0 14px rgba(245,220,84,.14);
+                filter: brightness(1.06);
+            }
+            100% {
+                text-shadow: 0 0 4px rgba(245,220,84,.14), 0 0 8px rgba(245,220,84,.08);
+                filter: brightness(1.02);
+            }
+        }
+
         .box {
             background: rgba(0,0,0,.18);
             border: 1px solid var(--line2);
@@ -6110,6 +6149,17 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             // SEED: always show
             $("#pillSeed").textContent = c.seed || "???";
         }
+
+        function setSeedAnimationState(stateName) {
+            const seedEls = [$("#spinSeed"), $("#pillSeed")].filter(Boolean);
+            seedEls.forEach(el => {
+                el.classList.remove("seed-spinning", "seed-settled");
+                void el.offsetWidth;
+                if (stateName === "spinning" || stateName === "settled") {
+                    el.classList.add(`seed-${stateName}`);
+                }
+            });
+        }
         function getFactionClass(f) {
             if (!f) return "";
             const n = String(f).toLowerCase();
@@ -6123,6 +6173,9 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const c = state.current;
 
             $("#spinSeed").textContent = c.seed || "???";
+            if (!c.spinning && !c.seed) {
+                setSeedAnimationState(null);
+            }
             const playerEntryBox = $("#playerEntryBox");
             const playerInput = $("#spinPlayerName");
             if (playerEntryBox) playerEntryBox.style.display = c.seed ? "" : "none";
@@ -8962,17 +9015,22 @@ ${noteContent}`
         }
         async function playQuickSeedSpin(finalSeedName) {
             const target = $("#spinSeed");
+            const pillTarget = $("#pillSeed");
             if (!target) return;
+            setSeedAnimationState("spinning");
             const start = performance.now();
             const total = 700;
             while (performance.now() - start < total) {
                 const sampleBase = makeSeedFromCurrent();
                 const sampleSeed = ensureUniqueSeed(`Seed: ${sampleBase}`);
                 target.textContent = sampleSeed;
+                if (pillTarget) pillTarget.textContent = sampleSeed;
                 playTone("seedTick");
                 await new Promise(res => setTimeout(res, 55));
             }
             target.textContent = finalSeedName || "—";
+            if (pillTarget) pillTarget.textContent = finalSeedName || "—";
+            setSeedAnimationState("settled");
             playTone("seedFinal");
         }
         function doRollPlanet() {
