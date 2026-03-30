@@ -2768,20 +2768,26 @@ END MASTER DIRECTIVE
         }
 
         .planetSearchControls {
-            display: flex;
+            display: grid;
+            grid-template-columns: minmax(130px, 170px) minmax(260px, 1fr) auto;
             gap: 8px;
-            flex-wrap: wrap;
-            align-items: center;
+            align-items: stretch;
         }
 
         .planetSearchControls select,
-        .planetSearchControls input {
-            min-height: 38px;
+        .planetSearchControls input,
+        .planetSearchControls button {
+            min-height: 40px;
         }
 
         .planetSearchControls input {
-            flex: 1;
-            min-width: 220px;
+            min-width: 0;
+        }
+
+        @media (max-width: 780px) {
+            .planetSearchControls {
+                grid-template-columns: 1fr;
+            }
         }
 
         .planetSearchResults {
@@ -2824,6 +2830,7 @@ END MASTER DIRECTIVE
             letter-spacing: .3px;
             text-align: left;
             padding: 10px 12px;
+            min-height: 42px;
         }
 
         .planetSearchGroupToggle:hover {
@@ -2836,6 +2843,13 @@ END MASTER DIRECTIVE
             font-weight: 700;
             text-transform: uppercase;
             white-space: nowrap;
+        }
+
+        .planetSearchGroupTitle {
+            font-size: 12px;
+            font-weight: 900;
+            color: #edf3ff;
+            letter-spacing: .28px;
         }
 
         .planetSearchGroupRows {
@@ -5297,7 +5311,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 toggle.type = "button";
                 toggle.className = "planetSearchGroupToggle";
                 toggle.innerHTML = `
-                    <span>${expanded ? "▼" : "▶"} ${escapeHtml(group.label)}</span>
+                    <span class="planetSearchGroupTitle">${expanded ? "▼" : "▶"} ${escapeHtml(group.label)}</span>
                     <span class="planetSearchGroupMeta">${group.planets.length} planet${group.planets.length === 1 ? "" : "s"}</span>
                 `;
                 toggle.addEventListener("click", () => {
@@ -6461,7 +6475,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                         </div>
 
                         <div class="planetMiniCard">
-                          <div class="planetMiniLabel">Environment</div>
+                          <div class="planetMiniLabel">Hazard</div>
                           <div class="planetTagRow">
                             ${(tags.length ? tags : [weatherRaw || "None"]).map(t => `<span class="planetTag">${envEmoji(t)} ${escapeHtml(t)}</span>`).join("")}
                           </div>
@@ -6682,7 +6696,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                         </div>
 
                         <div class="planetMiniCard">
-                          <div class="planetMiniLabel">Environment</div>
+                          <div class="planetMiniLabel">Hazard</div>
                           <div class="planetMiniValue">${escapeHtml(planetWeatherTags.length ? planetWeatherTags.slice(0, 3).join(" / ") : (planetWeatherText || "None"))}${planetWeatherTags.length > 3 ? ` (+${planetWeatherTags.length - 3})` : ""}</div>
                           <div class="planetTagRow">
                             ${(planetWeatherTags.length ? planetWeatherTags : [planetWeatherText || "None"]).map(t => `<span class="planetTag">${envEmoji(t)} ${escapeHtml(t)}</span>`).join("")}
