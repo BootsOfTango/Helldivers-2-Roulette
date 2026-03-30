@@ -2250,7 +2250,7 @@ END MASTER DIRECTIVE
             border: 1px solid var(--line2);
             border-radius: 14px;
             background: rgba(0,0,0,.22);
-            padding: 12px;
+            padding: 10px;
             position: sticky;
             top: 82px;
             align-self: start;
@@ -2258,9 +2258,18 @@ END MASTER DIRECTIVE
             overflow: auto;
         }
 
+        #rankDetailPanel .radarWrap {
+            margin-top: 8px;
+            padding: 6px;
+        }
+
+        #rankDetailPanel .radarWrap svg {
+            width: min(100%, 210px);
+        }
+
         .rankDetailLoadout {
             display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
+            grid-template-columns: repeat(4, minmax(0, 1fr));
             gap: 8px;
             margin-top: 8px;
         }
@@ -2268,24 +2277,41 @@ END MASTER DIRECTIVE
         .rankDetailItemCard {
             border: 1px solid var(--line2);
             border-radius: 12px;
-            padding: 8px;
+            padding: 6px;
             background: rgba(0,0,0,.22);
             display: flex;
             flex-direction: column;
-            gap: 6px;
+            gap: 4px;
             align-items: center;
+            min-width: 0;
         }
 
             .rankDetailItemCard img {
                 width: 100%;
-                max-width: 120px;
+                max-width: 86px;
                 aspect-ratio: 1 / 1;
                 object-fit: contain;
                 background: rgba(0,0,0,.35);
                 border-radius: 10px;
                 border: 1px solid var(--line2);
-                padding: 6px;
+                padding: 4px;
             }
+
+        .rankDetailItemCard.kind-booster img {
+            max-width: 74px;
+        }
+
+        .rankDetailItemCard.kind-stratagem img {
+            max-width: 68px;
+        }
+
+        .rankDetailItemName {
+            text-align: center;
+            line-height: 1.2;
+            font-size: 11px;
+            width: 100%;
+            overflow-wrap: anywhere;
+        }
 
         .rankDetailStrats {
             display: grid;
@@ -2521,6 +2547,10 @@ END MASTER DIRECTIVE
                 min-height: 0;
                 position: static;
                 max-height: none;
+            }
+
+            .rankDetailLoadout {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
             }
         }
 
@@ -4704,10 +4734,10 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 const visual = getItemVisual(value, kind);
                 const fallbackAttr = visual?.fallbackSrc ? ` data-fallback-src="${escapeHtml(visual.fallbackSrc)}"` : "";
                 return `
-                    <div class="rankDetailItemCard">
+                    <div class="rankDetailItemCard kind-${escapeHtml(kind || "unknown")}">
                         <div class="tiny muted">${escapeHtml(label)}</div>
                         ${visual?.src ? `<img src="${escapeHtml(visual.src)}" alt="${escapeHtml(visual.alt || value)}" loading="lazy" decoding="async" data-item-visual="true"${fallbackAttr} onerror="const fb=this.dataset.fallbackSrc;if(fb&&this.src!==fb){this.src=fb;return;}this.outerHTML='&lt;div class=&quot;tiny muted&quot;&gt;No image&lt;/div&gt;';">` : `<div class="tiny muted">No image</div>`}
-                        <div class="tiny">${escapeHtml(value || "—")}</div>
+                        <div class="tiny rankDetailItemName">${escapeHtml(value || "—")}</div>
                     </div>
                 `;
             };
