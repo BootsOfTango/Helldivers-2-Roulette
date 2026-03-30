@@ -2948,11 +2948,11 @@ END MASTER DIRECTIVE
 
     <main>
         <div class="tabs">
-            <div class="tabBtn active" data-tab="spin">SPIN</div>
-            <div class="tabBtn" data-tab="results">RESULTS</div>
-            <div class="tabBtn" data-tab="compare">COMPARE</div>
-            <div class="tabBtn" data-tab="items">ARMORY</div>
-            <div class="tabBtn" data-tab="rank">RANK</div>
+            <div class="tabBtn active" data-tab="spin">1. SPIN</div>
+            <div class="tabBtn" data-tab="results">2. RESULTS</div>
+            <div class="tabBtn" data-tab="compare">3. COMPARE</div>
+            <div class="tabBtn" data-tab="items">4. ARMORY</div>
+            <div class="tabBtn" data-tab="rank">5. RANK</div>
         </div>
 
         <!-- SPIN TAB -->
@@ -3012,9 +3012,6 @@ END MASTER DIRECTIVE
                                 <option value="Standard (40)">Standard (40)</option>
                             </select>
                             <button id="btnApplyManualMode" class="btnPrimary">Apply mode?</button>
-                        </div>
-                        <div class="miniRow" style="margin-top:10px;">
-                            <button id="btnRollPlanet" class="btnGhost" disabled>ROLL PLANET</button>
                         </div>
                     </div>
 
@@ -6502,7 +6499,6 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             // Buttons
             $("#btnLock").disabled = !c.loadout || c.locked || c.spinning;
-            $("#btnRollPlanet").disabled = !c.loadout || !c.locked || !c.modeApplied || c.spinning || c.planetConfirmed;
             if (manualModeSelect) manualModeSelect.disabled = !c.loadout || !c.locked || c.spinning || c.modeApplied;
             const btnApplyManualMode = $("#btnApplyManualMode");
             if (btnApplyManualMode) {
@@ -6514,7 +6510,6 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 ["btnSpin", !c.loadout && !c.spinning],
                 ["btnLock", !!(c.loadout && !c.locked && !c.spinning)],
                 ["btnApplyManualMode", !!(c.loadout && c.locked && !c.modeApplied && !c.spinning)],
-                ["btnRollPlanet", !!(c.loadout && c.locked && c.modeApplied && !c.planetLocked && !c.spinning && !c.planetConfirmed)],
                 ["btnConfirmPlanetInline", isReadyForPlanetConfirm],
                 ["btnConfirmPlayer", isReadyForPlayerConfirm]
             ];
@@ -9406,6 +9401,10 @@ ${noteContent}`
             state.current.modeApplied = true;
             if (state.current.loadout) state.current.loadout.mode = mode;
             if (state.current.loadout) state.current.loadout.fingerprint = fingerprintLoadout(state.current.loadout);
+            if (!state.current.planetLocked && !state.current.planetConfirmed) {
+                doRollPlanet();
+                return;
+            }
             renderSpin();
         }
 
@@ -9587,6 +9586,22 @@ ${noteContent}`
             document.addEventListener("keydown", (e) => {
                 if (e.key === "Escape" && state.ui.modalOpen) closeResultCardModal();
             });
+            document.addEventListener("keydown", (e) => {
+                if (e.defaultPrevented || e.repeat) return;
+                const target = e.target;
+                if (target && (target.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/i.test(target.tagName))) return;
+                const tabByNumber = {
+                    "1": "spin",
+                    "2": "results",
+                    "3": "compare",
+                    "4": "items",
+                    "5": "rank"
+                };
+                const nextTab = tabByNumber[e.key];
+                if (!nextTab) return;
+                e.preventDefault();
+                switchTab(nextTab);
+            });
 
             $("#resFilterMode").addEventListener("change", renderResults);
             $("#resFilterFaction").addEventListener("change", renderResults);
@@ -9714,15 +9729,6 @@ ${noteContent}`
                 state.items.boosters.push({ name: v, enabled: true, warbond: "Unassigned / Custom", subgroup: "booster", source: "Unassigned / Custom" });
                 $("#addBooster").value = "";
                 saveState(); renderItems();
-            });
-
-            // Optional: let the planet button reroll instead of “roll once”
-            // You already wrote doClearPlanet() as “reroll planet” behavior.
-            // If you want the same button to reroll after the first roll, use this:
-            $("#btnRollPlanet").addEventListener("click", () => {
-                // If not rolled yet -> first roll, else reroll
-                if (!state.current.planetLocked) doRollPlanet();
-                else doClearPlanet();
             });
 
             $("#btnSearchPlanetInline").addEventListener("click", () => {
