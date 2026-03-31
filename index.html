@@ -1718,6 +1718,27 @@ END MASTER DIRECTIVE
             color: #97a6bf;
         }
 
+        .cmpCardHoverTip {
+            position: fixed;
+            z-index: 10000;
+            pointer-events: none;
+            display: none;
+            max-width: min(360px, 90vw);
+            padding: 9px 11px;
+            border-radius: 10px;
+            border: 1px solid rgba(127,255,179,.55);
+            background: rgba(3, 7, 16, .96);
+            color: #f3fbff;
+            font-size: 12px;
+            line-height: 1.35;
+            box-shadow: 0 0 16px rgba(0,0,0,.45), 0 0 22px rgba(127,255,179,.2);
+            white-space: normal;
+        }
+
+        .cmpCardHoverTip .muted {
+            color: #97a6bf;
+        }
+
         .cmpHoverBanner.winner-a .cmpHoverBannerSide.left,
         .cmpHoverBanner.winner-b .cmpHoverBannerSide.right,
         .cmpHoverBanner.winner-tie .cmpHoverBannerSide {
@@ -6036,6 +6057,64 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             return ((a - b) / b) * 100;
         }
 
+        function buildCompareCardHoverTipHtml(card) {
+            const seedTitle = escapeHtml(formatSeedWithPlayer(card) || "—");
+            const player = escapeHtml(getPlayerName(card) || "—");
+            const primary = escapeHtml(card?.primary || "—");
+            const sidearm = escapeHtml(card?.sidearm || "—");
+            const throwable = escapeHtml(card?.throwable || "—");
+            const booster = escapeHtml(card?.booster || "—");
+            const stratagems = escapeHtml((card?.stratagems || []).join(" • ") || "—");
+            const planetName = card?.planet?.name ? escapeHtml(card.planet.name) : "";
+            const planetSector = card?.planet?.sector ? ` (${escapeHtml(card.planet.sector)})` : "";
+            const planetLine = planetName ? `<div><span class="muted">Planet:</span> ${planetName}${planetSector}</div>` : "";
+            return `
+                <div><strong>${seedTitle}</strong></div>
+                <div><span class="muted">Player:</span> ${player}</div>
+                <div><span class="muted">Primary:</span> ${primary}</div>
+                <div><span class="muted">Sidearm:</span> ${sidearm}</div>
+                <div><span class="muted">Throwable:</span> ${throwable}</div>
+                <div><span class="muted">Booster:</span> ${booster}</div>
+                <div><span class="muted">Strats:</span> ${stratagems}</div>
+                ${planetLine}
+            `;
+        }
+
+        function getCompareCardHoverTip() {
+            let tip = document.getElementById("cmpCardHoverTip");
+            if (!tip) {
+                tip = document.createElement("div");
+                tip.id = "cmpCardHoverTip";
+                tip.className = "cmpCardHoverTip";
+                document.body.appendChild(tip);
+            }
+            return tip;
+        }
+
+        function hideCompareCardHoverTip() {
+            const tip = document.getElementById("cmpCardHoverTip");
+            if (tip) tip.style.display = "none";
+        }
+
+        function positionCompareCardHoverTip(event) {
+            const tip = document.getElementById("cmpCardHoverTip");
+            if (!tip || tip.style.display !== "block") return;
+            const pad = 10;
+            const rect = tip.getBoundingClientRect();
+            let x = event.clientX + 14;
+            let y = event.clientY + 14;
+            if (x + rect.width + pad > window.innerWidth) x = event.clientX - rect.width - 14;
+            if (y + rect.height + pad > window.innerHeight) y = event.clientY - rect.height - 14;
+            tip.style.left = `${Math.max(pad, x)}px`;
+            tip.style.top = `${Math.max(pad, y)}px`;
+        }
+
+        function showCompareCardHoverTip(event, card) {
+            const tip = getCompareCardHoverTip();
+            tip.innerHTML = buildCompareCardHoverTipHtml(card);
+            tip.style.display = "block";
+            positionCompareCardHoverTip(event);
+        }
 
         function buildCompareRadar(cardA, cardB) {
             if (!cardA || !cardB) return;
@@ -6077,18 +6156,36 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const cardClassB = `card${tB ? ` tier-${tB}` : ""}`.trim();
 
             wrapA.innerHTML = `
-            <div class="${cardClassA}">
+            <div class="${cardClassA}" data-cmp-card="A" tabindex="0">
                 <div class="cmpTitle"${titleStyleA}>${escapeHtml(formatSeedWithPlayer(cardA))}</div>
                 <div class="miniRow" style="justify-content:center; margin-bottom:6px;">${moBadgeA}</div>
                 ${buildRadarSVG(cardA, safeMaxes)}
             </div>`;
 
             wrapB.innerHTML = `
-            <div class="${cardClassB}">
+            <div class="${cardClassB}" data-cmp-card="B" tabindex="0">
                 <div class="cmpTitle"${titleStyleB}>${escapeHtml(formatSeedWithPlayer(cardB))}</div>
                 <div class="miniRow" style="justify-content:center; margin-bottom:6px;">${moBadgeB}</div>
                 ${buildRadarSVG(cardB, safeMaxes)}
             </div>`;
+
+            const bindCompareCardHover = (node, card) => {
+                if (!node || !card) return;
+                node.addEventListener("mouseenter", (event) => showCompareCardHoverTip(event, card));
+                node.addEventListener("mousemove", (event) => positionCompareCardHoverTip(event));
+                node.addEventListener("mouseleave", hideCompareCardHoverTip);
+                node.addEventListener("focus", () => {
+                    const rect = node.getBoundingClientRect();
+                    showCompareCardHoverTip({
+                        clientX: rect.left + Math.min(28, rect.width * 0.2),
+                        clientY: rect.top + Math.min(28, rect.height * 0.2),
+                    }, card);
+                });
+                node.addEventListener("blur", hideCompareCardHoverTip);
+            };
+
+            bindCompareCardHover(wrapA.querySelector('[data-cmp-card="A"]'), cardA);
+            bindCompareCardHover(wrapB.querySelector('[data-cmp-card="B"]'), cardB);
 
             if (overlay) {
                 overlay.innerHTML = `<div class="tiny muted">Click <strong>STACK RADARS</strong> to overlap both pentagons, then hover each stat wedge to see who wins.<br>Stacked radar uses raw stat values per axis (no Grade/MO size scaling) so winners and % are accurate for any pair.</div>`;
@@ -6342,6 +6439,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const clearHover = () => {
                 activeHoverRow = null;
                 hideCmpStackHoverTip();
+                hideCompareCardHoverTip();
                 overlay.querySelectorAll(".cmpAxisEdge").forEach((seg) => seg.classList.remove("is-on"));
                 overlay.querySelectorAll(".cmpWinDot").forEach((dot) => dot.classList.remove("is-on"));
                 overlay.querySelectorAll(".cmpOverlayPoly").forEach((poly) => {
@@ -6359,6 +6457,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             hits.forEach((el) => {
                 el.addEventListener("mouseenter", (event) => {
+                    hideCompareCardHoverTip();
                     const axis = Number(el.getAttribute("data-axis") || -1);
                     const row = hoverRows.find(r => r.axis === axis);
                     clearHover();
@@ -6401,6 +6500,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 });
                 el.addEventListener("mouseleave", clearHover);
             });
+            overlay.addEventListener("mouseenter", hideCompareCardHoverTip);
             overlay.addEventListener("mouseleave", clearHover);
         }
 
