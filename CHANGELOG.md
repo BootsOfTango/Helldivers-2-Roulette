@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-04-01
+
+### First official Chaos Tango 1.0 release ✅
+
+- **Release:** Declared **Helldivers 2 Chaos Roulette (Chaos Tango)** as the first official **v1.0.0** release baseline.
+- **Version label:** Updated in-app version tag to `HD2 TANGO Roulette v1.0.0` for semantic-version consistency.
+- **Release docs:** Added `RELEASE_NOTES_v1.0.0.md` with copy-ready notes for GitHub Releases.
+
 ## 2026-03-26
 
 ### Entrenched Division warbond content update ✅
