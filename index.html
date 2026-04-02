@@ -3456,6 +3456,8 @@ END MASTER DIRECTIVE
                     <div class="tiny">
                         Each card gets a <strong>raw score</strong> from your recorded stats, then everything is scaled so the top run is always <strong>100</strong>.
                         <br><br>
+                        <strong>Major Order status is visual/filter-only</strong> in Rank (it does not modify raw score or grade).
+                        <br><br>
                         <strong>Raw Score</strong> (default, tweakable later):
                         <br>
                         <br>
@@ -3470,6 +3472,13 @@ END MASTER DIRECTIVE
             <div class="row" style="margin-top:10px;">
                 <div class="col">
                     <input id="rankSearch" placeholder="Search rank by player name..." />
+                </div>
+                <div class="col right">
+                    <select id="rankMoFilter" aria-label="Filter rank by major order status">
+                        <option value="all">All cards (MO done + fail)</option>
+                        <option value="done">MO DONE only</option>
+                        <option value="fail">MO FAIL only</option>
+                    </select>
                 </div>
             </div>
 
@@ -5868,8 +5877,6 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         /***********************
          * Ranking system (0-100 scale)
          ***********************/
-        const MO_FAIL_MULTIPLIER = 0.75;
-
         function computeRawScore(card) {
             const kills = Number(card.stats?.kills ?? 0);
             const accuracy = Number(card.stats?.accuracy ?? 0);
@@ -5879,14 +5886,14 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const stratUses = Number(card.stats?.stratUses ?? 0);
 
             // Balance power (kills) with execution (accuracy/survival) and utility (stratagems/mobility).
+            // Major Order status is metadata only (display/filter), not part of performance grading.
             let raw =
                 (kills * 0.7) +
                 (accuracy * 2.0) +
                 (stratUses * 3.0) +
                 (distanceKm * 4.0) -
                 (deaths * 12.0) -
-                (stims * 5.0) +
-                (card.majorOrderDone ? 20.0 : 0.0);
+                (stims * 5.0);
 
             if (!isFinite(raw)) raw = 0;
             raw = Math.max(0, raw);
@@ -9169,9 +9176,8 @@ ${noteContent}`
                     if (success) entry.moSuccess += 1;
                     const grade = clamp(Number(card.grade || 0), 0, 100);
                     const cardRank = clamp(Number(card.scoreRaw || 0), 0, 500);
-                    const moBoost = success ? 1 : MO_FAIL_MULTIPLIER;
                     const slotWeight = it.slot === "primary" ? 1.14 : it.slot === "sidearm" ? 1.0 : it.slot === "throwable" ? 0.94 : 1.1;
-                    const score = ((grade * 0.55) + (cardRank * 0.45)) * moBoost * slotWeight;
+                    const score = ((grade * 0.55) + (cardRank * 0.45)) * slotWeight;
                     entry.gradeSum += grade;
                     entry.cardRankSum += cardRank;
                     entry.scoreParts.push(score);
@@ -9289,6 +9295,7 @@ ${noteContent}`
             recalcGrades();
 
             const rankQuery = normalizeText($("#rankSearch")?.value || "");
+            const rankMoFilter = String($("#rankMoFilter")?.value || "all");
             const list = state.cards.slice().sort((a, b) => {
                 const g = Number(b.grade || 0) - Number(a.grade || 0);
                 if (g !== 0) return g;
@@ -9296,8 +9303,13 @@ ${noteContent}`
             });
 
             let filtered = list;
+            if (rankMoFilter === "done") {
+                filtered = filtered.filter(c => !!c.majorOrderDone);
+            } else if (rankMoFilter === "fail") {
+                filtered = filtered.filter(c => !c.majorOrderDone);
+            }
             if (rankQuery) {
-                filtered = list.filter(c => normalizeText(getPlayerName(c)).includes(rankQuery));
+                filtered = filtered.filter(c => normalizeText(getPlayerName(c)).includes(rankQuery));
             }
 
             const box = $("#rankList");
@@ -9324,7 +9336,7 @@ ${noteContent}`
             const radarMaxes = getRadarMaxes(state.cards);
 
             filtered.forEach((c) => {
-                const place = list.findIndex(x => x.id === c.id) + 1;
+                const place = filtered.findIndex(x => x.id === c.id) + 1;
 
                 const outer = document.createElement("div");
                 outer.className = "rankOuter";
@@ -9364,8 +9376,8 @@ ${noteContent}`
                 outer.appendChild(row);
                 box.appendChild(outer);
             });
-            const selectedCard = list.find(c => c.id === selectedRankCardId) || filtered[0] || null;
-            const selectedPlace = selectedCard ? (list.findIndex(x => x.id === selectedCard.id) + 1) : 0;
+            const selectedCard = filtered.find(c => c.id === selectedRankCardId) || filtered[0] || null;
+            const selectedPlace = selectedCard ? (filtered.findIndex(x => x.id === selectedCard.id) + 1) : 0;
             renderRankDetailPanel(selectedCard, selectedPlace, radarMaxes);
             renderItemInsights(state.cards);
         }
@@ -9885,6 +9897,7 @@ ${noteContent}`
             $("#cmpSortDir").addEventListener("change", refreshCompareOptions);
             $("#cmpSearch").addEventListener("input", refreshCompareOptions);
             $("#rankSearch").addEventListener("input", renderRank);
+            $("#rankMoFilter").addEventListener("change", renderRank);
             $("#itemSearch").addEventListener("input", renderItems);
             $("#itemsViewMode").addEventListener("change", (e) => {
                 localStorage.setItem(ITEMS_VIEW_MODE_KEY, e.target.value === "category" ? "category" : "warbond");
