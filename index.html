@@ -3342,12 +3342,11 @@ END MASTER DIRECTIVE
             <div class="row">
                 <div class="col">
                     <div class="label">Manual pool management</div>
-                    <div class="smallHelp">Enable or disable owned items, then add or remove entries without changing your current save wiring.</div>
+                    <div class="smallHelp">Enable or disable owned items instantly, then add or remove entries as needed.</div>
                 </div>
                 <div class="col right">
                     <div class="miniRow" style="justify-content:flex-end;">
                         <button id="btnResetDefaults" class="btnDanger">RESET DEFAULT LISTS</button>
-                        <button id="btnSaveItems" class="btnPrimary">SAVE ITEMS</button>
                     </div>
                 </div>
             </div>
@@ -9944,10 +9943,6 @@ ${noteContent}`
                 alert("Defaults restored.");
             });
 
-            $("#btnSaveItems").addEventListener("click", () => {
-                saveState();
-                alert("Items saved.");
-            });
 
             $("#btnRefreshApiPlanets").addEventListener("click", () => {
                 loadAndRenderApiActivePlanets();
