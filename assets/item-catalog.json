@@ -130,7 +130,7 @@
       "assetPath": "assets/weapons/primaries/sta-52-assault-rifle.png"
     },
     {
-      "name": "R-0 Variable",
+      "name": "VG-70 Variable",
       "type": "primary",
       "subgroup": "marksman-rifle",
       "warbond": "Unassigned / Custom",
@@ -906,12 +906,12 @@
       "assetPath": "assets/stratagems/defensive/gatling-sentry.svg"
     },
     {
-      "name": "Grenadier Battalion",
+      "name": "Grenadier Battlement",
       "type": "stratagem",
       "subgroup": "defensive",
       "warbond": "Unassigned / Custom",
       "source": "Unassigned / Custom",
-      "assetPath": "assets/stratagems/defensive/grenadier-battalion.png"
+      "assetPath": "assets/stratagems/defensive/grenadier-battalion.svg"
     },
     {
       "name": "HMG Emplacement",
@@ -1050,12 +1050,12 @@
       "assetPath": "assets/stratagems/support/de-escalator.png"
     },
     {
-      "name": "Detonation Tool",
+      "name": "Defoliation Tool",
       "type": "stratagem",
       "subgroup": "support",
       "warbond": "Unassigned / Custom",
       "source": "Unassigned / Custom",
-      "assetPath": "assets/stratagems/support/detonation-tool.png"
+      "assetPath": "assets/stratagems/support/detonation-tool.svg"
     },
     {
       "name": "Directional Shield",
@@ -1122,12 +1122,12 @@
       "assetPath": "assets/stratagems/support/flam-40-flamethrower.svg"
     },
     {
-      "name": "Fast Recon Vehicle",
+      "name": "M-102 Fast Recon Vehicle",
       "type": "stratagem",
       "subgroup": "support",
       "warbond": "Unassigned / Custom",
       "source": "Unassigned / Custom",
-      "assetPath": "assets/stratagems/support/fast-recon-vehicle.png"
+      "assetPath": "assets/stratagems/support/fast-recon-vehicle.svg"
     },
     {
       "name": "GL-21 Grenade Launcher",
@@ -1154,20 +1154,20 @@
       "assetPath": "assets/stratagems/support/guard-dog.png"
     },
     {
-      "name": "Guard Dog Arc",
+      "name": "AX/ARC-3 K-9",
       "type": "stratagem",
       "subgroup": "support",
       "warbond": "Unassigned / Custom",
       "source": "Unassigned / Custom",
-      "assetPath": "assets/stratagems/support/guard-dog-arc.png"
+      "assetPath": "assets/stratagems/support/guard-dog-arc.svg"
     },
     {
-      "name": "Guard Dog Breath",
+      "name": "AX/TX-13 Dog Breath",
       "type": "stratagem",
       "subgroup": "support",
       "warbond": "Unassigned / Custom",
       "source": "Unassigned / Custom",
-      "assetPath": "assets/stratagems/support/guard-dog-breath.png"
+      "assetPath": "assets/stratagems/support/guard-dog-breath.svg"
     },
     {
       "name": "Guard Dog Rover",
