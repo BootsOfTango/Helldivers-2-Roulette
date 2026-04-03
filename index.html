@@ -5882,6 +5882,17 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             return clamp((maxV - v) / (maxV - minV), 0, 1);
         }
 
+        // Endurance pressure score (lower is better):
+        // deaths are counted directly, while stims are compressed with log scaling
+        // so heavy stim usage (common ~5..50) doesn't collapse the radar axis to ~0 too quickly.
+        function getEnduranceLoad(stats) {
+            const deaths = Math.max(0, Number(stats?.deaths || 0));
+            const stims = Math.max(0, Number(stats?.stims || 0));
+            const stimReference = 50; // typical upper-end mission usage before "extreme" territory
+            const stimPressure = (Math.log1p(stims) / Math.log1p(stimReference)) * 10;
+            return deaths + stimPressure;
+        }
+
         // Baseline caps keep radar shape meaningful even when there is only one saved card.
         // Without these floors, single-card normalization makes every axis look "maxed",
         // which collapses the pentagon into a misleading near-regular shape.
@@ -5890,7 +5901,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             accuracy: 100,
             distanceKm: 12,
             stratUses: 30,
-            deathsPlusStims: 25
+            deathsPlusStims: 16
         };
 
         function getRadarMaxes(cards) {
@@ -5905,7 +5916,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             for (const c of (cards || [])) {
                 const s = c.stats || {};
-                const combo = Number(s.deaths || 0) + Number(s.stims || 0);
+                const combo = getEnduranceLoad(s);
                 out.maxKills = Math.max(out.maxKills, Number(s.kills || 0));
                 out.maxAccuracy = Math.max(out.maxAccuracy, Number(s.accuracy || 0));
                 out.maxDistanceKm = Math.max(out.maxDistanceKm, Number(s.distanceKm || 0));
@@ -5933,7 +5944,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
         function buildRadarSVG(card, maxes) {
             const s = card.stats || {};
-            const combo = Number(s.deaths || 0) + Number(s.stims || 0);
+            const combo = getEnduranceLoad(s);
 
             // Axis order matches your screenshot-style labels:
             // Power, Agility, Endurance, Mobility, Utility
@@ -6168,7 +6179,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
         function getCompareVals(card, maxes) {
             const s = card?.stats || {};
-            const combo = Number(s.deaths || 0) + Number(s.stims || 0);
+            const combo = getEnduranceLoad(s);
             // Overlay comparisons must use raw stat-normalized values (no grade/MO scaling),
             // otherwise a stronger overall grade can incorrectly flip per-axis winners.
             return [
@@ -6184,7 +6195,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const s = card?.stats || {};
             if (axisKey === "POWER") return Number(s.kills || 0);
             if (axisKey === "AGILITY") return Number(s.accuracy || 0);
-            if (axisKey === "ENDURANCE") return Number(s.deaths || 0) + Number(s.stims || 0);
+            if (axisKey === "ENDURANCE") return getEnduranceLoad(s);
             if (axisKey === "MOBILITY") return Number(s.distanceKm || 0);
             if (axisKey === "UTILITY") return Number(s.stratUses || 0);
             return 0;
