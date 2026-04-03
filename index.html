@@ -5960,7 +5960,9 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
 
         function getTierRadarColor(card) {
-            const tier = (card && card.tier) || "";
+            const tier = (card && card.id && typeof buildTierMap === "function")
+                ? (buildTierMap().get(card.id) || card.tier || "")
+                : ((card && card.tier) || "");
             if (tier === "gold") return { fill: "rgba(255,212,0,.22)", stroke: "#ffd400" };
             if (tier === "silver") return { fill: "rgba(200,210,220,.25)", stroke: "#c8d2dc" };
             if (tier === "bronze") return { fill: "rgba(230,170,90,.25)", stroke: "#e6aa5a" };
@@ -9153,7 +9155,9 @@ ${noteContent}`
                 getCardItems(card).forEach(it => {
                     const slotKey = (it.slot === "primary") ? "primaries"
                         : (it.slot === "sidearm") ? "sidearms"
-                            : (it.slot === "throwable") ? "throwables" : "stratagems";
+                            : (it.slot === "throwable") ? "throwables"
+                                : (it.slot === "booster") ? "boosters"
+                                    : "stratagems";
                     const key = `${slotKey}:${normalizeItemKey(it.name)}`;
                     if (!key) return;
 
@@ -9276,15 +9280,24 @@ ${noteContent}`
                 `;
             };
 
+            const bestFallback = (slotLabel, slot) => {
+                const bestCount = analytics.itemStats
+                    .filter(item => item.slot === slot)
+                    .reduce((mx, item) => Math.max(mx, Number(item.total || 0)), 0);
+                if (bestCount <= 0) return `Need 2+ ${slotLabel} uses`;
+                if (bestCount >= 2) return "No eligible data";
+                return `Need 2+ ${slotLabel} uses (${bestCount}/2 so far)`;
+            };
+
             insightBox.innerHTML = `
                 ${renderCountCard("Most rolled this week", analytics.mostRolledWeek, "No rolls in last 7 days")}
                 ${renderCountCard("Most rolled this month", analytics.mostRolledMonth, "No rolls in last 30 days")}
                 ${renderCountCard("Most rolled all the time", analytics.mostRolledAllTime, "Need saved runs")}
-                ${renderBestCard("Best performing primary", analytics.bestPrimary, "primary", "Need 2+ primary uses")}
-                ${renderBestCard("Best performing side arm", analytics.bestSidearm, "sidearm", "Need 2+ sidearm uses")}
-                ${renderBestCard("Best performing throwables", analytics.bestThrowable, "throwable", "Need 2+ throwable uses")}
-                ${renderBestCard("Best performed stratagem", analytics.bestStratagem, "stratagem", "Need 2+ stratagem uses")}
-                ${renderBestCard("Best performed booster", analytics.bestBooster, "booster", "Need 2+ booster uses")}
+                ${renderBestCard("Best performing primary", analytics.bestPrimary, "primary", bestFallback("primary", "primary"))}
+                ${renderBestCard("Best performing side arm", analytics.bestSidearm, "sidearm", bestFallback("sidearm", "sidearm"))}
+                ${renderBestCard("Best performing throwables", analytics.bestThrowable, "throwable", bestFallback("throwable", "throwable"))}
+                ${renderBestCard("Best performed stratagem", analytics.bestStratagem, "stratagem", bestFallback("stratagem", "stratagem"))}
+                ${renderBestCard("Best performed booster", analytics.bestBooster, "booster", bestFallback("booster", "booster"))}
             `;
         }
 
