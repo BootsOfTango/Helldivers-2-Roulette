@@ -4814,6 +4814,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             settings: {
                 discordWebhookUrl: "",
+                rememberedPlayerName: "",
             }
         };
 
@@ -4925,6 +4926,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             // webhook URL is stored separately so clear-data does not delete it
             state.settings.discordWebhookUrl = localStorage.getItem(DISCORD_WEBHOOK_KEY) || "";
+            state.settings.rememberedPlayerName = "";
 
             if (!raw) {
                 normalizeItemWarbondAssignments();
@@ -4962,6 +4964,9 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 }
 
                 state.cards = normalizeCardsCollection(parsed.cards);
+                if (parsed.settings && typeof parsed.settings === "object") {
+                    state.settings.rememberedPlayerName = String(parsed.settings.rememberedPlayerName || "").trim();
+                }
                 normalizeItemWarbondAssignments();
 
             } catch {
@@ -4978,7 +4983,10 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         function saveState() {
             localStorage.setItem(STORAGE_KEY, JSON.stringify({
                 items: state.items,
-                cards: state.cards
+                cards: state.cards,
+                settings: {
+                    rememberedPlayerName: String(state.settings?.rememberedPlayerName || "").trim()
+                }
             }));
 
             try {
@@ -4991,6 +4999,10 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             if ($("#planetSearchPanel") && $("#planetSearchPanel").style.display !== "none") {
                 renderPlanetSearchResults();
             }
+        }
+
+        function getRememberedPlayerName() {
+            return String(state.settings?.rememberedPlayerName || "").trim();
         }
 
         function normalizeCardRecord(card) {
@@ -5319,7 +5331,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             state.current.spinning = true;
             state.current.seed = null;
             state.current.seedBase = null;
-            state.current.playerNameDraft = "";
+            state.current.playerNameDraft = getRememberedPlayerName();
 
             if ($("#planetSearchInput")) $("#planetSearchInput").value = "";
             togglePlanetSearchPanel(false);
@@ -9412,7 +9424,7 @@ ${noteContent}`
             state.current.planetConfirmed = false;
             state.current.planetBiome = null;
             state.current.manualPlanetCandidate = null;
-            state.current.playerNameDraft = "";
+            state.current.playerNameDraft = getRememberedPlayerName();
 
             // special event: only if EXACT same fingerprint already exists in saved cards
             if (hasDuplicateFingerprint(loadout.fingerprint)) {
@@ -9451,7 +9463,7 @@ ${noteContent}`
             state.current.planetConfirmed = false;
             state.current.planetBiome = null;
             state.current.manualPlanetCandidate = null;
-            state.current.playerNameDraft = "";
+            state.current.playerNameDraft = getRememberedPlayerName();
 
             // if reroll produced non-duplicate, disable special mode immediately
             if (!hasDuplicateFingerprint(loadout.fingerprint)) {
@@ -9532,7 +9544,7 @@ ${noteContent}`
             state.current.spinning = true;
             state.current.seed = null;
             state.current.seedBase = null;
-            state.current.playerNameDraft = "";
+            state.current.playerNameDraft = getRememberedPlayerName();
             renderSpin();
             playQuickPlanetSpin(pc.name).then(() => {
                 state.current.spinning = false;
@@ -9564,7 +9576,7 @@ ${noteContent}`
             state.current.spinning = true;
             state.current.seed = null;
             state.current.seedBase = null;
-            state.current.playerNameDraft = "";
+            state.current.playerNameDraft = getRememberedPlayerName();
             renderSpin();
             playQuickPlanetSpin(pc.name).then(() => {
                 state.current.spinning = false;
@@ -9586,7 +9598,7 @@ ${noteContent}`
             state.current.planetConfirmed = false;
             state.current.planetBiome = null;
             state.current.manualPlanetCandidate = null;
-            state.current.playerNameDraft = "";
+            state.current.playerNameDraft = getRememberedPlayerName();
             state.current.specialActive = false;
             state.current.rerollsLeft = 0;
             state.current.spinning = false;
@@ -9706,6 +9718,7 @@ ${noteContent}`
                 return;
             }
             card.playerName = cleanName;
+            state.settings.rememberedPlayerName = cleanName;
 
             const normalizedCard = normalizeCardRecord(card);
             state.cards.unshift(normalizedCard);
@@ -9792,7 +9805,7 @@ ${noteContent}`
                 }
                 state.current.seed = null;
                 state.current.seedBase = null;
-                state.current.playerNameDraft = "";
+                state.current.playerNameDraft = getRememberedPlayerName();
                 if (state.current.loadout) {
                     state.current.loadout.mode = state.current.mode;
                     state.current.loadout.fingerprint = fingerprintLoadout(state.current.loadout);
