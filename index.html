@@ -2408,50 +2408,6 @@ END MASTER DIRECTIVE
             margin-top: 8px;
         }
 
-        .rankBackupNotice {
-            margin-top: 12px;
-            border: 1px solid rgba(255, 212, 0, .45);
-            background: rgba(255, 212, 0, .10);
-            border-radius: 10px;
-            padding: 10px 12px;
-            display: flex;
-            justify-content: space-between;
-            gap: 12px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-
-            .rankBackupNotice .warnText {
-                font-size: 12px;
-                color: #ffeaa2;
-                line-height: 1.35;
-            }
-
-            .rankBackupNotice .warnText strong {
-                color: #fff6ce;
-            }
-
-        #btnRankBackupNow {
-            white-space: nowrap;
-            border-color: rgba(255, 212, 0, .65);
-            color: #ffe05b;
-            background: rgba(255, 212, 0, .08);
-        }
-
-        .rankBackupMiniControls {
-            display: flex;
-            justify-content: flex-end;
-            align-items: center;
-            gap: 6px;
-            margin-top: 8px;
-        }
-
-            .rankBackupMiniControls .btnGhost {
-                font-size: 11px;
-                padding: 5px 9px;
-                letter-spacing: .2px;
-            }
-
         .itemInsightCards {
             display: grid;
             grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -3480,11 +3436,6 @@ END MASTER DIRECTIVE
                         <option value="fail">MO FAIL only</option>
                     </select>
                 </div>
-            </div>
-
-            <div class="rankBackupMiniControls" aria-label="Rank backup actions">
-                <button id="btnRankRestoreBackup" class="btnGhost">RESTORE</button>
-                <button id="btnRankBackupNow" class="btnGhost">BACKUP</button>
             </div>
 
             <div class="divider"></div>
@@ -4831,15 +4782,12 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
          ***********************/
         const STORAGE_KEY = "hd2_chaos_roulette_v1";
         const DISCORD_WEBHOOK_KEY = "hd2_discord_webhook_url";
-        const RESULTS_BACKUP_NUDGE_KEY = "hd2_results_backup_nudge_seen_v1";
-
         const state = {
             items: null,
             cards: [],
             ui: {
                 activeResultCardId: null,
                 modalOpen: false,
-                resultsBackupNudgeSeen: false,
                 apiPlanetSyncInProgress: false
             },
 
@@ -4977,7 +4925,6 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             // webhook URL is stored separately so clear-data does not delete it
             state.settings.discordWebhookUrl = localStorage.getItem(DISCORD_WEBHOOK_KEY) || "";
-            state.ui.resultsBackupNudgeSeen = localStorage.getItem(RESULTS_BACKUP_NUDGE_KEY) === "1";
 
             if (!raw) {
                 normalizeItemWarbondAssignments();
@@ -5670,7 +5617,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             const assetPath = String(entry?.assetPath || "").trim();
             const imageUrl = String(entry?.imageUrl || "").trim();
-            const preferRemote = cat === "booster";
+            const preferRemote = true;
             const primarySrc = preferRemote ? (imageUrl || assetPath || "") : (assetPath || imageUrl || "");
             const fallbackSrc = assetPath && imageUrl
                 ? (preferRemote ? assetPath : imageUrl)
@@ -9225,7 +9172,7 @@ ${noteContent}`
             };
 
             const bestBySlot = (slot) => itemStats
-                .filter(item => item.slot === slot && item.total >= 2)
+                .filter(item => item.slot === slot && item.total >= 1)
                 .sort((a, b) => b.performanceScore - a.performanceScore || b.moRate - a.moRate || b.total - a.total)[0] || null;
 
             return {
@@ -9284,9 +9231,8 @@ ${noteContent}`
                 const bestCount = analytics.itemStats
                     .filter(item => item.slot === slot)
                     .reduce((mx, item) => Math.max(mx, Number(item.total || 0)), 0);
-                if (bestCount <= 0) return `Need 2+ ${slotLabel} uses`;
-                if (bestCount >= 2) return "No eligible data";
-                return `Need 2+ ${slotLabel} uses (${bestCount}/2 so far)`;
+                if (bestCount <= 0) return `Need 1+ ${slotLabel} use`;
+                return "No eligible data";
             };
 
             insightBox.innerHTML = `
@@ -9408,15 +9354,6 @@ ${noteContent}`
         /***********************
          * Event wiring
          ***********************/
-        function maybeShowResultsBackupNudge() {
-            if (state.ui.resultsBackupNudgeSeen) return;
-
-            state.ui.resultsBackupNudgeSeen = true;
-            localStorage.setItem(RESULTS_BACKUP_NUDGE_KEY, "1");
-
-            alert("⚠️ Backup reminder (shown once):\n\nYour rank/results history is stored locally in this browser. Use BACKUP (Rank tab) to save a JSON copy, and RESTORE to load it later if needed.");
-        }
-
         function switchTab(tab) {
             $$(".tabBtn").forEach(b => b.classList.toggle("active", b.dataset.tab === tab));
             $("#tab-spin").style.display = (tab === "spin") ? "" : "none";
@@ -9427,7 +9364,6 @@ ${noteContent}`
 
             if (tab !== "results") closeResultCardModal();
             if (tab === "results") {
-                maybeShowResultsBackupNudge();
                 renderResults();
             }
             if (tab === "compare") {
@@ -9936,8 +9872,6 @@ ${noteContent}`
             });
 
             $("#btnExport").addEventListener("click", exportJSON);
-            $("#btnRankBackupNow").addEventListener("click", exportJSON);
-            $("#btnRankRestoreBackup").addEventListener("click", () => $("#importFile").click());
             $("#btnImport").addEventListener("click", () => $("#importFile").click());
             $("#importFile").addEventListener("change", (e) => {
                 const f = e.target.files && e.target.files[0];
