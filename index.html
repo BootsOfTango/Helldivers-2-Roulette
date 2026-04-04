@@ -6612,7 +6612,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         }
         function renderSpin() {
             const c = state.current;
-            const isReadyForPlanetConfirm = !!(c.loadout && c.locked && c.planetLocked && c.modeApplied && !c.planetConfirmed && !c.spinning);
+            const isReadyForPlanetConfirm = !!(c.loadout && c.locked && c.planetLocked && !c.planetConfirmed && !c.spinning);
             const isReadyForPlayerConfirm = !!(c.seed && c.planetConfirmed && !c.spinning);
 
             $("#spinSeed").textContent = c.seed || "???";
@@ -6650,7 +6650,6 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             const manualModeSelect = $("#manualModeSelect");
             if (manualModeSelect) manualModeSelect.value = c.mode || "";
-            const hasSelectedMode = ["Blitz (12)", "Eradication (15)", "Standard (40)"].includes(c.mode);
 
             // Planet display (name + info cards)
             const dispPlanetEl = $("#dispPlanet");
@@ -6726,17 +6725,19 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             // Buttons
             $("#btnLock").disabled = !c.loadout || c.locked || c.spinning;
-            if (manualModeSelect) manualModeSelect.disabled = !c.loadout || !c.locked || !c.planetLocked || c.spinning || c.modeApplied;
+            if (manualModeSelect) manualModeSelect.disabled = true;
+            const manualModeWrap = $("#manualModeWrap");
+            if (manualModeWrap) manualModeWrap.style.display = "none";
             const btnApplyManualMode = $("#btnApplyManualMode");
             if (btnApplyManualMode) {
-                btnApplyManualMode.disabled = !c.loadout || !c.locked || !c.planetLocked || c.spinning || c.modeApplied || !hasSelectedMode;
-                btnApplyManualMode.textContent = c.modeApplied ? "Applied!" : "Apply mode?";
+                btnApplyManualMode.disabled = true;
+                btnApplyManualMode.textContent = "Mode auto-randomized";
             }
 
             const actionMap = [
                 ["btnSpin", !c.loadout && !c.spinning],
                 ["btnLock", !!(c.loadout && !c.locked && !c.spinning)],
-                ["btnApplyManualMode", !!(c.loadout && c.locked && c.planetLocked && !c.modeApplied && !c.spinning && hasSelectedMode)],
+
                 ["btnConfirmPlanetInline", isReadyForPlanetConfirm],
                 ["btnConfirmPlayer", isReadyForPlayerConfirm]
             ];
@@ -9659,8 +9660,15 @@ ${noteContent}`
         function doUseThisRun() {
             // confirm planet and reveal seed first
             const c = state.current;
-            if (!c.loadout || !c.locked || !c.modeApplied || !c.planetLocked) return;
+            if (!c.loadout || !c.locked || !c.planetLocked) return;
             if (c.spinning || c.planetConfirmed) return;
+
+            c.mode = String(c._pendingMode || c.loadout?.mode || c.mode || "Standard (40)");
+            c.modeApplied = true;
+            if (c.loadout) {
+                c.loadout.mode = c.mode;
+                c.loadout.fingerprint = fingerprintLoadout(c.loadout);
+            }
 
             c.spinning = true;
             renderSpin();
