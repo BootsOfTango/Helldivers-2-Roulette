@@ -9798,7 +9798,14 @@ ${noteContent}`
                 btn.addEventListener("click", () => switchTab(btn.dataset.tab));
             });
 
-            $("#btnSpin").addEventListener("click", () => doSpin());
+            $("#btnSpin").addEventListener("click", () => {
+                const hasExistingSpin = !!state.current?.loadout;
+                if (hasExistingSpin) {
+                    const shouldProceed = confirm("Proceed with spinning a new loadout? This will replace your current spin.");
+                    if (!shouldProceed) return;
+                }
+                doSpin();
+            });
             $("#btnReroll").addEventListener("click", () => doReroll());
             $("#btnLock").addEventListener("click", () => doLock());
             $("#btnApplyManualMode").addEventListener("click", () => {
