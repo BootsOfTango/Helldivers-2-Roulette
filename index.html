@@ -3063,19 +3063,6 @@ END MASTER DIRECTIVE
 
                 <div class="spinMetaCol">
                     <div class="box">
-                        <div class="label">Mode</div>
-                        <div class="big" id="spinMode">—</div>
-                        <div class="miniRow" id="manualModeWrap" style="margin-top:10px;">
-                            <select id="manualModeSelect">
-                                <option value="Blitz (12)">Blitz (12)</option>
-                                <option value="Eradication (15)">Eradication (15)</option>
-                                <option value="Standard (40)">Standard (40)</option>
-                            </select>
-                            <button id="btnApplyManualMode" class="btnPrimary">Apply mode?</button>
-                        </div>
-                    </div>
-
-                    <div class="box">
                         <div class="label">Planet (rolled separately)</div>
                         <div class="big" id="dispPlanet">—</div>
 
@@ -3086,6 +3073,20 @@ END MASTER DIRECTIVE
                         </div>
 
                         <div class="tiny" id="dispPlanetTiny" style="display:none;"></div>
+                    </div>
+
+                    <div class="box">
+                        <div class="label">Mode</div>
+                        <div class="big" id="spinMode">—</div>
+                        <div class="miniRow" id="manualModeWrap" style="margin-top:10px;">
+                            <select id="manualModeSelect">
+                                <option value="" selected>Pick mission mode…</option>
+                                <option value="Blitz (12)">Blitz (12)</option>
+                                <option value="Eradication (15)">Eradication (15)</option>
+                                <option value="Standard (40)">Standard (40)</option>
+                            </select>
+                            <button id="btnApplyManualMode" class="btnPrimary">Apply mode?</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -5298,7 +5299,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         }
 
         function selectManualPlanetCandidate(planet) {
-            if (!state.current.loadout || !state.current.locked || !state.current.modeApplied) return;
+            if (!state.current.loadout || !state.current.locked) return;
             state.current.manualPlanetCandidate = {
                 name: planet.name,
                 sector: planet.sector || "—",
@@ -5309,7 +5310,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         }
 
         function confirmManualPlanetSelection() {
-            if (!state.current.loadout || !state.current.locked || !state.current.modeApplied) return;
+            if (!state.current.loadout || !state.current.locked) return;
             if (state.current.planetConfirmed) return;
 
             const planet = state.current.manualPlanetCandidate;
@@ -5451,7 +5452,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                     const pickBtn = document.createElement("button");
                     pickBtn.className = isPending ? "btnDanger" : "btnPrimary";
                     pickBtn.textContent = isSelected ? "SELECTED" : (isPending ? "CONFIRM?" : "CHOOSE");
-                    pickBtn.disabled = !state.current.loadout || !state.current.locked || !state.current.modeApplied || state.current.spinning || state.current.planetConfirmed;
+                    pickBtn.disabled = !state.current.loadout || !state.current.locked || state.current.spinning || state.current.planetConfirmed;
                     pickBtn.addEventListener("click", () => {
                         if (isPending) {
                             confirmManualPlanetSelection();
@@ -6611,7 +6612,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         }
         function renderSpin() {
             const c = state.current;
-            const isReadyForPlanetConfirm = !!(c.loadout && c.locked && c.modeApplied && c.planetLocked && !c.planetConfirmed && !c.spinning);
+            const isReadyForPlanetConfirm = !!(c.loadout && c.locked && c.planetLocked && c.modeApplied && !c.planetConfirmed && !c.spinning);
             const isReadyForPlayerConfirm = !!(c.seed && c.planetConfirmed && !c.spinning);
 
             $("#spinSeed").textContent = c.seed || "???";
@@ -6648,7 +6649,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             }
 
             const manualModeSelect = $("#manualModeSelect");
-            if (manualModeSelect) manualModeSelect.value = c.mode || "Blitz (12)";
+            if (manualModeSelect) manualModeSelect.value = c.mode || "";
+            const hasSelectedMode = ["Blitz (12)", "Eradication (15)", "Standard (40)"].includes(c.mode);
 
             // Planet display (name + info cards)
             const dispPlanetEl = $("#dispPlanet");
@@ -6724,17 +6726,17 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             // Buttons
             $("#btnLock").disabled = !c.loadout || c.locked || c.spinning;
-            if (manualModeSelect) manualModeSelect.disabled = !c.loadout || !c.locked || c.spinning || c.modeApplied;
+            if (manualModeSelect) manualModeSelect.disabled = !c.loadout || !c.locked || !c.planetLocked || c.spinning || c.modeApplied;
             const btnApplyManualMode = $("#btnApplyManualMode");
             if (btnApplyManualMode) {
-                btnApplyManualMode.disabled = !c.loadout || !c.locked || c.spinning || c.modeApplied;
+                btnApplyManualMode.disabled = !c.loadout || !c.locked || !c.planetLocked || c.spinning || c.modeApplied || !hasSelectedMode;
                 btnApplyManualMode.textContent = c.modeApplied ? "Applied!" : "Apply mode?";
             }
 
             const actionMap = [
                 ["btnSpin", !c.loadout && !c.spinning],
                 ["btnLock", !!(c.loadout && !c.locked && !c.spinning)],
-                ["btnApplyManualMode", !!(c.loadout && c.locked && !c.modeApplied && !c.spinning)],
+                ["btnApplyManualMode", !!(c.loadout && c.locked && c.planetLocked && !c.modeApplied && !c.spinning && hasSelectedMode)],
                 ["btnConfirmPlanetInline", isReadyForPlanetConfirm],
                 ["btnConfirmPlayer", isReadyForPlayerConfirm]
             ];
@@ -9464,7 +9466,7 @@ ${noteContent}`
             const loadout = rollLoadout(null);
             state.current.seed = null;
             state.current.seedBase = null;
-            state.current.mode = loadout.mode;
+            state.current.mode = null;
             state.current.modeApplied = false;
             state.current.faction = normalizeFactionName(loadout.faction);
             state.current.loadout = loadout;
@@ -9492,12 +9494,13 @@ ${noteContent}`
             // safety reset in case spinning got stuck
             state.current.spinning = false;
 
-            state.current.mode = state.current._pendingMode;
+            state.current.mode = null;
             state.current.faction = state.current._pendingFaction;
             state.current.modeApplied = false;
 
             state.current.locked = true;
             renderSpin();
+            doRollPlanet();
         }
         async function playQuickPlanetSpin(finalPlanetName) {
             const target = $("#dispPlanet");
@@ -9533,7 +9536,7 @@ ${noteContent}`
             playTone("seedFinal");
         }
         function doRollPlanet() {
-            if (!state.current.loadout || !state.current.locked || !state.current.modeApplied) return;
+            if (!state.current.loadout || !state.current.locked) return;
             if (state.current.planetConfirmed) return;
             const p = rollPlanetForFaction(state.current.faction);
             if (!p) {
@@ -9565,7 +9568,7 @@ ${noteContent}`
 
         function doClearPlanet() {
             // Renamed behavior: "REROLL PLANET" (roll again instead of clearing)
-            if (!state.current.loadout || !state.current.locked || !state.current.modeApplied) return;
+            if (!state.current.loadout || !state.current.locked) return;
             if (state.current.planetConfirmed) return;
 
             const p = rollPlanetForFaction(state.current.faction);
@@ -9642,7 +9645,7 @@ ${noteContent}`
         }
 
         function applyManualMode(mode) {
-            if (!state.current.loadout || !state.current.locked) return;
+            if (!state.current.loadout || !state.current.locked || !state.current.planetLocked) return;
             const allowed = ["Blitz (12)", "Eradication (15)", "Standard (40)"];
             if (!allowed.includes(mode)) return;
 
@@ -9650,10 +9653,6 @@ ${noteContent}`
             state.current.modeApplied = true;
             if (state.current.loadout) state.current.loadout.mode = mode;
             if (state.current.loadout) state.current.loadout.fingerprint = fingerprintLoadout(state.current.loadout);
-            if (!state.current.planetLocked && !state.current.planetConfirmed) {
-                doRollPlanet();
-                return;
-            }
             renderSpin();
         }
 
