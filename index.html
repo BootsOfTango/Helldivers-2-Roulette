@@ -2684,6 +2684,11 @@ END MASTER DIRECTIVE
             font-weight: 900;
         }
 
+        .mode-defense {
+            color: #65d7ff;
+            font-weight: 900;
+        }
+
         /* ===== FACTION COLORS ===== */
 
         /* ===== FACTION COLORS (TEXT ONLY) ===== */
@@ -3082,10 +3087,12 @@ END MASTER DIRECTIVE
                             <select id="manualModeSelect">
                                 <option value="" selected>Pick mission mode…</option>
                                 <option value="Blitz (12)">Blitz (12)</option>
+                                <option value="Defense (20)">Defense (20)</option>
                                 <option value="Eradication (15)">Eradication (15)</option>
                                 <option value="Standard (40)">Standard (40)</option>
                             </select>
                             <button id="btnApplyManualMode" class="btnPrimary">Apply mode?</button>
+                            <button id="btnRerollMode" class="btnGhost">Reroll mode</button>
                         </div>
                     </div>
                 </div>
@@ -3134,6 +3141,7 @@ END MASTER DIRECTIVE
                         <select id="resFilterMode">
                             <option value="">All modes</option>
                             <option value="Blitz (12)">Blitz (12)</option>
+                            <option value="Defense (20)">Defense (20)</option>
                             <option value="Eradication (15)">Eradication (15)</option>
                             <option value="Standard (40)">Standard (40)</option>
                         </select>
@@ -5148,12 +5156,15 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         /***********************
          * Spin logic
          ***********************/
+        const MISSION_MODES = Object.freeze([
+            "Standard (40)",
+            "Eradication (15)",
+            "Blitz (12)",
+            "Defense (20)"
+        ]);
+
         function rollMode() {
-            // weighted chance: 15% Blitz (12), 15% Eradication (15), 70% Standard (40)
-            const roll = Math.random();
-            if (roll < 0.15) return "Blitz (12)";
-            if (roll < 0.30) return "Eradication (15)";
-            return "Standard (40)";
+            return pickOne(MISSION_MODES);
         }
         function rollFaction() {
             const roll = Math.random();
@@ -6631,7 +6642,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             // MODE colors
             const modeEl = $("#spinMode");
-            modeEl.classList.remove("mode-standard", "mode-blitz", "mode-eradication");
+            modeEl.classList.remove("mode-standard", "mode-blitz", "mode-eradication", "mode-defense");
 
             if (!c.locked) {
                 modeEl.textContent = "—";
@@ -6641,6 +6652,9 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             } else if (c.mode === "Blitz (12)") {
                 modeEl.textContent = c.mode;
                 modeEl.classList.add("mode-blitz");
+            } else if (c.mode === "Defense (20)") {
+                modeEl.textContent = c.mode;
+                modeEl.classList.add("mode-defense");
             } else if (c.mode === "Eradication (15)") {
                 modeEl.textContent = c.mode;
                 modeEl.classList.add("mode-eradication");
@@ -9647,8 +9661,7 @@ ${noteContent}`
 
         function applyManualMode(mode) {
             if (!state.current.loadout || !state.current.locked || !state.current.planetLocked) return;
-            const allowed = ["Blitz (12)", "Eradication (15)", "Standard (40)"];
-            if (!allowed.includes(mode)) return;
+            if (!MISSION_MODES.includes(mode)) return;
 
             state.current.mode = mode;
             state.current.modeApplied = true;
@@ -9657,13 +9670,23 @@ ${noteContent}`
             renderSpin();
         }
 
+        function rerollMode() {
+            if (!state.current.loadout || !state.current.locked || !state.current.planetLocked) return;
+            if (!MISSION_MODES.length) return;
+
+            const currentMode = String(state.current.mode || state.current.loadout?.mode || "");
+            const options = MISSION_MODES.filter(mode => mode !== currentMode);
+            const nextMode = options.length ? pickOne(options) : MISSION_MODES[0];
+            applyManualMode(nextMode);
+        }
+
         function doUseThisRun() {
             // confirm planet and reveal seed first
             const c = state.current;
             if (!c.loadout || !c.locked || !c.planetLocked) return;
             if (c.spinning || c.planetConfirmed) return;
 
-            c.mode = String(c._pendingMode || c.loadout?.mode || c.mode || "Standard (40)");
+            c.mode = String(c._pendingMode || c.loadout?.mode || c.mode || MISSION_MODES[0]);
             c.modeApplied = true;
             if (c.loadout) {
                 c.loadout.mode = c.mode;
@@ -9818,6 +9841,7 @@ ${noteContent}`
             $("#btnApplyManualMode").addEventListener("click", () => {
                 applyManualMode($("#manualModeSelect")?.value || "");
             });
+            $("#btnRerollMode")?.addEventListener("click", () => rerollMode());
             $("#manualModeSelect").addEventListener("change", (e) => {
                 if (!state.current.loadout || !state.current.locked || state.current.modeApplied) return;
                 state.current.mode = String(e.target?.value || state.current.mode || "");
