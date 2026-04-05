@@ -9738,8 +9738,8 @@ ${noteContent}`
         }
 
         function applyManualMode(mode) {
-            if (!state.current.loadout || !state.current.locked || !state.current.planetLocked || !state.current.planetConfirmed || state.current.modeConfirmed) return;
-            if (!MISSION_MODES.includes(mode)) return;
+            if (!state.current.loadout || !state.current.locked || !state.current.planetLocked || !state.current.planetConfirmed || state.current.modeConfirmed) return false;
+            if (!MISSION_MODES.includes(mode)) return false;
 
             state.current.mode = mode;
             state.current.manualModeDraft = mode;
@@ -9747,6 +9747,7 @@ ${noteContent}`
             if (state.current.loadout) state.current.loadout.mode = mode;
             if (state.current.loadout) state.current.loadout.fingerprint = fingerprintLoadout(state.current.loadout);
             renderSpin();
+            return true;
         }
 
         function rerollMode() {
@@ -9923,7 +9924,10 @@ ${noteContent}`
             $("#btnReroll").addEventListener("click", () => doReroll());
             $("#btnLock").addEventListener("click", () => doLock());
             $("#btnApplyManualMode").addEventListener("click", () => {
-                applyManualMode($("#manualModeSelect")?.value || "");
+                const applied = applyManualMode($("#manualModeSelect")?.value || "");
+                if (applied) {
+                    doUseThisRun();
+                }
             });
             $("#btnRerollMode")?.addEventListener("click", () => rerollMode());
             $("#manualModeSelect").addEventListener("change", (e) => {
