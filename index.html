@@ -5136,6 +5136,29 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             while (out.length < count) out.push("—");
             return out;
         }
+        function isExosuitStratagem(name) {
+            return /exosuit/i.test(String(name || ""));
+        }
+        function enforceSingleExosuit(stratagems, stratagemPool) {
+            const picks = Array.isArray(stratagems) ? stratagems.slice() : [];
+            const exosuitIndexes = [];
+            picks.forEach((name, idx) => {
+                if (isExosuitStratagem(name)) exosuitIndexes.push(idx);
+            });
+            if (exosuitIndexes.length <= 1) return picks;
+
+            const replacementPool = enabledNames(stratagemPool).filter(name => {
+                if (!name || name === "—") return false;
+                if (isExosuitStratagem(name)) return false;
+                return !picks.includes(name);
+            });
+
+            for (let i = 1; i < exosuitIndexes.length; i++) {
+                const idx = exosuitIndexes[i];
+                picks[idx] = replacementPool.length ? replacementPool.shift() : "—";
+            }
+            return picks;
+        }
 
         function fingerprintLoadout(l) {
             // fingerprint excludes planet (planet is rolled separately)
@@ -5180,7 +5203,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const primary = pickOne(state.items.primaries);
             const sidearm = pickOne(state.items.sidearms);
             const throwable = pickOne(state.items.throwables);
-            const stratagems = pickManyUnique(state.items.stratagems, 4);
+            const rawStratagems = pickManyUnique(state.items.stratagems, 4);
+            const stratagems = enforceSingleExosuit(rawStratagems, state.items.stratagems);
             const booster = pickOne(state.items.boosters);
 
             const temp = { mode, faction, primary, sidearm, throwable, stratagems, booster };
