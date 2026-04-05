@@ -5104,6 +5104,14 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
          * Random selection
          ***********************/
         function enabledNames(list) {
+            if (!Array.isArray(list) || list.length === 0) return [];
+
+            // Support plain string lists (for static option pools like mission modes).
+            if (typeof list[0] === "string") {
+                return list
+                    .map(x => String(x || "").trim())
+                    .filter(Boolean);
+            }
 
             // If nothing enabled, automatically fallback to ALL items
             const enabled = list.filter(x => x.enabled);
