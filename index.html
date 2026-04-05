@@ -3089,7 +3089,7 @@ END MASTER DIRECTIVE
                                 <option value="Blitz (12)">Blitz (12)</option>
                                 <option value="Defense (20)">Defense (20)</option>
                                 <option value="Eradication (15)">Eradication (15)</option>
-                                <option value="Standard (40)">Standard (40)</option>
+                                <option value="Normal (40)">Normal (40)</option>
                             </select>
                             <button id="btnApplyManualMode" class="btnPrimary">Apply mode?</button>
                             <button id="btnRerollMode" class="btnGhost">Reroll mode</button>
@@ -3143,7 +3143,7 @@ END MASTER DIRECTIVE
                             <option value="Blitz (12)">Blitz (12)</option>
                             <option value="Defense (20)">Defense (20)</option>
                             <option value="Eradication (15)">Eradication (15)</option>
-                            <option value="Standard (40)">Standard (40)</option>
+                            <option value="Normal (40)">Normal (40)</option>
                         </select>
                         <select id="resFilterFaction">
                             <option value="">All factions</option>
@@ -5157,7 +5157,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
          * Spin logic
          ***********************/
         const MISSION_MODES = Object.freeze([
-            "Standard (40)",
+            "Normal (40)",
             "Eradication (15)",
             "Blitz (12)",
             "Defense (20)"
@@ -5340,6 +5340,12 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             state.current.planetLocked = true;
             state.current.planetConfirmed = false;
             state.current.manualPlanetCandidate = null;
+            state.current.mode = rollMode();
+            state.current.modeApplied = true;
+            if (state.current.loadout) {
+                state.current.loadout.mode = state.current.mode;
+                state.current.loadout.fingerprint = fingerprintLoadout(state.current.loadout);
+            }
             state.current.spinning = true;
             state.current.seed = null;
             state.current.seedBase = null;
@@ -6646,7 +6652,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             if (!c.locked) {
                 modeEl.textContent = "—";
-            } else if (c.mode === "Standard (40)") {
+            } else if (c.mode === "Normal (40)" || c.mode === "Standard (40)") {
                 modeEl.textContent = c.mode;
                 modeEl.classList.add("mode-standard");
             } else if (c.mode === "Blitz (12)") {
@@ -6739,14 +6745,20 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             // Buttons
             $("#btnLock").disabled = !c.loadout || c.locked || c.spinning;
-            if (manualModeSelect) manualModeSelect.disabled = true;
+            const canAdjustMode = !!(c.loadout && c.locked && c.planetLocked && !c.planetConfirmed && !c.spinning);
+            if (manualModeSelect) {
+                manualModeSelect.disabled = !canAdjustMode;
+                if (!manualModeSelect.value && c.mode) manualModeSelect.value = c.mode;
+            }
             const manualModeWrap = $("#manualModeWrap");
-            if (manualModeWrap) manualModeWrap.style.display = "none";
+            if (manualModeWrap) manualModeWrap.style.display = c.locked ? "" : "none";
             const btnApplyManualMode = $("#btnApplyManualMode");
             if (btnApplyManualMode) {
-                btnApplyManualMode.disabled = true;
-                btnApplyManualMode.textContent = "Mode auto-randomized";
+                btnApplyManualMode.disabled = !canAdjustMode || !manualModeSelect?.value;
+                btnApplyManualMode.textContent = "Apply mode";
             }
+            const btnRerollMode = $("#btnRerollMode");
+            if (btnRerollMode) btnRerollMode.disabled = !canAdjustMode;
 
             const actionMap = [
                 ["btnSpin", !c.loadout && !c.spinning],
@@ -9441,7 +9453,6 @@ ${noteContent}`
             state.current.mode = null;
             state.current.modeApplied = false;
             state.current.faction = null;
-            state.current._pendingMode = loadout.mode;
             state.current._pendingFaction = normalizeFactionName(loadout.faction);
             state.current.loadout = loadout;
             state.current.locked = false;
@@ -9570,6 +9581,12 @@ ${noteContent}`
             state.current.planetLocked = true;
             state.current.planetConfirmed = false;
             state.current.manualPlanetCandidate = null;
+            state.current.mode = rollMode();
+            state.current.modeApplied = true;
+            if (state.current.loadout) {
+                state.current.loadout.mode = state.current.mode;
+                state.current.loadout.fingerprint = fingerprintLoadout(state.current.loadout);
+            }
             state.current.spinning = true;
             state.current.seed = null;
             state.current.seedBase = null;
@@ -9602,6 +9619,12 @@ ${noteContent}`
             state.current.planetLocked = true;
             state.current.planetConfirmed = false;
             state.current.manualPlanetCandidate = null;
+            state.current.mode = rollMode();
+            state.current.modeApplied = true;
+            if (state.current.loadout) {
+                state.current.loadout.mode = state.current.mode;
+                state.current.loadout.fingerprint = fingerprintLoadout(state.current.loadout);
+            }
             state.current.spinning = true;
             state.current.seed = null;
             state.current.seedBase = null;
@@ -9631,7 +9654,6 @@ ${noteContent}`
             state.current.specialActive = false;
             state.current.rerollsLeft = 0;
             state.current.spinning = false;
-            state.current._pendingMode = null;
             state.current._pendingFaction = null;
             togglePlanetSearchPanel(false);
             clearSpinReelSlots();
@@ -9686,7 +9708,7 @@ ${noteContent}`
             if (!c.loadout || !c.locked || !c.planetLocked) return;
             if (c.spinning || c.planetConfirmed) return;
 
-            c.mode = String(c._pendingMode || c.loadout?.mode || c.mode || MISSION_MODES[0]);
+            c.mode = String(c.mode || c.loadout?.mode || rollMode());
             c.modeApplied = true;
             if (c.loadout) {
                 c.loadout.mode = c.mode;
@@ -9843,22 +9865,9 @@ ${noteContent}`
             });
             $("#btnRerollMode")?.addEventListener("click", () => rerollMode());
             $("#manualModeSelect").addEventListener("change", (e) => {
-                if (!state.current.loadout || !state.current.locked || state.current.modeApplied) return;
+                if (!state.current.loadout || !state.current.locked || !state.current.planetLocked || state.current.planetConfirmed) return;
                 state.current.mode = String(e.target?.value || state.current.mode || "");
                 state.current.modeApplied = false;
-                if (state.current.planetLocked) {
-                    state.current.planet = null;
-                    state.current.planetLocked = false;
-                    state.current.planetConfirmed = false;
-                    state.current.planetBiome = null;
-                }
-                state.current.seed = null;
-                state.current.seedBase = null;
-                state.current.playerNameDraft = getRememberedPlayerName();
-                if (state.current.loadout) {
-                    state.current.loadout.mode = state.current.mode;
-                    state.current.loadout.fingerprint = fingerprintLoadout(state.current.loadout);
-                }
                 renderSpin();
             });
             $("#spinPlayerName")?.addEventListener("input", (e) => {
