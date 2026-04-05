@@ -6787,7 +6787,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             // Buttons
             $("#btnLock").disabled = !c.loadout || c.locked || c.spinning;
-            const canAdjustMode = !!(c.loadout && c.locked && c.planetLocked && hasMode && !c.planetConfirmed && !c.spinning);
+            const canAdjustMode = !!(c.loadout && c.locked && c.planetLocked && !c.planetConfirmed && !c.spinning);
             if (manualModeSelect) {
                 manualModeSelect.disabled = !canAdjustMode;
             }
@@ -6796,7 +6796,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const btnApplyManualMode = $("#btnApplyManualMode");
             if (btnApplyManualMode) {
                 const selectedMode = String(c.manualModeDraft || manualModeSelect?.value || "");
-                btnApplyManualMode.disabled = !canAdjustMode || !selectedMode || selectedMode === String(c.mode || "");
+                btnApplyManualMode.disabled = !canAdjustMode || !selectedMode;
                 btnApplyManualMode.textContent = "Apply mode";
             }
             const btnRerollMode = $("#btnRerollMode");
