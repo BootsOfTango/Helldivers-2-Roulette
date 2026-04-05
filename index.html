@@ -4805,6 +4805,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 seed: null,
                 seedBase: null,
                 mode: null,
+                manualModeDraft: null,
                 modeApplied: false,
                 faction: null,
                 loadout: null,      // {primary, sidearm, throwable, stratagems[4], booster, fingerprint}
@@ -5373,6 +5374,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             state.current.planetConfirmed = false;
             state.current.manualPlanetCandidate = null;
             state.current.mode = null;
+            state.current.manualModeDraft = null;
             state.current.modeApplied = false;
             if (state.current.loadout) {
                 state.current.loadout.mode = state.current.mode;
@@ -6703,7 +6705,10 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             }
 
             const manualModeSelect = $("#manualModeSelect");
-            if (manualModeSelect) manualModeSelect.value = c.mode || "";
+            if (manualModeSelect) {
+                const selectValue = String(c.manualModeDraft || c.mode || "");
+                if (manualModeSelect.value !== selectValue) manualModeSelect.value = selectValue;
+            }
 
             // Planet display (name + info cards)
             const dispPlanetEl = $("#dispPlanet");
@@ -6785,13 +6790,13 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const canAdjustMode = !!(c.loadout && c.locked && c.planetLocked && hasMode && !c.planetConfirmed && !c.spinning);
             if (manualModeSelect) {
                 manualModeSelect.disabled = !canAdjustMode;
-                if (!manualModeSelect.value && c.mode) manualModeSelect.value = c.mode;
             }
             const manualModeWrap = $("#manualModeWrap");
             if (manualModeWrap) manualModeWrap.style.display = c.locked ? "" : "none";
             const btnApplyManualMode = $("#btnApplyManualMode");
             if (btnApplyManualMode) {
-                btnApplyManualMode.disabled = !canAdjustMode || !manualModeSelect?.value;
+                const selectedMode = String(c.manualModeDraft || manualModeSelect?.value || "");
+                btnApplyManualMode.disabled = !canAdjustMode || !selectedMode || selectedMode === String(c.mode || "");
                 btnApplyManualMode.textContent = "Apply mode";
             }
             const btnRerollMode = $("#btnRerollMode");
@@ -9488,6 +9493,7 @@ ${noteContent}`
             state.current.seedBase = null;
             state.current.seed = null;
             state.current.mode = null;
+            state.current.manualModeDraft = null;
             state.current.modeApplied = false;
             state.current.faction = null;
             state.current._pendingFaction = normalizeFactionName(loadout.faction);
@@ -9530,6 +9536,7 @@ ${noteContent}`
             state.current.seed = null;
             state.current.seedBase = null;
             state.current.mode = null;
+            state.current.manualModeDraft = null;
             state.current.modeApplied = false;
             state.current.faction = normalizeFactionName(loadout.faction);
             state.current.loadout = loadout;
@@ -9558,6 +9565,7 @@ ${noteContent}`
             state.current.spinning = false;
 
             state.current.mode = null;
+            state.current.manualModeDraft = null;
             state.current.faction = state.current._pendingFaction;
             state.current.modeApplied = false;
 
@@ -9619,6 +9627,7 @@ ${noteContent}`
             state.current.planetConfirmed = false;
             state.current.manualPlanetCandidate = null;
             state.current.mode = null;
+            state.current.manualModeDraft = null;
             state.current.modeApplied = false;
             if (state.current.loadout) {
                 state.current.loadout.mode = state.current.mode;
@@ -9657,6 +9666,7 @@ ${noteContent}`
             state.current.planetConfirmed = false;
             state.current.manualPlanetCandidate = null;
             state.current.mode = null;
+            state.current.manualModeDraft = null;
             state.current.modeApplied = false;
             if (state.current.loadout) {
                 state.current.loadout.mode = state.current.mode;
@@ -9678,6 +9688,7 @@ ${noteContent}`
             state.current.seed = null;
             state.current.seedBase = null;
             state.current.mode = null;
+            state.current.manualModeDraft = null;
             state.current.modeApplied = false;
             state.current.faction = null;
             state.current.loadout = null;
@@ -9723,6 +9734,7 @@ ${noteContent}`
             if (!MISSION_MODES.includes(mode)) return;
 
             state.current.mode = mode;
+            state.current.manualModeDraft = mode;
             state.current.modeApplied = true;
             if (state.current.loadout) state.current.loadout.mode = mode;
             if (state.current.loadout) state.current.loadout.fingerprint = fingerprintLoadout(state.current.loadout);
@@ -9749,6 +9761,7 @@ ${noteContent}`
             const hasMode = !!String(c.mode || "").trim();
             if (!hasMode) {
                 c.mode = rollMode();
+                c.manualModeDraft = c.mode;
                 c.modeApplied = true;
                 if (c.loadout) {
                     c.loadout.mode = c.mode;
@@ -9909,7 +9922,7 @@ ${noteContent}`
             $("#btnRerollMode")?.addEventListener("click", () => rerollMode());
             $("#manualModeSelect").addEventListener("change", (e) => {
                 if (!state.current.loadout || !state.current.locked || !state.current.planetLocked || state.current.planetConfirmed) return;
-                state.current.mode = String(e.target?.value || state.current.mode || "");
+                state.current.manualModeDraft = String(e.target?.value || state.current.mode || "");
                 state.current.modeApplied = false;
                 renderSpin();
             });
@@ -10000,7 +10013,7 @@ ${noteContent}`
                 saveState();
                 renderResults();
                 updateSavedCount();
-                state.current = { seed: null, seedBase: null, mode: null, modeApplied: false, faction: null, loadout: null, locked: false, planet: null, planetLocked: false, planetConfirmed: false, planetBiome: null, manualPlanetCandidate: null, playerNameDraft: "", specialActive: false, rerollsLeft: 0, spinning: false };
+                state.current = { seed: null, seedBase: null, mode: null, manualModeDraft: null, modeApplied: false, faction: null, loadout: null, locked: false, planet: null, planetLocked: false, planetConfirmed: false, planetBiome: null, manualPlanetCandidate: null, playerNameDraft: "", specialActive: false, rerollsLeft: 0, spinning: false };
                 renderSpin();
                 renderResults();
                 refreshCompareOptions();
