@@ -6693,7 +6693,6 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const c = state.current;
             const hasMode = !!String(c.mode || "").trim();
             const isReadyForPlanetConfirm = !!(c.loadout && c.locked && c.planetLocked && !c.planetConfirmed && !c.spinning);
-            const isReadyForModeConfirm = !!(c.loadout && c.locked && c.planetLocked && c.planetConfirmed && hasMode && !c.modeConfirmed && !c.spinning);
             const isReadyForPlayerConfirm = !!(c.seed && c.planetConfirmed && c.modeConfirmed && !c.spinning);
 
             $("#spinSeed").textContent = c.seed || "???";
@@ -6802,8 +6801,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             if (btnSearchPlanetInline) btnSearchPlanetInline.disabled = c.spinning || c.planetConfirmed;
             const btnConfirmPlanetInline = $("#btnConfirmPlanetInline");
             if (btnConfirmPlanetInline) {
-                btnConfirmPlanetInline.disabled = !(isReadyForPlanetConfirm || isReadyForModeConfirm);
-                btnConfirmPlanetInline.textContent = isReadyForModeConfirm ? "CONFIRM MODE" : "CONFIRM PLANET";
+                btnConfirmPlanetInline.disabled = !isReadyForPlanetConfirm;
+                btnConfirmPlanetInline.textContent = "CONFIRM PLANET";
             }
             const planetSearchMode = $("#planetSearchMode");
             const planetSearchInput = $("#planetSearchInput");
@@ -6829,12 +6828,14 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             }
             const btnRerollMode = $("#btnRerollMode");
             if (btnRerollMode) btnRerollMode.disabled = !canAdjustMode;
+            const isReadyForModeApply = !!(canAdjustMode && hasMode);
 
             const actionMap = [
                 ["btnSpin", !c.loadout && !c.spinning],
                 ["btnLock", !!(c.loadout && !c.locked && !c.spinning)],
 
-                ["btnConfirmPlanetInline", isReadyForModeConfirm || isReadyForPlanetConfirm],
+                ["btnConfirmPlanetInline", isReadyForPlanetConfirm],
+                ["btnApplyManualMode", isReadyForModeApply],
                 ["btnConfirmPlayer", isReadyForPlayerConfirm]
             ];
             actionMap.forEach(([id, active]) => {
@@ -9789,20 +9790,24 @@ ${noteContent}`
         function doUseThisRun() {
             const c = state.current;
             if (!c.loadout || !c.locked || !c.planetLocked) return;
-            if (c.spinning || c.modeConfirmed) return;
+            if (c.spinning || c.modeConfirmed || c.planetConfirmed) return;
 
-            if (!c.planetConfirmed) {
-                c.planetConfirmed = true;
-                c.mode = rollMode();
-                c.manualModeDraft = c.mode;
-                c.modeApplied = true;
-                if (c.loadout) {
-                    c.loadout.mode = c.mode;
-                    c.loadout.fingerprint = fingerprintLoadout(c.loadout);
-                }
-                renderSpin();
-                return;
+            c.planetConfirmed = true;
+            c.mode = rollMode();
+            c.manualModeDraft = c.mode;
+            c.modeApplied = true;
+            if (c.loadout) {
+                c.loadout.mode = c.mode;
+                c.loadout.fingerprint = fingerprintLoadout(c.loadout);
             }
+            renderSpin();
+        }
+
+        function doConfirmMode() {
+            const c = state.current;
+            if (!c.loadout || !c.locked || !c.planetLocked || !c.planetConfirmed) return;
+            if (c.spinning || c.modeConfirmed) return;
+            if (!String(c.mode || "").trim()) return;
 
             c.spinning = true;
             renderSpin();
@@ -9952,7 +9957,7 @@ ${noteContent}`
             $("#btnApplyManualMode").addEventListener("click", () => {
                 const applied = applyManualMode($("#manualModeSelect")?.value || "");
                 if (applied) {
-                    doUseThisRun();
+                    doConfirmMode();
                 }
             });
             $("#btnRerollMode")?.addEventListener("click", () => rerollMode());
