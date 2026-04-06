@@ -6893,7 +6893,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const displayedMode = canPreviewManualMode
                 ? String(c.manualModeDraft || c.mode || "")
                 : String(c.mode || "");
-            modeEl.classList.remove("mode-standard", "mode-blitz", "mode-eradication", "mode-defense");
+            modeEl.classList.remove("mode-standard", "mode-blitz", "mode-eradication", "mode-defense", "mode-rapid-acquisition");
 
             if (!c.locked) {
                 modeEl.textContent = "—";
@@ -6909,8 +6909,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             } else if (displayedMode === "Eradication (15)") {
                 modeEl.textContent = displayedMode;
                 modeEl.classList.add("mode-eradication");
-            } else if (c.mode === "Rapid Acquisition (15)") {
-                modeEl.textContent = c.mode;
+            } else if (displayedMode === "Rapid Acquisition (15)") {
+                modeEl.textContent = displayedMode;
                 modeEl.classList.add("mode-rapid-acquisition");
             } else {
                 modeEl.textContent = "—";
