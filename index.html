@@ -1034,6 +1034,81 @@ END MASTER DIRECTIVE
             align-items: flex-end;
         }
 
+        .factionSticker {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 10px;
+            letter-spacing: .3px;
+            text-transform: uppercase;
+            font-weight: 900;
+            border-radius: 999px;
+            border: 1px solid rgba(255,255,255,.25);
+            padding: 4px 8px;
+            color: #f5f8ff;
+            background: linear-gradient(130deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,.04), 0 0 12px rgba(255,255,255,.1);
+            white-space: nowrap;
+        }
+
+        .factionStickerIcon {
+            width: 16px;
+            height: 16px;
+            border-radius: 999px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            line-height: 1;
+            color: #0b0d11;
+            background: rgba(255,255,255,.9);
+            box-shadow: 0 0 8px rgba(255,255,255,.35);
+        }
+
+        .factionSticker.faction-terminids {
+            border-color: rgba(142,255,99,.5);
+            color: rgba(206,255,184,.98);
+            background: linear-gradient(130deg, rgba(66,168,22,.36), rgba(20,80,8,.22));
+            box-shadow: inset 0 0 0 1px rgba(149,255,111,.24), 0 0 12px rgba(120,255,88,.26);
+        }
+
+        .factionSticker.faction-terminids .factionStickerIcon {
+            background: rgba(142,255,99,.95);
+        }
+
+        .factionSticker.faction-automatons {
+            border-color: rgba(255,90,90,.52);
+            color: rgba(255,190,190,.98);
+            background: linear-gradient(130deg, rgba(186,20,20,.35), rgba(90,10,10,.22));
+            box-shadow: inset 0 0 0 1px rgba(255,110,110,.24), 0 0 12px rgba(255,62,62,.28);
+        }
+
+        .factionSticker.faction-automatons .factionStickerIcon {
+            background: rgba(255,95,95,.95);
+        }
+
+        .factionSticker.faction-illuminate {
+            border-color: rgba(215,120,255,.52);
+            color: rgba(240,205,255,.98);
+            background: linear-gradient(130deg, rgba(128,28,183,.34), rgba(67,14,104,.22));
+            box-shadow: inset 0 0 0 1px rgba(215,120,255,.24), 0 0 12px rgba(190,110,255,.28);
+        }
+
+        .factionSticker.faction-illuminate .factionStickerIcon {
+            background: rgba(220,130,255,.95);
+        }
+
+        .factionSticker.faction-superearth {
+            border-color: rgba(106,171,255,.52);
+            color: rgba(196,224,255,.98);
+            background: linear-gradient(130deg, rgba(25,70,176,.34), rgba(12,35,90,.22));
+            box-shadow: inset 0 0 0 1px rgba(106,171,255,.24), 0 0 12px rgba(85,150,255,.28);
+        }
+
+        .factionSticker.faction-superearth .factionStickerIcon {
+            background: rgba(116,178,255,.95);
+        }
+
 
         @media (max-width: 520px) {
             .resultSummaryTop {
@@ -6776,6 +6851,22 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             if (n.includes("super earth") || n.replace(/\s+/g, "").includes("superearth")) return "faction-superearth";
             return "";
         }
+        function getFactionStickerData(faction) {
+            const normalizedFaction = normalizeFactionName(faction || "");
+            if (normalizedFaction === "Terminids") {
+                return { icon: "🪲", label: "Terminids" };
+            }
+            if (normalizedFaction === "Automatons") {
+                return { icon: "🤖", label: "Automatons" };
+            }
+            if (normalizedFaction === "Illuminate") {
+                return { icon: "🛸", label: "Illuminate" };
+            }
+            if (normalizedFaction === "Super Earth") {
+                return { icon: "🛡️", label: "Super Earth" };
+            }
+            return { icon: "❓", label: normalizedFaction || "Unknown" };
+        }
         function renderSpin() {
             const c = state.current;
             const hasMode = !!String(c.mode || "").trim();
@@ -7017,6 +7108,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             for (const card of list) {
                 const moBadge = card.majorOrderDone ? `<span class="badge good">MO DONE</span>` : `<span class="badge red">MO NO</span>`;
                 const tier = tierMap.get(card.id) || "";
+                const factionClass = getFactionClass(card.faction);
+                const factionStickerData = getFactionStickerData(card.faction);
                 const el = document.createElement("div");
                 el.className = "card resultCard" + (tier ? ` tier-${tier}` : "");
                 if (pendingNewCardHighlightId && card.id === pendingNewCardHighlightId) {
@@ -7039,6 +7132,10 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                           <div class="resultSummaryBadges">
                             <span class="badge yellow">Grade ${Number(card.grade || 0)}</span>
                             ${moBadge}
+                            <span class="factionSticker ${factionClass}">
+                                <span class="factionStickerIcon">${escapeHtml(factionStickerData.icon)}</span>
+                                ${escapeHtml(factionStickerData.label)}
+                            </span>
                           </div>
                         </div>
                         <div class="radarWrap resultSummaryRadar">
