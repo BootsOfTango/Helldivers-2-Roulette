@@ -1,7 +1,6 @@
 <svg width="160" height="160" viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <path d="M80 12L102 86H58L80 12Z" fill="#FF6468"/>
-  <path d="M80 148L58 86H102L80 148Z" fill="#FF6468"/>
-  <path d="M16 66L58 86L36 108L16 66Z" fill="#FF6468"/>
-  <path d="M144 66L102 86L124 108L144 66Z" fill="#FF6468"/>
-  <path d="M80 28L91 66H69L80 28Z" fill="#FF6468"/>
+  <path d="M80 12L106 90L80 124L54 90L80 12Z" fill="#FF6468"/>
+  <path d="M80 28L92 90L80 106L68 90L80 28Z" fill="#F2F3F5"/>
+  <path d="M10 62L56 74L45 100L10 62Z" fill="#FF6468"/>
+  <path d="M150 62L104 74L115 100L150 62Z" fill="#FF6468"/>
 </svg>
