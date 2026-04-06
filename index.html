@@ -6780,21 +6780,25 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             // MODE colors
             const modeEl = $("#spinMode");
+            const canPreviewManualMode = !!(c.locked && c.planetLocked && c.planetConfirmed && !c.modeConfirmed);
+            const displayedMode = canPreviewManualMode
+                ? String(c.manualModeDraft || c.mode || "")
+                : String(c.mode || "");
             modeEl.classList.remove("mode-standard", "mode-blitz", "mode-eradication", "mode-defense");
 
             if (!c.locked) {
                 modeEl.textContent = "—";
-            } else if (c.mode === "Normal (40)" || c.mode === "Standard (40)") {
-                modeEl.textContent = c.mode;
+            } else if (displayedMode === "Normal (40)" || displayedMode === "Standard (40)") {
+                modeEl.textContent = displayedMode;
                 modeEl.classList.add("mode-standard");
-            } else if (c.mode === "Blitz (12)") {
-                modeEl.textContent = c.mode;
+            } else if (displayedMode === "Blitz (12)") {
+                modeEl.textContent = displayedMode;
                 modeEl.classList.add("mode-blitz");
-            } else if (c.mode === "Defense (20)" || c.mode === "Defense (20min)") {
-                modeEl.textContent = c.mode;
+            } else if (displayedMode === "Defense (20)" || displayedMode === "Defense (20min)") {
+                modeEl.textContent = displayedMode;
                 modeEl.classList.add("mode-defense");
-            } else if (c.mode === "Eradication (15)") {
-                modeEl.textContent = c.mode;
+            } else if (displayedMode === "Eradication (15)") {
+                modeEl.textContent = displayedMode;
                 modeEl.classList.add("mode-eradication");
             } else {
                 modeEl.textContent = "—";
@@ -10041,8 +10045,16 @@ ${noteContent}`
             $("#btnRerollMode")?.addEventListener("click", () => rerollMode());
             $("#manualModeSelect").addEventListener("change", (e) => {
                 if (!state.current.loadout || !state.current.locked || !state.current.planetLocked || !state.current.planetConfirmed || state.current.modeConfirmed) return;
-                state.current.manualModeDraft = String(e.target?.value || state.current.mode || "");
-                state.current.modeApplied = false;
+                const nextMode = String(e.target?.value || "");
+                state.current.manualModeDraft = String(nextMode || state.current.mode || "");
+                if (MISSION_MODES.includes(nextMode)) {
+                    state.current.mode = nextMode;
+                    state.current.modeApplied = true;
+                    state.current.loadout.mode = nextMode;
+                    state.current.loadout.fingerprint = fingerprintLoadout(state.current.loadout);
+                } else {
+                    state.current.modeApplied = false;
+                }
                 renderSpin();
             });
             $("#spinPlayerName")?.addEventListener("input", (e) => {
