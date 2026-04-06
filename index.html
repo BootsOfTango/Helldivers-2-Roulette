@@ -2596,6 +2596,32 @@ END MASTER DIRECTIVE
             background: rgba(255, 93, 93, .12);
         }
 
+        .resultsBackupReminder {
+            margin: 0 0 8px;
+            padding: 8px 12px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 214, 102, .65);
+            background: rgba(255, 214, 102, .12);
+            color: #ffe08a;
+            font-size: 12px;
+            letter-spacing: .2px;
+            text-align: right;
+            animation: backupReminderPulse 2.4s ease-in-out infinite;
+        }
+
+        @keyframes backupReminderPulse {
+            0%,
+            100% {
+                opacity: .85;
+                box-shadow: 0 0 0 rgba(255, 214, 102, 0);
+            }
+
+            50% {
+                opacity: 1;
+                box-shadow: 0 0 10px rgba(255, 214, 102, .22);
+            }
+        }
+
         @media (max-width: 1100px) {
             .itemInsightCards {
                 grid-template-columns: 1fr;
@@ -3151,6 +3177,9 @@ END MASTER DIRECTIVE
                     <div class="label">Saved loadout cards</div>
                 </div>
                 <div class="col right">
+                    <div id="resultsBackupReminder" class="resultsBackupReminder">
+                        ⚠️ Save/Export your cards JSON to your PC before clearing browser cache or cookies.
+                    </div>
                     <div class="miniRow" style="justify-content:flex-end;">
                         <button id="btnExport" class="btnGhost">EXPORT JSON</button>
                         <button id="btnImport" class="btnGhost">IMPORT JSON</button>
@@ -4819,6 +4848,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
          ***********************/
         const STORAGE_KEY = "hd2_chaos_roulette_v1";
         const DISCORD_WEBHOOK_KEY = "hd2_discord_webhook_url";
+        const FIRST_BACKUP_WARNING_KEY = "hd2_backup_warning_seen_v1";
         const state = {
             items: null,
             cards: [],
@@ -7748,6 +7778,15 @@ ${noteContent}`
 
         }
 
+        function showFirstTimeBackupWarning() {
+            try {
+                const alreadySeen = localStorage.getItem(FIRST_BACKUP_WARNING_KEY) === "1";
+                if (alreadySeen) return;
+                alert("Reminder: Export your cards JSON backup to your PC. If you clear browser cache/cookies, local saved cards can be deleted.");
+                localStorage.setItem(FIRST_BACKUP_WARNING_KEY, "1");
+            } catch (e) { }
+        }
+
 
         /***********************
          * Compare
@@ -10264,6 +10303,7 @@ ${noteContent}`
         saveState();      // ensures pills show correct saved count
         wireOnce();
         initApp();
+        showFirstTimeBackupWarning();
         switchTab("spin");
         renderSpin();
         setTimeout(() => { renderResults(); }, 0);
