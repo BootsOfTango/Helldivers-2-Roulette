@@ -5290,10 +5290,39 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             };
         }
 
+        function getActiveApiPlanetsMergedWithEditable() {
+            const apiList = Array.isArray(window.__apiActivePlanetsCache) ? window.__apiActivePlanetsCache : [];
+            if (!apiList.length) return [];
+
+            const editableByName = new Map(
+                (state.items.planets || []).map(p => [normalizePlanetKey(p?.name || ""), p])
+            );
+
+            return apiList.map((planet) => {
+                const editable = editableByName.get(normalizePlanetKey(planet?.name || ""));
+                const enabled = (typeof editable?.enabled === "boolean") ? editable.enabled : true;
+                return {
+                    name: planet?.name || editable?.name || "Unknown",
+                    sector: planet?.sector || editable?.sector || "—",
+                    faction: planet?.faction || editable?.faction || "Unknown",
+                    biome: planet?.biome || editable?.biome || "—",
+                    weather: editable?.weather || getFallbackPlanetConditionsByName(planet?.name) || "—",
+                    enabled
+                };
+            });
+        }
+
+        function getPlanetPoolSource() {
+            const apiMerged = getActiveApiPlanetsMergedWithEditable();
+            if (apiMerged.length) return apiMerged;
+            return Array.isArray(state?.items?.planets) ? state.items.planets : [];
+        }
+
         function rollPlanetForFaction(faction) {
             const spinF = String(faction || "").toLowerCase().trim();
+            const source = getPlanetPoolSource();
 
-            const pool = (state.items.planets || []).filter(p => {
+            const pool = source.filter(p => {
                 const enabled = (typeof p.enabled === "boolean") ? p.enabled : true;
                 if (!enabled) return false;
 
@@ -5310,9 +5339,17 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 return false;
             });
 
-            if (!pool.length) return null;
+            const fallbackPool = source.filter(p => {
+                const enabled = (typeof p.enabled === "boolean") ? p.enabled : true;
+                if (!enabled) return false;
+                const f = String(p.faction || "").toLowerCase().trim();
+                return f !== "super earth" && f !== "not in play";
+            });
 
-            const p = pool[randInt(pool.length)];
+            const finalPool = pool.length ? pool : fallbackPool;
+            if (!finalPool.length) return null;
+
+            const p = finalPool[randInt(finalPool.length)];
             return {
                 name: p.name,
                 sector: p.sector || "—",
@@ -5322,7 +5359,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         }
 
         function getAllPlanetsSortedBySector() {
-            const list = Array.isArray(state?.items?.planets) ? state.items.planets.slice() : [];
+            const list = getPlanetPoolSource().slice();
             return list.sort((a, b) => {
                 const s = String(a.sector || "").localeCompare(String(b.sector || ""));
                 if (s !== 0) return s;
@@ -9651,7 +9688,7 @@ ${noteContent}`
             if (!target) return;
             const start = performance.now();
             const total = 520;
-            const samplePool = (state.items.planets || []).map(p => p.name).filter(Boolean);
+            const samplePool = getPlanetPoolSource().map(p => p.name).filter(Boolean);
             while (performance.now() - start < total) {
                 const randomName = samplePool.length ? samplePool[randInt(samplePool.length)] : "SCANNING...";
                 target.textContent = randomName;
@@ -9684,7 +9721,7 @@ ${noteContent}`
             if (state.current.planetConfirmed) return;
             const p = rollPlanetForFaction(state.current.faction);
             if (!p) {
-                alert("No planets available for that faction. Add planets in ITEMS tab.");
+                alert("No planets available from active API list right now. Check ITEMS tab and refresh active planets.");
                 return;
             }
             const pc = deepClone(p);
@@ -9725,7 +9762,7 @@ ${noteContent}`
 
             const p = rollPlanetForFaction(state.current.faction);
             if (!p) {
-                alert("No planets available for that faction. Add planets in ITEMS tab.");
+                alert("No planets available from active API list right now. Check ITEMS tab and refresh active planets.");
                 return;
             }
             const pc = deepClone(p);
