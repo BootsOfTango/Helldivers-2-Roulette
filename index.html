@@ -2743,6 +2743,11 @@ END MASTER DIRECTIVE
             font-weight: 900;
         }
 
+        .mode-rapid-acquisition {
+            color: #8dff9e;
+            font-weight: 900;
+        }
+
         /* ===== FACTION COLORS ===== */
 
         /* ===== FACTION COLORS (TEXT ONLY) ===== */
@@ -3144,6 +3149,7 @@ END MASTER DIRECTIVE
                                 <option value="Defense (20min)">Defense (20min)</option>
                                 <option value="Eradication (15)">Eradication (15)</option>
                                 <option value="Normal (40)">Normal (40)</option>
+                                <option value="Rapid Acquisition (15)">Rapid Acquisition (15)</option>
                             </select>
                             <button id="btnApplyManualMode" class="btnPrimary">Apply mode?</button>
                             <button id="btnRerollMode" class="btnGhost">Reroll mode</button>
@@ -3201,6 +3207,7 @@ END MASTER DIRECTIVE
                             <option value="Defense (20min)">Defense (20min)</option>
                             <option value="Eradication (15)">Eradication (15)</option>
                             <option value="Normal (40)">Normal (40)</option>
+                            <option value="Rapid Acquisition (15)">Rapid Acquisition (15)</option>
                         </select>
                         <select id="resFilterFaction">
                             <option value="">All factions</option>
@@ -5253,9 +5260,20 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             "Blitz (12)",
             "Defense (20min)"
         ]);
+        const AUTOMATON_ONLY_MISSION_MODES = Object.freeze([
+            "Rapid Acquisition (15)"
+        ]);
 
-        function rollMode() {
-            return pickOne(MISSION_MODES);
+        function getMissionModesForFaction(faction) {
+            const normalizedFaction = normalizeFactionName(faction);
+            if (normalizedFaction === "Automatons") {
+                return [...MISSION_MODES, ...AUTOMATON_ONLY_MISSION_MODES];
+            }
+            return MISSION_MODES.slice();
+        }
+
+        function rollMode(faction) {
+            return pickOne(getMissionModesForFaction(faction));
         }
         function rollFaction() {
             const roll = Math.random();
@@ -5266,8 +5284,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         }
 
         function rollLoadout(seed) {
-            const mode = rollMode();
             const faction = rollFaction();
+            const mode = rollMode(faction);
             const primary = pickOne(state.items.primaries);
             const sidearm = pickOne(state.items.sidearms);
             const throwable = pickOne(state.items.throwables);
@@ -6780,7 +6798,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             // MODE colors
             const modeEl = $("#spinMode");
-            modeEl.classList.remove("mode-standard", "mode-blitz", "mode-eradication", "mode-defense");
+            modeEl.classList.remove("mode-standard", "mode-blitz", "mode-eradication", "mode-defense", "mode-rapid-acquisition");
 
             if (!c.locked) {
                 modeEl.textContent = "—";
@@ -6796,12 +6814,22 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             } else if (c.mode === "Eradication (15)") {
                 modeEl.textContent = c.mode;
                 modeEl.classList.add("mode-eradication");
+            } else if (c.mode === "Rapid Acquisition (15)") {
+                modeEl.textContent = c.mode;
+                modeEl.classList.add("mode-rapid-acquisition");
             } else {
                 modeEl.textContent = "—";
             }
 
             const manualModeSelect = $("#manualModeSelect");
             if (manualModeSelect) {
+                const rapidOption = manualModeSelect.querySelector('option[value="Rapid Acquisition (15)"]');
+                const isAutomatonFaction = normalizeFactionName(c.faction) === "Automatons";
+                if (rapidOption) {
+                    rapidOption.disabled = !isAutomatonFaction;
+                    rapidOption.hidden = !isAutomatonFaction;
+                }
+
                 const selectValue = String(c.manualModeDraft || c.mode || "");
                 if (manualModeSelect.value !== selectValue) manualModeSelect.value = selectValue;
             }
@@ -9844,7 +9872,8 @@ ${noteContent}`
 
         function applyManualMode(mode) {
             if (!state.current.loadout || !state.current.locked || !state.current.planetLocked || !state.current.planetConfirmed || state.current.modeConfirmed) return false;
-            if (!MISSION_MODES.includes(mode)) return false;
+            const availableModes = getMissionModesForFaction(state.current.faction);
+            if (!availableModes.includes(mode)) return false;
 
             state.current.mode = mode;
             state.current.manualModeDraft = mode;
@@ -9857,11 +9886,12 @@ ${noteContent}`
 
         function rerollMode() {
             if (!state.current.loadout || !state.current.locked || !state.current.planetLocked || !state.current.planetConfirmed || state.current.modeConfirmed) return;
-            if (!MISSION_MODES.length) return;
+            const availableModes = getMissionModesForFaction(state.current.faction);
+            if (!availableModes.length) return;
 
             const currentMode = String(state.current.mode || state.current.loadout?.mode || "");
-            const options = MISSION_MODES.filter(mode => mode !== currentMode);
-            const nextMode = options.length ? pickOne(options) : MISSION_MODES[0];
+            const options = availableModes.filter(mode => mode !== currentMode);
+            const nextMode = options.length ? pickOne(options) : availableModes[0];
             applyManualMode(nextMode);
         }
 
@@ -9871,7 +9901,7 @@ ${noteContent}`
             if (c.spinning || c.modeConfirmed || c.planetConfirmed) return;
 
             c.planetConfirmed = true;
-            c.mode = rollMode();
+            c.mode = rollMode(c.faction);
             c.manualModeDraft = c.mode;
             c.modeApplied = true;
             if (c.loadout) {
