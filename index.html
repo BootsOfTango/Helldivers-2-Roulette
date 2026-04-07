@@ -9543,11 +9543,16 @@ ${noteContent}`
                 .filter(item => item.slot === slot && item.total >= 1)
                 .sort((a, b) => b.performanceScore - a.performanceScore || b.moRate - a.moRate || b.total - a.total)[0] || null;
 
+            const mostRolledBySlot = (slot) => itemStats
+                .filter(item => item.slot === slot && item.total >= 1)
+                .sort((a, b) => b.total - a.total || b.performanceScore - a.performanceScore || b.moRate - a.moRate)[0] || null;
+
             return {
                 itemStats,
                 mostRolledWeek: pickTopByPeriod("week"),
                 mostRolledMonth: pickTopByPeriod("month"),
                 mostRolledAllTime: pickTopByPeriod("all"),
+                mostRolledBooster: mostRolledBySlot("booster"),
                 bestPrimary: bestBySlot("primary"),
                 bestSidearm: bestBySlot("sidearm"),
                 bestThrowable: bestBySlot("throwable"),
@@ -9612,6 +9617,7 @@ ${noteContent}`
                 ${renderBestCard("Best performing throwables", analytics.bestThrowable, "throwable", bestFallback("throwable", "throwable"))}
                 ${renderBestCard("Best performed stratagem", analytics.bestStratagem, "stratagem", bestFallback("stratagem", "stratagem"))}
                 ${renderBestCard("Best performed booster", analytics.bestBooster, "booster", bestFallback("booster", "booster"))}
+                ${renderCountCard("Most rolled booster", analytics.mostRolledBooster ? { item: analytics.mostRolledBooster, count: analytics.mostRolledBooster.total } : null, "Need 1+ booster use")}
             `;
         }
 
