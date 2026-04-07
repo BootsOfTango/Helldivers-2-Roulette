@@ -1121,6 +1121,11 @@ END MASTER DIRECTIVE
             padding: 12px;
         }
 
+        .difficultyModalDialog {
+            width: min(440px, 92vw);
+            max-height: 84vh;
+        }
+
         .modalActionRow {
             position: sticky;
             bottom: -12px;
@@ -3235,19 +3240,7 @@ END MASTER DIRECTIVE
                     <div class="box">
                         <div class="label">Difficulty</div>
                         <div class="miniRow" style="margin-top:10px;">
-                            <select id="spinDifficultySelect" aria-label="Mission difficulty">
-                                <option value="" selected>Choose difficulty first...</option>
-                                <option value="1">D1</option>
-                                <option value="2">D2</option>
-                                <option value="3">D3</option>
-                                <option value="4">D4</option>
-                                <option value="5">D5</option>
-                                <option value="6">D6</option>
-                                <option value="7">D7</option>
-                                <option value="8">D8</option>
-                                <option value="9">D9</option>
-                                <option value="10">D10</option>
-                            </select>
+                            <div class="pill" id="spinDifficultyDisplay">Choose when you click Spin Loadout</div>
                             <div class="pill" id="spinDifficultyTierBadge">Helldive Tier</div>
                         </div>
                     </div>
@@ -3358,6 +3351,32 @@ END MASTER DIRECTIVE
                     <button class="btnGhost" id="btnCloseResultModal">CLOSE</button>
                 </div>
                 <div id="resultCardModalBody"></div>
+            </div>
+        </div>
+
+        <div id="difficultyConfirmModal" class="cardModal" hidden>
+            <div class="cardModalDialog difficultyModalDialog">
+                <div class="label">Choose difficulty before spin</div>
+                <div class="tiny" style="margin-top:8px;">Confirm mission difficulty first, then loadout reels will animate with sound.</div>
+                <div class="miniRow" style="margin-top:12px;">
+                    <select id="difficultyModalSelect" aria-label="Spin difficulty">
+                        <option value="">Choose difficulty...</option>
+                        <option value="1">D1</option>
+                        <option value="2">D2</option>
+                        <option value="3">D3</option>
+                        <option value="4">D4</option>
+                        <option value="5">D5</option>
+                        <option value="6">D6</option>
+                        <option value="7">D7</option>
+                        <option value="8">D8</option>
+                        <option value="9">D9</option>
+                        <option value="10">D10</option>
+                    </select>
+                </div>
+                <div class="miniRow" style="justify-content:flex-end; margin-top:14px;">
+                    <button class="btnGhost" id="btnCancelDifficultyModal">Cancel</button>
+                    <button class="btnPrimary" id="btnConfirmDifficultyModal">Confirm & Spin</button>
+                </div>
             </div>
         </div>
 
@@ -5031,6 +5050,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             ui: {
                 activeResultCardId: null,
                 modalOpen: false,
+                difficultyModalOpen: false,
                 apiPlanetSyncInProgress: false
             },
 
@@ -7084,11 +7104,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const btnConfirmPlayer = $("#btnConfirmPlayer");
             if (btnConfirmPlayer) btnConfirmPlayer.disabled = !isReadyForPlayerConfirm;
 
-            const difficultySelect = $("#spinDifficultySelect");
-            if (difficultySelect) {
-                difficultySelect.value = hasDifficultySelection ? String(c.difficulty) : "";
-                difficultySelect.disabled = !!(c.spinning || c.loadout || c.modeConfirmed);
-            }
+            const difficultyDisplay = $("#spinDifficultyDisplay");
+            if (difficultyDisplay) difficultyDisplay.textContent = hasDifficultySelection ? formatDifficultyLabel(c) : "Choose when you click Spin Loadout";
             const difficultyBadge = $("#spinDifficultyTierBadge");
             if (difficultyBadge) difficultyBadge.textContent = hasDifficultySelection ? `${getDifficultyTierLabel(difficultyTier)} Tier` : "Required First";
             const difficultyPill = $("#spinDifficultyPill");
@@ -7511,6 +7528,23 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             modal.hidden = true;
             state.ui.activeResultCardId = null;
             state.ui.modalOpen = false;
+        }
+
+        function openDifficultyModal() {
+            const modal = $("#difficultyConfirmModal");
+            const select = $("#difficultyModalSelect");
+            if (!modal || !select) return;
+            select.value = state.current.difficultySelected ? String(getCardDifficulty(state.current)) : "";
+            modal.hidden = false;
+            state.ui.difficultyModalOpen = true;
+            requestAnimationFrame(() => select.focus());
+        }
+
+        function closeDifficultyModal() {
+            const modal = $("#difficultyConfirmModal");
+            if (!modal) return;
+            modal.hidden = true;
+            state.ui.difficultyModalOpen = false;
         }
 
         function getCardById(id) {
@@ -9909,8 +9943,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 state.current = {};
             }
             if (!state.current.difficultySelected) {
-                alert("Choose mission difficulty first (D1–D10), then spin the loadout.");
-                renderSpin();
+                openDifficultyModal();
                 return;
             }
 
@@ -10396,8 +10429,30 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             $("#resultCardModal").addEventListener("click", (e) => {
                 if (e.target && e.target.id === "resultCardModal") closeResultCardModal();
             });
+            $("#difficultyConfirmModal")?.addEventListener("click", (e) => {
+                if (e.target && e.target.id === "difficultyConfirmModal") closeDifficultyModal();
+            });
+            $("#btnCancelDifficultyModal")?.addEventListener("click", closeDifficultyModal);
+            $("#btnConfirmDifficultyModal")?.addEventListener("click", () => {
+                const raw = String($("#difficultyModalSelect")?.value || "").trim();
+                if (!raw) {
+                    alert("Pick a difficulty (D1–D10) to start the spin.");
+                    $("#difficultyModalSelect")?.focus();
+                    return;
+                }
+                state.current.difficultySelected = true;
+                state.current.difficulty = clamp(Math.round(Number(raw)), 1, 10);
+                closeDifficultyModal();
+                renderSpin();
+                doSpin();
+            });
             document.addEventListener("keydown", (e) => {
-                if (e.key === "Escape" && state.ui.modalOpen) closeResultCardModal();
+                if (e.key !== "Escape") return;
+                if (state.ui.difficultyModalOpen) {
+                    closeDifficultyModal();
+                    return;
+                }
+                if (state.ui.modalOpen) closeResultCardModal();
             });
             document.addEventListener("keydown", (e) => {
                 if (e.defaultPrevented || e.repeat) return;
@@ -10547,13 +10602,6 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 togglePlanetSearchPanel();
             });
             $("#btnConfirmPlanetInline")?.addEventListener("click", () => doUseThisRun());
-            $("#spinDifficultySelect")?.addEventListener("change", (e) => {
-                const raw = String(e.target.value || "").trim();
-                state.current.difficultySelected = !!raw;
-                state.current.difficulty = raw ? clamp(Math.round(Number(raw)), 1, 10) : 10;
-                renderSpin();
-            });
-
             $("#planetSearchInput").addEventListener("input", () => {
                 renderPlanetSearchResults();
             });
