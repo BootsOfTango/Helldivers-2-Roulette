@@ -3581,6 +3581,10 @@ END MASTER DIRECTIVE
 
             <div class="divider"></div>
 
+            <div class="miniRow" style="justify-content:flex-end; margin-bottom:10px;">
+                <button id="btnRefreshItemInsights" class="btnGhost">REFRESH ITEM INSIGHTS</button>
+            </div>
+
             <div id="itemInsightCards" class="itemInsightCards"></div>
 
             <div id="rankSplitView">
@@ -5157,19 +5161,22 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
         function normalizeCardRecord(card) {
             if (!card || typeof card !== "object") return null;
+            const loadout = (card.loadout && typeof card.loadout === "object") ? card.loadout : null;
 
             card.id = String(card.id || uid());
             card.createdAt = card.createdAt || nowISO();
             card.seed = String(card.seed || card.seedBase || "Unknown Seed");
-            card.mode = String(card.mode || "Unknown Mode");
-            card.faction = normalizeFactionName(card.faction || "Terminids");
-            card.primary = String(card.primary || "—");
-            card.sidearm = String(card.sidearm || "—");
-            card.throwable = String(card.throwable || "—");
-            card.booster = String(card.booster || "—");
+            card.mode = String(card.mode || loadout?.mode || "Unknown Mode");
+            card.faction = normalizeFactionName(card.faction || loadout?.faction || "Terminids");
+            card.primary = String(card.primary || loadout?.primary || "—");
+            card.sidearm = String(card.sidearm || loadout?.sidearm || "—");
+            card.throwable = String(card.throwable || loadout?.throwable || "—");
+            card.booster = String(card.booster || loadout?.booster || "—");
 
             // Backward compatibility: some older saves/imports had a string here.
-            if (!Array.isArray(card.stratagems)) {
+            if (!Array.isArray(card.stratagems) && Array.isArray(loadout?.stratagems)) {
+                card.stratagems = loadout.stratagems.slice();
+            } else if (!Array.isArray(card.stratagems)) {
                 if (typeof card.stratagems === "string") {
                     card.stratagems = splitWeatherTags(card.stratagems);
                 } else {
@@ -5781,7 +5788,19 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         }
 
         function preloadItemVisuals() {
-            if (itemVisuals.loaded) return Promise.resolve();
+            return preloadItemVisualsInternal(false);
+        }
+
+        function preloadItemVisualsInternal(forceReload) {
+            if (!forceReload && itemVisuals.loaded) return Promise.resolve();
+            if (forceReload) {
+                itemVisuals.loaded = false;
+                itemVisuals.validation = { errors: [] };
+                Object.keys(itemVisuals.byCategory).forEach(cat => {
+                    itemVisuals.byCategory[cat].clear();
+                });
+                itemVisuals.aliases.clear();
+            }
             return fetch("assets/item-images.json", { cache: "no-store" })
                 .then(res => {
                     if (!res.ok) throw new Error(`item-images.json ${res.status}`);
@@ -5803,6 +5822,55 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 .catch(err => {
                     console.warn("[item-visuals] Unable to load assets/item-images.json", err);
                 });
+        }
+
+        function loadItemCatalogForValidation() {
+            return fetch("assets/item-catalog.json", { cache: "no-store" })
+                .then(res => {
+                    if (!res.ok) throw new Error(`item-catalog.json ${res.status}`);
+                    return res.json();
+                });
+        }
+
+        async function refreshItemInsightsFromJson() {
+            try {
+                const [catalog] = await Promise.all([
+                    loadItemCatalogForValidation(),
+                    loadItemImageDb(),
+                    preloadItemVisualsInternal(true)
+                ]);
+
+                const catalogItems = Array.isArray(catalog?.items) ? catalog.items : [];
+                const missingVisuals = [];
+                const seen = new Set();
+
+                catalogItems.forEach(entry => {
+                    const type = String(entry?.type || "").trim();
+                    const name = String(entry?.name || "").trim();
+                    if (!type || !name) return;
+                    const key = `${type}:${normalizeItemKey(name)}`;
+                    if (seen.has(key)) return;
+                    seen.add(key);
+                    const visual = getItemVisual(name, type);
+                    if (!visual?.src) missingVisuals.push(`${type} • ${name}`);
+                });
+
+                state.cards = normalizeCardsCollection(state.cards);
+                recalcGrades();
+                renderRank();
+                saveState();
+
+                if (missingVisuals.length) {
+                    const preview = missingVisuals.slice(0, 8).join("\n");
+                    const suffix = missingVisuals.length > 8 ? `\n...and ${missingVisuals.length - 8} more.` : "";
+                    alert(`Refresh complete.\n\nFound ${missingVisuals.length} catalog item(s) with missing visuals:\n${preview}${suffix}`);
+                } else {
+                    alert("Refresh complete. JSON catalog/images validated and rank insights were rebuilt.");
+                }
+            } catch (err) {
+                console.warn("[item-insights-refresh]", err);
+                alert("Refresh failed while validating JSON files. Check console for details.");
+            }
         }
 
         function validateItemVisualData(data) {
@@ -10329,6 +10397,7 @@ ${noteContent}`
                 renderRank();
                 alert("Ranks recalculated.");
             });
+            $("#btnRefreshItemInsights")?.addEventListener("click", refreshItemInsightsFromJson);
 
             $("#btnResetDefaults").addEventListener("click", () => {
                 if (!confirm("Reset item lists to defaults? Your custom edits will be overwritten.")) return;
