@@ -1032,7 +1032,7 @@ END MASTER DIRECTIVE
             flex-direction: column;
             gap: 6px;
             align-items: stretch;
-            min-width: 165px;
+            min-width: 120px;
         }
 
         .resultSummaryBadges .badge {
@@ -1426,6 +1426,25 @@ END MASTER DIRECTIVE
             font-weight: 900;
             font-size: 14px;
             letter-spacing: .2px;
+        }
+
+        .cardSeedLine {
+            display: block;
+            font-weight: 900;
+            color: var(--text);
+            line-height: 1.2;
+        }
+
+        .cardSeedLabel {
+            font-weight: 900;
+        }
+
+        .cardPlayerLine {
+            display: block;
+            margin-top: 2px;
+            font-style: italic;
+            color: rgba(230,235,245,.92);
+            line-height: 1.2;
         }
 
         .cardMeta {
@@ -7125,7 +7144,10 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                       <button class="resultSummary" data-act="toggleCard" data-id="${card.id}">
                         <div class="resultSummaryTop">
                           <div>
-                            <div class="cardTitle">${escapeHtml(formatSeedWithPlayer(card))}</div>
+                            <div class="cardTitle">
+                                <span class="cardSeedLine"><span class="cardSeedLabel">SEED:</span> ${escapeHtml(card.seed || "—")}</span>
+                                <span class="cardPlayerLine">${escapeHtml(getPlayerName(card))}</span>
+                            </div>
                             <div class="resultSummaryMetaGrid">
                                 <div class="resultMetaChip"><span class="k">Mode</span><span class="${getModeClass(card.mode)}">${escapeHtml(card.mode || "—")}</span></div>
                                 <div class="resultMetaChip"><span class="k">Faction</span><span class="${getFactionClass(card.faction)}">${escapeHtml(card.faction || "—")}</span></div>
@@ -7193,7 +7215,10 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             body.innerHTML = `
                 <div class="resultDetail">
-                    <div class="cardTitle">${escapeHtml(formatSeedWithPlayer(card))}</div>
+                    <div class="cardTitle">
+                        <span class="cardSeedLine"><span class="cardSeedLabel">SEED:</span> ${escapeHtml(card.seed || "—")}</span>
+                        <span class="cardPlayerLine">${escapeHtml(getPlayerName(card))}</span>
+                    </div>
                     <div class="cardMeta"><span class="${getModeClass(card.mode)}">${escapeHtml(card.mode)}</span> • <span class="${getFactionClass(card.faction)}">${escapeHtml(card.faction)}</span> • ${escapeHtml(new Date(card.createdAt).toLocaleString())}</div>
 
                     <div class="modalLoadoutGrid" style="margin-top:10px;">
