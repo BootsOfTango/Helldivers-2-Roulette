@@ -5317,8 +5317,33 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             return MISSION_MODES.slice();
         }
 
+        const MISSION_MODE_WEIGHTS = Object.freeze({
+            "Normal (40)": 0.40,
+            "Blitz (12)": 0.15,
+            "Defense (20min)": 0.15,
+            "Rapid Acquisition (15)": 0.15,
+            "Eradication (15)": 0.15
+        });
+
         function rollMode(faction) {
-            return pickOne(getMissionModesForFaction(faction));
+            const modes = getMissionModesForFaction(faction);
+            if (!modes.length) return "Normal (40)";
+
+            const weighted = modes.map((mode) => ({
+                mode,
+                weight: Number(MISSION_MODE_WEIGHTS[mode] || 0)
+            }));
+            const totalWeight = weighted.reduce((sum, entry) => sum + entry.weight, 0);
+
+            if (totalWeight <= 0) return pickOne(modes);
+
+            let roll = Math.random() * totalWeight;
+            for (const entry of weighted) {
+                roll -= entry.weight;
+                if (roll <= 0) return entry.mode;
+            }
+
+            return weighted[weighted.length - 1].mode;
         }
         function rollFaction() {
             const roll = Math.random();
