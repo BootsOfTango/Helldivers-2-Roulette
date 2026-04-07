@@ -997,9 +997,13 @@ END MASTER DIRECTIVE
 
         .resultSummaryTop {
             display: grid;
-            grid-template-columns: minmax(0, 1fr) auto;
+            grid-template-columns: minmax(0, 1fr) max-content;
             align-items: stretch;
             gap: 10px;
+        }
+
+        .resultSummaryInfo {
+            min-width: 0;
         }
 
         .resultSummaryMetaGrid {
@@ -1031,8 +1035,8 @@ END MASTER DIRECTIVE
             display: flex;
             flex-direction: column;
             gap: 6px;
-            align-items: stretch;
-            min-width: 120px;
+            align-items: flex-end;
+            min-width: 92px;
         }
 
         .resultSummaryBadges .badge {
@@ -4059,8 +4063,14 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             return String(card?.playerName || "").trim() || DEFAULT_PLAYER_NAME;
         }
 
+        function getSeedDisplayName(card) {
+            const rawSeed = String(card?.seed || "—").trim();
+            const cleanSeed = rawSeed.replace(/^(?:seed:\s*)+/i, "").trim();
+            return cleanSeed || "—";
+        }
+
         function formatSeedWithPlayer(card) {
-            const seed = String(card?.seed || "—");
+            const seed = getSeedDisplayName(card);
             const player = getPlayerName(card);
             return `${seed} • ${player}`;
         }
@@ -7143,9 +7153,9 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 el.innerHTML = `
                       <button class="resultSummary" data-act="toggleCard" data-id="${card.id}">
                         <div class="resultSummaryTop">
-                          <div>
+                          <div class="resultSummaryInfo">
                             <div class="cardTitle">
-                                <span class="cardSeedLine"><span class="cardSeedLabel">SEED:</span> ${escapeHtml(card.seed || "—")}</span>
+                                <span class="cardSeedLine">${escapeHtml(getSeedDisplayName(card))}</span>
                                 <span class="cardPlayerLine">${escapeHtml(getPlayerName(card))}</span>
                             </div>
                             <div class="resultSummaryMetaGrid">
@@ -7216,7 +7226,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             body.innerHTML = `
                 <div class="resultDetail">
                     <div class="cardTitle">
-                        <span class="cardSeedLine"><span class="cardSeedLabel">SEED:</span> ${escapeHtml(card.seed || "—")}</span>
+                        <span class="cardSeedLine">${escapeHtml(getSeedDisplayName(card))}</span>
                         <span class="cardPlayerLine">${escapeHtml(getPlayerName(card))}</span>
                     </div>
                     <div class="cardMeta"><span class="${getModeClass(card.mode)}">${escapeHtml(card.mode)}</span> • <span class="${getFactionClass(card.faction)}">${escapeHtml(card.faction)}</span> • ${escapeHtml(new Date(card.createdAt).toLocaleString())}</div>
