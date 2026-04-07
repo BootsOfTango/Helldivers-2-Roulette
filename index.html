@@ -1045,26 +1045,15 @@ END MASTER DIRECTIVE
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
-            font-size: 12px;
-            letter-spacing: .5px;
-            text-transform: uppercase;
-            font-weight: 900;
-            border-radius: 14px;
-            border: 1px solid rgba(255,255,255,.25);
-            padding: 8px 10px;
-            color: #f5f8ff;
-            background: linear-gradient(130deg, rgba(16,16,16,.78), rgba(38,18,12,.65));
-            box-shadow: inset 0 0 0 1px rgba(255,255,255,.05), 0 0 16px rgba(255,255,255,.08);
-            white-space: nowrap;
+            padding: 0;
+            background: none;
+            border: 0;
+            box-shadow: none;
         }
 
         .factionStickerIconWrap {
-            width: 32px;
-            height: 32px;
-            border-radius: 999px;
-            background: rgba(0,0,0,.35);
-            box-shadow: inset 0 0 0 1px rgba(255,255,255,.15), 0 0 10px rgba(255,255,255,.2);
+            width: 100%;
+            height: 100%;
             display: inline-flex;
             align-items: center;
             justify-content: center;
@@ -1072,8 +1061,8 @@ END MASTER DIRECTIVE
         }
 
         .factionStickerIcon {
-            width: 24px;
-            height: 24px;
+            width: min(100%, 132px);
+            height: min(100%, 132px);
             object-fit: contain;
         }
 
@@ -1082,56 +1071,6 @@ END MASTER DIRECTIVE
             line-height: 1;
             color: #fff;
             font-weight: 800;
-        }
-
-        .factionStickerLabel {
-            max-width: 100%;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .factionSticker.faction-terminids {
-            border-color: rgba(142,255,99,.5);
-            color: rgba(206,255,184,.98);
-            background: linear-gradient(130deg, rgba(66,168,22,.36), rgba(20,80,8,.22));
-            box-shadow: inset 0 0 0 1px rgba(149,255,111,.24), 0 0 12px rgba(120,255,88,.26);
-        }
-
-        .factionSticker.faction-terminids .factionStickerIconWrap {
-            box-shadow: inset 0 0 0 1px rgba(149,255,111,.35), 0 0 12px rgba(120,255,88,.38);
-        }
-
-        .factionSticker.faction-automatons {
-            border-color: rgba(255,90,90,.52);
-            color: rgba(255,190,190,.98);
-            background: linear-gradient(130deg, rgba(186,20,20,.35), rgba(90,10,10,.22));
-            box-shadow: inset 0 0 0 1px rgba(255,110,110,.24), 0 0 12px rgba(255,62,62,.28);
-        }
-
-        .factionSticker.faction-automatons .factionStickerIconWrap {
-            box-shadow: inset 0 0 0 1px rgba(255,110,110,.35), 0 0 12px rgba(255,62,62,.42);
-        }
-
-        .factionSticker.faction-illuminate {
-            border-color: rgba(215,120,255,.52);
-            color: rgba(240,205,255,.98);
-            background: linear-gradient(130deg, rgba(128,28,183,.34), rgba(67,14,104,.22));
-            box-shadow: inset 0 0 0 1px rgba(215,120,255,.24), 0 0 12px rgba(190,110,255,.28);
-        }
-
-        .factionSticker.faction-illuminate .factionStickerIconWrap {
-            box-shadow: inset 0 0 0 1px rgba(215,120,255,.35), 0 0 12px rgba(190,110,255,.42);
-        }
-
-        .factionSticker.faction-superearth {
-            border-color: rgba(106,171,255,.52);
-            color: rgba(196,224,255,.98);
-            background: linear-gradient(130deg, rgba(25,70,176,.34), rgba(12,35,90,.22));
-            box-shadow: inset 0 0 0 1px rgba(106,171,255,.24), 0 0 12px rgba(85,150,255,.28);
-        }
-
-        .factionSticker.faction-superearth .factionStickerIconWrap {
-            box-shadow: inset 0 0 0 1px rgba(106,171,255,.35), 0 0 12px rgba(85,150,255,.42);
         }
 
 
@@ -7165,7 +7104,6 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                             ${moBadge}
                             <span class="factionSticker ${factionClass}">
                                 <span class="factionStickerIconWrap">${factionStickerData.image ? `<img class="factionStickerIcon" src="${escapeHtml(factionStickerData.image)}" alt="${escapeHtml(factionStickerData.label)}">` : `<span class="factionStickerIconFallback">?</span>`}</span>
-                                <span class="factionStickerLabel">${escapeHtml(factionStickerData.label)}</span>
                             </span>
                           </div>
                         </div>
