@@ -3236,6 +3236,7 @@ END MASTER DIRECTIVE
                         <div class="label">Difficulty</div>
                         <div class="miniRow" style="margin-top:10px;">
                             <select id="spinDifficultySelect" aria-label="Mission difficulty">
+                                <option value="" selected>Choose difficulty first...</option>
                                 <option value="1">D1</option>
                                 <option value="2">D2</option>
                                 <option value="3">D3</option>
@@ -3245,7 +3246,7 @@ END MASTER DIRECTIVE
                                 <option value="7">D7</option>
                                 <option value="8">D8</option>
                                 <option value="9">D9</option>
-                                <option value="10" selected>D10</option>
+                                <option value="10">D10</option>
                             </select>
                             <div class="pill" id="spinDifficultyTierBadge">Helldive Tier</div>
                         </div>
@@ -5041,6 +5042,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 manualModeDraft: null,
                 modeApplied: false,
                 difficulty: 10,
+                difficultySelected: false,
                 faction: null,
                 loadout: null,      // {primary, sidearm, throwable, stratagems[4], booster, fingerprint}
                 locked: false,
@@ -5682,7 +5684,6 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             state.current.manualPlanetCandidate = null;
             state.current.mode = null;
             state.current.manualModeDraft = null;
-            state.current.difficulty = getCardDifficulty(state.current);
             state.current.modeApplied = false;
             state.current.modeConfirmed = false;
             if (state.current.loadout) {
@@ -7062,10 +7063,11 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         }
         function renderSpin() {
             const c = state.current;
+            const hasDifficultySelection = !!c.difficultySelected;
             c.difficulty = getCardDifficulty(c);
             const difficultyTier = getDifficultyTier(c.difficulty);
             const hasMode = !!String(c.mode || "").trim();
-            const isReadyForPlanetConfirm = !!(c.loadout && c.locked && c.planetLocked && !c.planetConfirmed && !c.spinning);
+            const isReadyForPlanetConfirm = !!(hasDifficultySelection && c.loadout && c.locked && c.planetLocked && !c.planetConfirmed && !c.spinning);
             const isReadyForPlayerConfirm = !!(c.seed && c.planetConfirmed && c.modeConfirmed && !c.spinning);
 
             $("#spinSeed").textContent = c.seed || "???";
@@ -7084,15 +7086,15 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             const difficultySelect = $("#spinDifficultySelect");
             if (difficultySelect) {
-                difficultySelect.value = String(c.difficulty);
-                difficultySelect.disabled = !!(c.modeConfirmed || c.spinning);
+                difficultySelect.value = hasDifficultySelection ? String(c.difficulty) : "";
+                difficultySelect.disabled = !!(c.spinning || c.loadout || c.modeConfirmed);
             }
             const difficultyBadge = $("#spinDifficultyTierBadge");
-            if (difficultyBadge) difficultyBadge.textContent = `${getDifficultyTierLabel(difficultyTier)} Tier`;
+            if (difficultyBadge) difficultyBadge.textContent = hasDifficultySelection ? `${getDifficultyTierLabel(difficultyTier)} Tier` : "Required First";
             const difficultyPill = $("#spinDifficultyPill");
-            if (difficultyPill) difficultyPill.textContent = formatDifficultyLabel(c);
+            if (difficultyPill) difficultyPill.textContent = hasDifficultySelection ? formatDifficultyLabel(c) : "Pick difficulty first";
             const difficultyBanner = $("#difficultyBannerLabel");
-            if (difficultyBanner) difficultyBanner.textContent = `D${c.difficulty} (${getDifficultyTierLabel(difficultyTier)})`;
+            if (difficultyBanner) difficultyBanner.textContent = hasDifficultySelection ? `D${c.difficulty} (${getDifficultyTierLabel(difficultyTier)})` : "Select difficulty before spin";
 
             // MODE colors
             const modeEl = $("#spinMode");
@@ -7197,7 +7199,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const planetManualWrap = $("#planetManualSearchWrap");
             if (planetManualWrap) planetManualWrap.style.display = c.planet ? "" : "none";
             const btnSearchPlanetInline = $("#btnSearchPlanetInline");
-            if (btnSearchPlanetInline) btnSearchPlanetInline.disabled = c.spinning || c.planetConfirmed;
+            if (btnSearchPlanetInline) btnSearchPlanetInline.disabled = !hasDifficultySelection || c.spinning || c.planetConfirmed;
             const btnConfirmPlanetInline = $("#btnConfirmPlanetInline");
             if (btnConfirmPlanetInline) {
                 btnConfirmPlanetInline.disabled = !isReadyForPlanetConfirm;
@@ -7206,14 +7208,16 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const planetSearchMode = $("#planetSearchMode");
             const planetSearchInput = $("#planetSearchInput");
             const btnPlanetSearchClear = $("#btnPlanetSearchClear");
-            if (planetSearchMode) planetSearchMode.disabled = c.spinning || c.planetConfirmed;
-            if (planetSearchInput) planetSearchInput.disabled = c.spinning || c.planetConfirmed;
-            if (btnPlanetSearchClear) btnPlanetSearchClear.disabled = c.spinning || c.planetConfirmed;
+            if (planetSearchMode) planetSearchMode.disabled = !hasDifficultySelection || c.spinning || c.planetConfirmed;
+            if (planetSearchInput) planetSearchInput.disabled = !hasDifficultySelection || c.spinning || c.planetConfirmed;
+            if (btnPlanetSearchClear) btnPlanetSearchClear.disabled = !hasDifficultySelection || c.spinning || c.planetConfirmed;
             if (c.planetConfirmed) togglePlanetSearchPanel(false);
 
             // Buttons
-            $("#btnLock").disabled = !c.loadout || c.locked || c.spinning;
-            const canAdjustMode = !!(c.loadout && c.locked && c.planetLocked && c.planetConfirmed && !c.modeConfirmed && !c.spinning);
+            const btnSpin = $("#btnSpin");
+            if (btnSpin) btnSpin.disabled = !hasDifficultySelection || c.spinning;
+            $("#btnLock").disabled = !hasDifficultySelection || !c.loadout || c.locked || c.spinning;
+            const canAdjustMode = !!(hasDifficultySelection && c.loadout && c.locked && c.planetLocked && c.planetConfirmed && !c.modeConfirmed && !c.spinning);
             if (manualModeSelect) {
                 manualModeSelect.disabled = !canAdjustMode;
             }
@@ -7230,7 +7234,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const isReadyForModeApply = !!(canAdjustMode && hasMode);
 
             const actionMap = [
-                ["btnSpin", !c.loadout && !c.spinning],
+                ["btnSpin", hasDifficultySelection && !c.loadout && !c.spinning],
                 ["btnLock", !!(c.loadout && !c.locked && !c.spinning)],
 
                 ["btnConfirmPlanetInline", isReadyForPlanetConfirm],
@@ -7255,8 +7259,10 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 rerollBtn.style.display = "";
                 rerollBtn.textContent =
                     `SPECIAL EVENT: REROLL (${c.rerollsLeft})`;
+                rerollBtn.disabled = !hasDifficultySelection || c.spinning;
             } else {
                 rerollBtn.style.display = "none";
+                rerollBtn.disabled = true;
             }
 
             updateHeaderPills();
@@ -7453,7 +7459,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                     <div class="hr"></div>
 
                     <div class="statsGrid modalStatGrid">
-                      <div><div class="label">Difficulty</div><select data-k="difficulty" data-id="${card.id}">${Array.from({ length: 10 }, (_, i) => i + 1).map(d => `<option value="${d}" ${getCardDifficulty(card) === d ? "selected" : ""}>D${d} • ${getDifficultyTierLabel(getDifficultyTier(d))}</option>`).join("")}</select></div>
+                      <div><div class="label">Difficulty</div><input type="text" value="${escapeHtml(formatDifficultyLabel(card))}" readonly></div>
                       <div><div class="label">Kills</div><input type="number" min="0" value="${Number(card.stats?.kills || 0)}" data-k="kills" data-id="${card.id}"></div>
                       <div><div class="label">Accuracy (%)</div><input type="number" min="0" value="${Number(card.stats?.accuracy || 0)}" data-k="accuracy" data-id="${card.id}"></div>
                       <div><div class="label">Deaths</div><input type="number" min="0" value="${Number(card.stats?.deaths || 0)}" data-k="deaths" data-id="${card.id}"></div>
@@ -9902,6 +9908,11 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             if (!state.current) {
                 state.current = {};
             }
+            if (!state.current.difficultySelected) {
+                alert("Choose mission difficulty first (D1–D10), then spin the loadout.");
+                renderSpin();
+                return;
+            }
 
             const loadout = rollLoadout(null);
 
@@ -9915,7 +9926,6 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             state.current.seed = null;
             state.current.mode = null;
             state.current.manualModeDraft = null;
-            state.current.difficulty = getCardDifficulty(state.current);
             state.current.modeApplied = false;
             state.current.modeConfirmed = false;
             state.current.faction = null;
@@ -9960,7 +9970,6 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             state.current.seedBase = null;
             state.current.mode = null;
             state.current.manualModeDraft = null;
-            state.current.difficulty = getCardDifficulty(state.current);
             state.current.modeApplied = false;
             state.current.modeConfirmed = false;
             state.current.faction = normalizeFactionName(loadout.faction);
@@ -9985,7 +9994,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         }
 
         function doLock() {
-            if (!state.current.loadout) return;
+            if (!state.current.loadout || !state.current.difficultySelected) return;
             // safety reset in case spinning got stuck
             state.current.spinning = false;
 
@@ -10055,7 +10064,6 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             state.current.manualPlanetCandidate = null;
             state.current.mode = null;
             state.current.manualModeDraft = null;
-            state.current.difficulty = getCardDifficulty(state.current);
             state.current.modeApplied = false;
             state.current.modeConfirmed = false;
             if (state.current.loadout) {
@@ -10096,7 +10104,6 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             state.current.manualPlanetCandidate = null;
             state.current.mode = null;
             state.current.manualModeDraft = null;
-            state.current.difficulty = getCardDifficulty(state.current);
             state.current.modeApplied = false;
             state.current.modeConfirmed = false;
             if (state.current.loadout) {
@@ -10120,7 +10127,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             state.current.seedBase = null;
             state.current.mode = null;
             state.current.manualModeDraft = null;
-            state.current.difficulty = getCardDifficulty(state.current);
+            state.current.difficulty = 10;
+            state.current.difficultySelected = false;
             state.current.modeApplied = false;
             state.current.modeConfirmed = false;
             state.current.faction = null;
@@ -10465,7 +10473,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 saveState();
                 renderResults();
                 updateSavedCount();
-                state.current = { seed: null, seedBase: null, mode: null, manualModeDraft: null, modeApplied: false, difficulty: 10, faction: null, loadout: null, locked: false, planet: null, planetLocked: false, planetConfirmed: false, modeConfirmed: false, planetBiome: null, manualPlanetCandidate: null, playerNameDraft: "", specialActive: false, rerollsLeft: 0, spinning: false };
+                state.current = { seed: null, seedBase: null, mode: null, manualModeDraft: null, modeApplied: false, difficulty: 10, difficultySelected: false, faction: null, loadout: null, locked: false, planet: null, planetLocked: false, planetConfirmed: false, modeConfirmed: false, planetBiome: null, manualPlanetCandidate: null, playerNameDraft: "", specialActive: false, rerollsLeft: 0, spinning: false };
                 renderSpin();
                 renderResults();
                 refreshCompareOptions();
@@ -10540,7 +10548,9 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             });
             $("#btnConfirmPlanetInline")?.addEventListener("click", () => doUseThisRun());
             $("#spinDifficultySelect")?.addEventListener("change", (e) => {
-                state.current.difficulty = clamp(Math.round(Number(e.target.value || 10)), 1, 10);
+                const raw = String(e.target.value || "").trim();
+                state.current.difficultySelected = !!raw;
+                state.current.difficulty = raw ? clamp(Math.round(Number(raw)), 1, 10) : 10;
                 renderSpin();
             });
 
