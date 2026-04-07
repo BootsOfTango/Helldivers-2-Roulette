@@ -1344,7 +1344,8 @@ END MASTER DIRECTIVE
             --radarDot: var(--radarStroke);
         }
 
-            .card.tier-gold {
+            .card.tier-gold,
+            .card.tier-veteran {
                 --radarStroke: #ffd400;
                 --radarFill: rgba(255,212,0,.38);
                 --radarDot: #ffd400;
@@ -1356,7 +1357,8 @@ END MASTER DIRECTIVE
                 --radarDot: #c8d2dc;
             }
 
-            .card.tier-bronze {
+            .card.tier-bronze,
+            .card.tier-cadet {
                 --radarStroke: #e6aa5a;
                 --radarFill: rgba(230,170,90,.38);
                 --radarDot: #e6aa5a;
@@ -1368,7 +1370,8 @@ END MASTER DIRECTIVE
                 --radarDot: #965f28;
             }
 
-            .card.tier-rainbow {
+            .card.tier-rainbow,
+            .card.tier-helldive {
                 --radarStroke: url(#rainbowStroke);
                 --radarFill: rgba(255,255,255,.15);
                 --radarDot: #ffffff;
@@ -1398,7 +1401,9 @@ END MASTER DIRECTIVE
 
         /* Rainbow exception (gradients cannot shadow) */
         .card.tier-rainbow .radarFill,
-        .card.tier-rainbow .radarValue {
+        .card.tier-rainbow .radarValue,
+        .card.tier-helldive .radarFill,
+        .card.tier-helldive .radarValue {
             stroke: url(#rainbowStroke) !important;
             fill: rgba(255,255,255,.15) !important;
             filter: none !important;
@@ -1413,7 +1418,9 @@ END MASTER DIRECTIVE
         }
 
         .card.tier-rainbow .radarFill,
-        .card.tier-rainbow .radarValue {
+        .card.tier-rainbow .radarValue,
+        .card.tier-helldive .radarFill,
+        .card.tier-helldive .radarValue {
             stroke: url(#rainbowStroke) !important;
             fill: rgba(255,255,255,.15) !important;
             filter: none !important; /* drop-shadow breaks gradient strokes */
@@ -2302,7 +2309,8 @@ END MASTER DIRECTIVE
         }
         /* ===== RESULT CARD TIER COLORS ===== */
 
-        .card.tier-gold {
+        .card.tier-gold,
+        .card.tier-veteran {
             border-color: rgba(255,212,0,.75);
         }
 
@@ -2310,7 +2318,8 @@ END MASTER DIRECTIVE
             border-color: rgba(200,210,220,.85);
         }
 
-        .card.tier-bronze {
+        .card.tier-bronze,
+        .card.tier-cadet {
             border-color: rgba(230,170,90,.85);
         }
 
@@ -2318,7 +2327,8 @@ END MASTER DIRECTIVE
             border-color: rgba(150,95,40,.85);
         }
 
-        .card.tier-rainbow {
+        .card.tier-rainbow,
+        .card.tier-helldive {
             border: 2px solid transparent;
             background:
                 linear-gradient(180deg, rgba(0,0,0,.92), rgba(0,0,0,.92)) padding-box,
@@ -2885,6 +2895,21 @@ END MASTER DIRECTIVE
             border-color: rgba(230,170,90,.85) !important;
         }
 
+        .rim-cadet {
+            border-color: rgba(230,170,90,.85) !important;
+        }
+
+        .rim-veteran {
+            border-color: rgba(255,212,0,.75) !important;
+        }
+
+        .rim-helldive {
+            border: 2px solid transparent !important;
+            background:
+                linear-gradient(180deg, rgba(0,0,0,.92), rgba(0,0,0,.92)) padding-box,
+                conic-gradient(#ff3b3b, #ffd400, #2ecc71, #3b82f6, #a855f7, #ff3b3b) border-box !important;
+        }
+
         .planetCardWrap {
             display: flex;
             gap: 10px;
@@ -3134,7 +3159,7 @@ END MASTER DIRECTIVE
 
             </div>
 
-            <div class="sub">Solo only • D10 • weighted mission chaos • one mission = one card</div>
+            <div class="sub">Solo only • <span id="difficultyBannerLabel">D10 (Helldive)</span> • weighted mission chaos • one mission = one card</div>
         </div>
     </header>
 
@@ -3155,7 +3180,7 @@ END MASTER DIRECTIVE
                 <button id="btnReroll" class="btnDanger" style="display:none;">SPECIAL EVENT: REROLL (3)</button>
 
                 <div class="pillRow" style="margin-left:auto;">
-                    <div class="pill">D10 • <strong>Solo</strong></div>
+                    <div class="pill"><span id="spinDifficultyPill">D10 • Helldive</span> • <strong>Solo</strong></div>
                     <div class="pill">Cards: <strong id="spinSavedCount">0</strong></div>
                 </div>
             </div>
@@ -3205,6 +3230,25 @@ END MASTER DIRECTIVE
                         </div>
 
                         <div class="tiny" id="dispPlanetTiny" style="display:none;"></div>
+                    </div>
+
+                    <div class="box">
+                        <div class="label">Difficulty</div>
+                        <div class="miniRow" style="margin-top:10px;">
+                            <select id="spinDifficultySelect" aria-label="Mission difficulty">
+                                <option value="1">D1</option>
+                                <option value="2">D2</option>
+                                <option value="3">D3</option>
+                                <option value="4">D4</option>
+                                <option value="5">D5</option>
+                                <option value="6">D6</option>
+                                <option value="7">D7</option>
+                                <option value="8">D8</option>
+                                <option value="9">D9</option>
+                                <option value="10" selected>D10</option>
+                            </select>
+                            <div class="pill" id="spinDifficultyTierBadge">Helldive Tier</div>
+                        </div>
                     </div>
 
                     <div class="box">
@@ -3332,6 +3376,7 @@ END MASTER DIRECTIVE
                     <div class="formGrid3">
                         <select id="cmpSortMetric">
                             <option value="grade">Sort by Grade</option>
+                            <option value="difficulty">Sort by Difficulty</option>
                             <option value="kills">Sort by Kills</option>
                             <option value="deaths">Sort by Deaths</option>
                             <option value="stims">Sort by Stims</option>
@@ -3551,7 +3596,7 @@ END MASTER DIRECTIVE
                 <div class="col">
                     <div class="label">Rank system</div>
                     <div class="tiny">
-                        Each card gets a <strong>raw score</strong> from your recorded stats, then everything is scaled so the top run is always <strong>100</strong>.
+                        Each card gets a <strong>raw score</strong> from your recorded stats, then applies a <strong>difficulty multiplier (D1-D10)</strong>, then everything is scaled so the top run is always <strong>100</strong>.
                         <br><br>
                         <strong>Major Order status is visual/filter-only</strong> in Rank (it does not modify raw score or grade).
                         <br><br>
@@ -3571,11 +3616,32 @@ END MASTER DIRECTIVE
                     <input id="rankSearch" placeholder="Search rank by player name..." />
                 </div>
                 <div class="col right">
-                    <select id="rankMoFilter" aria-label="Filter rank by major order status">
-                        <option value="all">All cards (MO done + fail)</option>
-                        <option value="done">MO DONE only</option>
-                        <option value="fail">MO FAIL only</option>
-                    </select>
+                    <div class="miniRow" style="justify-content:flex-end; gap:8px;">
+                        <select id="rankTierFilter" aria-label="Filter rank by tier">
+                            <option value="all">All tiers</option>
+                            <option value="helldive">Helldive tier (D7-D10)</option>
+                            <option value="veteran">Veteran tier (D4-D6)</option>
+                            <option value="cadet">Cadet tier (D1-D3)</option>
+                        </select>
+                        <select id="rankDifficultyFilter" aria-label="Filter rank by difficulty">
+                            <option value="all">All difficulties</option>
+                            <option value="1">D1</option>
+                            <option value="2">D2</option>
+                            <option value="3">D3</option>
+                            <option value="4">D4</option>
+                            <option value="5">D5</option>
+                            <option value="6">D6</option>
+                            <option value="7">D7</option>
+                            <option value="8">D8</option>
+                            <option value="9">D9</option>
+                            <option value="10">D10</option>
+                        </select>
+                        <select id="rankMoFilter" aria-label="Filter rank by major order status">
+                            <option value="all">All cards (MO done + fail)</option>
+                            <option value="done">MO DONE only</option>
+                            <option value="fail">MO FAIL only</option>
+                        </select>
+                    </div>
                 </div>
             </div>
 
@@ -3595,7 +3661,7 @@ END MASTER DIRECTIVE
                     <div class="tiny muted">Select a ranked card to view details.</div>
                 </aside>
             </div>
-            <div class="smallHelp">Top 3 rims: shiny white (1), gold (2), silver (3). Bronze for 4th. The rest: default. Humans love medals.</div>
+            <div class="smallHelp">Rim colors represent difficulty tiers: Cadet (D1-D3), Veteran (D4-D6), Helldive (D7-D10). Place # is still shown in each filtered leaderboard.</div>
         </section>
 
     </main>
@@ -4077,6 +4143,31 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const seed = getSeedDisplayName(card);
             const player = getPlayerName(card);
             return `${seed} • ${player}`;
+        }
+
+        function getCardDifficulty(card) {
+            const d = Number(card?.difficulty ?? 10);
+            if (!Number.isFinite(d)) return 10;
+            return clamp(Math.round(d), 1, 10);
+        }
+
+        function getDifficultyTier(difficulty) {
+            const d = clamp(Math.round(Number(difficulty || 10)), 1, 10);
+            if (d <= 3) return "cadet";
+            if (d <= 6) return "veteran";
+            return "helldive";
+        }
+
+        function getDifficultyTierLabel(tier) {
+            if (tier === "cadet") return "Cadet";
+            if (tier === "veteran") return "Veteran";
+            return "Helldive";
+        }
+
+        function formatDifficultyLabel(card) {
+            const d = getCardDifficulty(card);
+            const tierLabel = getDifficultyTierLabel(getDifficultyTier(d));
+            return `D${d} • ${tierLabel}`;
         }
 
         // Canonicalize faction names so filters/colors don't silently fail.
@@ -4932,7 +5023,6 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
          * App State
          ***********************/
         const STORAGE_KEY = "hd2_chaos_roulette_v1";
-        const DISCORD_WEBHOOK_KEY = "hd2_discord_webhook_url";
         const FIRST_BACKUP_WARNING_KEY = "hd2_backup_warning_seen_v1";
         const state = {
             items: null,
@@ -4950,6 +5040,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 mode: null,
                 manualModeDraft: null,
                 modeApplied: false,
+                difficulty: 10,
                 faction: null,
                 loadout: null,      // {primary, sidearm, throwable, stratagems[4], booster, fingerprint}
                 locked: false,
@@ -5044,7 +5135,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 <div style="display:flex; justify-content:space-between; gap:8px; align-items:flex-start;">
                     <div>
                         <div style="font-weight:900;">#${place} • ${escapeHtml(formatSeedWithPlayer(card))}</div>
-                        <div class="tiny muted">${escapeHtml(card.mode)} • ${escapeHtml(card.faction)} • ${escapeHtml(getPlayerName(card))}</div>
+                        <div class="tiny muted">${escapeHtml(card.mode)} • ${escapeHtml(card.faction)} • ${escapeHtml(getPlayerName(card))} • ${escapeHtml(formatDifficultyLabel(card))}</div>
                     </div>
                     <div class="badge yellow">Grade ${Number(card.grade || 0)}</div>
                 </div>
@@ -5078,8 +5169,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             // Normalize default faction strings immediately
             sanitizeFactionData();
 
-            // webhook URL is stored separately so clear-data does not delete it
-            state.settings.discordWebhookUrl = localStorage.getItem(DISCORD_WEBHOOK_KEY) || "";
+            // Discord webhook sending is intentionally disabled.
+            state.settings.discordWebhookUrl = "";
             state.settings.rememberedPlayerName = "";
 
             if (!raw) {
@@ -5143,11 +5234,6 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 }
             }));
 
-            try {
-                const webhook = String(state.settings?.discordWebhookUrl || "").trim();
-                if (webhook) localStorage.setItem(DISCORD_WEBHOOK_KEY, webhook);
-            } catch (e) { }
-
             updateHeaderPills();
 
             if ($("#planetSearchPanel") && $("#planetSearchPanel").style.display !== "none") {
@@ -5194,6 +5280,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             card.notes = String(card.notes || "");
             card.scoreRaw = Number(card.scoreRaw || 0);
             card.grade = Number(card.grade || 0);
+            card.difficulty = getCardDifficulty(card);
             card.playerName = getPlayerName(card);
 
             return card;
@@ -5595,6 +5682,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             state.current.manualPlanetCandidate = null;
             state.current.mode = null;
             state.current.manualModeDraft = null;
+            state.current.difficulty = getCardDifficulty(state.current);
             state.current.modeApplied = false;
             state.current.modeConfirmed = false;
             if (state.current.loadout) {
@@ -6170,6 +6258,13 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         /***********************
          * Ranking system (0-100 scale)
          ***********************/
+        function getDifficultyMultiplier(difficulty) {
+            const d = clamp(Math.round(Number(difficulty || 10)), 1, 10);
+            if (d <= 3) return 0.82 + ((d - 1) * 0.07);  // D1-D3: 0.82..0.96
+            if (d <= 6) return 1.00 + ((d - 4) * 0.08);  // D4-D6: 1.00..1.16
+            return 1.28 + ((d - 7) * 0.11);              // D7-D10: 1.28..1.61
+        }
+
         function computeRawScore(card) {
             const kills = Number(card.stats?.kills ?? 0);
             const accuracy = Number(card.stats?.accuracy ?? 0);
@@ -6177,6 +6272,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const stims = Number(card.stats?.stims ?? 0);
             const distanceKm = Number(card.stats?.distanceKm ?? 0);
             const stratUses = Number(card.stats?.stratUses ?? 0);
+            const difficulty = getCardDifficulty(card);
 
             // Balance power (kills) with execution (accuracy/survival) and utility (stratagems/mobility).
             // Major Order status is metadata only (display/filter), not part of performance grading.
@@ -6189,6 +6285,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 (stims * 5.0);
 
             if (!isFinite(raw)) raw = 0;
+            raw *= getDifficultyMultiplier(difficulty);
             raw = Math.max(0, raw);
             return raw;
         }
@@ -6267,12 +6364,9 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const tier = (card && card.id && typeof buildTierMap === "function")
                 ? (buildTierMap().get(card.id) || card.tier || "")
                 : ((card && card.tier) || "");
-            if (tier === "gold") return { fill: "rgba(255,212,0,.22)", stroke: "#ffd400" };
-            if (tier === "silver") return { fill: "rgba(200,210,220,.25)", stroke: "#c8d2dc" };
-            if (tier === "bronze") return { fill: "rgba(230,170,90,.25)", stroke: "#e6aa5a" };
-            if (tier === "darkbronze") return { fill: "rgba(150,95,40,.28)", stroke: "#965f28" };
-            // Rainbow: use the shared SVG gradient so it matches the rainbow rim.
-            if (tier === "rainbow") return { fill: "rgba(255,255,255,.18)", stroke: "url(#rainbowStroke)" };
+            if (tier === "cadet") return { fill: "rgba(230,170,90,.25)", stroke: "#e6aa5a" };
+            if (tier === "veteran") return { fill: "rgba(200,210,220,.25)", stroke: "#c8d2dc" };
+            if (tier === "helldive") return { fill: "rgba(255,255,255,.18)", stroke: "url(#rainbowStroke)" };
             return { fill: "rgba(255,212,0,.18)", stroke: "#ffd400" };
         }
 
@@ -6819,20 +6913,18 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
 
         /***********************
-                 * Tiering (based on rank position)
-                 * Target distribution:
-                 *  3 rainbow
-                 *  5 gold   (places 4-8)
-                 *  7 silver (places 9-15)
-                 * 10 light bronze (places 16-25)
-                 * rest dark bronze/brown (26+)
-                 ***********************/
+         * Tiering (based on difficulty buckets)
+         * Cadet:   D1-D3
+         * Veteran: D4-D6
+         * Helldive:D7-D10
+         ***********************/
         function tierForPlace(place) {
+            // Legacy placement tiers are still used by analytic widgets and graph accents.
             if (place <= 3) return "rainbow";
             if (place <= 8) return "gold";
             if (place <= 15) return "silver";
-            if (place <= 25) return "bronze";       // light bronze
-            return "darkbronze";                   // or "brown" if you want another tier later
+            if (place <= 25) return "bronze";
+            return "darkbronze";
         }
 
         function buildTierMap() {
@@ -6846,9 +6938,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 });
 
             const map = new Map(); // id -> tier string
-            ordered.forEach((c, idx) => {
-                const place = idx + 1;
-                map.set(c.id, tierForPlace(place));
+            ordered.forEach((c) => {
+                map.set(c.id, getDifficultyTier(getCardDifficulty(c)));
             });
             return map;
         }
@@ -6873,6 +6964,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 s.stims = Number(s.stims || 0);
                 s.distanceKm = Number(s.distanceKm || 0);
                 s.stratUses = Number(s.stratUses || 0);
+                c.difficulty = getCardDifficulty(c);
             }
 
             const raws = state.cards.map(c => computeRawScore(c));
@@ -6970,6 +7062,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         }
         function renderSpin() {
             const c = state.current;
+            c.difficulty = getCardDifficulty(c);
+            const difficultyTier = getDifficultyTier(c.difficulty);
             const hasMode = !!String(c.mode || "").trim();
             const isReadyForPlanetConfirm = !!(c.loadout && c.locked && c.planetLocked && !c.planetConfirmed && !c.spinning);
             const isReadyForPlayerConfirm = !!(c.seed && c.planetConfirmed && c.modeConfirmed && !c.spinning);
@@ -6987,6 +7081,18 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             }
             const btnConfirmPlayer = $("#btnConfirmPlayer");
             if (btnConfirmPlayer) btnConfirmPlayer.disabled = !isReadyForPlayerConfirm;
+
+            const difficultySelect = $("#spinDifficultySelect");
+            if (difficultySelect) {
+                difficultySelect.value = String(c.difficulty);
+                difficultySelect.disabled = !!(c.modeConfirmed || c.spinning);
+            }
+            const difficultyBadge = $("#spinDifficultyTierBadge");
+            if (difficultyBadge) difficultyBadge.textContent = `${getDifficultyTierLabel(difficultyTier)} Tier`;
+            const difficultyPill = $("#spinDifficultyPill");
+            if (difficultyPill) difficultyPill.textContent = formatDifficultyLabel(c);
+            const difficultyBanner = $("#difficultyBannerLabel");
+            if (difficultyBanner) difficultyBanner.textContent = `D${c.difficulty} (${getDifficultyTierLabel(difficultyTier)})`;
 
             // MODE colors
             const modeEl = $("#spinMode");
@@ -7172,6 +7278,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 list = list.filter(c => {
                     const hay = normalizeText([
                         getPlayerName(c), c.seed, c.title, c.mode, c.faction,
+                        formatDifficultyLabel(c),
                         c.primary, c.sidearm, c.throwable, c.booster,
                         (c.stratagems || []).join(" "),
                         c.planet?.name, c.planet?.sector, (c.planet?.weatherText || c.planet?.weather)
@@ -7229,6 +7336,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                             <div class="resultSummaryMetaGrid">
                                 <div class="resultMetaChip"><span class="k">Mode</span><span class="${getModeClass(card.mode)}">${escapeHtml(card.mode || "—")}</span></div>
                                 <div class="resultMetaChip"><span class="k">Faction</span><span class="${getFactionClass(card.faction)}">${escapeHtml(card.faction || "—")}</span></div>
+                                <div class="resultMetaChip"><span class="k">Difficulty</span>${escapeHtml(formatDifficultyLabel(card))}</div>
                                 <div class="resultMetaChip"><span class="k">Date</span>${escapeHtml(new Date(card.createdAt).toLocaleString())}</div>
                                 <div class="resultMetaChip"><span class="k">Planet</span>${escapeHtml(card.planet?.name || "Not rolled")}</div>
                             </div>
@@ -7345,6 +7453,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                     <div class="hr"></div>
 
                     <div class="statsGrid modalStatGrid">
+                      <div><div class="label">Difficulty</div><select data-k="difficulty" data-id="${card.id}">${Array.from({ length: 10 }, (_, i) => i + 1).map(d => `<option value="${d}" ${getCardDifficulty(card) === d ? "selected" : ""}>D${d} • ${getDifficultyTierLabel(getDifficultyTier(d))}</option>`).join("")}</select></div>
                       <div><div class="label">Kills</div><input type="number" min="0" value="${Number(card.stats?.kills || 0)}" data-k="kills" data-id="${card.id}"></div>
                       <div><div class="label">Accuracy (%)</div><input type="number" min="0" value="${Number(card.stats?.accuracy || 0)}" data-k="accuracy" data-id="${card.id}"></div>
                       <div><div class="label">Deaths</div><input type="number" min="0" value="${Number(card.stats?.deaths || 0)}" data-k="deaths" data-id="${card.id}"></div>
@@ -7368,7 +7477,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                     </div>
 
                     <div class="miniRow modalActionRow" style="justify-content:space-between;">
-                      <div class="tiny">Raw: <strong>${Number(card.scoreRaw || 0).toFixed(1)}</strong></div>
+                      <div class="tiny">${escapeHtml(formatDifficultyLabel(card))} • Raw: <strong>${Number(card.scoreRaw || 0).toFixed(1)}</strong></div>
                       <div class="miniRow modalActionButtons">
                         <button class="btnPrimary" data-act="saveCard" data-id="${card.id}">SAVE</button>
                         <button class="btnGhost" data-act="deleteCard" data-id="${card.id}">DELETE</button>
@@ -7398,10 +7507,6 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             state.ui.modalOpen = false;
         }
 
-        function getDiscordWebhookUrl() {
-            return String(state.settings?.discordWebhookUrl || "").trim();
-        }
-
         function getCardById(id) {
             return state.cards.find(c => c.id === id) || null;
         }
@@ -7421,11 +7526,9 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const radar = buildRadarSVG(card, getRadarMaxes(state.cards || []));
             const tier = getCardTierClass(card);
             const borderColor = {
-                gold: "#ffcc4d",
-                silver: "#cfd6e6",
-                bronze: "#d59a67",
-                darkbronze: "#8b5a3c",
-                rainbow: "#8c7bff"
+                veteran: "#ffcc4d",
+                cadet: "#d59a67",
+                helldive: "#8c7bff"
             }[tier] || "#2b3549";
             const planetWeatherText = card.planet ? getPlanetWeatherText(card.planet) : "None";
             const planetWeatherTags = splitWeatherTags(planetWeatherText);
@@ -7437,7 +7540,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
     <div style="display:flex;justify-content:space-between;gap:18px;align-items:flex-start;">
       <div style="flex:1;min-width:0;">
         <div style="font-size:38px;font-weight:800;line-height:1.08;overflow-wrap:anywhere;word-break:break-word;">${escapeHtml(formatSeedWithPlayer(card))}</div>
-        <div style="color:#9aa8bf;font-size:22px;margin-top:6px;">${escapeHtml(card.mode || "—")} • <span style="color:${(card.faction || "").toLowerCase().includes("automat") ? "#ff5f5f" : "#8ac7ff"};font-weight:700;">${escapeHtml(card.faction || "—")}</span> • ${escapeHtml(createdAt)}</div>
+        <div style="color:#9aa8bf;font-size:22px;margin-top:6px;">${escapeHtml(card.mode || "—")} • <span style="color:${(card.faction || "").toLowerCase().includes("automat") ? "#ff5f5f" : "#8ac7ff"};font-weight:700;">${escapeHtml(card.faction || "—")}</span> • ${escapeHtml(formatDifficultyLabel(card))} • ${escapeHtml(createdAt)}</div>
       </div>
       <div style="text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex-shrink:0;">
         <div style="display:inline-flex;white-space:nowrap;padding:8px 14px;border-radius:999px;border:1px solid #ffe05b;color:#ffe05b;font-weight:800;font-size:24px;line-height:1;">Grade ${Number(card.grade || 0)}</div>
@@ -7564,6 +7667,9 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const booster = card.booster || "—";
             const tier = getCardTierClass(card);
             const borderColor = {
+                cadet: "#d59a67",
+                veteran: "#ffcc4d",
+                helldive: "#8c7bff",
                 gold: "#ffcc4d",
                 silver: "#cfd6e6",
                 bronze: "#d59a67",
@@ -7618,7 +7724,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             ctx.fillStyle = "#9aa8bf";
             ctx.font = "600 26px Inter, Segoe UI, Arial, sans-serif";
-            ctx.fillText(`${card.mode || "—"} • ${card.faction || "—"}`, 56, 132);
+            ctx.fillText(`${card.mode || "—"} • ${card.faction || "—"} • ${formatDifficultyLabel(card)}`, 56, 132);
 
             ctx.fillStyle = "#ffe05b";
             ctx.font = "800 34px Inter, Segoe UI, Arial, sans-serif";
@@ -7678,6 +7784,14 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
         function getDiscordTierVisual(tier) {
             const map = {
+                cadet: { label: "Cadet", embedColor: 0xd59a67, strokeColor: "#d59a67", marker: "🟠" },
+                veteran: { label: "Veteran", embedColor: 0xffcc4d, strokeColor: "#ffcc4d", marker: "🟡" },
+                helldive: {
+                    label: "Helldive",
+                    embedColor: 0x8c7bff,
+                    strokeColor: "#8c7bff",
+                    marker: "🔴🟠🟡🟢🔵🟣"
+                },
                 gold: { label: "Gold", embedColor: 0xffcc4d, strokeColor: "#ffcc4d", marker: "🟡" },
                 silver: { label: "Silver", embedColor: 0xcfd6e6, strokeColor: "#cfd6e6", marker: "⚪" },
                 bronze: { label: "Bronze", embedColor: 0xd59a67, strokeColor: "#d59a67", marker: "🟠" },
@@ -7707,6 +7821,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                     `**Rank:** ${tierVisual.marker} ${tierVisual.label}`,
                     `**Mode:** ${card.mode || "—"}`,
                     `**Faction:** ${card.faction || "—"}`,
+                    `**Difficulty:** ${formatDifficultyLabel(card)}`,
                     `**Major Order:** ${card.majorOrderDone ? "✅ DONE" : "❌ FAIL"}`,
                     `**Grade:** ${Number(card.grade || 0)}`,
                     `**Raw Score:** ${Number(card.scoreRaw || 0).toFixed(1)}`
@@ -7787,7 +7902,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             ctx.fillStyle = grad;
             ctx.fillRect(0, 0, baseWidth, baseHeight);
 
-            if (tier === "rainbow") {
+            if (tier === "rainbow" || tier === "helldive") {
                 const rainbowBorder = ctx.createLinearGradient(22, 22, baseWidth - 22, baseHeight - 22);
                 rainbowBorder.addColorStop(0, "#ff3b3b");
                 rainbowBorder.addColorStop(0.2, "#ff9f1a");
@@ -7845,7 +7960,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             });
             const radarTierColor = getTierRadarColor({ tier });
             ctx.fillStyle = radarTierColor.fill;
-            if (tier === "rainbow") {
+            if (tier === "rainbow" || tier === "helldive") {
                 const radarGradient = ctx.createLinearGradient(cx - radius, cy - radius, cx + radius, cy + radius);
                 radarGradient.addColorStop(0, "#ff3b3b");
                 radarGradient.addColorStop(0.2, "#ff9f1a");
@@ -7898,65 +8013,9 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         }
 
         async function sendCardToDiscord(card) {
-            const webhookUrl = getDiscordWebhookUrl();
-            if (!webhookUrl) {
-                alert("Please save your Discord webhook URL first.");
-                return;
-            }
-
-            recalcGrades();
-
-            const noteContent = getDiscordNotesText(card, 1700);
-            const payload = {
-                username: "Helldivers 2 Roulette",
-                content: noteContent
-                    ? `📸 ${formatSeedWithPlayer(card)}
-📝 Notes:
-${noteContent}`
-                    : `📸 ${formatSeedWithPlayer(card)}`,
-                embeds: [buildDiscordCardEmbed(card)]
-            };
-
-            const form = new FormData();
-            let hasImageAttachment = false;
-            try {
-                const rankPng = await rankPanelPngBlobForDiscord(card);
-                hasImageAttachment = true;
-                payload.attachments = [
-                    { id: 0, filename: "radar-detail.png" }
-                ];
-                payload.embeds = [buildDiscordCardEmbed(card, "attachment://radar-detail.png", "image")];
-                // Discord expects indexed multipart field names for attachments.
-                form.append("files[0]", rankPng, "radar-detail.png");
-            } catch (err) {
-                const msg = String(err?.message || err || "unknown error");
-                console.warn(`[discord] radar image export failed (${msg}), sending without image`);
-            }
-
-            form.append("payload_json", JSON.stringify(payload));
-
-            let res = await fetch(webhookUrl, { method: "POST", body: form });
-            // Some Discord webhook configurations reject embed payloads even with valid attachments.
-            // Fall back to sending the file without an embed card if Discord returns an embed validation error.
-            if (!res.ok && res.status === 400 && hasImageAttachment) {
-                const body = await res.text();
-                if (/"embeds"\s*:\s*\["0"\]/i.test(body) || /Invalid Form Body/i.test(body)) {
-                    const retryPayload = {
-                        username: payload.username,
-                        content: `${payload.content}\n⚠️ Discord rejected image embed; sent as structured embed without image.`,
-                        embeds: [buildDiscordCardEmbed(card)]
-                    };
-                    const retryForm = new FormData();
-                    retryForm.append("payload_json", JSON.stringify(retryPayload));
-                    res = await fetch(webhookUrl, { method: "POST", body: retryForm });
-                } else {
-                    throw new Error(`Discord returned ${res.status}: ${body}`);
-                }
-            }
-            if (!res.ok) {
-                const msg = await res.text();
-                throw new Error(`Discord returned ${res.status}: ${msg}`);
-            }
+            void card;
+            alert("Discord webhook integration is currently disabled.");
+            return false;
         }
 
         function onCardFieldChange(e) {
@@ -7979,6 +8038,8 @@ ${noteContent}`
                 card.majorOrderDone = (el.value === "true");
             } else if (key === "notes") {
                 card.notes = el.value;
+            } else if (key === "difficulty") {
+                card.difficulty = clamp(Math.round(Number(el.value || 10)), 1, 10);
             } else if (STAT_KEYS.includes(key)) {
                 card.stats[key] = Number(el.value || 0);
             }
@@ -8007,6 +8068,8 @@ ${noteContent}`
                     card.majorOrderDone = (String(el.value) === "true");
                 } else if (key === "notes") {
                     card.notes = el.value;
+                } else if (key === "difficulty") {
+                    card.difficulty = clamp(Math.round(Number(el.value || 10)), 1, 10);
                 } else if (STAT_KEYS.includes(key)) {
                     if (!card.stats) card.stats = {};
                     card.stats[key] = Number(el.value || 0);
@@ -8065,6 +8128,7 @@ ${noteContent}`
          ***********************/
         const METRICS = [
             { k: "grade", label: "Grade (0-100)" },
+            { k: "difficulty", label: "Difficulty (D1-D10)" },
             { k: "kills", label: "Kills (Power)" },
             { k: "accuracy", label: "Accuracy (Agility)" },
             { k: "deathsPlusStims", label: "Deaths + Stims (Endurance, low is good)" },
@@ -8082,7 +8146,7 @@ ${noteContent}`
             const opts = state.cards
                 .slice()
                 .sort((x, y) => (y.createdAt || "").localeCompare(x.createdAt || ""))
-                .map(c => ({ id: c.id, text: `${getPlayerName(c)} • ${c.seed} • ${c.mode} • ${c.faction} • Grade ${c.grade || 0}` }));
+                .map(c => ({ id: c.id, text: `${getPlayerName(c)} • ${c.seed} • ${c.mode} • ${c.faction} • ${formatDifficultyLabel(c)} • Grade ${c.grade || 0}` }));
 
             const build = (sel) => {
                 sel.innerHTML = "";
@@ -8136,6 +8200,7 @@ ${noteContent}`
         function metricValue(card, k) {
             if (k === "grade") return Number(card.grade || 0);
             if (k === "raw") return Number(card.scoreRaw || 0);
+            if (k === "difficulty") return getCardDifficulty(card);
             if (k === "majorOrderDone") return card?.majorOrderDone ? 1 : 0;
 
             const s = card.stats || {};
@@ -8157,6 +8222,7 @@ ${noteContent}`
 
             const rows = [
                 { name: "Grade (0-100)", k: "grade", better: "high" },
+                { name: "Difficulty", k: "difficulty", better: "high" },
                 { name: "Major Order", k: "majorOrderDone", better: "high" },
                 { name: "Kills", k: "kills", better: "high" },
                 { name: "Accuracy (%)", k: "accuracy", better: "high" },
@@ -8207,6 +8273,9 @@ ${noteContent}`
 
         function tierColor(tier) {
             // matches your results/rank vibe
+            if (tier === "cadet") return "#e6aa5a";
+            if (tier === "veteran") return "#ffd400";
+            if (tier === "helldive") return "#ffffff";
             if (tier === "gold") return "#ffd400";
             if (tier === "silver") return "#c8d2dc";
             if (tier === "bronze") return "#e6aa5a";
@@ -9697,6 +9766,8 @@ ${noteContent}`
 
             const rankQuery = normalizeText($("#rankSearch")?.value || "");
             const rankMoFilter = String($("#rankMoFilter")?.value || "all");
+            const rankTierFilter = String($("#rankTierFilter")?.value || "all");
+            const rankDifficultyFilter = String($("#rankDifficultyFilter")?.value || "all");
             const list = state.cards.slice().sort((a, b) => {
                 const g = Number(b.grade || 0) - Number(a.grade || 0);
                 if (g !== 0) return g;
@@ -9708,6 +9779,13 @@ ${noteContent}`
                 filtered = filtered.filter(c => !!c.majorOrderDone);
             } else if (rankMoFilter === "fail") {
                 filtered = filtered.filter(c => !c.majorOrderDone);
+            }
+            if (rankTierFilter !== "all") {
+                filtered = filtered.filter(c => getDifficultyTier(getCardDifficulty(c)) === rankTierFilter);
+            }
+            if (rankDifficultyFilter !== "all") {
+                const targetDifficulty = clamp(Math.round(Number(rankDifficultyFilter || 10)), 1, 10);
+                filtered = filtered.filter(c => getCardDifficulty(c) === targetDifficulty);
             }
             if (rankQuery) {
                 filtered = filtered.filter(c => normalizeText(getPlayerName(c)).includes(rankQuery));
@@ -9750,18 +9828,13 @@ ${noteContent}`
                     row.classList.add("isSelected");
                 }
 
-                const tier = tierForPlace(place);
-
-                if (tier === "rainbow") {
-                    outer.classList.add("rim-rainbow");
-                } else {
-                    row.classList.add(`rim-${tier}`);
-                }
+                const tier = getDifficultyTier(getCardDifficulty(c));
+                row.classList.add(`rim-${tier}`);
 
                 row.innerHTML = `
                           <div>
                             <div style="font-weight:900;">#${place} • ${escapeHtml(formatSeedWithPlayer(c))}</div>
-                            <div class="tiny">${escapeHtml(c.mode)} • ${escapeHtml(c.faction)} • ${escapeHtml(getPlayerName(c))} • <span class="muted">${escapeHtml(c.primary)}</span></div>
+                            <div class="tiny">${escapeHtml(c.mode)} • ${escapeHtml(c.faction)} • ${escapeHtml(getPlayerName(c))} • ${escapeHtml(formatDifficultyLabel(c))} • <span class="muted">${escapeHtml(c.primary)}</span></div>
                           </div>
                           <div style="text-align:right; display:flex; flex-direction:column; align-items:flex-end; gap:6px;">
                             <div class="badge yellow">Grade ${Number(c.grade || 0)}</div>
@@ -9842,6 +9915,7 @@ ${noteContent}`
             state.current.seed = null;
             state.current.mode = null;
             state.current.manualModeDraft = null;
+            state.current.difficulty = getCardDifficulty(state.current);
             state.current.modeApplied = false;
             state.current.modeConfirmed = false;
             state.current.faction = null;
@@ -9886,6 +9960,7 @@ ${noteContent}`
             state.current.seedBase = null;
             state.current.mode = null;
             state.current.manualModeDraft = null;
+            state.current.difficulty = getCardDifficulty(state.current);
             state.current.modeApplied = false;
             state.current.modeConfirmed = false;
             state.current.faction = normalizeFactionName(loadout.faction);
@@ -9916,6 +9991,7 @@ ${noteContent}`
 
             state.current.mode = null;
             state.current.manualModeDraft = null;
+            state.current.difficulty = getCardDifficulty(state.current);
             state.current.faction = state.current._pendingFaction;
             state.current.modeApplied = false;
             state.current.modeConfirmed = false;
@@ -9979,6 +10055,7 @@ ${noteContent}`
             state.current.manualPlanetCandidate = null;
             state.current.mode = null;
             state.current.manualModeDraft = null;
+            state.current.difficulty = getCardDifficulty(state.current);
             state.current.modeApplied = false;
             state.current.modeConfirmed = false;
             if (state.current.loadout) {
@@ -10019,6 +10096,7 @@ ${noteContent}`
             state.current.manualPlanetCandidate = null;
             state.current.mode = null;
             state.current.manualModeDraft = null;
+            state.current.difficulty = getCardDifficulty(state.current);
             state.current.modeApplied = false;
             state.current.modeConfirmed = false;
             if (state.current.loadout) {
@@ -10042,6 +10120,7 @@ ${noteContent}`
             state.current.seedBase = null;
             state.current.mode = null;
             state.current.manualModeDraft = null;
+            state.current.difficulty = getCardDifficulty(state.current);
             state.current.modeApplied = false;
             state.current.modeConfirmed = false;
             state.current.faction = null;
@@ -10178,6 +10257,7 @@ ${noteContent}`
 
                 majorOrderDone: false,
                 notes: "",
+                difficulty: getCardDifficulty(c),
 
                 scoreRaw: 0,
                 grade: 0,
@@ -10344,6 +10424,8 @@ ${noteContent}`
             $("#cmpSearch").addEventListener("input", refreshCompareOptions);
             $("#rankSearch").addEventListener("input", renderRank);
             $("#rankMoFilter").addEventListener("change", renderRank);
+            $("#rankTierFilter")?.addEventListener("change", renderRank);
+            $("#rankDifficultyFilter")?.addEventListener("change", renderRank);
             $("#itemSearch").addEventListener("input", renderItems);
             $("#itemsViewMode").addEventListener("change", (e) => {
                 localStorage.setItem(ITEMS_VIEW_MODE_KEY, e.target.value === "category" ? "category" : "warbond");
@@ -10383,7 +10465,7 @@ ${noteContent}`
                 saveState();
                 renderResults();
                 updateSavedCount();
-                state.current = { seed: null, seedBase: null, mode: null, manualModeDraft: null, modeApplied: false, faction: null, loadout: null, locked: false, planet: null, planetLocked: false, planetConfirmed: false, modeConfirmed: false, planetBiome: null, manualPlanetCandidate: null, playerNameDraft: "", specialActive: false, rerollsLeft: 0, spinning: false };
+                state.current = { seed: null, seedBase: null, mode: null, manualModeDraft: null, modeApplied: false, difficulty: 10, faction: null, loadout: null, locked: false, planet: null, planetLocked: false, planetConfirmed: false, modeConfirmed: false, planetBiome: null, manualPlanetCandidate: null, playerNameDraft: "", specialActive: false, rerollsLeft: 0, spinning: false };
                 renderSpin();
                 renderResults();
                 refreshCompareOptions();
@@ -10457,6 +10539,10 @@ ${noteContent}`
                 togglePlanetSearchPanel();
             });
             $("#btnConfirmPlanetInline")?.addEventListener("click", () => doUseThisRun());
+            $("#spinDifficultySelect")?.addEventListener("change", (e) => {
+                state.current.difficulty = clamp(Math.round(Number(e.target.value || 10)), 1, 10);
+                renderSpin();
+            });
 
             $("#planetSearchInput").addEventListener("input", () => {
                 renderPlanetSearchResults();
@@ -10497,6 +10583,7 @@ ${noteContent}`
                 list = list.filter(c => {
                     const hay = normalizeText([
                         getPlayerName(c), c.seed, c.title, c.mode, c.faction,
+                        formatDifficultyLabel(c),
                         c.primary, c.sidearm, c.throwable, c.booster,
                         (c.stratagems || []).join(" "),
                         c.planet?.name, c.planet?.sector, (c.planet?.weatherText || c.planet?.weather)
@@ -10515,11 +10602,15 @@ ${noteContent}`
 
                 const vx = (sortMetric === "grade")
                     ? Number(x.grade || 0)
-                    : Number(x.stats?.[sortMetric] || 0);
+                    : (sortMetric === "difficulty")
+                        ? getCardDifficulty(x)
+                        : Number(x.stats?.[sortMetric] || 0);
 
                 const vy = (sortMetric === "grade")
                     ? Number(y.grade || 0)
-                    : Number(y.stats?.[sortMetric] || 0);
+                    : (sortMetric === "difficulty")
+                        ? getCardDifficulty(y)
+                        : Number(y.stats?.[sortMetric] || 0);
 
                 const d = (vx - vy) * dir;
                 if (d !== 0) return d;
@@ -10532,7 +10623,7 @@ ${noteContent}`
 
             const opts = list.map(c => ({
                 id: c.id,
-                text: `${getPlayerName(c)} • ${c.seed} • ${c.mode} • ${c.faction} • Grade ${c.grade || 0}`
+                text: `${getPlayerName(c)} • ${c.seed} • ${c.mode} • ${c.faction} • ${formatDifficultyLabel(c)} • Grade ${c.grade || 0}`
             }));
 
             const build = (sel) => {
