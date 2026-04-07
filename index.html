@@ -6846,6 +6846,15 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             if (n.includes("super earth") || n.replace(/\s+/g, "").includes("superearth")) return "faction-superearth";
             return "";
         }
+        function getModeClass(mode) {
+            const m = String(mode || "").trim();
+            if (m === "Normal (40)") return "mode-standard";
+            if (m === "Blitz (12)") return "mode-blitz";
+            if (m === "Defense (20)" || m === "Defense (20min)") return "mode-defense";
+            if (m === "Eradication (15)") return "mode-eradication";
+            if (m === "Rapid Acquisition (15)") return "mode-rapid-acquisition";
+            return "";
+        }
         function getFactionStickerData(faction) {
             const normalizedFaction = normalizeFactionName(faction || "");
             if (normalizedFaction === "Terminids") {
@@ -7118,7 +7127,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                           <div>
                             <div class="cardTitle">${escapeHtml(formatSeedWithPlayer(card))}</div>
                             <div class="resultSummaryMetaGrid">
-                                <div class="resultMetaChip"><span class="k">Mode</span>${escapeHtml(card.mode || "—")}</div>
+                                <div class="resultMetaChip"><span class="k">Mode</span><span class="${getModeClass(card.mode)}">${escapeHtml(card.mode || "—")}</span></div>
                                 <div class="resultMetaChip"><span class="k">Faction</span><span class="${getFactionClass(card.faction)}">${escapeHtml(card.faction || "—")}</span></div>
                                 <div class="resultMetaChip"><span class="k">Date</span>${escapeHtml(new Date(card.createdAt).toLocaleString())}</div>
                                 <div class="resultMetaChip"><span class="k">Planet</span>${escapeHtml(card.planet?.name || "Not rolled")}</div>
@@ -7185,7 +7194,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             body.innerHTML = `
                 <div class="resultDetail">
                     <div class="cardTitle">${escapeHtml(formatSeedWithPlayer(card))}</div>
-                    <div class="cardMeta">${escapeHtml(card.mode)} • <span class="${getFactionClass(card.faction)}">${escapeHtml(card.faction)}</span> • ${escapeHtml(new Date(card.createdAt).toLocaleString())}</div>
+                    <div class="cardMeta"><span class="${getModeClass(card.mode)}">${escapeHtml(card.mode)}</span> • <span class="${getFactionClass(card.faction)}">${escapeHtml(card.faction)}</span> • ${escapeHtml(new Date(card.createdAt).toLocaleString())}</div>
 
                     <div class="modalLoadoutGrid" style="margin-top:10px;">
                         <div class="modalLoadoutColumn">
