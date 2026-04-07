@@ -3238,14 +3238,6 @@ END MASTER DIRECTIVE
                     </div>
 
                     <div class="box">
-                        <div class="label">Difficulty</div>
-                        <div class="miniRow" style="margin-top:10px;">
-                            <div class="pill" id="spinDifficultyDisplay">Choose when you click Spin Loadout</div>
-                            <div class="pill" id="spinDifficultyTierBadge">Helldive Tier</div>
-                        </div>
-                    </div>
-
-                    <div class="box">
                         <div class="label">Mode</div>
                         <div class="big" id="spinMode">—</div>
                         <div class="miniRow" id="manualModeWrap" style="margin-top:10px;">
@@ -7232,7 +7224,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             // Buttons
             const btnSpin = $("#btnSpin");
-            if (btnSpin) btnSpin.disabled = !hasDifficultySelection || c.spinning;
+            if (btnSpin) btnSpin.disabled = c.spinning;
             $("#btnLock").disabled = !hasDifficultySelection || !c.loadout || c.locked || c.spinning;
             const canAdjustMode = !!(hasDifficultySelection && c.loadout && c.locked && c.planetLocked && c.planetConfirmed && !c.modeConfirmed && !c.spinning);
             if (manualModeSelect) {
@@ -7251,7 +7243,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const isReadyForModeApply = !!(canAdjustMode && hasMode);
 
             const actionMap = [
-                ["btnSpin", hasDifficultySelection && !c.loadout && !c.spinning],
+                ["btnSpin", !c.loadout && !c.spinning],
                 ["btnLock", !!(c.loadout && !c.locked && !c.spinning)],
 
                 ["btnConfirmPlanetInline", isReadyForPlanetConfirm],
@@ -9942,10 +9934,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             if (!state.current) {
                 state.current = {};
             }
-            if (!state.current.difficultySelected) {
-                openDifficultyModal();
-                return;
-            }
+            if (!state.current.difficultySelected) return;
 
             const loadout = rollLoadout(null);
 
@@ -10392,7 +10381,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                     const shouldProceed = confirm("Proceed with spinning a new loadout? This will replace your current spin.");
                     if (!shouldProceed) return;
                 }
-                doSpin();
+                openDifficultyModal();
             });
             $("#btnReroll").addEventListener("click", () => doReroll());
             $("#btnLock").addEventListener("click", () => doLock());
