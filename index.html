@@ -10686,9 +10686,9 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             logRankLayoutState("rows-rendered", filtered.length);
             const selectedCard = list.find(c => c.id === selectedRankCardId) || filtered[0] || list[0] || null;
             const selectedPlace = selectedCard ? (filtered.findIndex(x => x.id === selectedCard.id) + 1) : 0;
-            renderRankDetailPanel(selectedCard, selectedPlace, radarMaxes);
-            renderItemInsights(filtered);
-            renderRankAnalytics(filtered);
+            try { renderRankDetailPanel(selectedCard, selectedPlace, radarMaxes); } catch (err) { console.error("[rank] detail panel render failed", err); }
+            try { renderItemInsights(filtered); } catch (err) { console.error("[rank] item insights render failed", err); }
+            try { renderRankAnalytics(filtered); } catch (err) { console.error("[rank] analytics render failed", err); }
         }
 
 
@@ -10704,7 +10704,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                     error: err
                 });
                 const box = $("#rankList");
-                if (box) {
+                if (box && !box.children.length) {
                     box.innerHTML = `<div class="tiny" style="padding:8px 10px; border:1px solid var(--line2); border-radius:10px; background:rgba(0,0,0,.22);">Unable to render rank right now. Try changing tiers or refreshing the page.</div>`;
                 }
             }
