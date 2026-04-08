@@ -1043,6 +1043,58 @@ END MASTER DIRECTIVE
             align-self: flex-end;
         }
 
+        .resultsDifficultyFilters {
+            margin-top: 10px;
+            border: 1px solid var(--line2);
+            border-radius: 12px;
+            padding: 10px;
+            background: rgba(255,255,255,.02);
+            display: grid;
+            gap: 10px;
+        }
+
+        .resultsDifficultyTierRow,
+        .resultsDifficultyLevelRow {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .resultsDifficultyBtn {
+            border: 1px solid var(--line2);
+            background: rgba(255,255,255,.03);
+            color: var(--text);
+            font-weight: 700;
+            border-radius: 999px;
+            padding: 6px 10px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .resultsDifficultyBtn:hover {
+            border-color: rgba(255,255,255,.28);
+        }
+
+        .resultsDifficultyBtn.is-active {
+            background: rgba(255,255,255,.12);
+            border-color: rgba(255,255,255,.42);
+        }
+
+        .resultsDifficultyBtn[data-tier="cadet"].is-active {
+            color: #60f9a8;
+            border-color: rgba(96,249,168,.6);
+        }
+
+        .resultsDifficultyBtn[data-tier="veteran"].is-active {
+            color: #ffbf66;
+            border-color: rgba(255,191,102,.6);
+        }
+
+        .resultsDifficultyBtn[data-tier="helldive"].is-active {
+            color: #ff6a75;
+            border-color: rgba(255,106,117,.6);
+        }
+
         .resultTierTag {
             align-self: flex-end;
             border: 1px solid var(--line2);
@@ -3537,17 +3589,17 @@ END MASTER DIRECTIVE
 
     <main>
         <div class="tabs">
-            <div class="tabBtn active" data-tab="spin">1. SPIN</div>
-            <div class="tabBtn" data-tab="results">2. RESULTS</div>
-            <div class="tabBtn" data-tab="compare">3. COMPARE</div>
-            <div class="tabBtn" data-tab="items">4. ARMORY</div>
-            <div class="tabBtn" data-tab="rank">5. RANK</div>
+            <div class="tabBtn active" data-tab="spin" onclick="switchTab('spin')">1. SPIN</div>
+            <div class="tabBtn" data-tab="results" onclick="switchTab('results')">2. RESULTS</div>
+            <div class="tabBtn" data-tab="compare" onclick="switchTab('compare')">3. COMPARE</div>
+            <div class="tabBtn" data-tab="items" onclick="switchTab('items')">4. ARMORY</div>
+            <div class="tabBtn" data-tab="rank" onclick="switchTab('rank')">5. RANK</div>
         </div>
 
         <!-- SPIN TAB -->
         <section id="tab-spin" class="panel">
             <div class="btnRow">
-                <button class="btnPrimary" id="btnSpin">SPIN LOADOUT</button>
+                <button class="btnPrimary" id="btnSpin" onclick="openDifficultyModal()">SPIN LOADOUT</button>
                 <button id="btnLock" class="btnGhost" disabled>LOCK LOADOUT</button>
                 <button id="btnReroll" class="btnDanger" style="display:none;">SPECIAL EVENT: REROLL (3)</button>
 
@@ -3693,6 +3745,16 @@ END MASTER DIRECTIVE
                     </div>
                     <div class="formGrid" style="margin-top:10px;">
                         <input id="resSearch" placeholder="Search by player, seed, weapon, strat, planet..." />
+                    </div>
+                    <div class="resultsDifficultyFilters">
+                        <div class="tiny">Difficulty scope</div>
+                        <div id="resultsDifficultyTierFilters" class="resultsDifficultyTierRow">
+                            <button type="button" class="resultsDifficultyBtn" data-tier="cadet">Cadet (D1-D3)</button>
+                            <button type="button" class="resultsDifficultyBtn" data-tier="veteran">Veteran (D4-D6)</button>
+                            <button type="button" class="resultsDifficultyBtn" data-tier="helldive">Helldive (D7-D10)</button>
+                            <button type="button" class="resultsDifficultyBtn" id="btnResultsTierClear">All tiers</button>
+                        </div>
+                        <div id="resultsDifficultyLevelFilters" class="resultsDifficultyLevelRow"></div>
                     </div>
                     <div class="smallHelp">Cards only exist if you hit “USE THIS RUN” from SPIN. Because your viewers don’t care about your indecision.</div>
                 </div>
@@ -4040,10 +4102,42 @@ END MASTER DIRECTIVE
 
     <script>
         let WIRED_ONCE = false;
+        function bindCriticalControls() {
+            try {
+                $$(".tabBtn").forEach((btn) => {
+                    if (btn.dataset.criticalBound === "1") return;
+                    btn.dataset.criticalBound = "1";
+                    btn.addEventListener("click", () => switchTab(btn.dataset.tab));
+                });
+
+                const spinBtn = $("#btnSpin");
+                if (spinBtn && spinBtn.dataset.criticalBound !== "1") {
+                    spinBtn.dataset.criticalBound = "1";
+                    spinBtn.addEventListener("click", () => {
+                        const hasExistingSpin = !!state.current?.loadout;
+                        if (hasExistingSpin) {
+                            const shouldProceed = confirm("Proceed with spinning a new loadout? This will replace your current spin.");
+                            if (!shouldProceed) return;
+                        }
+                        openDifficultyModal();
+                    });
+                }
+            } catch (err) {
+                console.error("[wire] bindCriticalControls failed", err);
+            }
+        }
+
         function wireOnce() {
             if (WIRED_ONCE) return;
-            WIRED_ONCE = true;
-            wire();
+            try {
+                bindCriticalControls();
+                wire();
+                WIRED_ONCE = true;
+            } catch (err) {
+                WIRED_ONCE = false;
+                console.error("[wire] failed during event wiring", err);
+                bindCriticalControls();
+            }
         }
 
 
@@ -4595,6 +4689,12 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             if (tier === "cadet") return "Cadet";
             if (tier === "veteran") return "Veteran";
             return "Helldive";
+        }
+
+        function getTierRangeLabel(tier) {
+            if (tier === "cadet") return "Levels 1-3";
+            if (tier === "veteran") return "Levels 4-6";
+            return "Levels 7-10";
         }
 
         function formatDifficultyLabel(card) {
@@ -5508,6 +5608,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         };
         let lastActionCue = "";
         let pendingNewCardHighlightId = null;
+        let activeResultsDifficultyTier = "";
+        let activeResultsDifficultyLevel = null;
         const manualPlanetSearchGroupState = new Map();
 
         function loadItemImageDb() {
@@ -7757,6 +7859,12 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             if (modeFilter) list = list.filter(c => c.mode === modeFilter);
             if (factionFilter) list = list.filter(c => c.faction === factionFilter);
+            if (activeResultsDifficultyTier) {
+                list = list.filter(c => resolveCardDifficultyTier(c) === activeResultsDifficultyTier);
+            }
+            if (Number.isFinite(activeResultsDifficultyLevel)) {
+                list = list.filter(c => getCardDifficulty(c) === activeResultsDifficultyLevel);
+            }
             if (query) {
                 list = list.filter(c => {
                     const hay = normalizeText([
@@ -7859,7 +7967,48 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             });
 
             refreshCompareOptions();
-            safeRenderRank("renderResults");
+        }
+
+        function syncResultsDifficultyFilterButtons() {
+            $$("#resultsDifficultyTierFilters .resultsDifficultyBtn[data-tier]").forEach((btn) => {
+                const isActive = btn.dataset.tier === activeResultsDifficultyTier;
+                btn.classList.toggle("is-active", isActive);
+                btn.setAttribute("aria-pressed", isActive ? "true" : "false");
+            });
+            const clearBtn = $("#btnResultsTierClear");
+            if (clearBtn) {
+                const noneSelected = !activeResultsDifficultyTier;
+                clearBtn.classList.toggle("is-active", noneSelected);
+                clearBtn.setAttribute("aria-pressed", noneSelected ? "true" : "false");
+            }
+
+            $$("#resultsDifficultyLevelFilters .resultsDifficultyBtn[data-level]").forEach((btn) => {
+                const level = Number(btn.dataset.level || 0);
+                const isActive = Number.isFinite(activeResultsDifficultyLevel) && level === activeResultsDifficultyLevel;
+                btn.classList.toggle("is-active", isActive);
+                btn.setAttribute("aria-pressed", isActive ? "true" : "false");
+            });
+        }
+
+        function renderResultsDifficultyFilters() {
+            const levelWrap = $("#resultsDifficultyLevelFilters");
+            if (!levelWrap) return;
+            levelWrap.innerHTML = "";
+            for (let difficulty = 1; difficulty <= 10; difficulty += 1) {
+                const btn = document.createElement("button");
+                btn.type = "button";
+                btn.className = "resultsDifficultyBtn";
+                btn.dataset.level = String(difficulty);
+                btn.textContent = `D${difficulty}`;
+                btn.addEventListener("click", () => {
+                    activeResultsDifficultyLevel = (activeResultsDifficultyLevel === difficulty) ? null : difficulty;
+                    activeResultsDifficultyTier = getDifficultyTier(difficulty);
+                    syncResultsDifficultyFilterButtons();
+                    renderResults();
+                });
+                levelWrap.appendChild(btn);
+            }
+            syncResultsDifficultyFilterButtons();
         }
 
         function renderModalLoadoutItem(label, value, kind) {
@@ -10451,106 +10600,72 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             state.cards = normalizeCardsCollection(state.cards);
             recalcGrades();
             if (!["cadet", "veteran", "helldive"].includes(activeTier)) {
-                activeTier = getBestAvailableTier(state.cards);
+                activeTier = pickMostPopulatedTier(state.cards);
             }
             syncRankTierCardUi();
-            const hasActiveTier = ["cadet", "veteran", "helldive"].includes(activeTier);
 
             const list = (Array.isArray(state.cards) ? state.cards : [])
                 .filter(card => card && typeof card === "object")
-                .sort((a, b) => {
-                    const g = Number(b?.grade || 0) - Number(a?.grade || 0);
-                    if (g !== 0) return g;
-                    return String(b?.createdAt || "").localeCompare(String(a?.createdAt || ""));
-                });
+                .sort((a, b) => Number(b?.grade || 0) - Number(a?.grade || 0) || String(b?.createdAt || "").localeCompare(String(a?.createdAt || "")));
 
-            let filtered = hasActiveTier
-                ? list.filter(c => cardMatchesTierRange(c, activeTier))
-                : [];
-
-            const box = $("#rankList");
-            box.innerHTML = "";
-
-            if (!hasActiveTier) {
-                selectedRankCardId = null;
-                renderRankDetailPanel(null, 0, getRadarMaxes(state.cards));
-                const insightBox = $("#itemInsightCards");
-                if (insightBox) insightBox.innerHTML = "";
-                const analyticsGrid = $("#rankAnalyticsGrid");
-                if (analyticsGrid) analyticsGrid.innerHTML = "";
-                return;
+            let filtered = list.filter(c => cardMatchesTierRange(c, activeTier));
+            if (!filtered.length && list.length) {
+                activeTier = pickMostPopulatedTier(list);
+                syncRankTierCardUi();
+                filtered = list.filter(c => cardMatchesTierRange(c, activeTier));
             }
 
-            if (selectedRankCardId && !list.some(c => c.id === selectedRankCardId)) {
-                selectedRankCardId = null;
-            }
-
+            renderRankFallbackList(filtered);
             if (!filtered.length) {
-                box.innerHTML = `<div class="tiny" style="padding:8px 10px; border:1px solid var(--line2); border-radius:10px; background:rgba(0,0,0,.22);">No ${escapeHtml(getDifficultyTierLabel(activeTier))} cards yet. Save/load cards with ${escapeHtml(getTierRangeLabel(activeTier))} difficulty to populate this leaderboard.</div>`;
-                renderRankDetailPanel(null, 0, getRadarMaxes(state.cards));
-                renderItemInsights(filtered);
-                renderRankAnalytics(filtered);
-                logRankLayoutState("empty-filtered", 0);
+                try { renderRankDetailPanel(null, 0, getRadarMaxes(state.cards)); } catch (err) { console.error("[rank] detail panel render failed", err); }
+                try { renderItemInsights(filtered); } catch (err) { console.error("[rank] item insights render failed", err); }
+                try { renderRankAnalytics(filtered); } catch (err) { console.error("[rank] analytics render failed", err); }
                 return;
             }
 
-            if (!selectedRankCardId) {
+            if (!selectedRankCardId || !filtered.some(c => c.id === selectedRankCardId)) {
                 selectedRankCardId = filtered[0]?.id || null;
             }
-            if (selectedRankCardId && !filtered.some(c => c.id === selectedRankCardId)) {
-                selectedRankCardId = filtered[0]?.id || null;
-            }
-
-            const radarMaxes = getRadarMaxes(state.cards);
-
-            filtered.forEach((c, index) => {
-                const place = index + 1;
-                const grade = clamp(Math.round(Number(c.grade || 0)), 0, 100);
-
-                const outer = document.createElement("div");
-                outer.className = "rankOuter rankAnimate";
-                outer.style.setProperty("--rank-stagger", `${place * 65}ms`);
-
-                const row = document.createElement("div");
-                row.className = "rankRow";
-                row.dataset.id = c.id;
-
-                if (c.id === selectedRankCardId) {
-                    row.classList.add("isSelected");
-                }
-
-                const cardDifficultyTier = resolveCardDifficultyTier(c);
-                row.classList.add(`rim-${cardDifficultyTier}`);
-                const gradeScore = clamp(Number(c.grade || 0), 0, 100);
-
-                row.innerHTML = `
-                          <div class="rankRowMain">
-                            <div style="font-weight:900;">#${place} • ${escapeHtml(formatSeedWithPlayer(c))}</div>
-                            <div class="tiny">${escapeHtml(c.mode)} • ${escapeHtml(c.faction)} • ${escapeHtml(getPlayerName(c))} • ${escapeHtml(formatDifficultyLabel(c))} • <span class="muted">${escapeHtml(c.primary)}</span></div>
-                            <div class="rankRowBarWrap">
-                                <div class="rankRowBar" style="--grade-width:${grade}%;"></div>
-                            </div>
-                          </div>
-                          <div style="text-align:right; display:flex; flex-direction:column; align-items:flex-end; gap:6px;">
-                            <div class="badge yellow">Grade ${grade}</div>
-                            <div class="tiny">Raw ${Number(c.scoreRaw || 0).toFixed(1)}</div>
-                          </div>
-                        `;
-
-                row.addEventListener("click", () => {
-                    selectedRankCardId = c.id;
-                    safeRenderRank("rankRow:select");
-                });
-
-                outer.appendChild(row);
-                box.appendChild(outer);
-            });
-            logRankLayoutState("rows-rendered", filtered.length);
             const selectedCard = filtered.find(c => c.id === selectedRankCardId) || filtered[0] || null;
             const selectedPlace = selectedCard ? (filtered.findIndex(x => x.id === selectedCard.id) + 1) : 0;
-            renderRankDetailPanel(selectedCard, selectedPlace, radarMaxes);
-            renderItemInsights(filtered);
-            renderRankAnalytics(filtered);
+            try { renderRankDetailPanel(selectedCard, selectedPlace, getRadarMaxes(state.cards)); } catch (err) { console.error("[rank] detail panel render failed", err); }
+            try { renderItemInsights(filtered); } catch (err) { console.error("[rank] item insights render failed", err); }
+            try { renderRankAnalytics(filtered); } catch (err) { console.error("[rank] analytics render failed", err); }
+        }
+
+        function renderRankFallbackList(cards = []) {
+            const box = $("#rankList");
+            if (!box) return;
+            box.innerHTML = "";
+            if (!cards.length) {
+                box.innerHTML = `<div class="tiny" style="padding:8px 10px; border:1px solid var(--line2); border-radius:10px; background:rgba(0,0,0,.22);">No cards found for the selected tier.</div>`;
+                return;
+            }
+            cards.forEach((c, idx) => {
+                const row = document.createElement("div");
+                row.className = "rankRow";
+                row.style.marginBottom = "8px";
+                row.dataset.id = c.id || "";
+                const grade = clamp(Math.round(Number(c?.grade || 0)), 0, 100);
+                row.innerHTML = `
+                    <div class="rankRowMain">
+                        <div style="font-weight:900;">#${idx + 1} • ${escapeHtml(formatSeedWithPlayer(c))}</div>
+                        <div class="tiny">${escapeHtml(c?.mode || "—")} • ${escapeHtml(c?.faction || "—")} • ${escapeHtml(formatDifficultyLabel(c))}</div>
+                        <div class="rankRowBarWrap">
+                            <div class="rankRowBar" style="--grade-width:${grade}%;"></div>
+                        </div>
+                    </div>
+                    <div style="text-align:right; display:flex; flex-direction:column; align-items:flex-end; gap:6px;">
+                        <div class="badge yellow">Grade ${grade}</div>
+                        <div class="tiny">Raw ${Number(c?.scoreRaw || 0).toFixed(1)}</div>
+                    </div>
+                `;
+                row.addEventListener("click", () => {
+                    selectedRankCardId = c.id;
+                    safeRenderRank("rankFallbackRow:select");
+                });
+                box.appendChild(row);
+            });
         }
 
 
@@ -10565,10 +10680,22 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                     selectedCardId: selectedRankCardId || null,
                     error: err
                 });
-                const box = $("#rankList");
-                if (box) {
-                    box.innerHTML = `<div class="tiny" style="padding:8px 10px; border:1px solid var(--line2); border-radius:10px; background:rgba(0,0,0,.22);">Unable to render rank right now. Try changing tiers or refreshing the page.</div>`;
+                const rankedCards = (Array.isArray(state.cards) ? state.cards : [])
+                    .filter(card => card && typeof card === "object")
+                    .sort((a, b) => Number(b?.grade || 0) - Number(a?.grade || 0));
+                const tierFiltered = ["cadet", "veteran", "helldive"].includes(activeTier)
+                    ? rankedCards.filter(c => cardMatchesTierRange(c, activeTier))
+                    : rankedCards;
+                renderRankFallbackList(tierFiltered);
+                try {
+                    const selected = tierFiltered.find(c => c.id === selectedRankCardId) || tierFiltered[0] || null;
+                    const place = selected ? (tierFiltered.findIndex(c => c.id === selected.id) + 1) : 0;
+                    renderRankDetailPanel(selected, place, getRadarMaxes(state.cards));
+                } catch (detailErr) {
+                    console.error("[rank] fallback detail render failed", detailErr);
                 }
+                try { renderItemInsights(tierFiltered); } catch (insightErr) { console.error("[rank] fallback insights failed", insightErr); }
+                try { renderRankAnalytics(tierFiltered); } catch (analyticsErr) { console.error("[rank] fallback analytics failed", analyticsErr); }
             }
         }
 
@@ -11158,6 +11285,27 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             $("#resFilterFaction").addEventListener("change", renderResults);
             $("#resSort").addEventListener("change", renderResults);
             $("#resSearch").addEventListener("input", renderResults);
+            $$("#resultsDifficultyTierFilters .resultsDifficultyBtn[data-tier]").forEach((btn) => {
+                btn.addEventListener("click", () => {
+                    const nextTier = String(btn.dataset.tier || "");
+                    if (activeResultsDifficultyTier === nextTier) {
+                        activeResultsDifficultyTier = "";
+                        activeResultsDifficultyLevel = null;
+                    } else {
+                        activeResultsDifficultyTier = nextTier;
+                        activeResultsDifficultyLevel = null;
+                    }
+                    syncResultsDifficultyFilterButtons();
+                    renderResults();
+                });
+            });
+            $("#btnResultsTierClear")?.addEventListener("click", () => {
+                activeResultsDifficultyTier = "";
+                activeResultsDifficultyLevel = null;
+                syncResultsDifficultyFilterButtons();
+                renderResults();
+            });
+            renderResultsDifficultyFilters();
 
             $("#cmpA").addEventListener("change", renderCompare);
             $("#cmpB").addEventListener("change", renderCompare);
@@ -11426,15 +11574,26 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         /***********************
          * Boot
          ***********************/
-        loadState();
-        preloadItemVisuals().then(() => renderItems());
-        saveState();      // ensures pills show correct saved count
+        // Boot sequence must stay resilient even if saved data is malformed.
+        // Wire UI controls first so tabs/buttons remain clickable.
         wireOnce();
-        initApp();
-        showFirstTimeBackupWarning();
-        switchTab("spin");
-        renderSpin();
-        setTimeout(() => { renderResults(); }, 0);
+        try {
+            loadState();
+        } catch (err) {
+            console.error("[boot] loadState failed; resetting runtime state", err);
+            state.items = deepClone(DEFAULTS.items);
+            state.cards = [];
+        }
+        preloadItemVisuals()
+            .then(() => renderItems())
+            .catch((err) => console.error("[boot] preload visuals failed", err));
+        try { saveState(); } catch (err) { console.error("[boot] saveState failed", err); }
+        initApp().catch((err) => console.error("[boot] initApp failed", err));
+        try { showFirstTimeBackupWarning(); } catch (err) { console.error("[boot] backup warning failed", err); }
+        try { switchTab("spin"); } catch (err) { console.error("[boot] switchTab failed", err); }
+        try { renderSpin(); } catch (err) { console.error("[boot] renderSpin failed", err); }
+        setTimeout(() => wireOnce(), 0);
+        setTimeout(() => { try { renderResults(); } catch (err) { console.error("[boot] renderResults failed", err); } }, 0);
 
         /* ===== AUTO COMPARE RADAR WIRING ===== */
         function updateCompareRadar() {
