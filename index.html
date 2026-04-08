@@ -4065,7 +4065,7 @@ END MASTER DIRECTIVE
                     </button>
                 </div>
             </div>
-            <div id="rankScopeState" class="tiny">Select a tier above to display rank cards and details.</div>
+            <div id="rankScopeState" class="tiny">Showing all result cards grouped by difficulty tier.</div>
 
             <div id="rankFocusPanel">
 
@@ -10370,8 +10370,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             const aggregations = buildRankScopeAggregations(cards);
             const hasActiveTier = ["cadet", "veteran", "helldive"].includes(activeTier);
-            const selectedMostRolled = hasActiveTier ? aggregations.mostRolledByTier[activeTier] : null;
-            const selectedBestPerformed = hasActiveTier ? aggregations.bestPerformedByTier[activeTier] : null;
+            const selectedMostRolled = hasActiveTier ? aggregations.mostRolledByTier[activeTier] : aggregations.mostRolledGlobal;
+            const selectedBestPerformed = hasActiveTier ? aggregations.bestPerformedByTier[activeTier] : aggregations.bestPerformedGlobal;
 
             const renderCol = (title, payload, mode) => {
                 const item = payload?.item || payload || null;
@@ -10508,10 +10508,12 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             });
             const rankScopeState = $("#rankScopeState");
             if (rankScopeState) {
-                const filteredCount = hasActiveTier ? state.cards.filter(card => resolveCardDifficultyTier(card) === activeTier).length : 0;
+                const filteredCount = hasActiveTier
+                    ? state.cards.filter(card => cardMatchesTierRange(card, activeTier)).length
+                    : (Array.isArray(state.cards) ? state.cards.length : 0);
                 const baseText = hasActiveTier
-                    ? `${getDifficultyTierLabel(activeTier)} mode active • filtered to ${getTierRangeLabel(activeTier)} • ${filteredCount} card${filteredCount === 1 ? "" : "s"}.`
-                    : "Select a tier above to display rank cards and details.";
+                    ? `${getDifficultyTierLabel(activeTier)} filter active • ${getTierRangeLabel(activeTier)} • ${filteredCount} card${filteredCount === 1 ? "" : "s"} from Results.`
+                    : `Showing all Results cards grouped by difficulty tier • ${filteredCount} card${filteredCount === 1 ? "" : "s"}.`;
                 rankScopeState.textContent = baseText;
             }
         }
@@ -10536,7 +10538,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 console.warn("[rank] ignored unsupported tier", { nextTier });
             }
             if (!options.silent) playTone("success");
-            activeTier = normalized;
+            activeTier = (normalized && activeTier === normalized) ? null : normalized;
             selectedRankCardId = null;
             syncRankTierCardUi();
             safeRenderRank("setActiveTier");
@@ -10567,9 +10569,6 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         function renderRank() {
             state.cards = normalizeCardsCollection(state.cards);
             recalcGrades();
-            if (!["cadet", "veteran", "helldive"].includes(activeTier)) {
-                activeTier = pickMostPopulatedTier(state.cards);
-            }
             syncRankTierCardUi();
             const hasActiveTier = ["cadet", "veteran", "helldive"].includes(activeTier);
 
@@ -10581,9 +10580,12 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                     return String(b?.createdAt || "").localeCompare(String(a?.createdAt || ""));
                 });
 
-            let filtered = hasActiveTier
-                ? list.filter(c => cardMatchesTierRange(c, activeTier))
-                : [];
+            const grouped = {
+                cadet: list.filter(c => cardMatchesTierRange(c, "cadet")),
+                veteran: list.filter(c => cardMatchesTierRange(c, "veteran")),
+                helldive: list.filter(c => cardMatchesTierRange(c, "helldive"))
+            };
+            let filtered = hasActiveTier ? grouped[activeTier] : list;
 
             const box = $("#rankList");
             box.innerHTML = "";
@@ -10593,13 +10595,11 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             }
 
             if (!filtered.length) {
-                const emptyText = hasActiveTier
-                    ? `No ${escapeHtml(getDifficultyTierLabel(activeTier))} cards yet. Save/load cards with ${escapeHtml(getTierRangeLabel(activeTier))} difficulty to populate this leaderboard.`
-                    : "No Results cards yet. Complete a run and save it from the SPIN tab to populate ranking.";
-                box.innerHTML = `<div class="tiny" style="padding:8px 10px; border:1px solid var(--line2); border-radius:10px; background:rgba(0,0,0,.22);">${emptyText}</div>`;
-                try { renderRankDetailPanel(null, 0, getRadarMaxes(state.cards)); } catch (err) { console.error("[rank] detail panel render failed", err); }
-                try { renderItemInsights(filtered); } catch (err) { console.error("[rank] item insights render failed", err); }
-                try { renderRankAnalytics(filtered); } catch (err) { console.error("[rank] analytics render failed", err); }
+                const emptyLabel = hasActiveTier ? getDifficultyTierLabel(activeTier) : "any";
+                box.innerHTML = `<div class="tiny" style="padding:8px 10px; border:1px solid var(--line2); border-radius:10px; background:rgba(0,0,0,.22);">No ${escapeHtml(emptyLabel)} cards yet in Results.</div>`;
+                renderRankDetailPanel(null, 0, getRadarMaxes(state.cards));
+                renderItemInsights(filtered);
+                renderRankAnalytics(filtered);
                 logRankLayoutState("empty-filtered", 0);
                 return;
             }
@@ -10612,13 +10612,13 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             }
 
             const radarMaxes = getRadarMaxes(state.cards);
-            filtered.forEach((c, index) => {
-                const place = index + 1;
+
+            const renderRankRow = (c, place, isGlobalContext) => {
                 const grade = clamp(Math.round(Number(c.grade || 0)), 0, 100);
 
                 const outer = document.createElement("div");
                 outer.className = "rankOuter rankAnimate";
-                outer.style.setProperty("--rank-stagger", `${place * 65}ms`);
+                outer.style.setProperty("--rank-stagger", `${(place + animateOffset) * 65}ms`);
 
                 const row = document.createElement("div");
                 row.className = "rankRow";
@@ -10630,12 +10630,13 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
                 const cardDifficultyTier = resolveCardDifficultyTier(c);
                 row.classList.add(`rim-${cardDifficultyTier}`);
-                const gradeScore = clamp(Number(c.grade || 0), 0, 100);
+                const tierBadge = `${getDifficultyTierLabel(cardDifficultyTier)} • ${formatDifficultyLabel(c)}`;
+                const titlePrefix = isGlobalContext ? `[${getDifficultyTierLabel(cardDifficultyTier)}] ` : "";
 
                 row.innerHTML = `
                           <div class="rankRowMain">
-                            <div style="font-weight:900;">#${place} • ${escapeHtml(formatSeedWithPlayer(c))}</div>
-                            <div class="tiny">${escapeHtml(c.mode)} • ${escapeHtml(c.faction)} • ${escapeHtml(getDifficultyTierLabel(cardDifficultyTier))} • ${escapeHtml(formatDifficultyLabel(c))} • <span class="muted">${escapeHtml(c.primary)}</span></div>
+                            <div style="font-weight:900;">#${place} • ${escapeHtml(titlePrefix)}${escapeHtml(formatSeedWithPlayer(c))}</div>
+                            <div class="tiny">${escapeHtml(c.mode)} • ${escapeHtml(c.faction)} • ${escapeHtml(getPlayerName(c))} • ${escapeHtml(tierBadge)} • <span class="muted">${escapeHtml(c.primary)}</span></div>
                             <div class="rankRowBarWrap">
                                 <div class="rankRowBar" style="--grade-width:${grade}%;"></div>
                             </div>
@@ -10653,9 +10654,37 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
                 outer.appendChild(row);
                 box.appendChild(outer);
-            });
+            };
+
+            if (hasActiveTier) {
+                filtered.forEach((c, index) => {
+                    renderRankRow(c, index + 1, false);
+                });
+            } else {
+                ["cadet", "veteran", "helldive"].forEach((tier) => {
+                    const sectionCards = grouped[tier];
+                    const head = document.createElement("div");
+                    head.className = "tiny";
+                    head.style.cssText = "margin:12px 0 8px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; opacity:.9;";
+                    head.textContent = `${getDifficultyTierLabel(tier)} • ${getTierRangeLabel(tier)} • ${sectionCards.length} card${sectionCards.length === 1 ? "" : "s"}`;
+                    box.appendChild(head);
+
+                    if (!sectionCards.length) {
+                        const empty = document.createElement("div");
+                        empty.className = "tiny";
+                        empty.style.cssText = "padding:8px 10px; margin-bottom:8px; border:1px solid var(--line2); border-radius:10px; background:rgba(0,0,0,.16);";
+                        empty.textContent = `No ${getDifficultyTierLabel(tier)} cards in Results yet.`;
+                        box.appendChild(empty);
+                        return;
+                    }
+
+                    sectionCards.forEach((c, index) => {
+                        renderRankRow(c, index + 1, true);
+                    });
+                });
+            }
             logRankLayoutState("rows-rendered", filtered.length);
-            const selectedCard = filtered.find(c => c.id === selectedRankCardId) || filtered[0] || null;
+            const selectedCard = list.find(c => c.id === selectedRankCardId) || filtered[0] || list[0] || null;
             const selectedPlace = selectedCard ? (filtered.findIndex(x => x.id === selectedCard.id) + 1) : 0;
             try { renderRankDetailPanel(selectedCard, selectedPlace, radarMaxes); } catch (err) { console.error("[rank] detail panel render failed", err); }
             try { renderItemInsights(filtered); } catch (err) { console.error("[rank] item insights render failed", err); }
@@ -10716,10 +10745,6 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             }
             if (tab === "items") renderItems();
             if (tab === "rank") {
-                if (!["cadet", "veteran", "helldive"].includes(activeTier) && state.cards.length) {
-                    activeTier = pickMostPopulatedTier(state.cards);
-                    selectedRankCardId = null;
-                }
                 safeRenderRank("switchTab:rank");
             }
             if (tab === "spin") {
@@ -11300,12 +11325,14 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             $("#cmpSearch").addEventListener("input", refreshCompareOptions);
             $$("#rankTierCards .rankTierCard").forEach((btn) => {
                 btn.addEventListener("click", () => {
-                    setActiveTier(btn.dataset.tier || "");
+                    const tier = btn.dataset.tier || "";
+                    setActiveTier(activeTier === tier ? null : tier);
                 });
                 btn.addEventListener("keydown", (e) => {
                     if (e.key === "Enter" || e.key === " ") {
                         e.preventDefault();
-                        setActiveTier(btn.dataset.tier || "");
+                        const tier = btn.dataset.tier || "";
+                        setActiveTier(activeTier === tier ? null : tier);
                     }
                 });
             });
