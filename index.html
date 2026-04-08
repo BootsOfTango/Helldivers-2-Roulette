@@ -4416,12 +4416,15 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         function getCardDifficulty(card) {
             const candidateValues = [
                 card?.difficulty,
-                card?.difficultySelected,
                 card?.missionDifficulty,
                 card?.difficultyLevel
             ];
 
-            let raw = candidateValues.find(v => v !== undefined && v !== null && String(v).trim() !== "");
+            let raw = candidateValues.find(v => {
+                if (v === undefined || v === null) return false;
+                if (typeof v === "boolean") return false;
+                return String(v).trim() !== "";
+            });
             if (raw === undefined || raw === null || String(raw).trim() === "") {
                 raw = card?.tier;
             }
