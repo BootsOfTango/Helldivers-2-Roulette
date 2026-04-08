@@ -1952,6 +1952,9 @@ END MASTER DIRECTIVE
         }
 
         .rankTierCard {
+            --tier-thumb-scale: 2.55;
+            --tier-thumb-x: 22%;
+            --tier-thumb-y: 14%;
             border: 1px solid var(--line2);
             border-radius: 14px;
             background: rgba(0,0,0,.22);
@@ -1959,7 +1962,7 @@ END MASTER DIRECTIVE
             text-align: left;
             color: #e8eef7;
             cursor: pointer;
-            min-height: 182px;
+            min-height: 190px;
             display: flex;
             flex-direction: column;
             justify-content: flex-start;
@@ -2017,11 +2020,11 @@ END MASTER DIRECTIVE
 
         .rankTierThumbFrame {
             width: 100%;
-            height: 102px;
+            height: 112px;
             border-radius: 10px;
             border: 1px solid rgba(255,255,255,.14);
             margin-bottom: 4px;
-            background: radial-gradient(circle at 50% 22%, rgba(34, 42, 66, .6), rgba(0,0,0,.45));
+            background: radial-gradient(circle at 52% 26%, rgba(34, 42, 66, .68), rgba(0,0,0,.58));
             display: flex;
             align-items: center;
             justify-content: center;
@@ -2033,9 +2036,27 @@ END MASTER DIRECTIVE
             height: 100%;
             object-fit: contain;
             object-position: center center;
-            padding: 4px 8px;
-            transform: scale(1.24);
+            padding: 2px 4px;
+            transform: translate(var(--tier-thumb-x), var(--tier-thumb-y)) scale(var(--tier-thumb-scale));
             transform-origin: center center;
+        }
+
+        .rankTierCard[data-tier="cadet"] {
+            --tier-thumb-scale: 2.9;
+            --tier-thumb-x: 24%;
+            --tier-thumb-y: 16%;
+        }
+
+        .rankTierCard[data-tier="veteran"] {
+            --tier-thumb-scale: 2.72;
+            --tier-thumb-x: 20%;
+            --tier-thumb-y: 14%;
+        }
+
+        .rankTierCard[data-tier="helldive"] {
+            --tier-thumb-scale: 2.66;
+            --tier-thumb-x: 18%;
+            --tier-thumb-y: 14%;
         }
 
         #rankScopeState {
