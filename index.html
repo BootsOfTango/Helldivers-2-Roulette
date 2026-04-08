@@ -1938,48 +1938,10 @@ END MASTER DIRECTIVE
         .rankTierTopBar {
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            justify-content: flex-start;
             gap: 10px;
             margin-top: 10px;
             flex-wrap: wrap;
-        }
-
-        .rankGlobalBtn {
-            border: 1px solid rgba(255, 212, 0, .45);
-            border-radius: 999px;
-            background: rgba(255, 212, 0, .12);
-            color: #ffe37a;
-            padding: 8px 14px;
-            font-weight: 900;
-            letter-spacing: .3px;
-            text-transform: uppercase;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-            transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease, background .2s ease;
-        }
-
-        .rankGlobalBtn:hover {
-            transform: translateY(-1px);
-            border-color: rgba(255, 220, 120, .75);
-            background: rgba(255, 212, 0, .18);
-            box-shadow: 0 0 14px rgba(255, 212, 0, .25);
-        }
-
-        .rankGlobalBtn.is-active {
-            border-color: rgba(255, 233, 112, .95);
-            background: rgba(255, 212, 0, .22);
-            box-shadow:
-                0 0 0 1px rgba(255, 233, 112, .45),
-                0 0 16px rgba(255, 221, 87, .35);
-        }
-
-        .rankGlobalBtn img {
-            width: 18px;
-            height: 18px;
-            object-fit: contain;
-            filter: drop-shadow(0 0 4px rgba(255, 212, 0, .45));
         }
 
         .rankTierCards {
@@ -2085,6 +2047,25 @@ END MASTER DIRECTIVE
                 0 0 14px rgba(255, 221, 87, .42),
                 inset 0 0 10px rgba(255, 233, 112, .16);
             animation: rankSelectedGlow 2.1s ease-in-out infinite;
+        }
+
+        .rankOuter.rankAnimate {
+            opacity: 0;
+            transform: translateY(-14px);
+            animation: rankRowDropIn .36s ease forwards;
+            animation-delay: var(--rank-stagger, 0ms);
+        }
+
+        @keyframes rankRowDropIn {
+            from {
+                opacity: 0;
+                transform: translateY(-14px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         @keyframes rankSelectedGlow {
@@ -3815,10 +3796,6 @@ END MASTER DIRECTIVE
         <section id="tab-rank" class="panel" style="display:none;">
             <div class="label">Choose tier</div>
             <div class="rankTierTopBar">
-                <button type="button" class="rankGlobalBtn is-active" id="btnRankGlobal" aria-pressed="true" aria-label="Show global rank list for levels 1 to 10">
-                    <img src="assets/branding/helldivers-2-logo.svg" alt="Helldivers 2 logo" onerror="this.onerror=null;this.src='assets/placeholders/branding/helldivers-2-logo-fallback.svg';" />
-                    <span>Global (L1-L10)</span>
-                </button>
                 <div class="rankTierCards" id="rankTierCards">
                     <button type="button" class="rankTierCard" data-tier="cadet" aria-pressed="false">
                         <img class="rankTierThumb" src="assets/rank-tiers/cadet.png" alt="Cadet tier visual" onerror="this.onerror=null;this.src='assets/placeholders/rank-tiers/cadet-placeholder.svg';" />
@@ -3837,26 +3814,7 @@ END MASTER DIRECTIVE
                     </button>
                 </div>
             </div>
-            <div id="rankScopeState" class="tiny">Global mode active • showing all ranks across levels 1-10.</div>
-
-            <div class="row">
-                <div class="col">
-                    <div class="label">Rank system</div>
-                    <div class="tiny">
-                        Each card gets a <strong>raw score</strong> from your recorded stats, then applies a <strong>difficulty multiplier (D1-D10)</strong>, then everything is scaled so the top run is always <strong>100</strong>.
-                        <br><br>
-                        <strong>Major Order status is visual/filter-only</strong> in Rank (it does not modify raw score or grade).
-                        <br><br>
-                        <strong>Raw Score</strong> (default, tweakable later):
-                        <br>
-                        <br>
-                        (clamped to 0 so nobody gets “negative liberty”)
-                    </div>
-                </div>
-                <div class="col right">
-                    <button id="btnRecalcRanks" class="btnPrimary">RECALCULATE</button>
-                </div>
-            </div>
+            <div id="rankScopeState" class="tiny">Select a tier above to display rank cards and details.</div>
 
             <div id="rankFocusPanel">
 
@@ -3879,6 +3837,9 @@ END MASTER DIRECTIVE
                 <div class="rankAnalyticsTitle">Tier analytics</div>
                 <div id="rankAnalyticsGrid" class="rankAnalyticsGrid"></div>
             </section>
+            <div class="miniRow" style="justify-content:flex-end; margin-top:12px;">
+                <button id="btnRecalcRanks" class="btnPrimary">RECALCULATE</button>
+            </div>
             </div>
         </section>
 
@@ -5285,7 +5246,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
         let itemImageDb = null;
         let selectedRankCardId = null;
-        let activeTier = "all";
+        let activeTier = null;
         const TIER_DIFFICULTY_RANGES = {
             cadet: { min: 1, max: 3 },
             veteran: { min: 4, max: 6 },
@@ -9984,12 +9945,9 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             if (!grid) return;
 
             const aggregations = buildRankScopeAggregations(cards);
-            const selectedMostRolled = activeTier === "all"
-                ? aggregations.mostRolledGlobal
-                : aggregations.mostRolledByTier[activeTier];
-            const selectedBestPerformed = activeTier === "all"
-                ? aggregations.bestPerformedGlobal
-                : aggregations.bestPerformedByTier[activeTier];
+            const hasActiveTier = ["cadet", "veteran", "helldive"].includes(activeTier);
+            const selectedMostRolled = hasActiveTier ? aggregations.mostRolledByTier[activeTier] : null;
+            const selectedBestPerformed = hasActiveTier ? aggregations.bestPerformedByTier[activeTier] : null;
 
             const renderCol = (title, payload, mode) => {
                 const item = payload?.item || payload || null;
@@ -10092,30 +10050,32 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
          ***********************/
         function syncRankTierCardUi() {
             const cards = $$("#rankTierCards .rankTierCard");
+            const rankTab = $("#tab-rank");
+            const hasActiveTier = ["cadet", "veteran", "helldive"].includes(activeTier);
+            if (rankTab) {
+                rankTab.classList.toggle("rank-mode-overview", !hasActiveTier);
+                rankTab.classList.toggle("rank-mode-focused", hasActiveTier);
+            }
             cards.forEach((btn) => {
                 const isActive = btn.dataset.tier === activeTier;
                 btn.classList.toggle("is-active", isActive);
                 btn.setAttribute("aria-pressed", isActive ? "true" : "false");
             });
-            const globalBtn = $("#btnRankGlobal");
-            if (globalBtn) {
-                const isGlobal = activeTier === "all";
-                globalBtn.classList.toggle("is-active", isGlobal);
-                globalBtn.setAttribute("aria-pressed", isGlobal ? "true" : "false");
-            }
             const rankScopeState = $("#rankScopeState");
             if (rankScopeState) {
-                rankScopeState.textContent = activeTier === "all"
-                    ? "Global mode active • showing all ranks across levels 1-10."
-                    : `${getDifficultyTierLabel(activeTier)} mode active • filtered to ${getTierRangeLabel(activeTier)}.`;
+                rankScopeState.textContent = hasActiveTier
+                    ? `${getDifficultyTierLabel(activeTier)} mode active • filtered to ${getTierRangeLabel(activeTier)}.`
+                    : "Select a tier above to display rank cards and details.";
             }
         }
 
         function setActiveTier(nextTier) {
             const normalized = ["cadet", "veteran", "helldive"].includes(String(nextTier || "").toLowerCase())
                 ? String(nextTier).toLowerCase()
-                : "all";
+                : null;
+            playTone("success");
             activeTier = normalized;
+            selectedRankCardId = null;
             syncRankTierCardUi();
             renderRank();
         }
@@ -10130,6 +10090,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         function renderRank() {
             recalcGrades();
             syncRankTierCardUi();
+            const hasActiveTier = ["cadet", "veteran", "helldive"].includes(activeTier);
 
             const list = state.cards.slice().sort((a, b) => {
                 const g = Number(b.grade || 0) - Number(a.grade || 0);
@@ -10137,14 +10098,24 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 return (b.createdAt || "").localeCompare(a.createdAt || "");
             });
 
-            const tierScopedList = activeTier === "all"
-                ? list
-                : list.filter(c => cardMatchesTierRange(c, activeTier));
+            const tierScopedList = hasActiveTier
+                ? list.filter(c => cardMatchesTierRange(c, activeTier))
+                : [];
 
             const filtered = tierScopedList;
 
             const box = $("#rankList");
             box.innerHTML = "";
+
+            if (!hasActiveTier) {
+                selectedRankCardId = null;
+                renderRankDetailPanel(null, 0, getRadarMaxes(state.cards));
+                const insightBox = $("#itemInsightCards");
+                if (insightBox) insightBox.innerHTML = "";
+                const analyticsGrid = $("#rankAnalyticsGrid");
+                if (analyticsGrid) analyticsGrid.innerHTML = "";
+                return;
+            }
 
             if (selectedRankCardId && !list.some(c => c.id === selectedRankCardId)) {
                 selectedRankCardId = null;
@@ -10171,7 +10142,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 const place = filtered.findIndex(x => x.id === c.id) + 1;
 
                 const outer = document.createElement("div");
-                outer.className = "rankOuter";
+                outer.className = "rankOuter rankAnimate";
+                outer.style.setProperty("--rank-stagger", `${place * 65}ms`);
 
                 const row = document.createElement("div");
                 row.className = "rankRow";
@@ -10796,13 +10768,12 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             $("#cmpSortMetric").addEventListener("change", refreshCompareOptions);
             $("#cmpSortDir").addEventListener("change", refreshCompareOptions);
             $("#cmpSearch").addEventListener("input", refreshCompareOptions);
-            $("#btnRankGlobal")?.addEventListener("click", () => setActiveTier("all"));
             $$("#rankTierCards .rankTierCard").forEach((btn) => {
-                btn.addEventListener("click", () => setActiveTier(btn.dataset.tier || "all"));
+                btn.addEventListener("click", () => setActiveTier(btn.dataset.tier || ""));
                 btn.addEventListener("keydown", (e) => {
                     if (e.key === "Enter" || e.key === " ") {
                         e.preventDefault();
-                        setActiveTier(btn.dataset.tier || "all");
+                        setActiveTier(btn.dataset.tier || "");
                     }
                 });
             });
