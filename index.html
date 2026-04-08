@@ -4573,11 +4573,17 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             return "helldive";
         }
 
+        function canonicalizeDifficultyTierValue(rawTier) {
+            const text = String(rawTier || "").trim().toLowerCase();
+            if (!text) return "";
+            if (text === "helldiver" || text === "rainbow") return "helldive";
+            if (text === "cadet" || text === "veteran" || text === "helldive") return text;
+            return "";
+        }
+
         function resolveCardDifficultyTier(card) {
-            const explicit = String(card?.difficultyTier || card?.tierTag || "").trim().toLowerCase();
-            if (explicit === "helldiver") return "helldive";
-            if (explicit === "cadet" || explicit === "veteran" || explicit === "helldive") return explicit;
-            if (explicit === "helldiver") return "helldive";
+            const explicit = canonicalizeDifficultyTierValue(card?.difficultyTier || card?.tierTag || card?.tier);
+            if (explicit) return explicit;
             return getDifficultyTier(getCardDifficulty(card));
         }
 
@@ -5644,10 +5650,14 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 }
 
                 state.cards = normalizeCardsCollection(parsed.cards);
+                const migratedCardTiers = migrateCardDifficultyTiers(state.cards);
                 if (parsed.settings && typeof parsed.settings === "object") {
                     state.settings.rememberedPlayerName = String(parsed.settings.rememberedPlayerName || "").trim();
                 }
                 normalizeItemWarbondAssignments();
+                if (migratedCardTiers) {
+                    saveState();
+                }
 
             } catch {
                 state.items = deepClone(DEFAULTS.items);
@@ -5716,7 +5726,10 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             card.scoreRaw = Number(card.scoreRaw || 0);
             card.grade = Number(card.grade || 0);
             card.difficulty = getCardDifficulty(card);
-            card.difficultyTier = getCardDifficultyTier(card);
+            const explicitTier = canonicalizeDifficultyTierValue(card.difficultyTier || card.tierTag || card.tier);
+            card.difficultyTier = explicitTier || getDifficultyTier(card.difficulty);
+            delete card.tierTag;
+            delete card.tier;
             card.playerName = getPlayerName(card);
 
             return card;
@@ -5725,6 +5738,24 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         function normalizeCardsCollection(cards) {
             if (!Array.isArray(cards)) return [];
             return cards.map(normalizeCardRecord).filter(Boolean);
+        }
+
+        function migrateCardDifficultyTiers(cards) {
+            if (!Array.isArray(cards)) return false;
+            let changed = false;
+            cards.forEach((card) => {
+                if (!card || typeof card !== "object") return;
+                const hadLegacyTierTag = Object.prototype.hasOwnProperty.call(card, "tierTag");
+                const hadLegacyTier = Object.prototype.hasOwnProperty.call(card, "tier");
+                const beforeTier = String(card.difficultyTier || "");
+
+                normalizeCardRecord(card);
+
+                if (card.difficultyTier !== beforeTier || hadLegacyTierTag || hadLegacyTier) {
+                    changed = true;
+                }
+            });
+            return changed;
         }
 
         /***********************
@@ -8511,6 +8542,9 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             } else if (key === "difficulty") {
                 card.difficulty = clamp(Math.round(Number(el.value || 10)), 1, 10);
                 card.difficultyTier = getDifficultyTier(card.difficulty);
+            } else if (key === "difficultyTier") {
+                const manualTier = canonicalizeDifficultyTierValue(el.value);
+                card.difficultyTier = manualTier || getDifficultyTier(card.difficulty);
             } else if (STAT_KEYS.includes(key)) {
                 card.stats[key] = Number(el.value || 0);
             }
@@ -8542,6 +8576,9 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 } else if (key === "difficulty") {
                     card.difficulty = clamp(Math.round(Number(el.value || 10)), 1, 10);
                     card.difficultyTier = getDifficultyTier(card.difficulty);
+                } else if (key === "difficultyTier") {
+                    const manualTier = canonicalizeDifficultyTierValue(el.value);
+                    card.difficultyTier = manualTier || getDifficultyTier(card.difficulty);
                 } else if (STAT_KEYS.includes(key)) {
                     if (!card.stats) card.stats = {};
                     card.stats[key] = Number(el.value || 0);
@@ -10954,7 +10991,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 majorOrderDone: false,
                 notes: "",
                 difficulty: getCardDifficulty(c),
-                difficultyTier: getDifficultyTier(getCardDifficulty(c)),
+                difficultyTier: canonicalizeDifficultyTierValue(c.difficultyTier) || getDifficultyTier(getCardDifficulty(c)),
 
                 scoreRaw: 0,
                 grade: 0,
@@ -11001,7 +11038,10 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                     const parsed = JSON.parse(String(reader.result || ""));
                     if (!parsed || typeof parsed !== "object") throw new Error("bad");
                     if (parsed.items) state.items = parsed.items;
-                    if (parsed.cards) state.cards = normalizeCardsCollection(parsed.cards);
+                    if (parsed.cards) {
+                        state.cards = normalizeCardsCollection(parsed.cards);
+                        migrateCardDifficultyTiers(state.cards);
+                    }
                     recalcGrades();
                     saveState();
                     renderItems();
