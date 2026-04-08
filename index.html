@@ -10352,60 +10352,25 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         /***********************
          * Rank rendering
          ***********************/
-        const DEBUG_RANK = true;
+        const ENABLE_RANK_WARNINGS = true;
 
         function logRankLayoutState(contextLabel, rowCount) {
-            if (!DEBUG_RANK) return;
+            if (!ENABLE_RANK_WARNINGS) return;
             const rankTab = $("#tab-rank");
             const focusPanel = $("#rankFocusPanel");
             const listColumn = document.querySelector(".rankListColumn");
             const rankList = $("#rankList");
             if (!rankTab || !focusPanel || !listColumn || !rankList) return;
-
-            const focusPanelStyle = window.getComputedStyle(focusPanel);
-            const listColumnStyle = window.getComputedStyle(listColumn);
-            const rankListStyle = window.getComputedStyle(rankList);
-
-            const focusRect = focusPanel.getBoundingClientRect();
-            const colRect = listColumn.getBoundingClientRect();
-            const listRect = rankList.getBoundingClientRect();
-
-            const viewport = window.innerWidth;
-            const breakpoint = viewport <= 780
-                ? "narrow<=780"
-                : (viewport <= 1100 ? "medium<=1100" : "desktop>1100");
-
-            console.groupCollapsed(`[rank-debug] layout:${contextLabel}`);
-            console.log("breakpoint", breakpoint, "viewport", viewport);
-            console.log("rowsGenerated", rowCount, "rowsInDom", rankList.children.length);
-            console.log("rankTabMode", {
-                focused: rankTab.classList.contains("rank-mode-focused"),
-                overview: rankTab.classList.contains("rank-mode-overview")
-            });
-            console.log("#rankFocusPanel", {
-                display: focusPanelStyle.display,
-                opacity: focusPanelStyle.opacity,
-                maxHeight: focusPanelStyle.maxHeight,
-                overflow: focusPanelStyle.overflow,
-                pointerEvents: focusPanelStyle.pointerEvents,
-                rectHeight: Number(focusRect.height.toFixed(2))
-            });
-            console.log(".rankListColumn", {
-                minHeight: listColumnStyle.minHeight,
-                height: listColumnStyle.height,
-                display: listColumnStyle.display,
-                overflow: listColumnStyle.overflow,
-                rectHeight: Number(colRect.height.toFixed(2))
-            });
-            console.log("#rankList", {
-                minHeight: rankListStyle.minHeight,
-                height: rankListStyle.height,
-                overflowY: rankListStyle.overflowY,
-                scrollHeight: rankList.scrollHeight,
-                clientHeight: rankList.clientHeight,
-                rectHeight: Number(listRect.height.toFixed(2))
-            });
-            console.groupEnd();
+            const rowsInDom = rankList.children.length;
+            if (rowCount !== rowsInDom) {
+                console.warn("[rank] row count mismatch", {
+                    contextLabel,
+                    rowCount,
+                    rowsInDom,
+                    activeTier: activeTier || null,
+                    focusedMode: rankTab.classList.contains("rank-mode-focused")
+                });
+            }
         }
 
         function syncRankTierCardUi() {
@@ -10423,15 +10388,11 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             });
             const rankScopeState = $("#rankScopeState");
             if (rankScopeState) {
-                const total = state.cards.length;
                 const filteredCount = hasActiveTier ? state.cards.filter(card => resolveCardDifficultyTier(card) === activeTier).length : 0;
                 const baseText = hasActiveTier
                     ? `${getDifficultyTierLabel(activeTier)} mode active • filtered to ${getTierRangeLabel(activeTier)} • ${filteredCount} card${filteredCount === 1 ? "" : "s"}.`
                     : "Select a tier above to display rank cards and details.";
-                const debugText = DEBUG_RANK
-                    ? ` activeTier=${activeTier || "none"} | total=${total} | filtered=${filteredCount}`
-                    : "";
-                rankScopeState.textContent = `${baseText}${debugText}`;
+                rankScopeState.textContent = baseText;
             }
         }
 
@@ -10451,12 +10412,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const normalized = ["cadet", "veteran", "helldive"].includes(String(nextTier || "").toLowerCase())
                 ? String(nextTier).toLowerCase()
                 : null;
-            if (DEBUG_RANK) {
-                console.groupCollapsed("[rank-debug] setActiveTier");
-                console.log("nextTier", nextTier);
-                console.log("normalized", normalized);
-                console.log("state.cards.length", state.cards.length);
-                console.groupEnd();
+            if (!normalized && nextTier != null && String(nextTier).trim() !== "" && ENABLE_RANK_WARNINGS) {
+                console.warn("[rank] ignored unsupported tier", { nextTier });
             }
             if (!options.silent) playTone("success");
             activeTier = normalized;
@@ -10482,32 +10439,9 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const range = TIER_DIFFICULTY_RANGES[tier];
             if (!range) return true;
             const cardDifficultyTier = resolveCardDifficultyTier(card);
-            if (cardDifficultyTier === tier) {
-                if (DEBUG_RANK) {
-                    console.log("[rank-debug] cardMatchesTierRange", {
-                        cardId: card?.id,
-                        tier,
-                        cardDifficultyTier,
-                        result: true,
-                        reason: "tier-match"
-                    });
-                }
-                return true;
-            }
+            if (cardDifficultyTier === tier) return true;
             const difficulty = getCardDifficulty(card);
-            const inRange = difficulty >= range.min && difficulty <= range.max;
-            if (DEBUG_RANK) {
-                console.log("[rank-debug] cardMatchesTierRange", {
-                    cardId: card?.id,
-                    tier,
-                    cardDifficultyTier,
-                    difficulty,
-                    range,
-                    result: inRange,
-                    reason: "difficulty-range"
-                });
-            }
-            return inRange;
+            return difficulty >= range.min && difficulty <= range.max;
         }
 
         function renderRank() {
@@ -10517,13 +10451,6 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             }
             syncRankTierCardUi();
             const hasActiveTier = ["cadet", "veteran", "helldive"].includes(activeTier);
-            if (DEBUG_RANK) {
-                console.groupCollapsed("[rank-debug] renderRank:start");
-                console.log("activeTier", activeTier);
-                console.log("hasActiveTier", hasActiveTier);
-                console.log("total cards", state.cards.length);
-                console.groupEnd();
-            }
 
             const list = state.cards.slice().sort((a, b) => {
                 const g = Number(b.grade || 0) - Number(a.grade || 0);
@@ -10534,21 +10461,6 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             let filtered = hasActiveTier
                 ? list.filter(c => cardMatchesTierRange(c, activeTier))
                 : [];
-            if (DEBUG_RANK) {
-                console.groupCollapsed("[rank-debug] renderRank:post-filter");
-                console.log("filtered.length", filtered.length);
-                filtered.forEach((card) => {
-                    console.log("card", {
-                        id: card?.id,
-                        difficulty: getCardDifficulty(card),
-                        difficultyTier: card?.difficultyTier ?? null,
-                        tierTag: card?.tierTag ?? null,
-                        legacyTier: card?.tier ?? null,
-                        resolvedTier: getCardDifficultyTier(card)
-                    });
-                });
-                console.groupEnd();
-            }
 
             const box = $("#rankList");
             box.innerHTML = "";
