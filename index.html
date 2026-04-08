@@ -5558,6 +5558,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 return;
             }
 
+            const normalizedCard = normalizeCardRecord(card) || card;
+
             const makeItemCard = (label, value, kind) => {
                 const visual = getItemVisual(value, kind);
                 const fallbackAttr = visual?.fallbackSrc ? ` data-fallback-src="${escapeHtml(visual.fallbackSrc)}"` : "";
@@ -5570,27 +5572,27 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 `;
             };
 
-            const strats = (card.stratagems || []).map(s => makeItemCard("Stratagem", s, "stratagem")).join("");
+            const strats = (Array.isArray(normalizedCard.stratagems) ? normalizedCard.stratagems : []).map(s => makeItemCard("Stratagem", s, "stratagem")).join("");
 
             panel.innerHTML = `
                 <div style="display:flex; justify-content:space-between; gap:8px; align-items:flex-start;">
                     <div>
-                        <div style="font-weight:900;">#${place} • ${escapeHtml(formatSeedWithPlayer(card))}</div>
-                        <div class="tiny muted">${escapeHtml(card.mode)} • ${escapeHtml(card.faction)} • ${escapeHtml(getPlayerName(card))} • ${escapeHtml(formatDifficultyLabel(card))}</div>
+                        <div style="font-weight:900;">#${place} • ${escapeHtml(formatSeedWithPlayer(normalizedCard))}</div>
+                        <div class="tiny muted">${escapeHtml(normalizedCard.mode)} • ${escapeHtml(normalizedCard.faction)} • ${escapeHtml(getPlayerName(normalizedCard))} • ${escapeHtml(formatDifficultyLabel(normalizedCard))}</div>
                     </div>
-                    <div class="badge yellow">Grade ${Number(card.grade || 0)}</div>
+                    <div class="badge yellow">Grade ${Number(normalizedCard.grade || 0)}</div>
                 </div>
 
                 <div style="margin-top:10px;">
-                    ${buildRadarSVG(card, radarMaxes)}
+                    ${buildRadarSVG(normalizedCard, radarMaxes)}
                 </div>
 
                 <div style="margin-top:10px;" class="label">Loadout</div>
                 <div class="rankDetailLoadout">
-                    ${makeItemCard("Primary", card.primary, "primary")}
-                    ${makeItemCard("Sidearm", card.sidearm, "sidearm")}
-                    ${makeItemCard("Throwable", card.throwable, "throwable")}
-                    ${makeItemCard("Booster", card.booster, "booster")}
+                    ${makeItemCard("Primary", normalizedCard.primary, "primary")}
+                    ${makeItemCard("Sidearm", normalizedCard.sidearm, "sidearm")}
+                    ${makeItemCard("Throwable", normalizedCard.throwable, "throwable")}
+                    ${makeItemCard("Booster", normalizedCard.booster, "booster")}
                 </div>
 
                 <div style="margin-top:10px;" class="label">Stratagems</div>
@@ -10446,6 +10448,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         }
 
         function renderRank() {
+            state.cards = normalizeCardsCollection(state.cards);
             recalcGrades();
             if (!["cadet", "veteran", "helldive"].includes(activeTier)) {
                 activeTier = getBestAvailableTier(state.cards);
