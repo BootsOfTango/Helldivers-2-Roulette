@@ -4413,29 +4413,19 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             return `${seed} • ${player}`;
         }
 
-        function getCardDifficulty(card) {
-            const candidateValues = [
-                card?.difficulty,
-                card?.missionDifficulty,
-                card?.difficultyLevel
-            ];
+        function parseDifficultyValue(raw) {
+            if (raw === undefined || raw === null) return null;
+            if (typeof raw === "boolean") return null;
 
-            let raw = candidateValues.find(v => {
-                if (v === undefined || v === null) return false;
-                if (typeof v === "boolean") return false;
-                return String(v).trim() !== "";
-            });
-            if (raw === undefined || raw === null || String(raw).trim() === "") {
-                raw = card?.tier;
-            }
             const numeric = Number(raw);
             if (Number.isFinite(numeric)) {
                 return clamp(Math.round(numeric), 1, 10);
             }
 
-            // Backward compatibility: old/imported cards can store strings like
-            // "D3", "Difficulty 6", etc. If parsing fails, fall back to D10.
-            const text = String(raw ?? "").trim();
+            // Backward compatibility: cards/imports can store strings like
+            // "D3", "Difficulty 6", "Level 7", etc.
+            const text = String(raw ?? "").trim().toLowerCase();
+            if (!text) return null;
             if (text === "cadet") return 2;
             if (text === "veteran") return 5;
             if (text === "helldive" || text === "helldiver" || text === "rainbow") return 9;
@@ -4445,6 +4435,26 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 return clamp(Math.round(Number(match[0])), 1, 10);
             }
 
+            return null;
+        }
+
+        function getCardDifficulty(card) {
+            const candidateValues = [
+                card?.difficulty,
+                card?.missionDifficulty,
+                card?.difficultyLevel,
+                card?.level,
+                card?.Level,
+                card?.resultLevel
+            ];
+
+            for (const value of candidateValues) {
+                const parsed = parseDifficultyValue(value);
+                if (Number.isFinite(parsed)) return parsed;
+            }
+
+            const parsedTierFallback = parseDifficultyValue(card?.tier);
+            if (Number.isFinite(parsedTierFallback)) return parsedTierFallback;
             return 10;
         }
 
@@ -10202,17 +10212,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const range = TIER_DIFFICULTY_RANGES[tier];
             if (!range) return true;
             const difficulty = getCardDifficulty(card);
-            if (difficulty >= range.min && difficulty <= range.max) return true;
-
-            const legacyTier = String(card?.tier || "").toLowerCase();
-            if (legacyTier && ["cadet", "veteran", "helldive", "helldiver", "rainbow"].includes(legacyTier)) {
-                const normalizedLegacyTier = legacyTier === "helldiver" || legacyTier === "rainbow"
-                    ? "helldive"
-                    : legacyTier;
-                return normalizedLegacyTier === tier;
-            }
-
-            return false;
+            return difficulty >= range.min && difficulty <= range.max;
         }
 
         function renderRank() {
