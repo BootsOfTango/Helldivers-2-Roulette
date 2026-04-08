@@ -4659,6 +4659,12 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             return "Helldive";
         }
 
+        function getTierRangeLabel(tier) {
+            if (tier === "cadet") return "Levels 1-3";
+            if (tier === "veteran") return "Levels 4-6";
+            return "Levels 7-10";
+        }
+
         function formatDifficultyLabel(card) {
             const d = getCardDifficulty(card);
             const tierLabel = getDifficultyTierLabel(getCardDifficultyTier(card));
