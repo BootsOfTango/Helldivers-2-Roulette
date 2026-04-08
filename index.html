@@ -1958,16 +1958,16 @@ END MASTER DIRECTIVE
             border: 1px solid var(--line2);
             border-radius: 14px;
             background: rgba(0,0,0,.22);
-            padding: 14px;
+            padding: 10px 12px;
             text-align: left;
             color: #e8eef7;
             cursor: pointer;
-            min-height: 190px;
+            min-height: 96px;
             display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
-            align-items: stretch;
-            gap: 8px;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
             overflow: visible;
             transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease, background .2s ease;
         }
@@ -1989,18 +1989,26 @@ END MASTER DIRECTIVE
         }
 
         .rankTierCardName {
-            font-size: 24px;
+            font-size: 18px;
             font-weight: 900;
             letter-spacing: .4px;
             text-transform: uppercase;
-            line-height: 1.05;
-            margin-top: 2px;
+            line-height: 1.02;
         }
 
         .rankTierCardRange {
             font-family: var(--mono);
-            font-size: 14px;
+            font-size: 12px;
             font-weight: 700;
+        }
+
+        .rankTierCardInfo {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            min-width: 0;
+            flex: 1;
+            justify-content: center;
         }
 
         .rankTierCard[data-tier="cadet"] .rankTierCardName,
@@ -2019,16 +2027,17 @@ END MASTER DIRECTIVE
         }
 
         .rankTierThumbFrame {
-            width: 100%;
-            height: 112px;
+            width: 56%;
+            max-width: 300px;
+            height: 78px;
             border-radius: 10px;
             border: 1px solid rgba(255,255,255,.14);
-            margin-bottom: 4px;
             background: radial-gradient(circle at 52% 26%, rgba(34, 42, 66, .68), rgba(0,0,0,.58));
             display: flex;
             align-items: center;
             justify-content: center;
             overflow: hidden;
+            flex-shrink: 0;
         }
 
         .rankTierThumb {
@@ -2036,27 +2045,27 @@ END MASTER DIRECTIVE
             height: 100%;
             object-fit: contain;
             object-position: center center;
-            padding: 2px 4px;
+            padding: 1px 3px;
             transform: translate(var(--tier-thumb-x), var(--tier-thumb-y)) scale(var(--tier-thumb-scale));
             transform-origin: center center;
         }
 
         .rankTierCard[data-tier="cadet"] {
-            --tier-thumb-scale: 2.9;
+            --tier-thumb-scale: 2.82;
             --tier-thumb-x: 24%;
-            --tier-thumb-y: 16%;
+            --tier-thumb-y: 15%;
         }
 
         .rankTierCard[data-tier="veteran"] {
-            --tier-thumb-scale: 2.72;
+            --tier-thumb-scale: 2.64;
             --tier-thumb-x: 20%;
-            --tier-thumb-y: 14%;
+            --tier-thumb-y: 13%;
         }
 
         .rankTierCard[data-tier="helldive"] {
-            --tier-thumb-scale: 2.66;
+            --tier-thumb-scale: 2.6;
             --tier-thumb-x: 18%;
-            --tier-thumb-y: 14%;
+            --tier-thumb-y: 13%;
         }
 
         #rankScopeState {
@@ -2640,6 +2649,10 @@ END MASTER DIRECTIVE
 
             .rankTierTopBar {
                 flex-wrap: nowrap;
+            }
+
+            .rankTierThumbFrame {
+                max-width: 220px;
             }
         }
 
@@ -3853,22 +3866,28 @@ END MASTER DIRECTIVE
                         <span class="rankTierThumbFrame">
                             <img class="rankTierThumb" src="cadet.png" alt="Cadet tier visual" onerror="this.onerror=null;this.src='assets/placeholders/rank-tiers/cadet-placeholder.svg';" />
                         </span>
-                        <span class="rankTierCardName">Cadet</span>
-                        <span class="rankTierCardRange">Levels 1-3</span>
+                        <span class="rankTierCardInfo">
+                            <span class="rankTierCardName">Cadet</span>
+                            <span class="rankTierCardRange">Levels 1-3</span>
+                        </span>
                     </button>
                     <button type="button" class="rankTierCard" data-tier="veteran" aria-pressed="false">
                         <span class="rankTierThumbFrame">
                             <img class="rankTierThumb" src="veteran.png" alt="Veteran tier visual" onerror="this.onerror=null;this.src='assets/placeholders/rank-tiers/veteran-placeholder.svg';" />
                         </span>
-                        <span class="rankTierCardName">Veteran</span>
-                        <span class="rankTierCardRange">Levels 4-6</span>
+                        <span class="rankTierCardInfo">
+                            <span class="rankTierCardName">Veteran</span>
+                            <span class="rankTierCardRange">Levels 4-6</span>
+                        </span>
                     </button>
                     <button type="button" class="rankTierCard" data-tier="helldive" aria-pressed="false">
                         <span class="rankTierThumbFrame">
                             <img class="rankTierThumb" src="helldive.png" alt="Helldiver tier visual" onerror="this.onerror=null;this.src='assets/placeholders/rank-tiers/helldiver-placeholder.svg';" />
                         </span>
-                        <span class="rankTierCardName">Helldiver</span>
-                        <span class="rankTierCardRange">Levels 7-10</span>
+                        <span class="rankTierCardInfo">
+                            <span class="rankTierCardName">Helldiver</span>
+                            <span class="rankTierCardRange">Levels 7-10</span>
+                        </span>
                     </button>
                 </div>
             </div>
