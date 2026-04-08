@@ -2035,6 +2035,16 @@ END MASTER DIRECTIVE
             font-weight: 700;
         }
 
+        .rankTierThumb {
+            width: 100%;
+            height: 56px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,.14);
+            object-fit: cover;
+            margin-bottom: 8px;
+            background: rgba(0,0,0,.25);
+        }
+
         #rankScopeState {
             margin-top: 8px;
             color: rgba(255,255,255,.82);
@@ -3051,7 +3061,7 @@ END MASTER DIRECTIVE
                 /* slightly less oversized so letters aren't chopped */
                 inset: -10vh -10vw;
                 /* smaller than before (was 140vmax) */
-                background: url("Helldivers-2-Logo.png.png") center / 90vmax no-repeat;
+                background: url("assets/branding/helldivers-2-logo.svg") center / 90vmax no-repeat;
                 opacity: 0.14;
                 pointer-events: none;
                 z-index: -1;
@@ -3861,19 +3871,22 @@ END MASTER DIRECTIVE
             <div class="label">Choose tier</div>
             <div class="rankTierTopBar">
                 <button type="button" class="rankGlobalBtn is-active" id="btnRankGlobal" aria-pressed="true" aria-label="Show global rank list for levels 1 to 10">
-                    <img src="Helldivers-2-Logo.png.png" alt="" />
+                    <img src="assets/branding/helldivers-2-logo.svg" alt="Helldivers 2 logo" onerror="this.onerror=null;this.src='assets/placeholders/branding/helldivers-2-logo-fallback.svg';" />
                     <span>Global (L1-L10)</span>
                 </button>
                 <div class="rankTierCards" id="rankTierCards">
                     <button type="button" class="rankTierCard" data-tier="cadet" aria-pressed="false">
+                        <img class="rankTierThumb" src="assets/rank-tiers/cadet.webp" alt="Cadet tier visual" onerror="this.onerror=null;this.src='assets/placeholders/rank-tiers/cadet-placeholder.svg';" />
                         <span class="rankTierCardName">Cadet</span>
                         <span class="rankTierCardRange">Levels 1-3</span>
                     </button>
                     <button type="button" class="rankTierCard" data-tier="veteran" aria-pressed="false">
+                        <img class="rankTierThumb" src="assets/rank-tiers/veteran.webp" alt="Veteran tier visual" onerror="this.onerror=null;this.src='assets/placeholders/rank-tiers/veteran-placeholder.svg';" />
                         <span class="rankTierCardName">Veteran</span>
                         <span class="rankTierCardRange">Levels 4-6</span>
                     </button>
                     <button type="button" class="rankTierCard" data-tier="helldive" aria-pressed="false">
+                        <img class="rankTierThumb" src="assets/rank-tiers/helldiver.webp" alt="Helldiver tier visual" onerror="this.onerror=null;this.src='assets/placeholders/rank-tiers/helldiver-placeholder.svg';" />
                         <span class="rankTierCardName">Helldiver</span>
                         <span class="rankTierCardRange">Levels 7-10</span>
                     </button>
