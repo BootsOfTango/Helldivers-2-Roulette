@@ -1043,6 +1043,33 @@ END MASTER DIRECTIVE
             align-self: flex-end;
         }
 
+        .resultTierTag {
+            align-self: flex-end;
+            border: 1px solid var(--line2);
+            border-radius: 999px;
+            padding: 4px 10px;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: .35px;
+            text-transform: uppercase;
+            background: rgba(255,255,255,.04);
+        }
+
+        .resultTierTag.tier-cadet {
+            color: #60f9a8;
+            border-color: rgba(96,249,168,.5);
+        }
+
+        .resultTierTag.tier-veteran {
+            color: #ffbf66;
+            border-color: rgba(255,191,102,.52);
+        }
+
+        .resultTierTag.tier-helldive {
+            color: #ff6a75;
+            border-color: rgba(255,106,117,.52);
+        }
+
         .factionSticker {
             flex: 1;
             min-height: 68px;
@@ -4480,6 +4507,12 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             return "helldive";
         }
 
+        function getCardDifficultyTier(card) {
+            const explicit = String(card?.difficultyTier || card?.tierTag || "").trim().toLowerCase();
+            if (explicit === "cadet" || explicit === "veteran" || explicit === "helldive") return explicit;
+            return getDifficultyTier(getCardDifficulty(card));
+        }
+
         function getDifficultyTierLabel(tier) {
             if (tier === "cadet") return "Cadet";
             if (tier === "veteran") return "Veteran";
@@ -4488,7 +4521,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
         function formatDifficultyLabel(card) {
             const d = getCardDifficulty(card);
-            const tierLabel = getDifficultyTierLabel(getDifficultyTier(d));
+            const tierLabel = getDifficultyTierLabel(getCardDifficultyTier(card));
             return `D${d} • ${tierLabel}`;
         }
 
@@ -5611,6 +5644,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             card.scoreRaw = Number(card.scoreRaw || 0);
             card.grade = Number(card.grade || 0);
             card.difficulty = getCardDifficulty(card);
+            card.difficultyTier = getCardDifficultyTier(card);
             card.playerName = getPlayerName(card);
 
             return card;
@@ -7659,6 +7693,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             for (const card of list) {
                 const moBadge = card.majorOrderDone ? `<span class="badge good">MO DONE</span>` : `<span class="badge red">MO NO</span>`;
                 const tier = tierMap.get(card.id) || "";
+                const difficultyTier = getCardDifficultyTier(card);
+                const difficultyTierLabel = getDifficultyTierLabel(difficultyTier);
                 const factionClass = getFactionClass(card.faction);
                 const factionStickerData = getFactionStickerData(card.faction);
                 const el = document.createElement("div");
@@ -7680,12 +7716,14 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                                 <div class="resultMetaChip"><span class="k">Mode</span><span class="${getModeClass(card.mode)}">${escapeHtml(card.mode || "—")}</span></div>
                                 <div class="resultMetaChip"><span class="k">Faction</span><span class="${getFactionClass(card.faction)}">${escapeHtml(card.faction || "—")}</span></div>
                                 <div class="resultMetaChip"><span class="k">Difficulty</span>${escapeHtml(formatDifficultyLabel(card))}</div>
+                                <div class="resultMetaChip"><span class="k">Tier</span>${escapeHtml(difficultyTierLabel)}</div>
                                 <div class="resultMetaChip"><span class="k">Date</span>${escapeHtml(new Date(card.createdAt).toLocaleString())}</div>
                                 <div class="resultMetaChip"><span class="k">Planet</span>${escapeHtml(card.planet?.name || "Not rolled")}</div>
                             </div>
                           </div>
                           <div class="resultSummaryBadges">
                             <span class="badge yellow">Grade ${Number(card.grade || 0)}</span>
+                            <span class="resultTierTag tier-${escapeHtml(difficultyTier)}">${escapeHtml(difficultyTierLabel)}</span>
                             ${moBadge}
                             <span class="factionSticker ${factionClass}">
                                 <span class="factionStickerIconWrap">${factionStickerData.image ? `<img class="factionStickerIcon" src="${escapeHtml(factionStickerData.image)}" alt="${escapeHtml(factionStickerData.label)}">` : `<span class="factionStickerIconFallback">?</span>`}</span>
@@ -8400,6 +8438,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 card.notes = el.value;
             } else if (key === "difficulty") {
                 card.difficulty = clamp(Math.round(Number(el.value || 10)), 1, 10);
+                card.difficultyTier = getDifficultyTier(card.difficulty);
             } else if (STAT_KEYS.includes(key)) {
                 card.stats[key] = Number(el.value || 0);
             }
@@ -8430,6 +8469,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                     card.notes = el.value;
                 } else if (key === "difficulty") {
                     card.difficulty = clamp(Math.round(Number(el.value || 10)), 1, 10);
+                    card.difficultyTier = getDifficultyTier(card.difficulty);
                 } else if (STAT_KEYS.includes(key)) {
                     if (!card.stats) card.stats = {};
                     card.stats[key] = Number(el.value || 0);
@@ -10228,8 +10268,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const normalized = ["cadet", "veteran", "helldive"].includes(String(nextTier || "").toLowerCase())
                 ? String(nextTier).toLowerCase()
                 : null;
-            playTone("success");
             activeTier = normalized;
+            playTone("success");
             selectedRankCardId = null;
             syncRankTierCardUi();
             try {
@@ -10241,15 +10281,33 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             }
         }
 
+        function getBestAvailableTier(cards = []) {
+            const rankedCards = Array.isArray(cards) ? cards : [];
+            const counts = {
+                cadet: rankedCards.filter(card => cardMatchesTierRange(card, "cadet")).length,
+                veteran: rankedCards.filter(card => cardMatchesTierRange(card, "veteran")).length,
+                helldive: rankedCards.filter(card => cardMatchesTierRange(card, "helldive")).length
+            };
+            if (counts.cadet > 0) return "cadet";
+            if (counts.veteran > 0) return "veteran";
+            if (counts.helldive > 0) return "helldive";
+            return null;
+        }
+
         function cardMatchesTierRange(card, tier) {
             const range = TIER_DIFFICULTY_RANGES[tier];
             if (!range) return true;
+            const cardTier = getCardDifficultyTier(card);
+            if (cardTier === tier) return true;
             const difficulty = getCardDifficulty(card);
             return difficulty >= range.min && difficulty <= range.max;
         }
 
         function renderRank() {
             recalcGrades();
+            if (!["cadet", "veteran", "helldive"].includes(activeTier)) {
+                activeTier = getBestAvailableTier(state.cards);
+            }
             syncRankTierCardUi();
             const hasActiveTier = ["cadet", "veteran", "helldive"].includes(activeTier);
 
@@ -10312,7 +10370,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                     row.classList.add("isSelected");
                 }
 
-                const tier = getDifficultyTier(getCardDifficulty(c));
+                const tier = getCardDifficultyTier(c);
                 row.classList.add(`rim-${tier}`);
 
                 row.innerHTML = `
@@ -10741,6 +10799,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 majorOrderDone: false,
                 notes: "",
                 difficulty: getCardDifficulty(c),
+                difficultyTier: getDifficultyTier(getCardDifficulty(c)),
 
                 scoreRaw: 0,
                 grade: 0,
@@ -10928,6 +10987,11 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             $("#cmpSortDir").addEventListener("change", refreshCompareOptions);
             $("#cmpSearch").addEventListener("input", refreshCompareOptions);
             $$("#rankTierCards .rankTierCard").forEach((btn) => {
+                btn.addEventListener("click", (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setActiveTier(btn.dataset.tier || "");
+                });
                 btn.addEventListener("keydown", (e) => {
                     if (e.key === "Enter" || e.key === " ") {
                         e.preventDefault();
