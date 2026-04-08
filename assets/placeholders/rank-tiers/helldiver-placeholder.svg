@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 180" role="img" aria-labelledby="title desc">
+  <title id="title">Helldiver Tier Placeholder</title>
+  <desc id="desc">Fallback visual used when an official Helldiver tier image is unavailable.</desc>
+  <defs>
+    <linearGradient id="rim" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ff3b3b" />
+      <stop offset="25%" stop-color="#ffd400" />
+      <stop offset="50%" stop-color="#2ecc71" />
+      <stop offset="75%" stop-color="#3b82f6" />
+      <stop offset="100%" stop-color="#a855f7" />
+    </linearGradient>
+  </defs>
+  <rect width="320" height="180" rx="16" fill="#121421" />
+  <rect x="8" y="8" width="304" height="164" rx="12" fill="none" stroke="url(#rim)" stroke-width="4" />
+  <text x="160" y="92" text-anchor="middle" fill="#f2f5ff" font-family="Arial, sans-serif" font-size="31" font-weight="700">HELLDIVER</text>
+  <text x="160" y="124" text-anchor="middle" fill="#adb6d9" font-family="Arial, sans-serif" font-size="16">placeholder</text>
+</svg>
