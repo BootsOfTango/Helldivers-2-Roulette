@@ -1962,51 +1962,28 @@ END MASTER DIRECTIVE
             transition: border-color .2s ease, box-shadow .2s ease;
         }
 
-        .rankBarsPane {
-            display: grid;
-            grid-template-columns: 44px minmax(0, 1fr);
-            gap: 8px;
-            width: 100%;
-            min-height: 100%;
-        }
-
-        .rankGradeAxis {
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            align-items: center;
-            border: 1px solid var(--line2);
-            border-radius: 12px;
-            background: rgba(0,0,0,.34);
-            padding: 10px 4px;
-            color: rgba(255,255,255,.78);
-            font-family: var(--mono);
-            font-size: 11px;
-            line-height: 1;
-        }
-
         .rankRowMain {
-            flex: 1;
             min-width: 0;
+            flex: 1;
         }
 
-        .rankScoreBar {
-            width: 140px;
-            max-width: 100%;
-            height: 8px;
+        .rankRowBarWrap {
+            margin-top: 8px;
+            width: 100%;
+            height: 10px;
             border-radius: 999px;
-            border: 1px solid rgba(255,255,255,.2);
-            background: rgba(255,255,255,.08);
+            border: 1px solid rgba(255,255,255,.14);
+            background: linear-gradient(90deg, rgba(255,77,77,.22) 0%, rgba(255,190,74,.22) 45%, rgba(127,255,162,.18) 100%);
             overflow: hidden;
-            position: relative;
         }
 
-        .rankScoreBarFill {
+        .rankRowBar {
             height: 100%;
+            width: var(--grade-width, 0%);
+            min-width: 2px;
             border-radius: inherit;
-            background: linear-gradient(90deg, rgba(255,212,0,.45), rgba(255,212,0,.95));
-            box-shadow: 0 0 10px rgba(255,212,0,.35);
-            transition: width .25s ease;
+            background: linear-gradient(90deg, #ff8a4a 0%, #ffd95a 50%, #71ffaf 100%);
+            box-shadow: 0 0 10px rgba(255,217,90,.35);
         }
 
         .rankTierTopBar {
@@ -2691,6 +2668,32 @@ END MASTER DIRECTIVE
         }
 
         /* Make Rank list scroll if it gets tall */
+        .rankListColumn {
+            min-height: 520px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .rankGradeScale {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 8px;
+            font-family: var(--mono);
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: .2px;
+        }
+
+        .rankGradeScaleTop {
+            color: rgba(113,255,175,.92);
+        }
+
+        .rankGradeScaleBottom {
+            color: rgba(255,142,112,.92);
+        }
+
         #rankList {
             display: flex;
             flex-direction: column;
@@ -2711,7 +2714,6 @@ END MASTER DIRECTIVE
 
         #rankSplitView > div {
             min-height: 520px;
-            display: flex;
         }
 
         #rankDetailPanel {
@@ -4012,14 +4014,12 @@ END MASTER DIRECTIVE
             <div id="itemInsightCards" class="itemInsightCards"></div>
 
             <div id="rankSplitView">
-                <div>
-                    <div class="rankBarsPane">
-                        <div class="rankGradeAxis" aria-hidden="true">
-                            <span>100</span>
-                            <span>0</span>
-                        </div>
-                        <div id="rankList"></div>
+                <div class="rankListColumn">
+                    <div class="rankGradeScale">
+                        <span class="rankGradeScaleTop">Grade 100</span>
+                        <span class="rankGradeScaleBottom">Grade 0</span>
                     </div>
+                    <div id="rankList"></div>
                 </div>
                 <aside id="rankDetailPanel">
                     <div class="tiny muted">Select a ranked card to view details.</div>
@@ -10440,8 +10440,9 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             const radarMaxes = getRadarMaxes(state.cards);
 
-            filtered.forEach((c) => {
-                const place = filtered.findIndex(x => x.id === c.id) + 1;
+            filtered.forEach((c, index) => {
+                const place = index + 1;
+                const grade = clamp(Math.round(Number(c.grade || 0)), 0, 100);
 
                 const outer = document.createElement("div");
                 outer.className = "rankOuter rankAnimate";
@@ -10463,12 +10464,12 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                           <div class="rankRowMain">
                             <div style="font-weight:900;">#${place} • ${escapeHtml(formatSeedWithPlayer(c))}</div>
                             <div class="tiny">${escapeHtml(c.mode)} • ${escapeHtml(c.faction)} • ${escapeHtml(getPlayerName(c))} • ${escapeHtml(formatDifficultyLabel(c))} • <span class="muted">${escapeHtml(c.primary)}</span></div>
+                            <div class="rankRowBarWrap">
+                                <div class="rankRowBar" style="--grade-width:${grade}%;"></div>
+                            </div>
                           </div>
                           <div style="text-align:right; display:flex; flex-direction:column; align-items:flex-end; gap:6px;">
-                            <div class="badge yellow">Grade ${Number(c.grade || 0)}</div>
-                            <div class="rankScoreBar" role="presentation">
-                                <div class="rankScoreBarFill" style="width:${gradeScore}%;"></div>
-                            </div>
+                            <div class="badge yellow">Grade ${grade}</div>
                             <div class="tiny">Raw ${Number(c.scoreRaw || 0).toFixed(1)}</div>
                           </div>
                         `;
