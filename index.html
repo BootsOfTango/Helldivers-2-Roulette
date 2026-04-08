@@ -4547,9 +4547,13 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 card?.difficulty,
                 card?.missionDifficulty,
                 card?.difficultyLevel,
+                card?.difficultyLabel,
+                card?.difficultyText,
                 card?.level,
                 card?.Level,
-                card?.resultLevel
+                card?.resultLevel,
+                card?.tierTag,
+                card?.difficultyTier
             ];
 
             for (const value of candidateValues) {
@@ -4573,6 +4577,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const explicit = String(card?.difficultyTier || card?.tierTag || "").trim().toLowerCase();
             if (explicit === "helldiver") return "helldive";
             if (explicit === "cadet" || explicit === "veteran" || explicit === "helldive") return explicit;
+            if (explicit === "helldiver") return "helldive";
             return getDifficultyTier(getCardDifficulty(card));
         }
 
@@ -10321,8 +10326,9 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             });
             const rankScopeState = $("#rankScopeState");
             if (rankScopeState) {
+                const count = hasActiveTier ? state.cards.filter(card => cardMatchesTierRange(card, activeTier)).length : 0;
                 rankScopeState.textContent = hasActiveTier
-                    ? `${getDifficultyTierLabel(activeTier)} mode active • filtered to ${getTierRangeLabel(activeTier)}.`
+                    ? `${getDifficultyTierLabel(activeTier)} mode active • filtered to ${getTierRangeLabel(activeTier)} • ${count} card${count === 1 ? "" : "s"}.`
                     : "Select a tier above to display rank cards and details.";
             }
         }
@@ -10396,16 +10402,6 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 ? list.filter(c => cardMatchesTierRange(c, activeTier))
                 : [];
 
-            if (hasActiveTier && !filtered.length && list.length) {
-                const fallbackTier = getBestAvailableTier(list);
-                if (fallbackTier && fallbackTier !== activeTier) {
-                    activeTier = fallbackTier;
-                    selectedRankCardId = null;
-                    syncRankTierCardUi();
-                    filtered = list.filter(c => cardMatchesTierRange(c, activeTier));
-                }
-            }
-
             const box = $("#rankList");
             box.innerHTML = "";
 
@@ -10424,7 +10420,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             }
 
             if (!filtered.length) {
-                box.innerHTML = `<div class="tiny">No cards in this tier yet. Save/load cards with ${getTierRangeLabel(activeTier)} difficulty to populate this list.</div>`;
+                box.innerHTML = `<div class="tiny" style="padding:8px 10px; border:1px solid var(--line2); border-radius:10px; background:rgba(0,0,0,.22);">No ${escapeHtml(getDifficultyTierLabel(activeTier))} cards yet. Save/load cards with ${escapeHtml(getTierRangeLabel(activeTier))} difficulty to populate this leaderboard.</div>`;
                 renderRankDetailPanel(null, 0, getRadarMaxes(state.cards));
                 renderItemInsights(filtered);
                 renderRankAnalytics(filtered);
