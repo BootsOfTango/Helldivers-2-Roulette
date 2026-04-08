@@ -10651,6 +10651,15 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 outer.className = "rankOuter rankAnimate";
                 outer.style.setProperty("--rank-stagger", `${(place + animateOffset) * 65}ms`);
 
+        function renderRankFallbackList(cards = []) {
+            const box = $("#rankList");
+            if (!box) return;
+            box.innerHTML = "";
+            if (!cards.length) {
+                box.innerHTML = `<div class="tiny" style="padding:8px 10px; border:1px solid var(--line2); border-radius:10px; background:rgba(0,0,0,.22);">No cards found for the selected tier.</div>`;
+                return;
+            }
+            cards.forEach((c, idx) => {
                 const row = document.createElement("div");
                 row.className = "rankRow";
                 row.dataset.id = c.id;
@@ -11616,15 +11625,25 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         /***********************
          * Boot
          ***********************/
-        loadState();
-        preloadItemVisuals().then(() => renderItems());
-        saveState();      // ensures pills show correct saved count
+        // Boot sequence must stay resilient even if saved data is malformed.
+        // Wire UI controls first so tabs/buttons remain clickable.
         wireOnce();
-        initApp();
-        showFirstTimeBackupWarning();
-        switchTab("spin");
-        renderSpin();
-        setTimeout(() => { renderResults(); }, 0);
+        try {
+            loadState();
+        } catch (err) {
+            console.error("[boot] loadState failed; resetting runtime state", err);
+            state.items = deepClone(DEFAULTS.items);
+            state.cards = [];
+        }
+        preloadItemVisuals()
+            .then(() => renderItems())
+            .catch((err) => console.error("[boot] preload visuals failed", err));
+        try { saveState(); } catch (err) { console.error("[boot] saveState failed", err); }
+        initApp().catch((err) => console.error("[boot] initApp failed", err));
+        try { showFirstTimeBackupWarning(); } catch (err) { console.error("[boot] backup warning failed", err); }
+        try { switchTab("spin"); } catch (err) { console.error("[boot] switchTab failed", err); }
+        try { renderSpin(); } catch (err) { console.error("[boot] renderSpin failed", err); }
+        setTimeout(() => { try { renderResults(); } catch (err) { console.error("[boot] renderResults failed", err); } }, 0);
 
         /* ===== AUTO COMPARE RADAR WIRING ===== */
         function updateCompareRadar() {
