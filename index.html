@@ -4345,9 +4345,21 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         }
 
         function getCardDifficulty(card) {
-            const d = Number(card?.difficulty ?? 10);
-            if (!Number.isFinite(d)) return 10;
-            return clamp(Math.round(d), 1, 10);
+            const raw = card?.difficulty;
+            const numeric = Number(raw);
+            if (Number.isFinite(numeric)) {
+                return clamp(Math.round(numeric), 1, 10);
+            }
+
+            // Backward compatibility: old/imported cards can store strings like
+            // "D3", "Difficulty 6", etc. If parsing fails, fall back to D10.
+            const text = String(raw ?? "").trim();
+            const match = text.match(/\d+/);
+            if (match) {
+                return clamp(Math.round(Number(match[0])), 1, 10);
+            }
+
+            return 10;
         }
 
         function getDifficultyTier(difficulty) {
@@ -10118,11 +10130,9 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 return (b.createdAt || "").localeCompare(a.createdAt || "");
             });
 
-            const tierScopedList = hasActiveTier
+            const filtered = hasActiveTier
                 ? list.filter(c => cardMatchesTierRange(c, activeTier))
                 : [];
-
-            const filtered = tierScopedList;
 
             const box = $("#rankList");
             box.innerHTML = "";
@@ -10142,10 +10152,10 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             }
 
             if (!filtered.length) {
-                box.innerHTML = `<div class="tiny">No cards to rank yet.</div>`;
+                box.innerHTML = `<div class="tiny">No cards in this tier yet. Save/load cards with ${getTierRangeLabel(activeTier)} difficulty to populate this list.</div>`;
                 renderRankDetailPanel(null, 0, getRadarMaxes(state.cards));
-                renderItemInsights(state.cards);
-                renderRankAnalytics(state.cards);
+                renderItemInsights(filtered);
+                renderRankAnalytics(filtered);
                 return;
             }
 
@@ -10187,7 +10197,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                           </div>
                         `;
 
-                row.addEventListener("click", (e) => {
+                row.addEventListener("click", () => {
                     selectedRankCardId = c.id;
                     renderRank();
                 });
@@ -10198,8 +10208,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const selectedCard = filtered.find(c => c.id === selectedRankCardId) || filtered[0] || null;
             const selectedPlace = selectedCard ? (filtered.findIndex(x => x.id === selectedCard.id) + 1) : 0;
             renderRankDetailPanel(selectedCard, selectedPlace, radarMaxes);
-            renderItemInsights(state.cards);
-            renderRankAnalytics(state.cards);
+            renderItemInsights(filtered);
+            renderRankAnalytics(filtered);
         }
 
         /***********************
