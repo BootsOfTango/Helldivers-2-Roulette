@@ -10282,6 +10282,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 : null;
             if (!options.silent) playTone("success");
             activeTier = normalized;
+            playTone("success");
             selectedRankCardId = null;
             syncRankTierCardUi();
             try {
@@ -10291,6 +10292,19 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 const box = $("#rankList");
                 if (box) box.innerHTML = `<div class="tiny">Could not render this tier right now. Open console for details.</div>`;
             }
+        }
+
+        function getBestAvailableTier(cards = []) {
+            const rankedCards = Array.isArray(cards) ? cards : [];
+            const counts = {
+                cadet: rankedCards.filter(card => cardMatchesTierRange(card, "cadet")).length,
+                veteran: rankedCards.filter(card => cardMatchesTierRange(card, "veteran")).length,
+                helldive: rankedCards.filter(card => cardMatchesTierRange(card, "helldive")).length
+            };
+            if (counts.cadet > 0) return "cadet";
+            if (counts.veteran > 0) return "veteran";
+            if (counts.helldive > 0) return "helldive";
+            return null;
         }
 
         function cardMatchesTierRange(card, tier) {
@@ -10304,6 +10318,9 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
         function renderRank() {
             recalcGrades();
+            if (!["cadet", "veteran", "helldive"].includes(activeTier)) {
+                activeTier = getBestAvailableTier(state.cards);
+            }
             syncRankTierCardUi();
             const hasActiveTier = ["cadet", "veteran", "helldive"].includes(activeTier);
 
