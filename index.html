@@ -3049,7 +3049,7 @@ END MASTER DIRECTIVE
         }
 
 
-        /* ===== BACKGROUND FIX: LOGO ONLY ON EDGES ===== */
+        /* ===== BACKGROUND: ALWAYS-ON HELLDIVERS 2 LOGO ===== */
 
         html {
             background: #07080a;
@@ -3061,19 +3061,15 @@ END MASTER DIRECTIVE
             isolation: isolate;
         }
 
-            body::before {
-                content: "";
-                position: fixed;
-                /* slightly less oversized so letters aren't chopped */
-                inset: -10vh -10vw;
-                /* smaller than before (was 140vmax) */
-                background: url("assets/branding/helldivers-2-logo.svg") center / 90vmax no-repeat;
-                opacity: 0.14;
-                pointer-events: none;
-                z-index: -1;
-                -webkit-mask-image: radial-gradient(circle at center, transparent 0 42%, rgba(0,0,0,1) 60%, rgba(0,0,0,1) 100% );
-                mask-image: radial-gradient(circle at center, transparent 0 42%, rgba(0,0,0,1) 60%, rgba(0,0,0,1) 100% );
-            }
+        body::before {
+            content: "";
+            position: fixed;
+            inset: -10vh -10vw;
+            background: url("Helldivers-2-Logo.png.png") center / 90vmax no-repeat;
+            opacity: 0.12;
+            pointer-events: none;
+            z-index: -1;
+        }
         /* ===== MODE COLORS ===== */
 
         .mode-standard {
