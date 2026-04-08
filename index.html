@@ -2045,6 +2045,57 @@ END MASTER DIRECTIVE
             display: none !important;
         }
 
+        .rankAdvancedFiltersPanel {
+            margin-top: 10px;
+            border: 1px solid var(--line2);
+            border-radius: 12px;
+            background: rgba(0, 0, 0, .2);
+            overflow: hidden;
+        }
+
+        .rankAdvancedFiltersToggle {
+            width: 100%;
+            border: 0;
+            background: rgba(255, 255, 255, .03);
+            color: #edf3ff;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            padding: 11px 12px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: .3px;
+        }
+
+        .rankAdvancedFiltersToggle:hover {
+            background: rgba(255, 255, 255, .07);
+        }
+
+        .rankAdvancedFiltersToggleMeta {
+            color: rgba(231, 239, 255, .72);
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .rankAdvancedFiltersPanel.is-open .rankAdvancedFiltersToggleMeta::before {
+            content: "▾ ";
+        }
+
+        .rankAdvancedFiltersPanel:not(.is-open) .rankAdvancedFiltersToggleMeta::before {
+            content: "▸ ";
+        }
+
+        .rankAdvancedFiltersBody {
+            padding: 10px 10px 0;
+            border-top: 1px solid var(--line2);
+        }
+
+        .rankAdvancedFiltersPanel:not(.is-open) .rankAdvancedFiltersBody {
+            display: none;
+        }
+
         #tab-rank {
             --rank-focus-duration: 320ms;
         }
@@ -3850,41 +3901,49 @@ END MASTER DIRECTIVE
             </div>
 
             <div id="rankFocusPanel">
-            <div id="rankFilterControls" hidden>
-                <div class="row" style="margin-top:10px;">
-                <div class="col">
-                    <input id="rankSearch" placeholder="Search rank by player name..." />
-                </div>
-                <div class="col right">
-                    <div class="miniRow" style="justify-content:flex-end; gap:8px;">
-                        <select id="rankTierFilter" aria-label="Filter rank by tier">
-                            <option value="all">All tiers</option>
-                            <option value="helldive">Helldive tier (D7-D10)</option>
-                            <option value="veteran">Veteran tier (D4-D6)</option>
-                            <option value="cadet">Cadet tier (D1-D3)</option>
-                        </select>
-                        <select id="rankDifficultyFilter" aria-label="Filter rank by difficulty">
-                            <option value="all">All difficulties</option>
-                            <option value="1">D1</option>
-                            <option value="2">D2</option>
-                            <option value="3">D3</option>
-                            <option value="4">D4</option>
-                            <option value="5">D5</option>
-                            <option value="6">D6</option>
-                            <option value="7">D7</option>
-                            <option value="8">D8</option>
-                            <option value="9">D9</option>
-                            <option value="10">D10</option>
-                        </select>
-                        <select id="rankMoFilter" aria-label="Filter rank by major order status">
-                            <option value="all">All cards (MO done + fail)</option>
-                            <option value="done">MO DONE only</option>
-                            <option value="fail">MO FAIL only</option>
-                        </select>
+            <section id="rankAdvancedFiltersPanel" class="rankAdvancedFiltersPanel" aria-label="Advanced filters">
+                <button type="button" id="btnRankAdvancedFilters" class="rankAdvancedFiltersToggle" aria-expanded="false">
+                    <span>Advanced Filters</span>
+                    <span class="rankAdvancedFiltersToggleMeta">Collapsed</span>
+                </button>
+                <div id="rankAdvancedFiltersBody" class="rankAdvancedFiltersBody">
+                    <div id="rankFilterControls">
+                        <div class="row" style="margin-top:0;">
+                            <div class="col">
+                                <input id="rankSearch" placeholder="Search rank by player name..." />
+                            </div>
+                            <div class="col right">
+                                <div class="miniRow" style="justify-content:flex-end; gap:8px;">
+                                    <select id="rankTierFilter" aria-label="Filter rank by tier">
+                                        <option value="all">All tiers</option>
+                                        <option value="helldive">Helldive tier (D7-D10)</option>
+                                        <option value="veteran">Veteran tier (D4-D6)</option>
+                                        <option value="cadet">Cadet tier (D1-D3)</option>
+                                    </select>
+                                    <select id="rankDifficultyFilter" aria-label="Filter rank by difficulty">
+                                        <option value="all">All difficulties</option>
+                                        <option value="1">D1</option>
+                                        <option value="2">D2</option>
+                                        <option value="3">D3</option>
+                                        <option value="4">D4</option>
+                                        <option value="5">D5</option>
+                                        <option value="6">D6</option>
+                                        <option value="7">D7</option>
+                                        <option value="8">D8</option>
+                                        <option value="9">D9</option>
+                                        <option value="10">D10</option>
+                                    </select>
+                                    <select id="rankMoFilter" aria-label="Filter rank by major order status">
+                                        <option value="all">All cards (MO done + fail)</option>
+                                        <option value="done">MO DONE only</option>
+                                        <option value="fail">MO FAIL only</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-            </div>
+            </section>
 
             <div class="divider"></div>
 
@@ -10131,15 +10190,6 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 globalBtn.classList.toggle("is-active", isGlobal);
                 globalBtn.setAttribute("aria-pressed", isGlobal ? "true" : "false");
             }
-            const rankTab = $("#tab-rank");
-            if (rankTab) {
-                rankTab.classList.toggle("rank-mode-focused", activeTier !== "all");
-                rankTab.classList.toggle("rank-mode-overview", activeTier === "all");
-            }
-            const filterControls = $("#rankFilterControls");
-            if (filterControls) {
-                filterControls.hidden = activeTier === "all";
-            }
             const tierFilter = $("#rankTierFilter");
             if (tierFilter && tierFilter.value !== activeTier) {
                 tierFilter.value = activeTier;
@@ -10152,12 +10202,23 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             }
         }
 
-        function setActiveTier(nextTier) {
+        function setRankAdvancedFiltersOpen(isOpen) {
+            const panel = $("#rankAdvancedFiltersPanel");
+            const toggle = $("#btnRankAdvancedFilters");
+            if (!panel || !toggle) return;
+            panel.classList.toggle("is-open", !!isOpen);
+            toggle.setAttribute("aria-expanded", isOpen ? "true" : "false");
+            const meta = toggle.querySelector(".rankAdvancedFiltersToggleMeta");
+            if (meta) meta.textContent = isOpen ? "Expanded" : "Collapsed";
+        }
+
+        function setActiveTier(nextTier, opts = {}) {
             const normalized = ["cadet", "veteran", "helldive"].includes(String(nextTier || "").toLowerCase())
                 ? String(nextTier).toLowerCase()
                 : "all";
             activeTier = normalized;
             syncRankTierCardUi();
+            if (opts.autoExpandFilters) setRankAdvancedFiltersOpen(true);
             renderRank();
         }
 
@@ -10859,15 +10920,20 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             $("#cmpSearch").addEventListener("input", refreshCompareOptions);
             $("#rankSearch").addEventListener("input", renderRank);
             $("#rankMoFilter").addEventListener("change", renderRank);
-            $("#rankTierFilter")?.addEventListener("change", (e) => setActiveTier(e.target.value));
+            $("#rankTierFilter")?.addEventListener("change", (e) => setActiveTier(e.target.value, { autoExpandFilters: true }));
             $("#rankDifficultyFilter")?.addEventListener("change", renderRank);
-            $("#btnRankGlobal")?.addEventListener("click", () => setActiveTier("all"));
+            $("#btnRankAdvancedFilters")?.addEventListener("click", () => {
+                const isOpen = $("#rankAdvancedFiltersPanel")?.classList.contains("is-open");
+                setRankAdvancedFiltersOpen(!isOpen);
+            });
+            setRankAdvancedFiltersOpen(false);
+            $("#btnRankGlobal")?.addEventListener("click", () => setActiveTier("all", { autoExpandFilters: true }));
             $$("#rankTierCards .rankTierCard").forEach((btn) => {
-                btn.addEventListener("click", () => setActiveTier(btn.dataset.tier || "all"));
+                btn.addEventListener("click", () => setActiveTier(btn.dataset.tier || "all", { autoExpandFilters: true }));
                 btn.addEventListener("keydown", (e) => {
                     if (e.key === "Enter" || e.key === " ") {
                         e.preventDefault();
-                        setActiveTier(btn.dataset.tier || "all");
+                        setActiveTier(btn.dataset.tier || "all", { autoExpandFilters: true });
                     }
                 });
             });
