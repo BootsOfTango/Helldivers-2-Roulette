@@ -4104,8 +4104,13 @@ END MASTER DIRECTIVE
         let WIRED_ONCE = false;
         function wireOnce() {
             if (WIRED_ONCE) return;
-            WIRED_ONCE = true;
-            wire();
+            try {
+                wire();
+                WIRED_ONCE = true;
+            } catch (err) {
+                WIRED_ONCE = false;
+                console.error("[wire] failed during event wiring", err);
+            }
         }
 
 
