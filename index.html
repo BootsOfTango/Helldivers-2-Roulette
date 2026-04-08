@@ -1959,13 +1959,13 @@ END MASTER DIRECTIVE
             text-align: left;
             color: #e8eef7;
             cursor: pointer;
-            min-height: 148px;
+            min-height: 182px;
             display: flex;
             flex-direction: column;
             justify-content: flex-start;
             align-items: stretch;
             gap: 8px;
-            overflow: hidden;
+            overflow: visible;
             transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease, background .2s ease;
         }
 
@@ -2015,16 +2015,27 @@ END MASTER DIRECTIVE
             color: #ff6565;
         }
 
-        .rankTierThumb {
+        .rankTierThumbFrame {
             width: 100%;
-            height: 78px;
+            height: 102px;
             border-radius: 10px;
             border: 1px solid rgba(255,255,255,.14);
-            object-fit: contain;
-            object-position: center top;
-            padding: 0 4px;
             margin-bottom: 4px;
             background: radial-gradient(circle at 50% 22%, rgba(34, 42, 66, .6), rgba(0,0,0,.45));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .rankTierThumb {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            object-position: center center;
+            padding: 4px 8px;
+            transform: scale(1.24);
+            transform-origin: center center;
         }
 
         #rankScopeState {
@@ -3818,17 +3829,23 @@ END MASTER DIRECTIVE
             <div class="rankTierTopBar">
                 <div class="rankTierCards" id="rankTierCards">
                     <button type="button" class="rankTierCard" data-tier="cadet" aria-pressed="false">
-                        <img class="rankTierThumb" src="cadet.png" alt="Cadet tier visual" onerror="this.onerror=null;this.src='assets/placeholders/rank-tiers/cadet-placeholder.svg';" />
+                        <span class="rankTierThumbFrame">
+                            <img class="rankTierThumb" src="cadet.png" alt="Cadet tier visual" onerror="this.onerror=null;this.src='assets/placeholders/rank-tiers/cadet-placeholder.svg';" />
+                        </span>
                         <span class="rankTierCardName">Cadet</span>
                         <span class="rankTierCardRange">Levels 1-3</span>
                     </button>
                     <button type="button" class="rankTierCard" data-tier="veteran" aria-pressed="false">
-                        <img class="rankTierThumb" src="veteran.png" alt="Veteran tier visual" onerror="this.onerror=null;this.src='assets/placeholders/rank-tiers/veteran-placeholder.svg';" />
+                        <span class="rankTierThumbFrame">
+                            <img class="rankTierThumb" src="veteran.png" alt="Veteran tier visual" onerror="this.onerror=null;this.src='assets/placeholders/rank-tiers/veteran-placeholder.svg';" />
+                        </span>
                         <span class="rankTierCardName">Veteran</span>
                         <span class="rankTierCardRange">Levels 4-6</span>
                     </button>
                     <button type="button" class="rankTierCard" data-tier="helldive" aria-pressed="false">
-                        <img class="rankTierThumb" src="helldive.png" alt="Helldiver tier visual" onerror="this.onerror=null;this.src='assets/placeholders/rank-tiers/helldiver-placeholder.svg';" />
+                        <span class="rankTierThumbFrame">
+                            <img class="rankTierThumb" src="helldive.png" alt="Helldiver tier visual" onerror="this.onerror=null;this.src='assets/placeholders/rank-tiers/helldiver-placeholder.svg';" />
+                        </span>
                         <span class="rankTierCardName">Helldiver</span>
                         <span class="rankTierCardRange">Levels 7-10</span>
                     </button>
@@ -4345,7 +4362,17 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         }
 
         function getCardDifficulty(card) {
-            const raw = card?.difficulty;
+            const candidateValues = [
+                card?.difficulty,
+                card?.difficultySelected,
+                card?.missionDifficulty,
+                card?.difficultyLevel
+            ];
+
+            let raw = candidateValues.find(v => v !== undefined && v !== null && String(v).trim() !== "");
+            if (raw === undefined || raw === null || String(raw).trim() === "") {
+                raw = card?.tier;
+            }
             const numeric = Number(raw);
             if (Number.isFinite(numeric)) {
                 return clamp(Math.round(numeric), 1, 10);
@@ -4354,6 +4381,10 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             // Backward compatibility: old/imported cards can store strings like
             // "D3", "Difficulty 6", etc. If parsing fails, fall back to D10.
             const text = String(raw ?? "").trim();
+            if (text === "cadet") return 2;
+            if (text === "veteran") return 5;
+            if (text === "helldive" || text === "helldiver" || text === "rainbow") return 9;
+
             const match = text.match(/\d+/);
             if (match) {
                 return clamp(Math.round(Number(match[0])), 1, 10);
@@ -10116,7 +10147,17 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const range = TIER_DIFFICULTY_RANGES[tier];
             if (!range) return true;
             const difficulty = getCardDifficulty(card);
-            return difficulty >= range.min && difficulty <= range.max;
+            if (difficulty >= range.min && difficulty <= range.max) return true;
+
+            const legacyTier = String(card?.tier || "").toLowerCase();
+            if (legacyTier && ["cadet", "veteran", "helldive", "helldiver", "rainbow"].includes(legacyTier)) {
+                const normalizedLegacyTier = legacyTier === "helldiver" || legacyTier === "rainbow"
+                    ? "helldive"
+                    : legacyTier;
+                return normalizedLegacyTier === tier;
+            }
+
+            return false;
         }
 
         function renderRank() {
