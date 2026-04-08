@@ -1971,6 +1971,7 @@ END MASTER DIRECTIVE
                 0 0 14px rgba(255, 221, 87, .3),
                 inset 0 0 10px rgba(255, 233, 112, .14);
             background: rgba(20, 24, 38, .88);
+            transform: scale(1.03);
         }
 
         .rankTierCardName {
@@ -1989,6 +1990,33 @@ END MASTER DIRECTIVE
 
         #rankFilterControls[hidden] {
             display: none !important;
+        }
+
+        #tab-rank {
+            --rank-focus-duration: 320ms;
+        }
+
+        #tab-rank.rank-mode-overview #rankFocusPanel {
+            opacity: 0;
+            transform: translateY(16px);
+            pointer-events: none;
+            max-height: 0;
+            overflow: hidden;
+        }
+
+        #tab-rank.rank-mode-focused #rankFocusPanel {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+            max-height: 2600px;
+        }
+
+        #rankFocusPanel {
+            transition:
+                opacity var(--rank-focus-duration) ease,
+                transform var(--rank-focus-duration) ease,
+                max-height var(--rank-focus-duration) ease;
+            will-change: opacity, transform, max-height;
         }
 
         .rankRow.isSelected {
@@ -3701,6 +3729,7 @@ END MASTER DIRECTIVE
                 </div>
             </div>
 
+            <div id="rankFocusPanel">
             <div id="rankFilterControls" hidden>
                 <div class="row" style="margin-top:10px;">
                 <div class="col">
@@ -3754,6 +3783,7 @@ END MASTER DIRECTIVE
                 </aside>
             </div>
             <div class="smallHelp">Rim colors represent difficulty tiers: Cadet (D1-D3), Veteran (D4-D6), Helldive (D7-D10). Place # is still shown in each filtered leaderboard.</div>
+            </div>
         </section>
 
     </main>
@@ -5160,6 +5190,11 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         let itemImageDb = null;
         let selectedRankCardId = null;
         let activeTier = "all";
+        const TIER_DIFFICULTY_RANGES = {
+            cadet: { min: 1, max: 3 },
+            veteran: { min: 4, max: 6 },
+            helldive: { min: 7, max: 10 }
+        };
         let lastActionCue = "";
         let pendingNewCardHighlightId = null;
         const manualPlanetSearchGroupState = new Map();
@@ -9881,6 +9916,11 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 btn.classList.toggle("is-active", isActive);
                 btn.setAttribute("aria-pressed", isActive ? "true" : "false");
             });
+            const rankTab = $("#tab-rank");
+            if (rankTab) {
+                rankTab.classList.toggle("rank-mode-focused", activeTier !== "all");
+                rankTab.classList.toggle("rank-mode-overview", activeTier === "all");
+            }
             const filterControls = $("#rankFilterControls");
             if (filterControls) {
                 filterControls.hidden = activeTier === "all";
@@ -9900,6 +9940,13 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             renderRank();
         }
 
+        function cardMatchesTierRange(card, tier) {
+            const range = TIER_DIFFICULTY_RANGES[tier];
+            if (!range) return true;
+            const difficulty = getCardDifficulty(card);
+            return difficulty >= range.min && difficulty <= range.max;
+        }
+
         function renderRank() {
             recalcGrades();
             syncRankTierCardUi();
@@ -9914,7 +9961,11 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 return (b.createdAt || "").localeCompare(a.createdAt || "");
             });
 
-            let filtered = list;
+            const tierScopedList = activeTier === "all"
+                ? list
+                : list.filter(c => cardMatchesTierRange(c, activeTier));
+
+            let filtered = tierScopedList;
             const effectiveTierFilter = rankTierFilter !== "all" ? rankTierFilter : activeTier;
             if (rankMoFilter === "done") {
                 filtered = filtered.filter(c => !!c.majorOrderDone);
@@ -9922,7 +9973,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 filtered = filtered.filter(c => !c.majorOrderDone);
             }
             if (effectiveTierFilter !== "all") {
-                filtered = filtered.filter(c => getDifficultyTier(getCardDifficulty(c)) === effectiveTierFilter);
+                filtered = filtered.filter(c => cardMatchesTierRange(c, effectiveTierFilter));
             }
             if (rankDifficultyFilter !== "all") {
                 const targetDifficulty = clamp(Math.round(Number(rankDifficultyFilter || 10)), 1, 10);
@@ -10589,6 +10640,12 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             $("#rankDifficultyFilter")?.addEventListener("change", renderRank);
             $$("#rankTierCards .rankTierCard").forEach((btn) => {
                 btn.addEventListener("click", () => setActiveTier(btn.dataset.tier || "all"));
+                btn.addEventListener("keydown", (e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        setActiveTier(btn.dataset.tier || "all");
+                    }
+                });
             });
             $("#itemSearch").addEventListener("input", renderItems);
             $("#itemsViewMode").addEventListener("change", (e) => {
