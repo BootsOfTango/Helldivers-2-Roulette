@@ -10601,6 +10601,20 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 }
             }
 
+            // If the currently selected tier has no cards but Results has cards,
+            // auto-recover to the most populated tier so Rank never appears empty.
+            if (hasActiveTier && !filtered.length && list.length) {
+                const recoveredTier = pickMostPopulatedTier(list);
+                if (recoveredTier && recoveredTier !== activeTier) {
+                    activeTier = recoveredTier;
+                    syncRankTierCardUi();
+                    filtered = list.filter(c => cardMatchesTierRange(c, activeTier));
+                    if (!filtered.some(c => c.id === selectedRankCardId)) {
+                        selectedRankCardId = filtered[0]?.id || null;
+                    }
+                }
+            }
+
             const box = $("#rankList");
             box.innerHTML = "";
 
@@ -10721,6 +10735,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 if (box && !box.children.length) {
                     box.innerHTML = `<div class="tiny" style="padding:8px 10px; border:1px solid var(--line2); border-radius:10px; background:rgba(0,0,0,.22);">Unable to render rank right now. Try changing tiers or refreshing the page.</div>`;
                 }
+                try { renderItemInsights(tierFiltered); } catch (insightErr) { console.error("[rank] fallback insights failed", insightErr); }
+                try { renderRankAnalytics(tierFiltered); } catch (analyticsErr) { console.error("[rank] fallback analytics failed", analyticsErr); }
             }
         }
 
