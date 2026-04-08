@@ -422,6 +422,9 @@ END MASTER DIRECTIVE
             gap: 10px;
             flex-wrap: wrap;
             padding: 10px 0 14px;
+            position: relative;
+            z-index: 1200;
+            pointer-events: auto;
         }
 
         .tabBtn {
@@ -435,6 +438,21 @@ END MASTER DIRECTIVE
             font-weight: 600;
             font-size: 12px;
             transition: .15s ease;
+            pointer-events: auto;
+            position: relative;
+            z-index: 1201;
+        }
+
+        .btnRow {
+            position: relative;
+            z-index: 1100;
+            pointer-events: auto;
+        }
+
+        #btnSpin {
+            pointer-events: auto;
+            position: relative;
+            z-index: 1201;
         }
 
             .tabBtn:hover {
