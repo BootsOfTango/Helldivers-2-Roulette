@@ -2140,8 +2140,9 @@ END MASTER DIRECTIVE
         }
 
         .rankOuter.rankAnimate {
-            opacity: 0;
-            transform: translateY(-14px);
+            /* Keep rows visible even when animations are disabled by browser/OS settings. */
+            opacity: 1;
+            transform: translateY(0);
             animation: rankRowDropIn .36s ease forwards;
             animation-delay: var(--rank-stagger, 0ms);
         }
@@ -2171,6 +2172,14 @@ END MASTER DIRECTIVE
                     0 0 0 1px rgba(255, 233, 112, .75),
                     0 0 24px rgba(255, 221, 87, .60),
                     inset 0 0 14px rgba(255, 233, 112, .24);
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .rankOuter.rankAnimate {
+                animation: none;
+                opacity: 1;
+                transform: none;
             }
         }
 
