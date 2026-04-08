@@ -4573,12 +4573,16 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             return "helldive";
         }
 
-        function getCardDifficultyTier(card) {
+        function resolveCardDifficultyTier(card) {
             const explicit = String(card?.difficultyTier || card?.tierTag || "").trim().toLowerCase();
             if (explicit === "helldiver") return "helldive";
             if (explicit === "cadet" || explicit === "veteran" || explicit === "helldive") return explicit;
             if (explicit === "helldiver") return "helldive";
             return getDifficultyTier(getCardDifficulty(card));
+        }
+
+        function getCardDifficultyTier(card) {
+            return resolveCardDifficultyTier(card);
         }
 
         function getDifficultyTierLabel(tier) {
@@ -7760,13 +7764,13 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             for (const card of list) {
                 const moBadge = card.majorOrderDone ? `<span class="badge good">MO DONE</span>` : `<span class="badge red">MO NO</span>`;
-                const tier = tierMap.get(card.id) || "";
-                const difficultyTier = getCardDifficultyTier(card);
+                const placementTier = tierMap.get(card.id) || "";
+                const difficultyTier = resolveCardDifficultyTier(card);
                 const difficultyTierLabel = getDifficultyTierLabel(difficultyTier);
                 const factionClass = getFactionClass(card.faction);
                 const factionStickerData = getFactionStickerData(card.faction);
                 const el = document.createElement("div");
-                el.className = "card resultCard" + (tier ? ` tier-${tier}` : "");
+                el.className = "card resultCard" + (placementTier ? ` tier-${placementTier}` : "");
                 if (pendingNewCardHighlightId && card.id === pendingNewCardHighlightId) {
                     el.classList.add("resultCard-newly-created");
                     highlightedCardEl = el;
@@ -10329,7 +10333,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const rankScopeState = $("#rankScopeState");
             if (rankScopeState) {
                 const total = state.cards.length;
-                const filteredCount = hasActiveTier ? state.cards.filter(card => cardMatchesTierRange(card, activeTier)).length : 0;
+                const filteredCount = hasActiveTier ? state.cards.filter(card => resolveCardDifficultyTier(card) === activeTier).length : 0;
                 const baseText = hasActiveTier
                     ? `${getDifficultyTierLabel(activeTier)} mode active • filtered to ${getTierRangeLabel(activeTier)} • ${filteredCount} card${filteredCount === 1 ? "" : "s"}.`
                     : "Select a tier above to display rank cards and details.";
@@ -10392,13 +10396,13 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         function cardMatchesTierRange(card, tier) {
             const range = TIER_DIFFICULTY_RANGES[tier];
             if (!range) return true;
-            const cardTier = getCardDifficultyTier(card);
-            if (cardTier === tier) {
+            const cardDifficultyTier = resolveCardDifficultyTier(card);
+            if (cardDifficultyTier === tier) {
                 if (DEBUG_RANK) {
                     console.log("[rank-debug] cardMatchesTierRange", {
                         cardId: card?.id,
                         tier,
-                        cardTier,
+                        cardDifficultyTier,
                         result: true,
                         reason: "tier-match"
                     });
@@ -10411,7 +10415,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 console.log("[rank-debug] cardMatchesTierRange", {
                     cardId: card?.id,
                     tier,
-                    cardTier,
+                    cardDifficultyTier,
                     difficulty,
                     range,
                     result: inRange,
@@ -10511,8 +10515,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                     row.classList.add("isSelected");
                 }
 
-                const tier = getCardDifficultyTier(c);
-                row.classList.add(`rim-${tier}`);
+                const cardDifficultyTier = resolveCardDifficultyTier(c);
+                row.classList.add(`rim-${cardDifficultyTier}`);
                 const gradeScore = clamp(Number(c.grade || 0), 0, 100);
 
                 row.innerHTML = `
