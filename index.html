@@ -6422,7 +6422,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             state.cards = normalizeCardsCollection(state.cards);
             recalcGrades();
-            renderRank();
+            safeRenderRank("refreshItemInsightsFromJson");
             saveState();
 
             if (catalogResult.status === "rejected") {
@@ -7412,7 +7412,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 .sort((a, b) => {
                     const g = Number(b.grade || 0) - Number(a.grade || 0);
                     if (g !== 0) return g;
-                    return (b.createdAt || "").localeCompare(a.createdAt || "");
+                    return String(b?.createdAt || "").localeCompare(String(a?.createdAt || ""));
                 });
 
             const map = new Map(); // id -> tier string
@@ -7424,6 +7424,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         function recalcGrades() {
             // Backward-compat: older cards may have stats at top-level.
             for (const c of state.cards) {
+                if (!c || typeof c !== "object") continue;
                 if (!c.stats || typeof c.stats !== "object") c.stats = {};
                 const s = c.stats;
 
@@ -7768,10 +7769,10 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             }
 
             const sorter = {
-                new: (a, b) => (b.createdAt || "").localeCompare(a.createdAt || ""),
-                old: (a, b) => (a.createdAt || "").localeCompare(b.createdAt || ""),
-                player_asc: (a, b) => getPlayerName(a).localeCompare(getPlayerName(b)) || (b.createdAt || "").localeCompare(a.createdAt || ""),
-                player_desc: (a, b) => getPlayerName(b).localeCompare(getPlayerName(a)) || (b.createdAt || "").localeCompare(a.createdAt || ""),
+                new: (a, b) => String(b?.createdAt || "").localeCompare(String(a?.createdAt || "")),
+                old: (a, b) => String(a?.createdAt || "").localeCompare(String(b?.createdAt || "")),
+                player_asc: (a, b) => getPlayerName(a).localeCompare(getPlayerName(b)) || String(b?.createdAt || "").localeCompare(String(a?.createdAt || "")),
+                player_desc: (a, b) => getPlayerName(b).localeCompare(getPlayerName(a)) || String(b?.createdAt || "").localeCompare(String(a?.createdAt || "")),
                 kills_desc: (a, b) => (Number(b.stats.kills || 0) - Number(a.stats.kills || 0)),
                 deaths_asc: (a, b) => (Number(a.stats.deaths || 0) - Number(b.stats.deaths || 0)),
                 stims_asc: (a, b) => (Number(a.stats.stims || 0) - Number(b.stats.stims || 0)),
@@ -8552,7 +8553,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             recalcGrades();
             // saveState();
             updateHeaderPills();
-            renderRank();
+            safeRenderRank("onCardFieldChange");
             refreshCompareOptions();
             // keep results view stable, no full redraw per keystroke except textarea input is fine
         }
@@ -8654,7 +8655,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             const opts = state.cards
                 .slice()
-                .sort((x, y) => (y.createdAt || "").localeCompare(x.createdAt || ""))
+                .sort((x, y) => String(y?.createdAt || "").localeCompare(String(x?.createdAt || "")))
                 .map(c => ({ id: c.id, text: `${getPlayerName(c)} • ${c.seed} • ${c.mode} • ${c.faction} • ${formatDifficultyLabel(c)} • Grade ${c.grade || 0}` }));
 
             const build = (sel) => {
@@ -10099,7 +10100,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         }
 
         function buildItemAnalytics(cards = []) {
-            const sorted = cards.slice().sort((a, b) => (a.createdAt || "").localeCompare(b.createdAt || ""));
+            const sorted = cards.slice().sort((a, b) => String(a?.createdAt || "").localeCompare(String(b?.createdAt || "")));
             const byKey = new Map();
 
             const now = Date.now();
@@ -10455,7 +10456,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const list = state.cards.slice().sort((a, b) => {
                 const g = Number(b.grade || 0) - Number(a.grade || 0);
                 if (g !== 0) return g;
-                return (b.createdAt || "").localeCompare(a.createdAt || "");
+                return String(b?.createdAt || "").localeCompare(String(a?.createdAt || ""));
             });
 
             let filtered = hasActiveTier
@@ -10533,7 +10534,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
                 row.addEventListener("click", () => {
                     selectedRankCardId = c.id;
-                    renderRank();
+                    safeRenderRank("rankRow:select");
                 });
 
                 outer.appendChild(row);
@@ -11027,7 +11028,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                     saveState();
                     renderItems();
                     renderResults();
-                    renderRank();
+                    safeRenderRank("importJSONFile");
                     refreshCompareOptions();
                     drawGraph();
                     alert("Import complete.");
@@ -11216,14 +11217,14 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 renderSpin();
                 renderResults();
                 refreshCompareOptions();
-                renderRank();
+                safeRenderRank("btnClearAll");
                 renderItems();
                 loadAndRenderApiActivePlanets();
             });
 
             $("#btnRecalcRanks").addEventListener("click", () => {
                 recalcGrades();
-                renderRank();
+                safeRenderRank("btnRecalcRanks");
                 alert("Ranks recalculated.");
             });
             $("#btnRefreshItemInsights")?.addEventListener("click", refreshItemInsightsFromJson);
@@ -11339,7 +11340,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 if (sortMetric === "playerName") {
                     const d = getPlayerName(x).localeCompare(getPlayerName(y)) * dir;
                     if (d !== 0) return d;
-                    return (y.createdAt || "").localeCompare(x.createdAt || "");
+                    return String(y?.createdAt || "").localeCompare(String(x?.createdAt || ""));
                 }
 
                 const vx = (sortMetric === "grade")
@@ -11358,7 +11359,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 if (d !== 0) return d;
 
                 // tie-breaker: newest first
-                return (y.createdAt || "").localeCompare(x.createdAt || "");
+                return String(y?.createdAt || "").localeCompare(String(x?.createdAt || ""));
             });
 
             const prevA = a.value, prevB = b.value;
