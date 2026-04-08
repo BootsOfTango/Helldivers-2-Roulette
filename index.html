@@ -10603,11 +10603,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             const list = (Array.isArray(state.cards) ? state.cards : [])
                 .filter(card => card && typeof card === "object")
-                .sort((a, b) => {
-                    const g = Number(b?.grade || 0) - Number(a?.grade || 0);
-                    if (g !== 0) return g;
-                    return String(b?.createdAt || "").localeCompare(String(a?.createdAt || ""));
-                });
+                .sort((a, b) => Number(b?.grade || 0) - Number(a?.grade || 0) || String(b?.createdAt || "").localeCompare(String(a?.createdAt || "")));
 
             const grouped = {
                 cadet: list.filter(c => cardMatchesTierRange(c, "cadet")),
