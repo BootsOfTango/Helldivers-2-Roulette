@@ -10354,6 +10354,60 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
          ***********************/
         const DEBUG_RANK = true;
 
+        function logRankLayoutState(contextLabel, rowCount) {
+            if (!DEBUG_RANK) return;
+            const rankTab = $("#tab-rank");
+            const focusPanel = $("#rankFocusPanel");
+            const listColumn = document.querySelector(".rankListColumn");
+            const rankList = $("#rankList");
+            if (!rankTab || !focusPanel || !listColumn || !rankList) return;
+
+            const focusPanelStyle = window.getComputedStyle(focusPanel);
+            const listColumnStyle = window.getComputedStyle(listColumn);
+            const rankListStyle = window.getComputedStyle(rankList);
+
+            const focusRect = focusPanel.getBoundingClientRect();
+            const colRect = listColumn.getBoundingClientRect();
+            const listRect = rankList.getBoundingClientRect();
+
+            const viewport = window.innerWidth;
+            const breakpoint = viewport <= 780
+                ? "narrow<=780"
+                : (viewport <= 1100 ? "medium<=1100" : "desktop>1100");
+
+            console.groupCollapsed(`[rank-debug] layout:${contextLabel}`);
+            console.log("breakpoint", breakpoint, "viewport", viewport);
+            console.log("rowsGenerated", rowCount, "rowsInDom", rankList.children.length);
+            console.log("rankTabMode", {
+                focused: rankTab.classList.contains("rank-mode-focused"),
+                overview: rankTab.classList.contains("rank-mode-overview")
+            });
+            console.log("#rankFocusPanel", {
+                display: focusPanelStyle.display,
+                opacity: focusPanelStyle.opacity,
+                maxHeight: focusPanelStyle.maxHeight,
+                overflow: focusPanelStyle.overflow,
+                pointerEvents: focusPanelStyle.pointerEvents,
+                rectHeight: Number(focusRect.height.toFixed(2))
+            });
+            console.log(".rankListColumn", {
+                minHeight: listColumnStyle.minHeight,
+                height: listColumnStyle.height,
+                display: listColumnStyle.display,
+                overflow: listColumnStyle.overflow,
+                rectHeight: Number(colRect.height.toFixed(2))
+            });
+            console.log("#rankList", {
+                minHeight: rankListStyle.minHeight,
+                height: rankListStyle.height,
+                overflowY: rankListStyle.overflowY,
+                scrollHeight: rankList.scrollHeight,
+                clientHeight: rankList.clientHeight,
+                rectHeight: Number(listRect.height.toFixed(2))
+            });
+            console.groupEnd();
+        }
+
         function syncRankTierCardUi() {
             const cards = $$("#rankTierCards .rankTierCard");
             const rankTab = $("#tab-rank");
@@ -10518,6 +10572,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 renderRankDetailPanel(null, 0, getRadarMaxes(state.cards));
                 renderItemInsights(filtered);
                 renderRankAnalytics(filtered);
+                logRankLayoutState("empty-filtered", 0);
                 return;
             }
 
@@ -10572,6 +10627,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 outer.appendChild(row);
                 box.appendChild(outer);
             });
+            logRankLayoutState("rows-rendered", filtered.length);
             const selectedCard = filtered.find(c => c.id === selectedRankCardId) || filtered[0] || null;
             const selectedPlace = selectedCard ? (filtered.findIndex(x => x.id === selectedCard.id) + 1) : 0;
             renderRankDetailPanel(selectedCard, selectedPlace, radarMaxes);
