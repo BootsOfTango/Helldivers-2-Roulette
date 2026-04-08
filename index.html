@@ -4065,7 +4065,7 @@ END MASTER DIRECTIVE
                     </button>
                 </div>
             </div>
-            <div id="rankScopeState" class="tiny">Select a tier above to display rank cards and details.</div>
+            <div id="rankScopeState" class="tiny">Showing all result cards grouped by difficulty tier.</div>
 
             <div id="rankFocusPanel">
 
@@ -10502,11 +10502,12 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             });
             const rankScopeState = $("#rankScopeState");
             if (rankScopeState) {
-                const totalCount = Array.isArray(state.cards) ? state.cards.length : 0;
-                const filteredCount = hasActiveTier ? state.cards.filter(card => resolveCardDifficultyTier(card) === activeTier).length : totalCount;
+                const filteredCount = hasActiveTier
+                    ? state.cards.filter(card => cardMatchesTierRange(card, activeTier)).length
+                    : (Array.isArray(state.cards) ? state.cards.length : 0);
                 const baseText = hasActiveTier
-                    ? `${getDifficultyTierLabel(activeTier)} mode active • filtered to ${getTierRangeLabel(activeTier)} • ${filteredCount} card${filteredCount === 1 ? "" : "s"}.`
-                    : `All Results cards • grouped by Cadet / Veteran / Helldive • ${filteredCount} card${filteredCount === 1 ? "" : "s"} total.`;
+                    ? `${getDifficultyTierLabel(activeTier)} filter active • ${getTierRangeLabel(activeTier)} • ${filteredCount} card${filteredCount === 1 ? "" : "s"} from Results.`
+                    : `Showing all Results cards grouped by difficulty tier • ${filteredCount} card${filteredCount === 1 ? "" : "s"}.`;
                 rankScopeState.textContent = baseText;
             }
         }
@@ -10573,9 +10574,12 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                     return String(b?.createdAt || "").localeCompare(String(a?.createdAt || ""));
                 });
 
-            let filtered = hasActiveTier
-                ? list.filter(c => cardMatchesTierRange(c, activeTier))
-                : list;
+            const grouped = {
+                cadet: list.filter(c => cardMatchesTierRange(c, "cadet")),
+                veteran: list.filter(c => cardMatchesTierRange(c, "veteran")),
+                helldive: list.filter(c => cardMatchesTierRange(c, "helldive"))
+            };
+            let filtered = hasActiveTier ? grouped[activeTier] : list;
 
             const box = $("#rankList");
             box.innerHTML = "";
@@ -10585,10 +10589,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             }
 
             if (!filtered.length) {
-                const emptyText = hasActiveTier
-                    ? `No ${escapeHtml(getDifficultyTierLabel(activeTier))} cards yet. Save/load cards with ${escapeHtml(getTierRangeLabel(activeTier))} difficulty to populate this leaderboard.`
-                    : "No Results cards yet. Complete a run and save it from the SPIN tab to populate ranking.";
-                box.innerHTML = `<div class="tiny" style="padding:8px 10px; border:1px solid var(--line2); border-radius:10px; background:rgba(0,0,0,.22);">${emptyText}</div>`;
+                const emptyLabel = hasActiveTier ? getDifficultyTierLabel(activeTier) : "any";
+                box.innerHTML = `<div class="tiny" style="padding:8px 10px; border:1px solid var(--line2); border-radius:10px; background:rgba(0,0,0,.22);">No ${escapeHtml(emptyLabel)} cards yet in Results.</div>`;
                 renderRankDetailPanel(null, 0, getRadarMaxes(state.cards));
                 renderItemInsights(filtered);
                 renderRankAnalytics(filtered);
@@ -10604,7 +10606,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             }
 
             const radarMaxes = getRadarMaxes(state.cards);
-            const renderRow = (c, place, animateOffset = 0) => {
+
+            const renderRankRow = (c, place, isGlobalContext) => {
                 const grade = clamp(Math.round(Number(c.grade || 0)), 0, 100);
 
                 const outer = document.createElement("div");
@@ -10621,12 +10624,13 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
                 const cardDifficultyTier = resolveCardDifficultyTier(c);
                 row.classList.add(`rim-${cardDifficultyTier}`);
-                const gradeScore = clamp(Number(c.grade || 0), 0, 100);
+                const tierBadge = `${getDifficultyTierLabel(cardDifficultyTier)} • ${formatDifficultyLabel(c)}`;
+                const titlePrefix = isGlobalContext ? `[${getDifficultyTierLabel(cardDifficultyTier)}] ` : "";
 
                 row.innerHTML = `
                           <div class="rankRowMain">
-                            <div style="font-weight:900;">#${place} • ${escapeHtml(formatSeedWithPlayer(c))}</div>
-                            <div class="tiny">${escapeHtml(c.mode)} • ${escapeHtml(c.faction)} • ${escapeHtml(getDifficultyTierLabel(cardDifficultyTier))} • ${escapeHtml(formatDifficultyLabel(c))} • <span class="muted">${escapeHtml(c.primary)}</span></div>
+                            <div style="font-weight:900;">#${place} • ${escapeHtml(titlePrefix)}${escapeHtml(formatSeedWithPlayer(c))}</div>
+                            <div class="tiny">${escapeHtml(c.mode)} • ${escapeHtml(c.faction)} • ${escapeHtml(getPlayerName(c))} • ${escapeHtml(tierBadge)} • <span class="muted">${escapeHtml(c.primary)}</span></div>
                             <div class="rankRowBarWrap">
                                 <div class="rankRowBar" style="--grade-width:${grade}%;"></div>
                             </div>
@@ -10647,25 +10651,34 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             };
 
             if (hasActiveTier) {
-                filtered.forEach((c, index) => renderRow(c, index + 1));
+                filtered.forEach((c, index) => {
+                    renderRankRow(c, index + 1, false);
+                });
             } else {
-                const tiersInOrder = ["cadet", "veteran", "helldive"];
-                let runningOffset = 0;
-                tiersInOrder.forEach((tier) => {
-                    const tierCards = filtered.filter(c => cardMatchesTierRange(c, tier));
-                    if (!tierCards.length) return;
+                ["cadet", "veteran", "helldive"].forEach((tier) => {
+                    const sectionCards = grouped[tier];
+                    const head = document.createElement("div");
+                    head.className = "tiny";
+                    head.style.cssText = "margin:12px 0 8px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; opacity:.9;";
+                    head.textContent = `${getDifficultyTierLabel(tier)} • ${getTierRangeLabel(tier)} • ${sectionCards.length} card${sectionCards.length === 1 ? "" : "s"}`;
+                    box.appendChild(head);
 
-                    const section = document.createElement("div");
-                    section.style.marginBottom = "10px";
-                    section.innerHTML = `<div class="tiny" style="margin:6px 0 8px; font-weight:800; letter-spacing:.35px;">${escapeHtml(getDifficultyTierLabel(tier))} • ${escapeHtml(getTierRangeLabel(tier))} • ${tierCards.length} card${tierCards.length === 1 ? "" : "s"}</div>`;
-                    box.appendChild(section);
+                    if (!sectionCards.length) {
+                        const empty = document.createElement("div");
+                        empty.className = "tiny";
+                        empty.style.cssText = "padding:8px 10px; margin-bottom:8px; border:1px solid var(--line2); border-radius:10px; background:rgba(0,0,0,.16);";
+                        empty.textContent = `No ${getDifficultyTierLabel(tier)} cards in Results yet.`;
+                        box.appendChild(empty);
+                        return;
+                    }
 
-                    tierCards.forEach((c, index) => renderRow(c, index + 1, runningOffset));
-                    runningOffset += tierCards.length;
+                    sectionCards.forEach((c, index) => {
+                        renderRankRow(c, index + 1, true);
+                    });
                 });
             }
             logRankLayoutState("rows-rendered", filtered.length);
-            const selectedCard = filtered.find(c => c.id === selectedRankCardId) || filtered[0] || null;
+            const selectedCard = list.find(c => c.id === selectedRankCardId) || filtered[0] || list[0] || null;
             const selectedPlace = selectedCard ? (filtered.findIndex(x => x.id === selectedCard.id) + 1) : 0;
             renderRankDetailPanel(selectedCard, selectedPlace, radarMaxes);
             renderItemInsights(filtered);
@@ -11306,12 +11319,14 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             $("#cmpSearch").addEventListener("input", refreshCompareOptions);
             $$("#rankTierCards .rankTierCard").forEach((btn) => {
                 btn.addEventListener("click", () => {
-                    setActiveTier(btn.dataset.tier || "");
+                    const tier = btn.dataset.tier || "";
+                    setActiveTier(activeTier === tier ? null : tier);
                 });
                 btn.addEventListener("keydown", (e) => {
                     if (e.key === "Enter" || e.key === " ") {
                         e.preventDefault();
-                        setActiveTier(btn.dataset.tier || "");
+                        const tier = btn.dataset.tier || "";
+                        setActiveTier(activeTier === tier ? null : tier);
                     }
                 });
             });
