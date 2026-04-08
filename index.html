@@ -4571,6 +4571,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
         function getCardDifficultyTier(card) {
             const explicit = String(card?.difficultyTier || card?.tierTag || "").trim().toLowerCase();
+            if (explicit === "helldiver") return "helldive";
             if (explicit === "cadet" || explicit === "veteran" || explicit === "helldive") return explicit;
             return getDifficultyTier(getCardDifficulty(card));
         }
@@ -10457,6 +10458,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
                 const tier = getCardDifficultyTier(c);
                 row.classList.add(`rim-${tier}`);
+                const gradeScore = clamp(Number(c.grade || 0), 0, 100);
 
                 row.innerHTML = `
                           <div class="rankRowMain">
