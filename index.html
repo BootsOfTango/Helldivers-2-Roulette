@@ -3589,17 +3589,17 @@ END MASTER DIRECTIVE
 
     <main>
         <div class="tabs">
-            <div class="tabBtn active" data-tab="spin">1. SPIN</div>
-            <div class="tabBtn" data-tab="results">2. RESULTS</div>
-            <div class="tabBtn" data-tab="compare">3. COMPARE</div>
-            <div class="tabBtn" data-tab="items">4. ARMORY</div>
-            <div class="tabBtn" data-tab="rank">5. RANK</div>
+            <div class="tabBtn active" data-tab="spin" onclick="switchTab('spin')">1. SPIN</div>
+            <div class="tabBtn" data-tab="results" onclick="switchTab('results')">2. RESULTS</div>
+            <div class="tabBtn" data-tab="compare" onclick="switchTab('compare')">3. COMPARE</div>
+            <div class="tabBtn" data-tab="items" onclick="switchTab('items')">4. ARMORY</div>
+            <div class="tabBtn" data-tab="rank" onclick="switchTab('rank')">5. RANK</div>
         </div>
 
         <!-- SPIN TAB -->
         <section id="tab-spin" class="panel">
             <div class="btnRow">
-                <button class="btnPrimary" id="btnSpin">SPIN LOADOUT</button>
+                <button class="btnPrimary" id="btnSpin" onclick="openDifficultyModal()">SPIN LOADOUT</button>
                 <button id="btnLock" class="btnGhost" disabled>LOCK LOADOUT</button>
                 <button id="btnReroll" class="btnDanger" style="display:none;">SPECIAL EVENT: REROLL (3)</button>
 
