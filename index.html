@@ -7856,7 +7856,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             });
 
             refreshCompareOptions();
-            renderRank();
+            safeRenderRank("renderResults");
         }
 
         function renderModalLoadoutItem(label, value, kind) {
@@ -10408,13 +10408,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             activeTier = normalized;
             selectedRankCardId = null;
             syncRankTierCardUi();
-            try {
-                renderRank();
-            } catch (err) {
-                console.warn("[rank-tier] Unable to render tier", normalized, err);
-                const box = $("#rankList");
-                if (box) box.innerHTML = `<div class="tiny">Could not render this tier right now. Open console for details.</div>`;
-            }
+            safeRenderRank("setActiveTier");
         }
 
         function getBestAvailableTier(cards = []) {
@@ -10585,6 +10579,25 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             renderRankAnalytics(filtered);
         }
 
+
+        function safeRenderRank(contextLabel) {
+            try {
+                renderRank();
+            } catch (err) {
+                console.error("[rank] safeRenderRank failed", {
+                    contextLabel,
+                    activeTier: activeTier || null,
+                    totalCards: Array.isArray(state?.cards) ? state.cards.length : 0,
+                    selectedCardId: selectedRankCardId || null,
+                    error: err
+                });
+                const box = $("#rankList");
+                if (box) {
+                    box.innerHTML = `<div class="tiny" style="padding:8px 10px; border:1px solid var(--line2); border-radius:10px; background:rgba(0,0,0,.22);">Unable to render rank right now. Try changing tiers or refreshing the page.</div>`;
+                }
+            }
+        }
+
         /***********************
          * Escape HTML for safe rendering
          ***********************/
@@ -10624,7 +10637,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                     activeTier = pickMostPopulatedTier(state.cards);
                     selectedRankCardId = null;
                 }
-                renderRank();
+                safeRenderRank("switchTab:rank");
             }
             if (tab === "spin") {
                 renderSpin();
