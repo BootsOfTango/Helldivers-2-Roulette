@@ -10264,10 +10264,23 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             }
         }
 
-        function setActiveTier(nextTier) {
+        function pickMostPopulatedTier(cards) {
+            const order = ["cadet", "veteran", "helldive"];
+            const counts = { cadet: 0, veteran: 0, helldive: 0 };
+            (cards || []).forEach((card) => {
+                const tier = getCardDifficultyTier(card);
+                if (counts[tier] != null) counts[tier] += 1;
+            });
+            return order
+                .slice()
+                .sort((a, b) => counts[b] - counts[a])[0] || "helldive";
+        }
+
+        function setActiveTier(nextTier, options = {}) {
             const normalized = ["cadet", "veteran", "helldive"].includes(String(nextTier || "").toLowerCase())
                 ? String(nextTier).toLowerCase()
                 : null;
+            if (!options.silent) playTone("success");
             activeTier = normalized;
             playTone("success");
             selectedRankCardId = null;
@@ -10433,7 +10446,13 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 drawGraph();
             }
             if (tab === "items") renderItems();
-            if (tab === "rank") renderRank();
+            if (tab === "rank") {
+                if (!["cadet", "veteran", "helldive"].includes(activeTier) && state.cards.length) {
+                    activeTier = pickMostPopulatedTier(state.cards);
+                    selectedRankCardId = null;
+                }
+                renderRank();
+            }
             if (tab === "spin") {
                 renderSpin();
                 if (!state.current?.loadout) clearSpinReelSlots();
@@ -10987,9 +11006,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             $("#cmpSortDir").addEventListener("change", refreshCompareOptions);
             $("#cmpSearch").addEventListener("input", refreshCompareOptions);
             $$("#rankTierCards .rankTierCard").forEach((btn) => {
-                btn.addEventListener("click", (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
+                btn.addEventListener("click", () => {
                     setActiveTier(btn.dataset.tier || "");
                 });
                 btn.addEventListener("keydown", (e) => {
@@ -10998,11 +11015,6 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                         setActiveTier(btn.dataset.tier || "");
                     }
                 });
-            });
-            $("#rankTierCards")?.addEventListener("click", (e) => {
-                const btn = e.target.closest(".rankTierCard");
-                if (!btn) return;
-                setActiveTier(btn.dataset.tier || "");
             });
             $("#itemSearch").addEventListener("input", renderItems);
             $("#itemsViewMode").addEventListener("change", (e) => {
