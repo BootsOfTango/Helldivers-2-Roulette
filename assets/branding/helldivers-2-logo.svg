@@ -1,15 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
-  <title id="title">Helldivers 2 Logo Local Placeholder</title>
-  <desc id="desc">Text-based local logo placeholder used until an official logo file is imported.</desc>
-  <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#0f1118" />
-      <stop offset="100%" stop-color="#1f2738" />
-    </linearGradient>
-  </defs>
-  <rect width="512" height="512" fill="url(#bg)" rx="32" />
-  <circle cx="256" cy="220" r="96" fill="none" stroke="#f5dc54" stroke-width="14" />
-  <path d="M256 145l22 42 46 7-33 32 8 46-43-23-43 23 8-46-33-32 46-7z" fill="#f5dc54" />
-  <text x="256" y="360" fill="#e7edf8" text-anchor="middle" font-family="Arial, sans-serif" font-size="38" font-weight="700">HD2 LOGO</text>
-  <text x="256" y="400" fill="#9fb0ce" text-anchor="middle" font-family="Arial, sans-serif" font-size="20">Replace with official file</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1365 768" role="img" aria-labelledby="title desc" preserveAspectRatio="xMidYMid meet">
+  <title id="title">Helldivers 2 Logo</title>
+  <desc id="desc">Official Helldivers 2 logo sourced from the repository root image asset.</desc>
+  <image href="../../Helldivers-2-Logo.png.png" x="0" y="0" width="1365" height="768" preserveAspectRatio="xMidYMid meet" />
 </svg>
