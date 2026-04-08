@@ -10587,6 +10587,20 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             };
             let filtered = hasActiveTier ? grouped[activeTier] : list;
 
+            // If the currently selected tier has no cards but Results has cards,
+            // auto-recover to the most populated tier so Rank never appears empty.
+            if (hasActiveTier && !filtered.length && list.length) {
+                const recoveredTier = pickMostPopulatedTier(list);
+                if (recoveredTier && recoveredTier !== activeTier) {
+                    activeTier = recoveredTier;
+                    syncRankTierCardUi();
+                    filtered = list.filter(c => cardMatchesTierRange(c, activeTier));
+                    if (!filtered.some(c => c.id === selectedRankCardId)) {
+                        selectedRankCardId = filtered[0]?.id || null;
+                    }
+                }
+            }
+
             const box = $("#rankList");
             box.innerHTML = "";
 
