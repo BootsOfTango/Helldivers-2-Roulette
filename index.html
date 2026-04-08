@@ -3070,6 +3070,21 @@ END MASTER DIRECTIVE
             opacity: 0.12;
             pointer-events: none;
             z-index: -1;
+            /* Keep logo visible at the left/right edges, but cut out the center lane behind spin entries. */
+            -webkit-mask-image: linear-gradient(to right,
+                rgba(0, 0, 0, 1) 0%,
+                rgba(0, 0, 0, 1) 22%,
+                rgba(0, 0, 0, 0) 36%,
+                rgba(0, 0, 0, 0) 64%,
+                rgba(0, 0, 0, 1) 78%,
+                rgba(0, 0, 0, 1) 100%);
+            mask-image: linear-gradient(to right,
+                rgba(0, 0, 0, 1) 0%,
+                rgba(0, 0, 0, 1) 22%,
+                rgba(0, 0, 0, 0) 36%,
+                rgba(0, 0, 0, 0) 64%,
+                rgba(0, 0, 0, 1) 78%,
+                rgba(0, 0, 0, 1) 100%);
         }
         /* ===== MODE COLORS ===== */
 
