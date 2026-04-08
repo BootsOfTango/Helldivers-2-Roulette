@@ -1962,12 +1962,12 @@ END MASTER DIRECTIVE
             text-align: left;
             color: #e8eef7;
             cursor: pointer;
-            min-height: 124px;
+            min-height: 78px;
             display: flex;
             flex-direction: row;
-            justify-content: space-between;
+            justify-content: flex-start;
             align-items: center;
-            gap: 14px;
+            gap: 12px;
             overflow: visible;
             transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease, background .2s ease;
         }
@@ -2005,10 +2005,11 @@ END MASTER DIRECTIVE
         .rankTierCardInfo {
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 4px;
             min-width: 0;
             flex: 1;
             justify-content: center;
+            order: 1;
         }
 
         .rankTierCard[data-tier="cadet"] .rankTierCardName,
@@ -2027,9 +2028,9 @@ END MASTER DIRECTIVE
         }
 
         .rankTierThumbFrame {
-            width: 62%;
-            max-width: 300px;
-            height: 112px;
+            width: 118px;
+            max-width: 118px;
+            height: 60px;
             border-radius: 10px;
             border: 1px solid rgba(255,255,255,.14);
             background: radial-gradient(circle at 52% 26%, rgba(34, 42, 66, .68), rgba(0,0,0,.58));
@@ -2038,6 +2039,7 @@ END MASTER DIRECTIVE
             justify-content: center;
             overflow: hidden;
             flex-shrink: 0;
+            order: 2;
         }
 
         .rankTierThumb {
@@ -2051,20 +2053,20 @@ END MASTER DIRECTIVE
         }
 
         .rankTierCard[data-tier="cadet"] {
-            --tier-thumb-scale: 2.82;
-            --tier-thumb-x: 24%;
+            --tier-thumb-scale: 2.56;
+            --tier-thumb-x: 22%;
             --tier-thumb-y: 15%;
         }
 
         .rankTierCard[data-tier="veteran"] {
-            --tier-thumb-scale: 2.64;
-            --tier-thumb-x: 20%;
+            --tier-thumb-scale: 2.45;
+            --tier-thumb-x: 18%;
             --tier-thumb-y: 13%;
         }
 
         .rankTierCard[data-tier="helldive"] {
-            --tier-thumb-scale: 2.6;
-            --tier-thumb-x: 18%;
+            --tier-thumb-scale: 2.4;
+            --tier-thumb-x: 16%;
             --tier-thumb-y: 13%;
         }
 
@@ -2652,21 +2654,21 @@ END MASTER DIRECTIVE
             }
 
             .rankTierCard {
-                min-height: 152px;
-                flex-direction: column;
-                align-items: stretch;
+                min-height: 78px;
+                flex-direction: row;
+                align-items: center;
                 justify-content: flex-start;
-                gap: 8px;
+                gap: 12px;
             }
 
             .rankTierCardInfo {
-                justify-content: flex-start;
-                gap: 6px;
+                justify-content: center;
+                gap: 4px;
             }
 
             .rankTierThumbFrame {
-                width: 100%;
-                max-width: none;
+                width: 118px;
+                max-width: 118px;
             }
         }
 
