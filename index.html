@@ -6250,43 +6250,55 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         }
 
         async function refreshItemInsightsFromJson() {
-            try {
-                const [catalog] = await Promise.all([
-                    loadItemCatalogForValidation(),
-                    loadItemImageDb(),
-                    preloadItemVisualsInternal(true)
-                ]);
+            const [catalogResult, imageDbResult, visualResult] = await Promise.allSettled([
+                loadItemCatalogForValidation(),
+                loadItemImageDb(),
+                preloadItemVisualsInternal(true)
+            ]);
 
-                const catalogItems = Array.isArray(catalog?.items) ? catalog.items : [];
-                const missingVisuals = [];
-                const seen = new Set();
+            if (imageDbResult.status === "rejected") {
+                console.warn("[item-insights-refresh] item image db refresh failed", imageDbResult.reason);
+            }
+            if (visualResult.status === "rejected") {
+                console.warn("[item-insights-refresh] item visual preload failed", visualResult.reason);
+            }
 
-                catalogItems.forEach(entry => {
-                    const type = String(entry?.type || "").trim();
-                    const name = String(entry?.name || "").trim();
-                    if (!type || !name) return;
-                    const key = `${type}:${normalizeItemKey(name)}`;
-                    if (seen.has(key)) return;
-                    seen.add(key);
-                    const visual = getItemVisual(name, type);
-                    if (!visual?.src) missingVisuals.push(`${type} • ${name}`);
-                });
+            const catalog = catalogResult.status === "fulfilled" ? catalogResult.value : null;
+            if (catalogResult.status === "rejected") {
+                console.warn("[item-insights-refresh] catalog validation skipped", catalogResult.reason);
+            }
 
-                state.cards = normalizeCardsCollection(state.cards);
-                recalcGrades();
-                renderRank();
-                saveState();
+            const catalogItems = Array.isArray(catalog?.items) ? catalog.items : [];
+            const missingVisuals = [];
+            const seen = new Set();
 
-                if (missingVisuals.length) {
-                    const preview = missingVisuals.slice(0, 8).join("\n");
-                    const suffix = missingVisuals.length > 8 ? `\n...and ${missingVisuals.length - 8} more.` : "";
-                    alert(`Refresh complete.\n\nFound ${missingVisuals.length} catalog item(s) with missing visuals:\n${preview}${suffix}`);
-                } else {
-                    alert("Refresh complete. JSON catalog/images validated and rank insights were rebuilt.");
-                }
-            } catch (err) {
-                console.warn("[item-insights-refresh]", err);
-                alert("Refresh failed while validating JSON files. Check console for details.");
+            catalogItems.forEach(entry => {
+                const type = String(entry?.type || "").trim();
+                const name = String(entry?.name || "").trim();
+                if (!type || !name) return;
+                const key = `${type}:${normalizeItemKey(name)}`;
+                if (seen.has(key)) return;
+                seen.add(key);
+                const visual = getItemVisual(name, type);
+                if (!visual?.src) missingVisuals.push(`${type} • ${name}`);
+            });
+
+            state.cards = normalizeCardsCollection(state.cards);
+            recalcGrades();
+            renderRank();
+            saveState();
+
+            if (catalogResult.status === "rejected") {
+                alert("Refresh partially complete. Rank insights were rebuilt, but JSON validation could not run (check console for details).");
+                return;
+            }
+
+            if (missingVisuals.length) {
+                const preview = missingVisuals.slice(0, 8).join("\n");
+                const suffix = missingVisuals.length > 8 ? `\n...and ${missingVisuals.length - 8} more.` : "";
+                alert(`Refresh complete.\n\nFound ${missingVisuals.length} catalog item(s) with missing visuals:\n${preview}${suffix}`);
+            } else {
+                alert("Refresh complete. JSON catalog/images validated and rank insights were rebuilt.");
             }
         }
 
@@ -10220,7 +10232,13 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             activeTier = normalized;
             selectedRankCardId = null;
             syncRankTierCardUi();
-            renderRank();
+            try {
+                renderRank();
+            } catch (err) {
+                console.warn("[rank-tier] Unable to render tier", normalized, err);
+                const box = $("#rankList");
+                if (box) box.innerHTML = `<div class="tiny">Could not render this tier right now. Open console for details.</div>`;
+            }
         }
 
         function cardMatchesTierRange(card, tier) {
@@ -10910,13 +10928,17 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             $("#cmpSortDir").addEventListener("change", refreshCompareOptions);
             $("#cmpSearch").addEventListener("input", refreshCompareOptions);
             $$("#rankTierCards .rankTierCard").forEach((btn) => {
-                btn.addEventListener("click", () => setActiveTier(btn.dataset.tier || ""));
                 btn.addEventListener("keydown", (e) => {
                     if (e.key === "Enter" || e.key === " ") {
                         e.preventDefault();
                         setActiveTier(btn.dataset.tier || "");
                     }
                 });
+            });
+            $("#rankTierCards")?.addEventListener("click", (e) => {
+                const btn = e.target.closest(".rankTierCard");
+                if (!btn) return;
+                setActiveTier(btn.dataset.tier || "");
             });
             $("#itemSearch").addEventListener("input", renderItems);
             $("#itemsViewMode").addEventListener("change", (e) => {
