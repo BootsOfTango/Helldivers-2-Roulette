@@ -1958,7 +1958,7 @@ END MASTER DIRECTIVE
             border: 1px solid var(--line2);
             border-radius: 14px;
             background: rgba(0,0,0,.22);
-            padding: 14px;
+            padding: 10px 12px;
             text-align: left;
             color: #e8eef7;
             cursor: pointer;
@@ -1989,17 +1989,16 @@ END MASTER DIRECTIVE
         }
 
         .rankTierCardName {
-            font-size: 24px;
+            font-size: 18px;
             font-weight: 900;
             letter-spacing: .4px;
             text-transform: uppercase;
-            line-height: 1.05;
-            margin-top: 2px;
+            line-height: 1.02;
         }
 
         .rankTierCardRange {
             font-family: var(--mono);
-            font-size: 14px;
+            font-size: 12px;
             font-weight: 700;
         }
 
@@ -2046,27 +2045,27 @@ END MASTER DIRECTIVE
             height: 100%;
             object-fit: contain;
             object-position: center center;
-            padding: 2px 4px;
+            padding: 1px 3px;
             transform: translate(var(--tier-thumb-x), var(--tier-thumb-y)) scale(var(--tier-thumb-scale));
             transform-origin: center center;
         }
 
         .rankTierCard[data-tier="cadet"] {
-            --tier-thumb-scale: 2.9;
+            --tier-thumb-scale: 2.82;
             --tier-thumb-x: 24%;
-            --tier-thumb-y: 16%;
+            --tier-thumb-y: 15%;
         }
 
         .rankTierCard[data-tier="veteran"] {
-            --tier-thumb-scale: 2.72;
+            --tier-thumb-scale: 2.64;
             --tier-thumb-x: 20%;
-            --tier-thumb-y: 14%;
+            --tier-thumb-y: 13%;
         }
 
         .rankTierCard[data-tier="helldive"] {
-            --tier-thumb-scale: 2.66;
+            --tier-thumb-scale: 2.6;
             --tier-thumb-x: 18%;
-            --tier-thumb-y: 14%;
+            --tier-thumb-y: 13%;
         }
 
         #rankScopeState {
@@ -3065,7 +3064,7 @@ END MASTER DIRECTIVE
             content: "";
             position: fixed;
             inset: -10vh -10vw;
-            background: url("Helldivers-2-Logo.png.png") center / 90vmax no-repeat;
+            background: url("assets/branding/helldivers-2-logo.svg") center / 90vmax no-repeat;
             opacity: 0.12;
             pointer-events: none;
             z-index: -1;
