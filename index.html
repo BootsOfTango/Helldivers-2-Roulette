@@ -4102,6 +4102,31 @@ END MASTER DIRECTIVE
 
     <script>
         let WIRED_ONCE = false;
+        function bindCriticalControls() {
+            try {
+                $$(".tabBtn").forEach((btn) => {
+                    if (btn.dataset.criticalBound === "1") return;
+                    btn.dataset.criticalBound = "1";
+                    btn.addEventListener("click", () => switchTab(btn.dataset.tab));
+                });
+
+                const spinBtn = $("#btnSpin");
+                if (spinBtn && spinBtn.dataset.criticalBound !== "1") {
+                    spinBtn.dataset.criticalBound = "1";
+                    spinBtn.addEventListener("click", () => {
+                        const hasExistingSpin = !!state.current?.loadout;
+                        if (hasExistingSpin) {
+                            const shouldProceed = confirm("Proceed with spinning a new loadout? This will replace your current spin.");
+                            if (!shouldProceed) return;
+                        }
+                        openDifficultyModal();
+                    });
+                }
+            } catch (err) {
+                console.error("[wire] bindCriticalControls failed", err);
+            }
+        }
+
         function wireOnce() {
             if (WIRED_ONCE) return;
             try {
