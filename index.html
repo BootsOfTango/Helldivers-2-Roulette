@@ -1962,12 +1962,12 @@ END MASTER DIRECTIVE
             text-align: left;
             color: #e8eef7;
             cursor: pointer;
-            min-height: 96px;
+            min-height: 124px;
             display: flex;
             flex-direction: row;
             justify-content: space-between;
             align-items: center;
-            gap: 10px;
+            gap: 14px;
             overflow: visible;
             transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease, background .2s ease;
         }
@@ -2005,7 +2005,7 @@ END MASTER DIRECTIVE
         .rankTierCardInfo {
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: 8px;
             min-width: 0;
             flex: 1;
             justify-content: center;
@@ -2027,9 +2027,9 @@ END MASTER DIRECTIVE
         }
 
         .rankTierThumbFrame {
-            width: 56%;
+            width: 62%;
             max-width: 300px;
-            height: 78px;
+            height: 112px;
             border-radius: 10px;
             border: 1px solid rgba(255,255,255,.14);
             background: radial-gradient(circle at 52% 26%, rgba(34, 42, 66, .68), rgba(0,0,0,.58));
@@ -2651,8 +2651,22 @@ END MASTER DIRECTIVE
                 flex-wrap: nowrap;
             }
 
+            .rankTierCard {
+                min-height: 152px;
+                flex-direction: column;
+                align-items: stretch;
+                justify-content: flex-start;
+                gap: 8px;
+            }
+
+            .rankTierCardInfo {
+                justify-content: flex-start;
+                gap: 6px;
+            }
+
             .rankTierThumbFrame {
-                max-width: 220px;
+                width: 100%;
+                max-width: none;
             }
         }
 
@@ -3034,7 +3048,7 @@ END MASTER DIRECTIVE
         }
 
 
-        /* ===== BACKGROUND FIX: LOGO ONLY ON EDGES ===== */
+        /* ===== BACKGROUND: ALWAYS-ON HELLDIVERS 2 LOGO ===== */
 
         html {
             background: #07080a;
@@ -3046,19 +3060,15 @@ END MASTER DIRECTIVE
             isolation: isolate;
         }
 
-            body::before {
-                content: "";
-                position: fixed;
-                /* slightly less oversized so letters aren't chopped */
-                inset: -10vh -10vw;
-                /* smaller than before (was 140vmax) */
-                background: url("assets/branding/helldivers-2-logo.svg") center / 90vmax no-repeat;
-                opacity: 0.14;
-                pointer-events: none;
-                z-index: -1;
-                -webkit-mask-image: radial-gradient(circle at center, transparent 0 42%, rgba(0,0,0,1) 60%, rgba(0,0,0,1) 100% );
-                mask-image: radial-gradient(circle at center, transparent 0 42%, rgba(0,0,0,1) 60%, rgba(0,0,0,1) 100% );
-            }
+        body::before {
+            content: "";
+            position: fixed;
+            inset: -10vh -10vw;
+            background: url("assets/branding/helldivers-2-logo.svg") center / 90vmax no-repeat;
+            opacity: 0.12;
+            pointer-events: none;
+            z-index: -1;
+        }
         /* ===== MODE COLORS ===== */
 
         .mode-standard {
