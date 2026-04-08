@@ -10311,6 +10311,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         /***********************
          * Rank rendering
          ***********************/
+        const DEBUG_RANK = true;
+
         function syncRankTierCardUi() {
             const cards = $$("#rankTierCards .rankTierCard");
             const rankTab = $("#tab-rank");
@@ -10326,10 +10328,15 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             });
             const rankScopeState = $("#rankScopeState");
             if (rankScopeState) {
-                const count = hasActiveTier ? state.cards.filter(card => cardMatchesTierRange(card, activeTier)).length : 0;
-                rankScopeState.textContent = hasActiveTier
-                    ? `${getDifficultyTierLabel(activeTier)} mode active • filtered to ${getTierRangeLabel(activeTier)} • ${count} card${count === 1 ? "" : "s"}.`
+                const total = state.cards.length;
+                const filteredCount = hasActiveTier ? state.cards.filter(card => cardMatchesTierRange(card, activeTier)).length : 0;
+                const baseText = hasActiveTier
+                    ? `${getDifficultyTierLabel(activeTier)} mode active • filtered to ${getTierRangeLabel(activeTier)} • ${filteredCount} card${filteredCount === 1 ? "" : "s"}.`
                     : "Select a tier above to display rank cards and details.";
+                const debugText = DEBUG_RANK
+                    ? ` activeTier=${activeTier || "none"} | total=${total} | filtered=${filteredCount}`
+                    : "";
+                rankScopeState.textContent = `${baseText}${debugText}`;
             }
         }
 
@@ -10349,6 +10356,13 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const normalized = ["cadet", "veteran", "helldive"].includes(String(nextTier || "").toLowerCase())
                 ? String(nextTier).toLowerCase()
                 : null;
+            if (DEBUG_RANK) {
+                console.groupCollapsed("[rank-debug] setActiveTier");
+                console.log("nextTier", nextTier);
+                console.log("normalized", normalized);
+                console.log("state.cards.length", state.cards.length);
+                console.groupEnd();
+            }
             if (!options.silent) playTone("success");
             activeTier = normalized;
             selectedRankCardId = null;
@@ -10379,9 +10393,32 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const range = TIER_DIFFICULTY_RANGES[tier];
             if (!range) return true;
             const cardTier = getCardDifficultyTier(card);
-            if (cardTier === tier) return true;
+            if (cardTier === tier) {
+                if (DEBUG_RANK) {
+                    console.log("[rank-debug] cardMatchesTierRange", {
+                        cardId: card?.id,
+                        tier,
+                        cardTier,
+                        result: true,
+                        reason: "tier-match"
+                    });
+                }
+                return true;
+            }
             const difficulty = getCardDifficulty(card);
-            return difficulty >= range.min && difficulty <= range.max;
+            const inRange = difficulty >= range.min && difficulty <= range.max;
+            if (DEBUG_RANK) {
+                console.log("[rank-debug] cardMatchesTierRange", {
+                    cardId: card?.id,
+                    tier,
+                    cardTier,
+                    difficulty,
+                    range,
+                    result: inRange,
+                    reason: "difficulty-range"
+                });
+            }
+            return inRange;
         }
 
         function renderRank() {
@@ -10391,6 +10428,13 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             }
             syncRankTierCardUi();
             const hasActiveTier = ["cadet", "veteran", "helldive"].includes(activeTier);
+            if (DEBUG_RANK) {
+                console.groupCollapsed("[rank-debug] renderRank:start");
+                console.log("activeTier", activeTier);
+                console.log("hasActiveTier", hasActiveTier);
+                console.log("total cards", state.cards.length);
+                console.groupEnd();
+            }
 
             const list = state.cards.slice().sort((a, b) => {
                 const g = Number(b.grade || 0) - Number(a.grade || 0);
@@ -10401,6 +10445,21 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             let filtered = hasActiveTier
                 ? list.filter(c => cardMatchesTierRange(c, activeTier))
                 : [];
+            if (DEBUG_RANK) {
+                console.groupCollapsed("[rank-debug] renderRank:post-filter");
+                console.log("filtered.length", filtered.length);
+                filtered.forEach((card) => {
+                    console.log("card", {
+                        id: card?.id,
+                        difficulty: getCardDifficulty(card),
+                        difficultyTier: card?.difficultyTier ?? null,
+                        tierTag: card?.tierTag ?? null,
+                        legacyTier: card?.tier ?? null,
+                        resolvedTier: getCardDifficultyTier(card)
+                    });
+                });
+                console.groupEnd();
+            }
 
             const box = $("#rankList");
             box.innerHTML = "";
