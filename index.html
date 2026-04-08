@@ -1043,6 +1043,58 @@ END MASTER DIRECTIVE
             align-self: flex-end;
         }
 
+        .resultsDifficultyFilters {
+            margin-top: 10px;
+            border: 1px solid var(--line2);
+            border-radius: 12px;
+            padding: 10px;
+            background: rgba(255,255,255,.02);
+            display: grid;
+            gap: 10px;
+        }
+
+        .resultsDifficultyTierRow,
+        .resultsDifficultyLevelRow {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .resultsDifficultyBtn {
+            border: 1px solid var(--line2);
+            background: rgba(255,255,255,.03);
+            color: var(--text);
+            font-weight: 700;
+            border-radius: 999px;
+            padding: 6px 10px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .resultsDifficultyBtn:hover {
+            border-color: rgba(255,255,255,.28);
+        }
+
+        .resultsDifficultyBtn.is-active {
+            background: rgba(255,255,255,.12);
+            border-color: rgba(255,255,255,.42);
+        }
+
+        .resultsDifficultyBtn[data-tier="cadet"].is-active {
+            color: #60f9a8;
+            border-color: rgba(96,249,168,.6);
+        }
+
+        .resultsDifficultyBtn[data-tier="veteran"].is-active {
+            color: #ffbf66;
+            border-color: rgba(255,191,102,.6);
+        }
+
+        .resultsDifficultyBtn[data-tier="helldive"].is-active {
+            color: #ff6a75;
+            border-color: rgba(255,106,117,.6);
+        }
+
         .resultTierTag {
             align-self: flex-end;
             border: 1px solid var(--line2);
@@ -3694,6 +3746,16 @@ END MASTER DIRECTIVE
                     <div class="formGrid" style="margin-top:10px;">
                         <input id="resSearch" placeholder="Search by player, seed, weapon, strat, planet..." />
                     </div>
+                    <div class="resultsDifficultyFilters">
+                        <div class="tiny">Difficulty scope</div>
+                        <div id="resultsDifficultyTierFilters" class="resultsDifficultyTierRow">
+                            <button type="button" class="resultsDifficultyBtn" data-tier="cadet">Cadet (D1-D3)</button>
+                            <button type="button" class="resultsDifficultyBtn" data-tier="veteran">Veteran (D4-D6)</button>
+                            <button type="button" class="resultsDifficultyBtn" data-tier="helldive">Helldive (D7-D10)</button>
+                            <button type="button" class="resultsDifficultyBtn" id="btnResultsTierClear">All tiers</button>
+                        </div>
+                        <div id="resultsDifficultyLevelFilters" class="resultsDifficultyLevelRow"></div>
+                    </div>
                     <div class="smallHelp">Cards only exist if you hit “USE THIS RUN” from SPIN. Because your viewers don’t care about your indecision.</div>
                 </div>
             </div>
@@ -5508,6 +5570,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         };
         let lastActionCue = "";
         let pendingNewCardHighlightId = null;
+        let activeResultsDifficultyTier = "";
+        let activeResultsDifficultyLevel = null;
         const manualPlanetSearchGroupState = new Map();
 
         function loadItemImageDb() {
@@ -7757,6 +7821,12 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             if (modeFilter) list = list.filter(c => c.mode === modeFilter);
             if (factionFilter) list = list.filter(c => c.faction === factionFilter);
+            if (activeResultsDifficultyTier) {
+                list = list.filter(c => resolveCardDifficultyTier(c) === activeResultsDifficultyTier);
+            }
+            if (Number.isFinite(activeResultsDifficultyLevel)) {
+                list = list.filter(c => getCardDifficulty(c) === activeResultsDifficultyLevel);
+            }
             if (query) {
                 list = list.filter(c => {
                     const hay = normalizeText([
@@ -7859,7 +7929,48 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             });
 
             refreshCompareOptions();
-            safeRenderRank("renderResults");
+        }
+
+        function syncResultsDifficultyFilterButtons() {
+            $$("#resultsDifficultyTierFilters .resultsDifficultyBtn[data-tier]").forEach((btn) => {
+                const isActive = btn.dataset.tier === activeResultsDifficultyTier;
+                btn.classList.toggle("is-active", isActive);
+                btn.setAttribute("aria-pressed", isActive ? "true" : "false");
+            });
+            const clearBtn = $("#btnResultsTierClear");
+            if (clearBtn) {
+                const noneSelected = !activeResultsDifficultyTier;
+                clearBtn.classList.toggle("is-active", noneSelected);
+                clearBtn.setAttribute("aria-pressed", noneSelected ? "true" : "false");
+            }
+
+            $$("#resultsDifficultyLevelFilters .resultsDifficultyBtn[data-level]").forEach((btn) => {
+                const level = Number(btn.dataset.level || 0);
+                const isActive = Number.isFinite(activeResultsDifficultyLevel) && level === activeResultsDifficultyLevel;
+                btn.classList.toggle("is-active", isActive);
+                btn.setAttribute("aria-pressed", isActive ? "true" : "false");
+            });
+        }
+
+        function renderResultsDifficultyFilters() {
+            const levelWrap = $("#resultsDifficultyLevelFilters");
+            if (!levelWrap) return;
+            levelWrap.innerHTML = "";
+            for (let difficulty = 1; difficulty <= 10; difficulty += 1) {
+                const btn = document.createElement("button");
+                btn.type = "button";
+                btn.className = "resultsDifficultyBtn";
+                btn.dataset.level = String(difficulty);
+                btn.textContent = `D${difficulty}`;
+                btn.addEventListener("click", () => {
+                    activeResultsDifficultyLevel = (activeResultsDifficultyLevel === difficulty) ? null : difficulty;
+                    activeResultsDifficultyTier = getDifficultyTier(difficulty);
+                    syncResultsDifficultyFilterButtons();
+                    renderResults();
+                });
+                levelWrap.appendChild(btn);
+            }
+            syncResultsDifficultyFilterButtons();
         }
 
         function renderModalLoadoutItem(label, value, kind) {
@@ -10253,8 +10364,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             const aggregations = buildRankScopeAggregations(cards);
             const hasActiveTier = ["cadet", "veteran", "helldive"].includes(activeTier);
-            const selectedMostRolled = hasActiveTier ? aggregations.mostRolledByTier[activeTier] : null;
-            const selectedBestPerformed = hasActiveTier ? aggregations.bestPerformedByTier[activeTier] : null;
+            const selectedMostRolled = hasActiveTier ? aggregations.mostRolledByTier[activeTier] : aggregations.mostRolledGlobal;
+            const selectedBestPerformed = hasActiveTier ? aggregations.bestPerformedByTier[activeTier] : aggregations.bestPerformedGlobal;
 
             const renderCol = (title, payload, mode) => {
                 const item = payload?.item || payload || null;
@@ -10421,7 +10532,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 console.warn("[rank] ignored unsupported tier", { nextTier });
             }
             if (!options.silent) playTone("success");
-            activeTier = normalized;
+            activeTier = (normalized && activeTier === normalized) ? null : normalized;
             selectedRankCardId = null;
             syncRankTierCardUi();
             safeRenderRank("setActiveTier");
@@ -10501,7 +10612,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
                 const outer = document.createElement("div");
                 outer.className = "rankOuter rankAnimate";
-                outer.style.setProperty("--rank-stagger", `${place * 65}ms`);
+                outer.style.setProperty("--rank-stagger", `${(place + animateOffset) * 65}ms`);
 
                 const row = document.createElement("div");
                 row.className = "rankRow";
@@ -11175,6 +11286,27 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             $("#resFilterFaction").addEventListener("change", renderResults);
             $("#resSort").addEventListener("change", renderResults);
             $("#resSearch").addEventListener("input", renderResults);
+            $$("#resultsDifficultyTierFilters .resultsDifficultyBtn[data-tier]").forEach((btn) => {
+                btn.addEventListener("click", () => {
+                    const nextTier = String(btn.dataset.tier || "");
+                    if (activeResultsDifficultyTier === nextTier) {
+                        activeResultsDifficultyTier = "";
+                        activeResultsDifficultyLevel = null;
+                    } else {
+                        activeResultsDifficultyTier = nextTier;
+                        activeResultsDifficultyLevel = null;
+                    }
+                    syncResultsDifficultyFilterButtons();
+                    renderResults();
+                });
+            });
+            $("#btnResultsTierClear")?.addEventListener("click", () => {
+                activeResultsDifficultyTier = "";
+                activeResultsDifficultyLevel = null;
+                syncResultsDifficultyFilterButtons();
+                renderResults();
+            });
+            renderResultsDifficultyFilters();
 
             $("#cmpA").addEventListener("change", renderCompare);
             $("#cmpB").addEventListener("change", renderCompare);
