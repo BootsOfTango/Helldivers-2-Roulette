@@ -10686,15 +10686,6 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             try { renderRankAnalytics(filtered); } catch (err) { console.error("[rank] analytics render failed", err); }
         }
 
-            const radarMaxes = getRadarMaxes(state.cards);
-
-            const renderRankRow = (c, place, isGlobalContext) => {
-                const grade = clamp(Math.round(Number(c.grade || 0)), 0, 100);
-
-                const outer = document.createElement("div");
-                outer.className = "rankOuter rankAnimate";
-                outer.style.setProperty("--rank-stagger", `${(place + animateOffset) * 65}ms`);
-
         function renderRankFallbackList(cards = []) {
             const box = $("#rankList");
             if (!box) return;
@@ -10704,9 +10695,14 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 return;
             }
             cards.forEach((c, idx) => {
+                const place = idx + 1;
+                const grade = clamp(Math.round(Number(c.grade || 0)), 0, 100);
                 const row = document.createElement("div");
                 row.className = "rankRow";
                 row.dataset.id = c.id;
+                const outer = document.createElement("div");
+                outer.className = "rankOuter rankAnimate";
+                outer.style.setProperty("--rank-stagger", `${idx * 65}ms`);
 
                 if (c.id === selectedRankCardId) {
                     row.classList.add("isSelected");
@@ -10715,11 +10711,10 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 const cardDifficultyTier = resolveCardDifficultyTier(c);
                 row.classList.add(`rim-${cardDifficultyTier}`);
                 const tierBadge = `${getDifficultyTierLabel(cardDifficultyTier)} • ${formatDifficultyLabel(c)}`;
-                const titlePrefix = isGlobalContext ? `[${getDifficultyTierLabel(cardDifficultyTier)}] ` : "";
 
                 row.innerHTML = `
                           <div class="rankRowMain">
-                            <div style="font-weight:900;">#${place} • ${escapeHtml(titlePrefix)}${escapeHtml(formatSeedWithPlayer(c))}</div>
+                            <div style="font-weight:900;">#${place} • ${escapeHtml(formatSeedWithPlayer(c))}</div>
                             <div class="tiny">${escapeHtml(c.mode)} • ${escapeHtml(c.faction)} • ${escapeHtml(getPlayerName(c))} • ${escapeHtml(tierBadge)} • <span class="muted">${escapeHtml(c.primary)}</span></div>
                             <div class="rankRowBarWrap">
                                 <div class="rankRowBar" style="--grade-width:${grade}%;"></div>
@@ -10738,41 +10733,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
                 outer.appendChild(row);
                 box.appendChild(outer);
-            };
-
-            if (hasActiveTier) {
-                filtered.forEach((c, index) => {
-                    renderRankRow(c, index + 1, false);
-                });
-            } else {
-                ["cadet", "veteran", "helldive"].forEach((tier) => {
-                    const sectionCards = grouped[tier];
-                    const head = document.createElement("div");
-                    head.className = "tiny";
-                    head.style.cssText = "margin:12px 0 8px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; opacity:.9;";
-                    head.textContent = `${getDifficultyTierLabel(tier)} • ${getTierRangeLabel(tier)} • ${sectionCards.length} card${sectionCards.length === 1 ? "" : "s"}`;
-                    box.appendChild(head);
-
-                    if (!sectionCards.length) {
-                        const empty = document.createElement("div");
-                        empty.className = "tiny";
-                        empty.style.cssText = "padding:8px 10px; margin-bottom:8px; border:1px solid var(--line2); border-radius:10px; background:rgba(0,0,0,.16);";
-                        empty.textContent = `No ${getDifficultyTierLabel(tier)} cards in Results yet.`;
-                        box.appendChild(empty);
-                        return;
-                    }
-
-                    sectionCards.forEach((c, index) => {
-                        renderRankRow(c, index + 1, true);
-                    });
-                });
-            }
-            logRankLayoutState("rows-rendered", filtered.length);
-            const selectedCard = list.find(c => c.id === selectedRankCardId) || filtered[0] || list[0] || null;
-            const selectedPlace = selectedCard ? (filtered.findIndex(x => x.id === selectedCard.id) + 1) : 0;
-            try { renderRankDetailPanel(selectedCard, selectedPlace, radarMaxes); } catch (err) { console.error("[rank] detail panel render failed", err); }
-            try { renderItemInsights(filtered); } catch (err) { console.error("[rank] item insights render failed", err); }
-            try { renderRankAnalytics(filtered); } catch (err) { console.error("[rank] analytics render failed", err); }
+            });
         }
 
 
