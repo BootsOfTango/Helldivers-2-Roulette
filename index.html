@@ -2673,6 +2673,58 @@ END MASTER DIRECTIVE
             margin-bottom: 10px;
         }
 
+        .rankAnalyticsSection {
+            margin-top: 12px;
+            border: 1px solid var(--line2);
+            border-radius: 12px;
+            background: rgba(0,0,0,.22);
+            padding: 10px;
+        }
+
+        .rankAnalyticsTitle {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: .45px;
+            color: #d8ecff;
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+
+        .rankAnalyticsGrid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .rankAnalyticsCol {
+            border: 1px solid var(--line2);
+            border-radius: 10px;
+            background: rgba(255,255,255,.03);
+            padding: 10px;
+        }
+
+        .rankAnalyticsColHead {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: .42px;
+            color: #8bc8ff;
+            margin-bottom: 8px;
+            font-weight: 800;
+        }
+
+        .rankAnalyticsItem {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .rankAnalyticsMeta {
+            margin-top: 4px;
+            color: var(--muted);
+            font-size: 11px;
+        }
+
         .itemInsightCard {
             border: 1px solid var(--line2);
             border-radius: 12px;
@@ -2854,6 +2906,10 @@ END MASTER DIRECTIVE
 
         @media (max-width: 1100px) {
             .itemInsightCards {
+                grid-template-columns: 1fr;
+            }
+
+            .rankAnalyticsGrid {
                 grid-template-columns: 1fr;
             }
 
@@ -3847,6 +3903,10 @@ END MASTER DIRECTIVE
                 </aside>
             </div>
             <div class="smallHelp">Rim colors represent difficulty tiers: Cadet (D1-D3), Veteran (D4-D6), Helldive (D7-D10). Place # is still shown in each filtered leaderboard.</div>
+            <section id="rankAnalyticsSection" class="rankAnalyticsSection">
+                <div class="rankAnalyticsTitle">Tier analytics</div>
+                <div id="rankAnalyticsGrid" class="rankAnalyticsGrid"></div>
+            </section>
             </div>
         </section>
 
@@ -9910,6 +9970,91 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             };
         }
 
+        function buildRankScopeAggregations(cards = []) {
+            const tierKeys = ["cadet", "veteran", "helldive"];
+            const pickMostRolled = (analytics) => {
+                const winner = (analytics?.itemStats || [])
+                    .filter(item => Number(item.total || 0) > 0)
+                    .sort((a, b) => Number(b.total || 0) - Number(a.total || 0)
+                        || Number(b.performanceScore || 0) - Number(a.performanceScore || 0)
+                        || Number(b.moRate || 0) - Number(a.moRate || 0))[0] || null;
+                return winner ? { item: winner, count: Number(winner.total || 0) } : null;
+            };
+            const pickBestPerformed = (analytics) => (analytics?.itemStats || [])
+                .filter(item => Number(item.total || 0) > 0)
+                .sort((a, b) => Number(b.performanceScore || 0) - Number(a.performanceScore || 0)
+                    || Number(b.moRate || 0) - Number(a.moRate || 0)
+                    || Number(b.total || 0) - Number(a.total || 0))[0] || null;
+
+            const scoped = {
+                mostRolledByTier: {},
+                bestPerformedByTier: {},
+                mostRolledGlobal: null,
+                bestPerformedGlobal: null
+            };
+
+            const globalAnalytics = buildItemAnalytics(cards);
+            scoped.mostRolledGlobal = pickMostRolled(globalAnalytics);
+            scoped.bestPerformedGlobal = pickBestPerformed(globalAnalytics);
+
+            tierKeys.forEach((tier) => {
+                const tierCards = (cards || []).filter(card => cardMatchesTierRange(card, tier));
+                const tierAnalytics = buildItemAnalytics(tierCards);
+                scoped.mostRolledByTier[tier] = pickMostRolled(tierAnalytics);
+                scoped.bestPerformedByTier[tier] = pickBestPerformed(tierAnalytics);
+            });
+
+            return scoped;
+        }
+
+        function renderRankAnalytics(cards = []) {
+            const grid = $("#rankAnalyticsGrid");
+            if (!grid) return;
+
+            const aggregations = buildRankScopeAggregations(cards);
+            const selectedMostRolled = activeTier === "all"
+                ? aggregations.mostRolledGlobal
+                : aggregations.mostRolledByTier[activeTier];
+            const selectedBestPerformed = activeTier === "all"
+                ? aggregations.bestPerformedGlobal
+                : aggregations.bestPerformedByTier[activeTier];
+
+            const renderCol = (title, payload, mode) => {
+                const item = payload?.item || payload || null;
+                if (!item) {
+                    return `
+                        <article class="rankAnalyticsCol">
+                            <div class="rankAnalyticsColHead">${title}</div>
+                            <div class="tiny muted">Not enough recorded runs yet.</div>
+                        </article>
+                    `;
+                }
+
+                const visual = `<div class="itemVisualCell itemInsightVisualCell">${renderItemVisualHtml(item.name, item.slot)}</div>`;
+                const sub = mode === "mostRolled"
+                    ? `${Number(payload?.count || item.total || 0)} rolls • MO ${Math.round(Number(item.moRate || 0) * 100)}%`
+                    : `Perf ${Number(item.performanceScore || 0).toFixed(1)} • MO ${Math.round(Number(item.moRate || 0) * 100)}% • uses ${Number(item.total || 0)}`;
+
+                return `
+                    <article class="rankAnalyticsCol">
+                        <div class="rankAnalyticsColHead">${title}</div>
+                        <div class="rankAnalyticsItem">
+                            <div class="itemInsightText">
+                                <div class="value">${escapeHtml(item.name)}</div>
+                                <div class="rankAnalyticsMeta">${escapeHtml(item.slot)} · ${sub}</div>
+                            </div>
+                            <div class="itemInsightVisual">${visual}</div>
+                        </div>
+                    </article>
+                `;
+            };
+
+            grid.innerHTML = `
+                ${renderCol("Most Rolled", selectedMostRolled, "mostRolled")}
+                ${renderCol("Best Performed", selectedBestPerformed, "bestPerformed")}
+            `;
+        }
+
         function renderItemInsights(cards = []) {
             const insightBox = $("#itemInsightCards");
             if (!insightBox) return;
@@ -10070,6 +10215,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 box.innerHTML = `<div class="tiny">No cards to rank yet.</div>`;
                 renderRankDetailPanel(null, 0, getRadarMaxes(state.cards));
                 renderItemInsights(state.cards);
+                renderRankAnalytics(state.cards);
                 return;
             }
 
@@ -10122,6 +10268,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const selectedPlace = selectedCard ? (filtered.findIndex(x => x.id === selectedCard.id) + 1) : 0;
             renderRankDetailPanel(selectedCard, selectedPlace, radarMaxes);
             renderItemInsights(state.cards);
+            renderRankAnalytics(state.cards);
         }
 
         /***********************
