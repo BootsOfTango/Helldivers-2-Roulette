@@ -5572,7 +5572,10 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
          * App State
          ***********************/
         const STORAGE_KEY = "hd2_chaos_roulette_v1";
+        const STORAGE_BACKUP_KEY = "hd2_chaos_roulette_backup_v1";
+        const STORAGE_CORRUPT_KEY = "hd2_chaos_roulette_corrupt_v1";
         const FIRST_BACKUP_WARNING_KEY = "hd2_backup_warning_seen_v1";
+        let shouldPersistOnBoot = true;
         const state = {
             items: null,
             cards: [],
@@ -5720,8 +5723,50 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             `;
         }
 
+        function parseAndApplyState(raw) {
+            const parsed = JSON.parse(raw);
+
+            if (parsed.items) {
+                // Merge saved edits INTO defaults instead of replacing them
+                Object.keys(parsed.items).forEach(key => {
+                    if (Array.isArray(parsed.items[key])) {
+                        // Merge arrays by name (for planets, stratagems, etc)
+                        const saved = parsed.items[key];
+                        const base = state.items[key];
+
+                        if (!Array.isArray(base)) {
+                            state.items[key] = saved;
+                            return;
+                        }
+
+                        saved.forEach(savedItem => {
+                            const match = base.find(b => b.name === savedItem.name);
+                            if (match) {
+                                Object.assign(match, savedItem);
+                            } else {
+                                base.push(savedItem);
+                            }
+                        });
+                    } else {
+                        state.items[key] = parsed.items[key];
+                    }
+                });
+            }
+
+            state.cards = normalizeCardsCollection(parsed.cards);
+            const migratedCardTiers = migrateCardDifficultyTiers(state.cards);
+            if (parsed.settings && typeof parsed.settings === "object") {
+                state.settings.rememberedPlayerName = String(parsed.settings.rememberedPlayerName || "").trim();
+            }
+            normalizeItemWarbondAssignments();
+            if (migratedCardTiers) {
+                saveState();
+            }
+        }
+
         function loadState() {
             const raw = localStorage.getItem(STORAGE_KEY);
+            const rawBackup = localStorage.getItem(STORAGE_BACKUP_KEY);
 
             // Always start from defaults
             state.items = deepClone(DEFAULTS.items);
@@ -5734,55 +5779,39 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             state.settings.discordWebhookUrl = "";
             state.settings.rememberedPlayerName = "";
 
-            if (!raw) {
+            if (!raw && !rawBackup) {
                 normalizeItemWarbondAssignments();
                 return;
             }
 
             try {
-                const parsed = JSON.parse(raw);
-
-                if (parsed.items) {
-                    // Merge saved edits INTO defaults instead of replacing them
-                    Object.keys(parsed.items).forEach(key => {
-                        if (Array.isArray(parsed.items[key])) {
-                            // Merge arrays by name (for planets, stratagems, etc)
-                            const saved = parsed.items[key];
-                            const base = state.items[key];
-
-                            if (!Array.isArray(base)) {
-                                state.items[key] = saved;
-                                return;
-                            }
-
-                            saved.forEach(savedItem => {
-                                const match = base.find(b => b.name === savedItem.name);
-                                if (match) {
-                                    Object.assign(match, savedItem);
-                                } else {
-                                    base.push(savedItem);
-                                }
-                            });
-                        } else {
-                            state.items[key] = parsed.items[key];
-                        }
-                    });
+                parseAndApplyState(raw || rawBackup);
+            } catch (primaryErr) {
+                if (raw) {
+                    try { localStorage.setItem(STORAGE_CORRUPT_KEY, raw); } catch (_) {}
                 }
 
-                state.cards = normalizeCardsCollection(parsed.cards);
-                const migratedCardTiers = migrateCardDifficultyTiers(state.cards);
-                if (parsed.settings && typeof parsed.settings === "object") {
-                    state.settings.rememberedPlayerName = String(parsed.settings.rememberedPlayerName || "").trim();
+                if (rawBackup && rawBackup !== raw) {
+                    try {
+                        state.items = deepClone(DEFAULTS.items);
+                        state.cards = [];
+                        sanitizeFactionData();
+                        parseAndApplyState(rawBackup);
+                        console.warn("[storage] Loaded backup state after primary state parse failure.", primaryErr);
+                    } catch (backupErr) {
+                        console.error("[storage] Failed to parse both primary and backup state.", backupErr);
+                        state.items = deepClone(DEFAULTS.items);
+                        normalizeItemWarbondAssignments();
+                        state.cards = [];
+                        shouldPersistOnBoot = false;
+                    }
+                } else {
+                    state.items = deepClone(DEFAULTS.items);
+                    normalizeItemWarbondAssignments();
+                    state.cards = [];
+                    shouldPersistOnBoot = false;
+                    console.error("[storage] Failed to parse primary state; preserving corrupt payload for manual recovery.", primaryErr);
                 }
-                normalizeItemWarbondAssignments();
-                if (migratedCardTiers) {
-                    saveState();
-                }
-
-            } catch {
-                state.items = deepClone(DEFAULTS.items);
-                normalizeItemWarbondAssignments();
-                state.cards = [];
             }
 
             // Normalize any mismatched faction strings from defaults/imports/saves
@@ -5791,13 +5820,15 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         }
 
         function saveState() {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify({
+            const payload = JSON.stringify({
                 items: state.items,
                 cards: state.cards,
                 settings: {
                     rememberedPlayerName: String(state.settings?.rememberedPlayerName || "").trim()
                 }
-            }));
+            });
+            localStorage.setItem(STORAGE_KEY, payload);
+            localStorage.setItem(STORAGE_BACKUP_KEY, payload);
 
             updateHeaderPills();
 
@@ -11430,6 +11461,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             $("#btnClearAll").addEventListener("click", () => {
                 if (!confirm("This will delete ALL saved cards and item edits. Continue?")) return;
                 localStorage.removeItem(STORAGE_KEY);
+                localStorage.removeItem(STORAGE_BACKUP_KEY);
+                localStorage.removeItem(STORAGE_CORRUPT_KEY);
                 loadState();
                 saveState();
                 renderResults();
@@ -11655,7 +11688,11 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         preloadItemVisuals()
             .then(() => renderItems())
             .catch((err) => console.error("[boot] preload visuals failed", err));
-        try { saveState(); } catch (err) { console.error("[boot] saveState failed", err); }
+        if (shouldPersistOnBoot) {
+            try { saveState(); } catch (err) { console.error("[boot] saveState failed", err); }
+        } else {
+            console.warn("[boot] Skipped initial save to avoid overwriting recoverable corrupt storage payload.");
+        }
         initApp().catch((err) => console.error("[boot] initApp failed", err));
         try { showFirstTimeBackupWarning(); } catch (err) { console.error("[boot] backup warning failed", err); }
         try { switchTab("spin"); } catch (err) { console.error("[boot] switchTab failed", err); }
