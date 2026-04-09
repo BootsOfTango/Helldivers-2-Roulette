@@ -3820,6 +3820,17 @@ END MASTER DIRECTIVE
             </div>
         </div>
 
+        <div id="finalizeStatsConfirmModal" class="cardModal" hidden>
+            <div class="cardModalDialog difficultyModalDialog">
+                <div class="label">Finalize mission stats?</div>
+                <div class="tiny" style="margin-top:8px;">Finalize mission stats? This cannot be edited later.</div>
+                <div class="miniRow" style="justify-content:flex-end; margin-top:14px;">
+                    <button class="btnGhost" id="btnCancelFinalizeStatsModal">Cancel</button>
+                    <button class="btnDanger" id="btnConfirmFinalizeStatsModal">Finalize</button>
+                </div>
+            </div>
+        </div>
+
         <!-- COMPARE TAB -->
         <section id="tab-compare" class="panel" style="display:none;">
             <div class="row">
@@ -5584,7 +5595,9 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 activeResultCardId: null,
                 modalOpen: false,
                 difficultyModalOpen: false,
-                apiPlanetSyncInProgress: false
+                finalizeStatsModalOpen: false,
+                apiPlanetSyncInProgress: false,
+                resultCardDrafts: {}
             },
 
             // current spin
@@ -5902,6 +5915,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             card.majorOrderDone = !!card.majorOrderDone;
             card.notes = String(card.notes || "");
+            card.statsLocked = !!card.statsLocked;
+            card.statsLockedAt = card.statsLocked ? String(card.statsLockedAt || card.updatedAt || card.createdAt || nowISO()) : null;
             card.scoreRaw = Number(card.scoreRaw || 0);
             card.grade = clamp(Number(card.grade || 0), 0, 100);
             card.difficulty = getCardDifficulty(card);
@@ -8096,11 +8111,31 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             `;
         }
 
+        function getMissionStatsDraft(cardId) {
+            const card = getCardById(cardId);
+            if (!card) return null;
+            if (!state.ui.resultCardDrafts || typeof state.ui.resultCardDrafts !== "object") {
+                state.ui.resultCardDrafts = {};
+            }
+            const existing = state.ui.resultCardDrafts[cardId];
+            if (existing && typeof existing === "object") return existing;
+            const draft = {
+                stats: normalizeMissionStats(card.stats, card),
+                majorOrderDone: !!card.majorOrderDone,
+                notes: String(card.notes || "")
+            };
+            state.ui.resultCardDrafts[cardId] = draft;
+            return draft;
+        }
+
         function openResultCardModal(cardId) {
             const card = getCardById(cardId);
             const modal = $("#resultCardModal");
             const body = $("#resultCardModalBody");
             if (!card || !modal || !body) return;
+            const draft = getMissionStatsDraft(card.id);
+            if (!draft) return;
+            const editingLocked = !!card.statsLocked;
 
             const planetWeatherText = card.planet ? getPlanetWeatherText(card.planet) : "None";
             const planetWeatherTags = splitWeatherTags(planetWeatherText);
@@ -8161,32 +8196,32 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
                     <div class="statsGrid modalStatGrid">
                       <div><div class="label">Difficulty</div><input type="text" value="${escapeHtml(formatDifficultyLabel(card))}" readonly></div>
-                      <div><div class="label">Kills</div><input type="number" min="0" value="${Number(card.stats?.kills || 0)}" data-k="kills" data-id="${card.id}"></div>
-                      <div><div class="label">Accuracy (%)</div><input type="number" min="0" value="${Number(card.stats?.accuracy || 0)}" data-k="accuracy" data-id="${card.id}"></div>
-                      <div><div class="label">Deaths</div><input type="number" min="0" value="${Number(card.stats?.deaths || 0)}" data-k="deaths" data-id="${card.id}"></div>
-                      <div><div class="label">Stims</div><input type="number" min="0" value="${Number(card.stats?.stims || 0)}" data-k="stims" data-id="${card.id}"></div>
-                      <div><div class="label">Distance (km)</div><input type="number" min="0" step="0.1" value="${Number(card.stats?.distanceKm || 0)}" data-k="distanceKm" data-id="${card.id}"></div>
-                      <div><div class="label">Strat uses</div><input type="number" min="0" value="${Number(card.stats?.stratUses || 0)}" data-k="stratUses" data-id="${card.id}"></div>
+                      <div><div class="label">Kills</div><input type="number" min="0" value="${Number(draft.stats?.kills || 0)}" data-k="kills" data-id="${card.id}" ${editingLocked ? "disabled" : ""}></div>
+                      <div><div class="label">Accuracy (%)</div><input type="number" min="0" value="${Number(draft.stats?.accuracy || 0)}" data-k="accuracy" data-id="${card.id}" ${editingLocked ? "disabled" : ""}></div>
+                      <div><div class="label">Deaths</div><input type="number" min="0" value="${Number(draft.stats?.deaths || 0)}" data-k="deaths" data-id="${card.id}" ${editingLocked ? "disabled" : ""}></div>
+                      <div><div class="label">Stims</div><input type="number" min="0" value="${Number(draft.stats?.stims || 0)}" data-k="stims" data-id="${card.id}" ${editingLocked ? "disabled" : ""}></div>
+                      <div><div class="label">Distance (km)</div><input type="number" min="0" step="0.1" value="${Number(draft.stats?.distanceKm || 0)}" data-k="distanceKm" data-id="${card.id}" ${editingLocked ? "disabled" : ""}></div>
+                      <div><div class="label">Strat uses</div><input type="number" min="0" value="${Number(draft.stats?.stratUses || 0)}" data-k="stratUses" data-id="${card.id}" ${editingLocked ? "disabled" : ""}></div>
                     </div>
 
                     <div class="modalMoNotesRow">
                       <div>
                         <div class="label">Major order done</div>
-                        <select data-k="majorOrderDone" data-id="${card.id}">
-                          <option value="false" ${card.majorOrderDone ? "" : "selected"}>No</option>
-                          <option value="true" ${card.majorOrderDone ? "selected" : ""}>Yes</option>
+                        <select data-k="majorOrderDone" data-id="${card.id}" ${editingLocked ? "disabled" : ""}>
+                          <option value="false" ${draft.majorOrderDone ? "" : "selected"}>No</option>
+                          <option value="true" ${draft.majorOrderDone ? "selected" : ""}>Yes</option>
                         </select>
                       </div>
                       <div class="modalNotes">
                         <div class="label">Notes</div>
-                        <textarea data-k="notes" data-id="${card.id}" placeholder="Write anything: what sucked, what worked, funny moments...">${escapeHtml(card.notes || "")}</textarea>
+                        <textarea data-k="notes" data-id="${card.id}" placeholder="Write anything: what sucked, what worked, funny moments..." ${editingLocked ? "disabled" : ""}>${escapeHtml(draft.notes || "")}</textarea>
                       </div>
                     </div>
 
                     <div class="miniRow modalActionRow" style="justify-content:space-between;">
-                      <div class="tiny">${escapeHtml(formatDifficultyLabel(card))} • Raw: <strong>${Number(card.scoreRaw || 0).toFixed(1)}</strong></div>
+                      <div class="tiny">${escapeHtml(formatDifficultyLabel(card))} • Raw: <strong>${Number(card.scoreRaw || 0).toFixed(1)}</strong>${editingLocked ? ` • Finalized ${escapeHtml(new Date(card.statsLockedAt || card.createdAt).toLocaleString())}` : ""}</div>
                       <div class="miniRow modalActionButtons">
-                        <button class="btnPrimary" data-act="saveCard" data-id="${card.id}">SAVE</button>
+                        <button class="btnPrimary" data-act="saveCard" data-id="${card.id}" ${editingLocked ? "disabled" : ""}>SAVE</button>
                         <button class="btnGhost" data-act="deleteCard" data-id="${card.id}">DELETE</button>
                       </div>
                     </div>
@@ -8210,8 +8245,23 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const modal = $("#resultCardModal");
             if (!modal) return;
             modal.hidden = true;
+            closeFinalizeStatsModal();
             state.ui.activeResultCardId = null;
             state.ui.modalOpen = false;
+        }
+
+        function openFinalizeStatsModal() {
+            const modal = $("#finalizeStatsConfirmModal");
+            if (!modal) return;
+            modal.hidden = false;
+            state.ui.finalizeStatsModalOpen = true;
+        }
+
+        function closeFinalizeStatsModal() {
+            const modal = $("#finalizeStatsConfirmModal");
+            if (!modal) return;
+            modal.hidden = true;
+            state.ui.finalizeStatsModalOpen = false;
         }
 
         function openDifficultyModal() {
@@ -8750,40 +8800,28 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             const card = state.cards.find(c => c.id === id);
             if (!card) return;
-            const sourceRoot = e.target.closest(".cardModalDialog") || e.target.closest(".card") || document;
+            if (card.statsLocked) return;
+            const draft = getMissionStatsDraft(id);
+            if (!draft) return;
 
-            // ensure stats container exists
-            if (!card.stats || typeof card.stats !== "object") card.stats = {};
-
-            // numeric stat fields
             const STAT_KEYS = ["kills", "accuracy", "deaths", "stims", "distanceKm", "stratUses"];
 
             if (key === "majorOrderDone") {
-                card.majorOrderDone = (el.value === "true");
+                draft.majorOrderDone = (el.value === "true");
             } else if (key === "notes") {
-                card.notes = el.value;
-            } else if (key === "difficulty") {
-                card.difficulty = clamp(Math.round(Number(el.value || 10)), 1, 10);
-                card.difficultyTier = getDifficultyTier(card.difficulty);
-            } else if (key === "difficultyTier") {
-                const manualTier = canonicalizeDifficultyTierValue(el.value);
-                card.difficultyTier = manualTier || getDifficultyTier(card.difficulty);
+                draft.notes = el.value;
             } else if (STAT_KEYS.includes(key)) {
-                card.stats[key] = Number(el.value || 0);
+                draft.stats[key] = Number(el.value || 0);
             }
-
-            recalcGrades();
-            // saveState();
-            updateHeaderPills();
-            safeRenderRank("onCardFieldChange");
-            refreshCompareOptions();
-            // keep results view stable, no full redraw per keystroke except textarea input is fine
         }
 
 
-        function syncCardFromResultInputs(cardId, rootEl) {
+        function syncDraftFromResultInputs(cardId, rootEl) {
             const card = getCardById(cardId);
             if (!card) return null;
+            if (card.statsLocked) return null;
+            const draft = getMissionStatsDraft(cardId);
+            if (!draft) return null;
 
             const scope = rootEl || document;
             const fields = scope.querySelectorAll(`[data-id="${cardId}"][data-k]`);
@@ -8793,22 +8831,16 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 const key = el.getAttribute("data-k");
                 if (!key) return;
                 if (key === "majorOrderDone") {
-                    card.majorOrderDone = (String(el.value) === "true");
+                    draft.majorOrderDone = (String(el.value) === "true");
                 } else if (key === "notes") {
-                    card.notes = el.value;
-                } else if (key === "difficulty") {
-                    card.difficulty = clamp(Math.round(Number(el.value || 10)), 1, 10);
-                    card.difficultyTier = getDifficultyTier(card.difficulty);
-                } else if (key === "difficultyTier") {
-                    const manualTier = canonicalizeDifficultyTierValue(el.value);
-                    card.difficultyTier = manualTier || getDifficultyTier(card.difficulty);
+                    draft.notes = el.value;
                 } else if (STAT_KEYS.includes(key)) {
-                    if (!card.stats) card.stats = {};
-                    card.stats[key] = Number(el.value || 0);
+                    if (!draft.stats || typeof draft.stats !== "object") draft.stats = {};
+                    draft.stats[key] = Number(el.value || 0);
                 }
             });
 
-            return card;
+            return draft;
         }
         async function onCardAction(e) {
             const actionBtn = e.target.closest("button[data-act]");
@@ -8823,26 +8855,42 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             if (act === "deleteCard") {
                 if (!confirm("Delete this card?")) return;
                 state.cards = state.cards.filter(c => c.id !== id);
+                if (state.ui.resultCardDrafts && typeof state.ui.resultCardDrafts === "object") {
+                    delete state.ui.resultCardDrafts[id];
+                }
                 saveState();
                 renderResults();
                 closeResultCardModal();
                 return;
             }
             if (act === "saveCard") {
-                // Sync latest typed values (even if user didn't blur the input yet)
-                syncCardFromResultInputs(id, sourceRoot);
-
-                // Recalculate score + grade and persist
-                recalcGrades();
-                saveState();
-                renderResults();
-                if (state.ui.modalOpen && state.ui.activeResultCardId === id) openResultCardModal(id);
-
-                // Tiny confirmation so you know it worked
-                alert("Saved ✅");
+                if (card.statsLocked) return;
+                syncDraftFromResultInputs(id, sourceRoot);
+                openFinalizeStatsModal();
                 return;
             }
 
+        }
+
+        function confirmFinalizeActiveCardStats() {
+            const cardId = state.ui.activeResultCardId;
+            if (!cardId) return;
+            const card = getCardById(cardId);
+            if (!card || card.statsLocked) return;
+            const draft = state.ui.resultCardDrafts?.[cardId];
+            if (!draft) return;
+
+            card.stats = normalizeMissionStats(draft.stats, card);
+            card.majorOrderDone = !!draft.majorOrderDone;
+            card.notes = String(draft.notes || "");
+            card.statsLocked = true;
+            card.statsLockedAt = nowISO();
+
+            recalcGrades();
+            saveState();
+            renderResults();
+            closeFinalizeStatsModal();
+            if (state.ui.modalOpen && state.ui.activeResultCardId === cardId) openResultCardModal(cardId);
         }
 
         function showFirstTimeBackupWarning() {
@@ -11220,6 +11268,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
                 majorOrderDone: false,
                 notes: "",
+                statsLocked: false,
+                statsLockedAt: null,
                 difficulty: getCardDifficulty(c),
                 difficultyTier: canonicalizeDifficultyTierValue(c.difficultyTier) || getDifficultyTier(getCardDifficulty(c)),
 
@@ -11358,7 +11408,12 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             $("#difficultyConfirmModal")?.addEventListener("click", (e) => {
                 if (e.target && e.target.id === "difficultyConfirmModal") closeDifficultyModal();
             });
+            $("#finalizeStatsConfirmModal")?.addEventListener("click", (e) => {
+                if (e.target && e.target.id === "finalizeStatsConfirmModal") closeFinalizeStatsModal();
+            });
             $("#btnCancelDifficultyModal")?.addEventListener("click", closeDifficultyModal);
+            $("#btnCancelFinalizeStatsModal")?.addEventListener("click", closeFinalizeStatsModal);
+            $("#btnConfirmFinalizeStatsModal")?.addEventListener("click", confirmFinalizeActiveCardStats);
             $("#btnConfirmDifficultyModal")?.addEventListener("click", () => {
                 const raw = String($("#difficultyModalSelect")?.value || "").trim();
                 if (!raw) {
@@ -11374,6 +11429,10 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             });
             document.addEventListener("keydown", (e) => {
                 if (e.key !== "Escape") return;
+                if (state.ui.finalizeStatsModalOpen) {
+                    closeFinalizeStatsModal();
+                    return;
+                }
                 if (state.ui.difficultyModalOpen) {
                     closeDifficultyModal();
                     return;
