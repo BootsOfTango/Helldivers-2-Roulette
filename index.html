@@ -5813,6 +5813,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         function normalizeCardRecord(card) {
             if (!card || typeof card !== "object") return null;
             const loadout = (card.loadout && typeof card.loadout === "object") ? card.loadout : null;
+            const legacyTierValue = canonicalizeDifficultyTierValue(card.difficultyTier || card.tierTag || card.tier);
 
             card.id = String(card.id || uid());
             card.createdAt = card.createdAt || nowISO();
@@ -5844,14 +5845,34 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             card.majorOrderDone = !!card.majorOrderDone;
             card.notes = String(card.notes || "");
             card.scoreRaw = Number(card.scoreRaw || 0);
-            card.grade = Number(card.grade || 0);
+            card.grade = clamp(Number(card.grade || 0), 0, 100);
             card.difficulty = getCardDifficulty(card);
             // Enforce strict tier mapping from D1-D10 only:
             // Cadet (1-3), Veteran (4-6), Helldive (7-10).
             card.difficultyTier = getDifficultyTier(card.difficulty);
+            if (legacyTierValue && legacyTierValue !== card.difficultyTier) {
+                console.warn("[rank] corrected tier mismatch from difficulty", {
+                    cardId: card.id,
+                    difficulty: card.difficulty,
+                    legacyTier: legacyTierValue,
+                    correctedTier: card.difficultyTier
+                });
+            }
             delete card.tierTag;
             delete card.tier;
             card.playerName = getPlayerName(card);
+            const stats = (card.stats && typeof card.stats === "object") ? card.stats : {};
+            const statNumber = (v) => {
+                const n = Number(v || 0);
+                return Number.isFinite(n) ? n : 0;
+            };
+            card.stats = {
+                power: statNumber(stats.power),
+                agility: statNumber(stats.agility),
+                endurance: statNumber(stats.endurance),
+                mobility: statNumber(stats.mobility),
+                utility: statNumber(stats.utility)
+            };
 
             return card;
         }
@@ -10623,7 +10644,9 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             const list = (Array.isArray(state.cards) ? state.cards : [])
                 .filter(card => card && typeof card === "object")
-                .sort((a, b) => Number(b?.grade || 0) - Number(a?.grade || 0) || String(b?.createdAt || "").localeCompare(String(a?.createdAt || "")));
+                .sort((a, b) => Number(b?.grade || 0) - Number(a?.grade || 0)
+                    || String(b?.createdAt || "").localeCompare(String(a?.createdAt || ""))
+                    || String(a?.id || "").localeCompare(String(b?.id || "")));
 
             const grouped = {
                 cadet: list.filter(c => cardMatchesTierRange(c, "cadet")),
