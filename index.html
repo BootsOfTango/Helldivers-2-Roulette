@@ -5586,6 +5586,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         const STORAGE_KEY = "hd2_chaos_roulette_v1";
         const STORAGE_BACKUP_KEY = "hd2_chaos_roulette_backup_v1";
         const STORAGE_CORRUPT_KEY = "hd2_chaos_roulette_corrupt_v1";
+        const STORAGE_LOCKED_STATS_AUDIT_KEY = "hd2_chaos_roulette_locked_stats_audit_v1";
         const FIRST_BACKUP_WARNING_KEY = "hd2_backup_warning_seen_v1";
         let shouldPersistOnBoot = true;
         const state = {
@@ -5597,7 +5598,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 difficultyModalOpen: false,
                 finalizeStatsModalOpen: false,
                 apiPlanetSyncInProgress: false,
-                resultCardDrafts: {}
+                resultCardDrafts: {},
+                lockedStatsBaseline: {}
             },
 
             // current spin
@@ -5830,6 +5832,20 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             // Normalize any mismatched faction strings from defaults/imports/saves
             sanitizeFactionData();
+            refreshLockedStatsBaseline();
+            try {
+                const savedAuditRaw = localStorage.getItem(STORAGE_LOCKED_STATS_AUDIT_KEY);
+                if (savedAuditRaw) {
+                    const savedAudit = JSON.parse(savedAuditRaw);
+                    const savedKeys = Object.keys(savedAudit || {}).sort().join("|");
+                    const currentKeys = Object.keys(state.ui.lockedStatsBaseline || {}).sort().join("|");
+                    if (savedKeys === currentKeys) {
+                        assertLockedStatsDeterminism("loadState");
+                    }
+                }
+            } catch (err) {
+                console.warn("[card-stats] skipped locked stats audit load check", err);
+            }
 
         }
 
@@ -5843,6 +5859,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             });
             localStorage.setItem(STORAGE_KEY, payload);
             localStorage.setItem(STORAGE_BACKUP_KEY, payload);
+            refreshLockedStatsBaseline();
+            persistLockedStatsAudit();
 
             updateHeaderPills();
 
@@ -5879,6 +5897,61 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             out.distanceKm = toFiniteNumber(firstPresent("distanceKm", "mobility"));
             out.stratUses = toFiniteNumber(firstPresent("stratUses", "utility"));
             return out;
+        }
+
+        function stableStatsSignature(stats) {
+            const s = normalizeMissionStats(stats);
+            return [
+                Number(s.kills || 0).toFixed(4),
+                Number(s.accuracy || 0).toFixed(4),
+                Number(s.deaths || 0).toFixed(4),
+                Number(s.stims || 0).toFixed(4),
+                Number(s.distanceKm || 0).toFixed(4),
+                Number(s.stratUses || 0).toFixed(4)
+            ].join("|");
+        }
+
+        function buildLockedStatsBaseline(cards) {
+            const out = {};
+            (Array.isArray(cards) ? cards : []).forEach((card) => {
+                if (!card || typeof card !== "object" || !card.id || !card.statsLocked) return;
+                out[card.id] = {
+                    signature: stableStatsSignature(card.stats),
+                    statsLockedAt: card.statsLockedAt ? String(card.statsLockedAt) : null
+                };
+            });
+            return out;
+        }
+
+        function refreshLockedStatsBaseline() {
+            state.ui.lockedStatsBaseline = buildLockedStatsBaseline(state.cards);
+        }
+
+        function persistLockedStatsAudit() {
+            try {
+                localStorage.setItem(STORAGE_LOCKED_STATS_AUDIT_KEY, JSON.stringify(buildLockedStatsBaseline(state.cards)));
+            } catch (err) {
+                console.warn("[card-stats] failed to persist locked stats audit", err);
+            }
+        }
+
+        function assertLockedStatsDeterminism(context) {
+            const baseline = (state.ui && state.ui.lockedStatsBaseline && typeof state.ui.lockedStatsBaseline === "object")
+                ? state.ui.lockedStatsBaseline
+                : {};
+            const mismatches = [];
+            Object.entries(baseline).forEach(([id, expected]) => {
+                const card = getCardById(id);
+                if (!card || !card.statsLocked) return;
+                const currentSig = stableStatsSignature(card.stats);
+                if (currentSig !== String(expected?.signature || "")) {
+                    mismatches.push({ id, expected: expected.signature, actual: currentSig });
+                }
+            });
+            if (mismatches.length) {
+                console.error(`[card-stats] Deterministic check failed (${context})`, mismatches);
+                throw new Error(`[card-stats] locked mission stats changed unexpectedly (${context})`);
+            }
         }
 
         function canEditCardStats(card, context = "") {
@@ -5935,6 +6008,15 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 card.statsLockedAt = String(card.updatedAt || card.createdAt || nowISO());
             } else {
                 card.statsLockedAt = null;
+            }
+            if (card.statsLocked) {
+                const lockedSnapshot = (card.lockedStatsSnapshot && typeof card.lockedStatsSnapshot === "object")
+                    ? card.lockedStatsSnapshot
+                    : card.stats;
+                card.lockedStatsSnapshot = normalizeMissionStats(lockedSnapshot, card);
+                card.stats = normalizeMissionStats(card.lockedStatsSnapshot, card);
+            } else {
+                card.lockedStatsSnapshot = null;
             }
             card.scoreRaw = Number(card.scoreRaw || 0);
             card.grade = clamp(Number(card.grade || 0), 0, 100);
@@ -7651,8 +7733,13 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             return map;
         }
         function recalcGrades() {
+            assertLockedStatsDeterminism("recalcGrades:before");
             for (const c of state.cards) {
                 if (!c || typeof c !== "object") continue;
+                if (c.statsLocked) {
+                    c.lockedStatsSnapshot = normalizeMissionStats(c.lockedStatsSnapshot || c.stats, c);
+                    c.stats = normalizeMissionStats(c.lockedStatsSnapshot, c);
+                }
                 c.stats = normalizeMissionStats(c.stats, c);
                 c.difficulty = getCardDifficulty(c);
             }
@@ -7664,6 +7751,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 c.scoreRaw = raw;
                 c.grade = (maxRaw <= 0) ? 0 : Math.round((raw / maxRaw) * 100);
             });
+            assertLockedStatsDeterminism("recalcGrades:after");
         }
 
         /***********************
@@ -8904,6 +8992,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             card.notes = String(draft.notes || "");
             card.statsLocked = true;
             card.statsLockedAt = nowISO();
+            card.lockedStatsSnapshot = normalizeMissionStats(card.stats, card);
 
             recalcGrades();
             saveState();
@@ -10880,10 +10969,12 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         }
 
         function runViewOnlyRender(label, renderFn) {
+            assertLockedStatsDeterminism(`${label}:before`);
             const beforeLength = Array.isArray(state?.cards) ? state.cards.length : 0;
             const beforeCardsSnapshot = JSON.stringify(state?.cards ?? []);
             renderFn();
             assertViewRenderDoesNotMutateCards(label, beforeCardsSnapshot, beforeLength);
+            assertLockedStatsDeterminism(`${label}:after`);
         }
 
         /***********************
@@ -11289,6 +11380,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 notes: "",
                 statsLocked: false,
                 statsLockedAt: null,
+                lockedStatsSnapshot: null,
                 difficulty: getCardDifficulty(c),
                 difficultyTier: canonicalizeDifficultyTierValue(c.difficultyTier) || getDifficultyTier(getCardDifficulty(c)),
 
