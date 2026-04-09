@@ -5680,7 +5680,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 return;
             }
 
-            const normalizedCard = normalizeCardRecord(card) || card;
+            const normalizedCard = getNormalizedCardView(card) || card;
 
             const makeItemCard = (label, value, kind) => {
                 const visual = getItemVisual(value, kind);
@@ -5922,6 +5922,11 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             card.stats = normalizeMissionStats(card.stats, card);
 
             return card;
+        }
+
+        function getNormalizedCardView(card) {
+            if (!card || typeof card !== "object") return null;
+            return normalizeCardRecord(deepClone(card));
         }
 
         function normalizeCardsCollection(cards) {
@@ -7916,8 +7921,6 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         }
 
         function renderResults() {
-            recalcGrades();
-
             const modeFilter = $("#resFilterMode").value;
             const factionFilter = $("#resFilterFaction").value;
             const sort = $("#resSort").value;
@@ -8939,8 +8942,6 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         }
 
         function renderCompare() {
-            recalcGrades();
-
             const idA = $("#cmpA").value;
             const idB = $("#cmpB").value;
             const ca = state.cards.find(c => c.id === idA);
@@ -9141,7 +9142,6 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         function drawGraph() {
             // Graph UI is optional. If it is not present, do nothing.
             if (!$("#graphCanvas") || !$("#gX") || !$("#gY") || !$("#gFilterFaction") || !$("#gFilterMode") || !$("#gFilterHas")) return;
-            recalcGrades();
             wireGraphHover();
 
             const xK = $("#gX").value;
@@ -10667,17 +10667,13 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         }
 
         function renderRank() {
-            state.cards = normalizeCardsCollection(state.cards);
-            recalcGrades();
             syncRankTierCardUi();
             const hasActiveTier = ["cadet", "veteran", "helldive"].includes(activeTier);
 
             const list = (Array.isArray(state.cards) ? state.cards : [])
                 .filter(card => card && typeof card === "object")
-                .map((card) => {
-                    card.stats = normalizeMissionStats(card.stats, card);
-                    return card;
-                })
+                .map(card => getNormalizedCardView(card))
+                .filter(Boolean)
                 .sort((a, b) => Number(b?.grade || 0) - Number(a?.grade || 0)
                     || String(b?.createdAt || "").localeCompare(String(a?.createdAt || ""))
                     || String(a?.id || "").localeCompare(String(b?.id || "")));
@@ -10803,6 +10799,26 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             }
         }
 
+        function assertViewRenderDoesNotMutateCards(label, beforeCardsSnapshot, beforeLength) {
+            const afterLength = Array.isArray(state?.cards) ? state.cards.length : 0;
+            const afterCardsSnapshot = JSON.stringify(state?.cards ?? []);
+            const ok = beforeLength === afterLength && beforeCardsSnapshot === afterCardsSnapshot;
+            console.assert(ok, `[view-only] ${label} mutated state.cards`, {
+                beforeLength,
+                afterLength
+            });
+            if (!ok) {
+                throw new Error(`[view-only] ${label} mutated state.cards`);
+            }
+        }
+
+        function runViewOnlyRender(label, renderFn) {
+            const beforeLength = Array.isArray(state?.cards) ? state.cards.length : 0;
+            const beforeCardsSnapshot = JSON.stringify(state?.cards ?? []);
+            renderFn();
+            assertViewRenderDoesNotMutateCards(label, beforeCardsSnapshot, beforeLength);
+        }
+
         /***********************
          * Escape HTML for safe rendering
          ***********************/
@@ -10826,22 +10842,22 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             if (tab !== "results") closeResultCardModal();
             if (tab === "results") {
-                renderResults();
+                runViewOnlyRender("switchTab:results", () => renderResults());
             }
             if (tab === "compare") {
-                refreshCompareOptions();
+                runViewOnlyRender("switchTab:compare:refreshCompareOptions", () => refreshCompareOptions());
                 // Ensure layout + options are ready before drawing radars (COMPARE tab is hidden until now)
                 requestAnimationFrame(() => requestAnimationFrame(() => {
-                    if (typeof updateCompareRadar === "function") updateCompareRadar();
+                    if (typeof updateCompareRadar === "function") runViewOnlyRender("switchTab:compare:updateCompareRadar", () => updateCompareRadar());
                 }));
-                drawGraph();
+                runViewOnlyRender("switchTab:compare:drawGraph", () => drawGraph());
             }
-            if (tab === "items") renderItems();
+            if (tab === "items") runViewOnlyRender("switchTab:items", () => renderItems());
             if (tab === "rank") {
-                safeRenderRank("switchTab:rank");
+                runViewOnlyRender("switchTab:rank", () => safeRenderRank("switchTab:rank"));
             }
             if (tab === "spin") {
-                renderSpin();
+                runViewOnlyRender("switchTab:spin", () => renderSpin());
                 if (!state.current?.loadout) clearSpinReelSlots();
             }
         }
@@ -11699,8 +11715,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         initApp().catch((err) => console.error("[boot] initApp failed", err));
         try { showFirstTimeBackupWarning(); } catch (err) { console.error("[boot] backup warning failed", err); }
         try { switchTab("spin"); } catch (err) { console.error("[boot] switchTab failed", err); }
-        try { renderSpin(); } catch (err) { console.error("[boot] renderSpin failed", err); }
-        setTimeout(() => { try { renderResults(); } catch (err) { console.error("[boot] renderResults failed", err); } }, 0);
+        try { runViewOnlyRender("boot:renderSpin", () => renderSpin()); } catch (err) { console.error("[boot] renderSpin failed", err); }
+        setTimeout(() => { try { runViewOnlyRender("boot:renderResults", () => renderResults()); } catch (err) { console.error("[boot] renderResults failed", err); } }, 0);
 
         /* ===== AUTO COMPARE RADAR WIRING ===== */
         function updateCompareRadar() {
