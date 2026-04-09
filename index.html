@@ -5842,6 +5842,32 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             return String(state.settings?.rememberedPlayerName || "").trim();
         }
 
+        function normalizeMissionStats(stats, fallback = null) {
+            const toFiniteNumber = (v) => {
+                const n = Number(v ?? 0);
+                return Number.isFinite(n) ? n : 0;
+            };
+            const source = (stats && typeof stats === "object") ? stats : {};
+            const fallbackSource = (fallback && typeof fallback === "object") ? fallback : {};
+            const out = { ...source };
+            const hasOwn = (obj, key) => Object.prototype.hasOwnProperty.call(obj, key);
+            const firstPresent = (...keys) => {
+                for (const key of keys) {
+                    if (hasOwn(source, key) && source[key] != null) return source[key];
+                    if (hasOwn(fallbackSource, key) && fallbackSource[key] != null) return fallbackSource[key];
+                }
+                return 0;
+            };
+
+            out.kills = toFiniteNumber(firstPresent("kills", "power"));
+            out.accuracy = toFiniteNumber(firstPresent("accuracy", "agility"));
+            out.deaths = toFiniteNumber(firstPresent("deaths", "endurance"));
+            out.stims = toFiniteNumber(firstPresent("stims"));
+            out.distanceKm = toFiniteNumber(firstPresent("distanceKm", "mobility"));
+            out.stratUses = toFiniteNumber(firstPresent("stratUses", "utility"));
+            return out;
+        }
+
         function normalizeCardRecord(card) {
             if (!card || typeof card !== "object") return null;
             const loadout = (card.loadout && typeof card.loadout === "object") ? card.loadout : null;
@@ -5893,18 +5919,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             delete card.tierTag;
             delete card.tier;
             card.playerName = getPlayerName(card);
-            const stats = (card.stats && typeof card.stats === "object") ? card.stats : {};
-            const statNumber = (v) => {
-                const n = Number(v || 0);
-                return Number.isFinite(n) ? n : 0;
-            };
-            card.stats = {
-                power: statNumber(stats.power),
-                agility: statNumber(stats.agility),
-                endurance: statNumber(stats.endurance),
-                mobility: statNumber(stats.mobility),
-                utility: statNumber(stats.utility)
-            };
+            card.stats = normalizeMissionStats(card.stats, card);
 
             return card;
         }
@@ -6918,12 +6933,13 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         }
 
         function computeRawScore(card) {
-            const kills = Number(card.stats?.kills ?? 0);
-            const accuracy = Number(card.stats?.accuracy ?? 0);
-            const deaths = Number(card.stats?.deaths ?? 0);
-            const stims = Number(card.stats?.stims ?? 0);
-            const distanceKm = Number(card.stats?.distanceKm ?? 0);
-            const stratUses = Number(card.stats?.stratUses ?? 0);
+            const s = normalizeMissionStats(card?.stats, card);
+            const kills = Number(s.kills ?? 0);
+            const accuracy = Number(s.accuracy ?? 0);
+            const deaths = Number(s.deaths ?? 0);
+            const stims = Number(s.stims ?? 0);
+            const distanceKm = Number(s.distanceKm ?? 0);
+            const stratUses = Number(s.stratUses ?? 0);
             const difficulty = getCardDifficulty(card);
 
             // Balance power (kills) with execution (accuracy/survival) and utility (stratagems/mobility).
@@ -6998,7 +7014,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             };
 
             for (const c of (cards || [])) {
-                const s = c.stats || {};
+                const s = normalizeMissionStats(c?.stats, c);
                 const combo = getEnduranceLoad(s);
                 out.maxKills = Math.max(out.maxKills, Number(s.kills || 0));
                 out.maxAccuracy = Math.max(out.maxAccuracy, Number(s.accuracy || 0));
@@ -7023,7 +7039,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         }
 
         function buildRadarSVG(card, maxes) {
-            const s = card.stats || {};
+            const s = normalizeMissionStats(card?.stats, card);
             const combo = getEnduranceLoad(s);
 
             // Axis order matches your screenshot-style labels:
@@ -7258,7 +7274,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         }
 
         function getCompareVals(card, maxes) {
-            const s = card?.stats || {};
+            const s = normalizeMissionStats(card?.stats, card);
             const combo = getEnduranceLoad(s);
             // Overlay comparisons must use raw stat-normalized values (no grade/MO scaling),
             // otherwise a stronger overall grade can incorrectly flip per-axis winners.
@@ -7272,7 +7288,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         }
 
         function getCompareMetricValue(card, axisKey) {
-            const s = card?.stats || {};
+            const s = normalizeMissionStats(card?.stats, card);
             if (axisKey === "POWER") return Number(s.kills || 0);
             if (axisKey === "AGILITY") return Number(s.accuracy || 0);
             if (axisKey === "ENDURANCE") return getEnduranceLoad(s);
@@ -7596,27 +7612,9 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             return map;
         }
         function recalcGrades() {
-            // Backward-compat: older cards may have stats at top-level.
             for (const c of state.cards) {
                 if (!c || typeof c !== "object") continue;
-                if (!c.stats || typeof c.stats !== "object") c.stats = {};
-                const s = c.stats;
-
-                // migrate legacy flat fields if present
-                if (s.kills == null && c.kills != null) s.kills = Number(c.kills || 0);
-                if (s.accuracy == null && c.accuracy != null) s.accuracy = Number(c.accuracy || 0);
-                if (s.deaths == null && c.deaths != null) s.deaths = Number(c.deaths || 0);
-                if (s.stims == null && c.stims != null) s.stims = Number(c.stims || 0);
-                if (s.distanceKm == null && c.distanceKm != null) s.distanceKm = Number(c.distanceKm || 0);
-                if (s.stratUses == null && c.stratUses != null) s.stratUses = Number(c.stratUses || 0);
-
-                // ensure numeric defaults
-                s.kills = Number(s.kills || 0);
-                s.accuracy = Number(s.accuracy || 0);
-                s.deaths = Number(s.deaths || 0);
-                s.stims = Number(s.stims || 0);
-                s.distanceKm = Number(s.distanceKm || 0);
-                s.stratUses = Number(s.stratUses || 0);
+                c.stats = normalizeMissionStats(c.stats, c);
                 c.difficulty = getCardDifficulty(c);
             }
 
@@ -8494,8 +8492,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
         function getDiscordRadarValues(card) {
             const maxes = getRadarMaxes(state.cards || []);
-            const s = card.stats || {};
-            const combo = Number(s.deaths || 0) + Number(s.stims || 0);
+            const s = normalizeMissionStats(card?.stats, card);
+            const combo = getEnduranceLoad(s);
             return [
                 normPos(s.kills, maxes.maxKills),
                 normPos(s.accuracy, maxes.maxAccuracy),
@@ -8530,7 +8528,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         }
 
         function buildDiscordCardEmbed(card, imageUrl, imageStyle = "thumbnail") {
-            const s = card.stats || {};
+            const s = normalizeMissionStats(card?.stats, card);
             const weatherText = card.planet ? getPlanetWeatherText(card.planet) : "None";
             const createdAt = card.createdAt ? new Date(card.createdAt).toLocaleString() : "—";
             const tier = getCardTierClass(card);
@@ -8618,7 +8616,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const tier = getCardTierClass(card);
             const tierVisual = getDiscordTierVisual(tier);
 
-            const s = card.stats || {};
+            const s = normalizeMissionStats(card?.stats, card);
             const grad = ctx.createLinearGradient(0, 0, 0, baseHeight);
             grad.addColorStop(0, "#070c16");
             grad.addColorStop(1, "#03060d");
@@ -8644,7 +8642,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const labels = [
                 `POWER\n${Number(s.kills || 0)} kills`,
                 `AGILITY\n${Number(s.accuracy || 0)}% acc`,
-                `ENDURANCE\n${Number(s.deaths || 0) + Number(s.stims || 0)} combo`,
+                `ENDURANCE\n${getEnduranceLoad(s).toFixed(1)} combo`,
                 `MOBILITY\n${formatMetricDisplay(s.distanceKm, "distanceKm")} km`,
                 `UTILITY\n${Number(s.stratUses || 0)} uses`
             ];
@@ -10676,6 +10674,10 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             const list = (Array.isArray(state.cards) ? state.cards : [])
                 .filter(card => card && typeof card === "object")
+                .map((card) => {
+                    card.stats = normalizeMissionStats(card.stats, card);
+                    return card;
+                })
                 .sort((a, b) => Number(b?.grade || 0) - Number(a?.grade || 0)
                     || String(b?.createdAt || "").localeCompare(String(a?.createdAt || ""))
                     || String(a?.id || "").localeCompare(String(b?.id || "")));
