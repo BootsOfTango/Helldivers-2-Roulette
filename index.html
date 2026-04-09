@@ -5898,13 +5898,31 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 const n = Number(v || 0);
                 return Number.isFinite(n) ? n : 0;
             };
-            card.stats = {
-                power: statNumber(stats.power),
-                agility: statNumber(stats.agility),
-                endurance: statNumber(stats.endurance),
-                mobility: statNumber(stats.mobility),
-                utility: statNumber(stats.utility)
+            const hasOwn = (obj, key) => Object.prototype.hasOwnProperty.call(obj, key);
+            const canonicalKeys = ["kills", "accuracy", "deaths", "stims", "distanceKm", "stratUses"];
+            const legacyMap = {
+                power: "kills",
+                agility: "accuracy",
+                endurance: "deaths",
+                mobility: "distanceKm",
+                utility: "stratUses"
             };
+            const canonicalFromLegacy = (canonicalKey) => {
+                const legacyKey = Object.keys(legacyMap).find((k) => legacyMap[k] === canonicalKey);
+                if (!legacyKey || !hasOwn(stats, legacyKey)) return undefined;
+                return statNumber(stats[legacyKey]);
+            };
+            card.stats = {
+                kills: hasOwn(stats, "kills") ? statNumber(stats.kills) : (canonicalFromLegacy("kills") ?? 0),
+                accuracy: hasOwn(stats, "accuracy") ? statNumber(stats.accuracy) : (canonicalFromLegacy("accuracy") ?? 0),
+                deaths: hasOwn(stats, "deaths") ? statNumber(stats.deaths) : (canonicalFromLegacy("deaths") ?? 0),
+                stims: hasOwn(stats, "stims") ? statNumber(stats.stims) : 0,
+                distanceKm: hasOwn(stats, "distanceKm") ? statNumber(stats.distanceKm) : (canonicalFromLegacy("distanceKm") ?? 0),
+                stratUses: hasOwn(stats, "stratUses") ? statNumber(stats.stratUses) : (canonicalFromLegacy("stratUses") ?? 0)
+            };
+            canonicalKeys.forEach((key) => {
+                if (!Number.isFinite(card.stats[key])) card.stats[key] = 0;
+            });
 
             return card;
         }
