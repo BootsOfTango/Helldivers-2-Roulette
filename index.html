@@ -5881,6 +5881,17 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             return out;
         }
 
+        function canEditCardStats(card, context = "") {
+            const locked = !!card?.statsLocked;
+            if (locked && context) {
+                console.warn(`[card-stats] Blocked mutation attempt on locked card (${context})`, {
+                    cardId: card?.id || null,
+                    statsLockedAt: card?.statsLockedAt || null
+                });
+            }
+            return !locked;
+        }
+
         function normalizeCardRecord(card) {
             if (!card || typeof card !== "object") return null;
             const loadout = (card.loadout && typeof card.loadout === "object") ? card.loadout : null;
@@ -5915,8 +5926,16 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             card.majorOrderDone = !!card.majorOrderDone;
             card.notes = String(card.notes || "");
-            card.statsLocked = !!card.statsLocked;
-            card.statsLockedAt = card.statsLocked ? String(card.statsLockedAt || card.updatedAt || card.createdAt || nowISO()) : null;
+            const hasStatsLocked = Object.prototype.hasOwnProperty.call(card, "statsLocked");
+            const hasStatsLockedAt = Object.prototype.hasOwnProperty.call(card, "statsLockedAt");
+            card.statsLocked = hasStatsLocked ? !!card.statsLocked : false;
+            if (hasStatsLockedAt) {
+                card.statsLockedAt = card.statsLockedAt == null ? null : String(card.statsLockedAt);
+            } else if (card.statsLocked) {
+                card.statsLockedAt = String(card.updatedAt || card.createdAt || nowISO());
+            } else {
+                card.statsLockedAt = null;
+            }
             card.scoreRaw = Number(card.scoreRaw || 0);
             card.grade = clamp(Number(card.grade || 0), 0, 100);
             card.difficulty = getCardDifficulty(card);
@@ -8800,7 +8819,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             const card = state.cards.find(c => c.id === id);
             if (!card) return;
-            if (card.statsLocked) return;
+            if (!canEditCardStats(card, "onCardFieldChange")) return;
             const draft = getMissionStatsDraft(id);
             if (!draft) return;
 
@@ -8816,10 +8835,10 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         }
 
 
-        function syncDraftFromResultInputs(cardId, rootEl) {
+        function syncCardFromResultInputs(cardId, rootEl) {
             const card = getCardById(cardId);
             if (!card) return null;
-            if (card.statsLocked) return null;
+            if (!canEditCardStats(card, "syncCardFromResultInputs")) return null;
             const draft = getMissionStatsDraft(cardId);
             if (!draft) return null;
 
@@ -8864,8 +8883,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 return;
             }
             if (act === "saveCard") {
-                if (card.statsLocked) return;
-                syncDraftFromResultInputs(id, sourceRoot);
+                if (!canEditCardStats(card, "onCardAction:saveCard")) return;
+                syncCardFromResultInputs(id, sourceRoot);
                 openFinalizeStatsModal();
                 return;
             }
@@ -8876,7 +8895,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const cardId = state.ui.activeResultCardId;
             if (!cardId) return;
             const card = getCardById(cardId);
-            if (!card || card.statsLocked) return;
+            if (!card || !canEditCardStats(card, "confirmFinalizeActiveCardStats")) return;
             const draft = state.ui.resultCardDrafts?.[cardId];
             if (!draft) return;
 
