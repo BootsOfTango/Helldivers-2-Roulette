@@ -2073,22 +2073,22 @@ END MASTER DIRECTIVE
         }
 
         .rankTierCard {
-            --tier-thumb-scale: 2.55;
-            --tier-thumb-x: 22%;
-            --tier-thumb-y: 14%;
+            --tier-thumb-scale: 2.15;
+            --tier-thumb-x: 8%;
+            --tier-thumb-y: 10%;
             border: 1px solid var(--line2);
             border-radius: 14px;
             background: rgba(0,0,0,.22);
-            padding: 10px 12px;
+            padding: 8px 10px;
             text-align: left;
             color: #e8eef7;
             cursor: pointer;
-            min-height: 78px;
+            min-height: 94px;
             display: flex;
             flex-direction: row;
             justify-content: flex-start;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
             overflow: visible;
             transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease, background .2s ease;
         }
@@ -2110,7 +2110,7 @@ END MASTER DIRECTIVE
         }
 
         .rankTierCardName {
-            font-size: 18px;
+            font-size: 20px;
             font-weight: 900;
             letter-spacing: .4px;
             text-transform: uppercase;
@@ -2126,7 +2126,7 @@ END MASTER DIRECTIVE
         .rankTierCardInfo {
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: 3px;
             min-width: 0;
             flex: 1;
             justify-content: center;
@@ -2149,9 +2149,9 @@ END MASTER DIRECTIVE
         }
 
         .rankTierThumbFrame {
-            width: 118px;
-            max-width: 118px;
-            height: 60px;
+            width: 130px;
+            max-width: 130px;
+            height: 84px;
             border-radius: 10px;
             border: 1px solid rgba(255,255,255,.14);
             background: radial-gradient(circle at 52% 26%, rgba(34, 42, 66, .68), rgba(0,0,0,.58));
@@ -2168,27 +2168,27 @@ END MASTER DIRECTIVE
             height: 100%;
             object-fit: contain;
             object-position: center center;
-            padding: 1px 3px;
+            padding: 0;
             transform: translate(var(--tier-thumb-x), var(--tier-thumb-y)) scale(var(--tier-thumb-scale));
             transform-origin: center center;
         }
 
         .rankTierCard[data-tier="cadet"] {
-            --tier-thumb-scale: 2.56;
-            --tier-thumb-x: 22%;
-            --tier-thumb-y: 15%;
+            --tier-thumb-scale: 2.18;
+            --tier-thumb-x: 8%;
+            --tier-thumb-y: 12%;
         }
 
         .rankTierCard[data-tier="veteran"] {
-            --tier-thumb-scale: 2.45;
-            --tier-thumb-x: 18%;
-            --tier-thumb-y: 13%;
+            --tier-thumb-scale: 2.08;
+            --tier-thumb-x: 5%;
+            --tier-thumb-y: 10%;
         }
 
         .rankTierCard[data-tier="helldive"] {
-            --tier-thumb-scale: 2.4;
-            --tier-thumb-x: 16%;
-            --tier-thumb-y: 13%;
+            --tier-thumb-scale: 2.05;
+            --tier-thumb-x: 4%;
+            --tier-thumb-y: 9%;
         }
 
         #rankScopeState {
@@ -2809,21 +2809,22 @@ END MASTER DIRECTIVE
             }
 
             .rankTierCard {
-                min-height: 78px;
+                min-height: 94px;
                 flex-direction: row;
                 align-items: center;
                 justify-content: flex-start;
-                gap: 12px;
+                gap: 10px;
             }
 
             .rankTierCardInfo {
                 justify-content: center;
-                gap: 4px;
+                gap: 3px;
             }
 
             .rankTierThumbFrame {
-                width: 118px;
-                max-width: 118px;
+                width: 130px;
+                max-width: 130px;
+                height: 84px;
             }
         }
 
