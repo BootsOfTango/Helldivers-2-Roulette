@@ -10770,20 +10770,11 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 const baseText = hasActiveTier
                     ? `${getDifficultyTierLabel(activeTier)} filter active • ${getTierRangeLabel(activeTier)} • ${filteredCount} card${filteredCount === 1 ? "" : "s"} from Results.`
                     : `Showing all Results cards grouped by difficulty tier • ${filteredCount} card${filteredCount === 1 ? "" : "s"}.`;
-                rankScopeState.textContent = baseText;
+                const guidanceText = (hasActiveTier && filteredCount === 0)
+                    ? " Need cards played and saved in this level range to populate this tier."
+                    : "";
+                rankScopeState.textContent = `${baseText}${guidanceText}`;
             }
-        }
-
-        function pickMostPopulatedTier(cards) {
-            const order = ["cadet", "veteran", "helldive"];
-            const counts = { cadet: 0, veteran: 0, helldive: 0 };
-            (cards || []).forEach((card) => {
-                const tier = getCardDifficultyTier(card);
-                if (counts[tier] != null) counts[tier] += 1;
-            });
-            return order
-                .slice()
-                .sort((a, b) => counts[b] - counts[a])[0] || "helldive";
         }
 
         function setActiveTier(nextTier, options = {}) {
@@ -10841,20 +10832,6 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             };
             let filtered = hasActiveTier ? grouped[activeTier] : list;
 
-            // If the currently selected tier has no cards but Results has cards,
-            // auto-recover to the most populated tier so Rank never appears empty.
-            if (hasActiveTier && !filtered.length && list.length) {
-                const recoveredTier = pickMostPopulatedTier(list);
-                if (recoveredTier && recoveredTier !== activeTier) {
-                    activeTier = recoveredTier;
-                    syncRankTierCardUi();
-                    filtered = list.filter(c => cardMatchesTierRange(c, activeTier));
-                    if (!filtered.some(c => c.id === selectedRankCardId)) {
-                        selectedRankCardId = filtered[0]?.id || null;
-                    }
-                }
-            }
-
             const box = $("#rankList");
             box.innerHTML = "";
 
@@ -10864,8 +10841,10 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             renderRankFallbackList(filtered);
             if (!filtered.length) {
-                const emptyLabel = hasActiveTier ? getDifficultyTierLabel(activeTier) : "any";
-                box.innerHTML = `<div class="tiny" style="padding:8px 10px; border:1px solid var(--line2); border-radius:10px; background:rgba(0,0,0,.22);">No ${escapeHtml(emptyLabel)} cards yet in Results.</div>`;
+                const tierHint = hasActiveTier
+                    ? `Need cards played and saved within ${getTierRangeLabel(activeTier)} to show this tier.`
+                    : "Need saved Result cards to start seeing rank tiers.";
+                box.innerHTML = `<div class="tiny" style="padding:8px 10px; border:1px solid var(--line2); border-radius:10px; background:rgba(0,0,0,.22);">${escapeHtml(tierHint)}</div>`;
                 renderRankDetailPanel(null, 0, getRadarMaxes(state.cards));
                 renderItemInsights(filtered);
                 renderRankAnalytics(filtered);
@@ -10888,7 +10867,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             if (!box) return;
             box.innerHTML = "";
             if (!cards.length) {
-                box.innerHTML = `<div class="tiny" style="padding:8px 10px; border:1px solid var(--line2); border-radius:10px; background:rgba(0,0,0,.22);">No cards found for the selected tier.</div>`;
+                box.innerHTML = `<div class="tiny" style="padding:8px 10px; border:1px solid var(--line2); border-radius:10px; background:rgba(0,0,0,.22);">Need cards played and saved in this tier to show leaderboard results.</div>`;
                 return;
             }
             cards.forEach((c, idx) => {
