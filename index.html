@@ -1466,10 +1466,11 @@ END MASTER DIRECTIVE
                 --radarDot: #e6aa5a;
             }
 
+            .card.tier-gray,
             .card.tier-darkbronze {
-                --radarStroke: #965f28;
-                --radarFill: rgba(150,95,40,.38);
-                --radarDot: #965f28;
+                --radarStroke: #8b95a8;
+                --radarFill: rgba(139,149,168,.34);
+                --radarDot: #8b95a8;
             }
 
             .card.tier-rainbow,
@@ -2644,8 +2645,9 @@ END MASTER DIRECTIVE
             border-color: rgba(230,170,90,.85);
         }
 
+        .card.tier-gray,
         .card.tier-darkbronze {
-            border-color: rgba(150,95,40,.85);
+            border-color: rgba(128,138,156,.82);
         }
 
         .card.tier-rainbow,
@@ -3251,8 +3253,9 @@ END MASTER DIRECTIVE
             color: #a855f7;
         }
         /* ===== RANK TIER RIMS (matching your tier plan) ===== */
+        .rim-gray,
         .rim-darkbronze {
-            border-color: rgba(150,95,40,.85) !important;
+            border-color: rgba(128,138,156,.82) !important;
         }
 
         .rim-brown {
@@ -4023,7 +4026,7 @@ END MASTER DIRECTIVE
                 </div>
             </div>
             <div id="rankScopeState" class="tiny">Showing all result cards grouped by difficulty tier.</div>
-            <div class="smallHelp">Rim colors represent difficulty tiers: Cadet (D1-D3), Veteran (D4-D6), Helldive (D7-D10). Place # is still shown in each filtered leaderboard.</div>
+            <div class="smallHelp">Each difficulty tier is its own league (Grade 0-100). Rim colors are placement bands per league: top 3 rainbow, next 5 gold, next 7 silver, next 13 bronze, rest gray.</div>
             <div class="miniRow" style="justify-content:flex-end; margin-top:12px;">
                 <button id="btnRecalcRanks" class="btnPrimary">RECALCULATE</button>
             </div>
@@ -7625,27 +7628,27 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
          * Helldive:D7-D10
          ***********************/
         function tierForPlace(place) {
-            // Legacy placement tiers are still used by analytic widgets and graph accents.
+            // Classic placement bands for each independent difficulty-tier league.
             if (place <= 3) return "rainbow";
             if (place <= 8) return "gold";
             if (place <= 15) return "silver";
-            if (place <= 25) return "bronze";
-            return "darkbronze";
+            if (place <= 28) return "bronze";
+            return "gray";
         }
 
         function buildTierMap() {
-            // MUST mirror rank ordering: grade desc (tie-breaker: newest first so stable-ish)
-            const ordered = state.cards
-                .slice()
-                .sort((a, b) => {
-                    const g = Number(b.grade || 0) - Number(a.grade || 0);
-                    if (g !== 0) return g;
-                    return String(b?.createdAt || "").localeCompare(String(a?.createdAt || ""));
-                });
-
-            const map = new Map(); // id -> tier string
-            ordered.forEach((c) => {
-                map.set(c.id, getDifficultyTier(getCardDifficulty(c)));
+            // Placement color map is calculated per difficulty-tier league (Cadet/Veteran/Helldive).
+            const map = new Map(); // id -> placement tier string
+            const leagues = ["cadet", "veteran", "helldive"];
+            leagues.forEach((leagueTier) => {
+                const ordered = (Array.isArray(state.cards) ? state.cards : [])
+                    .filter((card) => cardMatchesTierRange(card, leagueTier))
+                    .slice()
+                    .sort((a, b) => Number(b?.grade || 0) - Number(a?.grade || 0)
+                        || Number(b?.scoreRaw || 0) - Number(a?.scoreRaw || 0)
+                        || String(b?.createdAt || "").localeCompare(String(a?.createdAt || ""))
+                        || String(a?.id || "").localeCompare(String(b?.id || "")));
+                ordered.forEach((card, idx) => map.set(card.id, tierForPlace(idx + 1)));
             });
             return map;
         }
@@ -7661,12 +7664,21 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 c.difficulty = getCardDifficulty(c);
             }
 
-            const raws = state.cards.map(c => computeRawScore(c));
-            const maxRaw = Math.max(0, ...raws);
-            state.cards.forEach((c, i) => {
-                const raw = raws[i] ?? 0;
-                c.scoreRaw = raw;
-                c.grade = (maxRaw <= 0) ? 0 : Math.round((raw / maxRaw) * 100);
+            const cardsWithRaw = state.cards.map((card) => ({
+                card,
+                raw: computeRawScore(card)
+            }));
+            cardsWithRaw.forEach(({ card, raw }) => {
+                card.scoreRaw = raw;
+                card.grade = 0;
+            });
+
+            ["cadet", "veteran", "helldive"].forEach((leagueTier) => {
+                const leagueCards = cardsWithRaw.filter(({ card }) => cardMatchesTierRange(card, leagueTier));
+                const leagueMaxRaw = Math.max(0, ...leagueCards.map(({ raw }) => raw));
+                leagueCards.forEach(({ card, raw }) => {
+                    card.grade = (leagueMaxRaw <= 0) ? 0 : Math.round((raw / leagueMaxRaw) * 100);
+                });
             });
             assertLockedStatsDeterminism("recalcGrades:after");
         }
@@ -8471,7 +8483,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 gold: "#ffcc4d",
                 silver: "#cfd6e6",
                 bronze: "#d59a67",
-                darkbronze: "#8b5a3c",
+                gray: "#8b95a8",
+                darkbronze: "#8b95a8",
                 rainbow: "#8c7bff"
             }[tier] || "#2b3549";
             const weatherText = card.planet ? getPlanetWeatherText(card.planet) : "None";
@@ -8593,7 +8606,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 gold: { label: "Gold", embedColor: 0xffcc4d, strokeColor: "#ffcc4d", marker: "🟡" },
                 silver: { label: "Silver", embedColor: 0xcfd6e6, strokeColor: "#cfd6e6", marker: "⚪" },
                 bronze: { label: "Bronze", embedColor: 0xd59a67, strokeColor: "#d59a67", marker: "🟠" },
-                darkbronze: { label: "Dark Bronze", embedColor: 0x8b5a3c, strokeColor: "#8b5a3c", marker: "🟤" },
+                gray: { label: "Gray", embedColor: 0x8b95a8, strokeColor: "#8b95a8", marker: "⚙️" },
+                darkbronze: { label: "Gray", embedColor: 0x8b95a8, strokeColor: "#8b95a8", marker: "⚙️" },
                 rainbow: {
                     label: "Rainbow",
                     embedColor: 0x8c7bff,
@@ -9082,7 +9096,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             if (tier === "gold") return "#ffd400";
             if (tier === "silver") return "#c8d2dc";
             if (tier === "bronze") return "#e6aa5a";
-            if (tier === "darkbronze") return "#965f28";
+            if (tier === "gray" || tier === "darkbronze") return "#8b95a8";
             if (tier === "brown") return "#78502d";
             if (tier === "rainbow") return "#ffffff"; // base, rainbow drawn as segmented ring
             return "rgba(255,212,0,.85)";
@@ -10705,6 +10719,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 box.innerHTML = `<div class="tiny" style="padding:8px 10px; border:1px solid var(--line2); border-radius:10px; background:rgba(0,0,0,.22);">Need cards played and saved in this tier to show leaderboard results.</div>`;
                 return;
             }
+            const placementTierMap = buildTierMap();
             cards.forEach((c, idx) => {
                 const place = idx + 1;
                 const grade = clamp(Math.round(Number(c.grade || 0)), 0, 100);
@@ -10720,7 +10735,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 }
 
                 const cardDifficultyTier = resolveCardDifficultyTier(c);
-                row.classList.add(`rim-${cardDifficultyTier}`);
+                const placementTier = placementTierMap.get(c.id) || "";
+                row.classList.add(`rim-${placementTier || cardDifficultyTier}`);
                 const tierBadge = `${getDifficultyTierLabel(cardDifficultyTier)} • ${formatDifficultyLabel(c)}`;
 
                 row.innerHTML = `
