@@ -4044,7 +4044,23 @@ END MASTER DIRECTIVE
 
         <!-- RANK TAB -->
         <section id="tab-rank" class="panel" style="display:none;">
-            <div class="label">Choose tier</div>
+            <div id="rankFocusPanel">
+
+            <div class="miniRow" style="justify-content:flex-end; margin-bottom:10px;">
+                <button id="btnRefreshItemInsights" class="btnGhost">REFRESH ITEM INSIGHTS</button>
+            </div>
+
+            <div id="itemInsightCards" class="itemInsightCards"></div>
+
+            <div id="rankSplitView">
+                <div class="rankListColumn">
+                    <div id="rankList"></div>
+                </div>
+                <aside id="rankDetailPanel">
+                    <div class="tiny muted">Select a ranked card to view details.</div>
+                </aside>
+            </div>
+            <div class="label" style="margin-top:14px;">Choose tier</div>
             <div class="rankTierTopBar">
                 <div class="rankTierCards" id="rankTierCards">
                     <button type="button" class="rankTierCard" data-tier="cadet" aria-pressed="false">
@@ -4077,23 +4093,6 @@ END MASTER DIRECTIVE
                 </div>
             </div>
             <div id="rankScopeState" class="tiny">Showing all result cards grouped by difficulty tier.</div>
-
-            <div id="rankFocusPanel">
-
-            <div class="miniRow" style="justify-content:flex-end; margin-bottom:10px;">
-                <button id="btnRefreshItemInsights" class="btnGhost">REFRESH ITEM INSIGHTS</button>
-            </div>
-
-            <div id="itemInsightCards" class="itemInsightCards"></div>
-
-            <div id="rankSplitView">
-                <div class="rankListColumn">
-                    <div id="rankList"></div>
-                </div>
-                <aside id="rankDetailPanel">
-                    <div class="tiny muted">Select a ranked card to view details.</div>
-                </aside>
-            </div>
             <div class="smallHelp">Rim colors represent difficulty tiers: Cadet (D1-D3), Veteran (D4-D6), Helldive (D7-D10). Place # is still shown in each filtered leaderboard.</div>
             <section id="rankAnalyticsSection" class="rankAnalyticsSection">
                 <div class="rankAnalyticsTitle">Tier analytics</div>
