@@ -2073,6 +2073,29 @@ END MASTER DIRECTIVE
             width: 100%;
         }
 
+        .rankTierAllCard {
+            width: 100%;
+            min-height: 86px;
+            padding: 10px 14px;
+        }
+
+        .rankTierAllCard .rankTierCardInfo {
+            gap: 6px;
+        }
+
+        .rankTierAllCard .rankTierCardName,
+        .rankTierAllCard .rankTierCardRange {
+            color: #ffe970;
+        }
+
+        .rankTierAllCard .rankTierCardSummary {
+            font-family: var(--mono);
+            font-size: 11px;
+            color: rgba(232, 238, 247, .86);
+            letter-spacing: .18px;
+            line-height: 1.35;
+        }
+
         .rankTierCard {
             --tier-thumb-scale: 2.15;
             --tier-thumb-x: 8%;
@@ -4006,6 +4029,13 @@ END MASTER DIRECTIVE
             <div class="label" style="margin-top:14px;">Choose tier</div>
             <div class="rankTierTopBar">
                 <div class="rankTierCards" id="rankTierCards">
+                    <button type="button" class="rankTierCard rankTierAllCard" data-tier="all" aria-pressed="false">
+                        <span class="rankTierCardInfo">
+                            <span class="rankTierCardName">ALL TIER RANK</span>
+                            <span class="rankTierCardRange">D1-D10 ultimate totals</span>
+                            <span class="rankTierCardSummary" id="rankAllTierSummary">D1-D10 • 0 cards • Grade Σ 0 • Raw Σ 0.0</span>
+                        </span>
+                    </button>
                     <button type="button" class="rankTierCard" data-tier="cadet" aria-pressed="false">
                         <span class="rankTierThumbFrame">
                             <img class="rankTierThumb" src="cadet.png" alt="Cadet tier visual" onerror="this.onerror=null;this.src='assets/placeholders/rank-tiers/cadet-placeholder.svg';" />
@@ -10619,7 +10649,9 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 rankTab.classList.toggle("rank-mode-focused", hasActiveTier);
             }
             cards.forEach((btn) => {
-                const isActive = btn.dataset.tier === activeTier;
+                const isActive = btn.dataset.tier === "all"
+                    ? !hasActiveTier
+                    : btn.dataset.tier === activeTier;
                 btn.classList.toggle("is-active", isActive);
                 btn.setAttribute("aria-pressed", isActive ? "true" : "false");
             });
@@ -10636,20 +10668,45 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                     : "";
                 rankScopeState.textContent = `${baseText}${guidanceText}`;
             }
+            const allTierSummary = $("#rankAllTierSummary");
+            if (allTierSummary) {
+                const totals = getAllTierRankTotals();
+                allTierSummary.textContent = `D1-D10 • ${totals.cardCount} saved card${totals.cardCount === 1 ? "" : "s"} • Grade Σ ${totals.gradeSum} • Raw Σ ${totals.rawSum.toFixed(1)}`;
+            }
         }
 
         function setActiveTier(nextTier, options = {}) {
-            const normalized = ["cadet", "veteran", "helldive"].includes(String(nextTier || "").toLowerCase())
-                ? String(nextTier).toLowerCase()
+            const requestedTier = String(nextTier || "").toLowerCase();
+            const normalized = ["cadet", "veteran", "helldive"].includes(requestedTier)
+                ? requestedTier
                 : null;
+            const requestedAllTier = requestedTier === "all" || requestedTier === "";
             if (!normalized && nextTier != null && String(nextTier).trim() !== "" && ENABLE_RANK_WARNINGS) {
-                console.warn("[rank] ignored unsupported tier", { nextTier });
+                if (!requestedAllTier) {
+                    console.warn("[rank] ignored unsupported tier", { nextTier });
+                }
             }
             if (!options.silent) playTone("success");
-            activeTier = (normalized && activeTier === normalized) ? null : normalized;
+            activeTier = requestedAllTier
+                ? null
+                : ((normalized && activeTier === normalized) ? null : normalized);
             selectedRankCardId = null;
             syncRankTierCardUi();
             safeRenderRank("setActiveTier");
+        }
+
+        function getAllTierRankTotals() {
+            const savedCards = (Array.isArray(state.cards) ? state.cards : [])
+                .filter(card => card && typeof card === "object")
+                .map(card => getNormalizedCardView(card))
+                .filter(Boolean);
+
+            return savedCards.reduce((acc, card) => {
+                acc.cardCount += 1;
+                acc.gradeSum += clamp(Math.round(Number(card.grade || 0)), 0, 100);
+                acc.rawSum += clamp(Number(card.scoreRaw || 0), 0, 500);
+                return acc;
+            }, { cardCount: 0, gradeSum: 0, rawSum: 0 });
         }
 
         function getBestAvailableTier(cards = []) {
