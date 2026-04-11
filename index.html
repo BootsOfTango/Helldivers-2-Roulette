@@ -2058,12 +2058,7 @@ END MASTER DIRECTIVE
         }
 
         .rankTierTopBar {
-            display: flex;
-            align-items: center;
-            justify-content: flex-start;
-            gap: 10px;
             margin-top: 10px;
-            flex-wrap: wrap;
         }
 
         .rankTierCards {
@@ -2075,8 +2070,9 @@ END MASTER DIRECTIVE
 
         .rankTierAllCard {
             width: 100%;
-            min-height: 86px;
+            min-height: 72px;
             padding: 10px 14px;
+            grid-column: 1 / -1;
         }
 
         .rankTierAllCard .rankTierCardInfo {
@@ -2817,10 +2813,6 @@ END MASTER DIRECTIVE
         @media (min-width: 960px) {
             .rankTierCards {
                 grid-template-columns: repeat(3, minmax(0, 1fr));
-            }
-
-            .rankTierTopBar {
-                flex-wrap: nowrap;
             }
 
             .rankTierCard {
