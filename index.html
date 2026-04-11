@@ -10732,6 +10732,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 .map(card => getNormalizedCardView(card))
                 .filter(Boolean)
                 .sort((a, b) => Number(b?.grade || 0) - Number(a?.grade || 0)
+                    || Number(b?.scoreRaw || 0) - Number(a?.scoreRaw || 0)
                     || String(b?.createdAt || "").localeCompare(String(a?.createdAt || ""))
                     || String(a?.id || "").localeCompare(String(b?.id || "")));
 
@@ -10778,9 +10779,9 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 box.innerHTML = `<div class="tiny" style="padding:8px 10px; border:1px solid var(--line2); border-radius:10px; background:rgba(0,0,0,.22);">Need cards played and saved in this tier to show leaderboard results.</div>`;
                 return;
             }
-            const placementTierMap = buildTierMap();
             cards.forEach((c, idx) => {
                 const place = idx + 1;
+                const placementTier = tierForPlace(place);
                 const grade = clamp(Math.round(Number(c.grade || 0)), 0, 100);
                 const row = document.createElement("div");
                 row.className = "rankRow";
@@ -10794,7 +10795,6 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 }
 
                 const cardDifficultyTier = resolveCardDifficultyTier(c);
-                const placementTier = placementTierMap.get(c.id) || "";
                 row.classList.add(`rim-${placementTier || cardDifficultyTier}`);
                 const tierBadge = `${getDifficultyTierLabel(cardDifficultyTier)} • ${formatDifficultyLabel(c)}`;
 
