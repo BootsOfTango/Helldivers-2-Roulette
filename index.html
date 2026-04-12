@@ -1233,7 +1233,7 @@ END MASTER DIRECTIVE
         }
 
         .cardModalDialog {
-            width: min(800px, 92vw);
+            width: min(740px, 92vw);
             max-height: 84vh;
             overflow: auto;
             border: 1px solid var(--line2);
@@ -1267,14 +1267,14 @@ END MASTER DIRECTIVE
 
         .modalLoadoutGrid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 8px;
+            grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+            gap: 6px;
             justify-content: stretch;
         }
 
         .modalLoadoutColumn {
             display: grid;
-            gap: 10px;
+            gap: 6px;
             align-content: start;
         }
 
@@ -1282,21 +1282,21 @@ END MASTER DIRECTIVE
             border: 1px solid var(--line2);
             border-radius: 12px;
             background: rgba(255,255,255,.02);
-            padding: 6px;
+            padding: 4px 5px;
             display: flex;
-            gap: 6px;
+            gap: 5px;
             align-items: center;
         }
 
         .modalLoadoutIcon {
-            width: 46px;
-            height: 46px;
-            border-radius: 9px;
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
             border: 1px solid rgba(255,255,255,.15);
             background: rgba(0,0,0,.25);
             object-fit: contain;
-            padding: 3px;
-            flex: 0 0 46px;
+            padding: 2px;
+            flex: 0 0 40px;
         }
 
         .modalLoadoutText {
@@ -1357,8 +1357,8 @@ END MASTER DIRECTIVE
 
         .modalStatGrid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(88px, 112px));
-            gap: 6px;
+            grid-template-columns: repeat(auto-fit, minmax(82px, 104px));
+            gap: 5px;
             justify-content: start;
         }
 
@@ -1378,7 +1378,7 @@ END MASTER DIRECTIVE
         .modalMoNotesRow {
             margin-top: 6px;
             display: grid;
-            grid-template-columns: minmax(170px, 240px) minmax(0, 1fr);
+            grid-template-columns: minmax(150px, 210px) minmax(0, 1fr);
             gap: 6px;
             align-items: start;
         }
@@ -1404,7 +1404,7 @@ END MASTER DIRECTIVE
 
         @media (max-width: 980px) {
             .cardModalDialog {
-                width: min(720px, 94vw);
+                width: min(680px, 94vw);
             }
 
             .modalPlanetWrap {
@@ -1412,7 +1412,7 @@ END MASTER DIRECTIVE
             }
 
             .modalStatGrid {
-                grid-template-columns: repeat(3, minmax(92px, 1fr));
+                grid-template-columns: repeat(3, minmax(84px, 1fr));
             }
         }
 
