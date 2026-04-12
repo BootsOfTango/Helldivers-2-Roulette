@@ -1209,7 +1209,7 @@ END MASTER DIRECTIVE
         }
 
         .cardModalDialog {
-            width: min(860px, 92vw);
+            width: min(800px, 92vw);
             max-height: 84vh;
             overflow: auto;
             border: 1px solid var(--line2);
@@ -1243,8 +1243,9 @@ END MASTER DIRECTIVE
 
         .modalLoadoutGrid {
             display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
+            grid-template-columns: repeat(2, minmax(260px, 360px));
             gap: 10px;
+            justify-content: center;
         }
 
         .modalLoadoutColumn {
@@ -1257,21 +1258,21 @@ END MASTER DIRECTIVE
             border: 1px solid var(--line2);
             border-radius: 12px;
             background: rgba(255,255,255,.02);
-            padding: 8px;
+            padding: 7px;
             display: flex;
-            gap: 10px;
+            gap: 8px;
             align-items: center;
         }
 
         .modalLoadoutIcon {
-            width: 56px;
-            height: 56px;
+            width: 52px;
+            height: 52px;
             border-radius: 10px;
             border: 1px solid rgba(255,255,255,.15);
             background: rgba(0,0,0,.25);
             object-fit: contain;
             padding: 4px;
-            flex: 0 0 56px;
+            flex: 0 0 52px;
         }
 
         .modalLoadoutText {
@@ -1289,7 +1290,13 @@ END MASTER DIRECTIVE
 
         .modalLoadoutText .v {
             font-weight: 700;
-            overflow-wrap: anywhere;
+            line-height: 1.2;
+            overflow-wrap: break-word;
+            word-break: normal;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
         }
 
         .modalPlanetWrap {
@@ -1372,7 +1379,7 @@ END MASTER DIRECTIVE
 
         @media (max-width: 980px) {
             .cardModalDialog {
-                width: min(760px, 94vw);
+                width: min(720px, 94vw);
             }
 
             .modalPlanetWrap {
