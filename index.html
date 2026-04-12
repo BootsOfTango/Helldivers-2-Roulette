@@ -1267,9 +1267,9 @@ END MASTER DIRECTIVE
 
         .modalLoadoutGrid {
             display: grid;
-            grid-template-columns: repeat(2, minmax(260px, 360px));
-            gap: 10px;
-            justify-content: center;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 8px;
+            justify-content: stretch;
         }
 
         .modalLoadoutColumn {
@@ -1282,27 +1282,27 @@ END MASTER DIRECTIVE
             border: 1px solid var(--line2);
             border-radius: 12px;
             background: rgba(255,255,255,.02);
-            padding: 7px;
+            padding: 6px;
             display: flex;
-            gap: 8px;
+            gap: 6px;
             align-items: center;
         }
 
         .modalLoadoutIcon {
-            width: 52px;
-            height: 52px;
-            border-radius: 10px;
+            width: 46px;
+            height: 46px;
+            border-radius: 9px;
             border: 1px solid rgba(255,255,255,.15);
             background: rgba(0,0,0,.25);
             object-fit: contain;
-            padding: 4px;
-            flex: 0 0 52px;
+            padding: 3px;
+            flex: 0 0 46px;
         }
 
         .modalLoadoutText {
             min-width: 0;
-            font-size: 13px;
-            line-height: 1.3;
+            font-size: 12px;
+            line-height: 1.2;
         }
 
         .modalLoadoutText .k {
@@ -1357,8 +1357,9 @@ END MASTER DIRECTIVE
 
         .modalStatGrid {
             display: grid;
-            grid-template-columns: repeat(6, minmax(90px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(88px, 112px));
             gap: 6px;
+            justify-content: start;
         }
 
         .modalStatGrid .label {
@@ -1411,7 +1412,7 @@ END MASTER DIRECTIVE
             }
 
             .modalStatGrid {
-                grid-template-columns: repeat(3, minmax(110px, 1fr));
+                grid-template-columns: repeat(3, minmax(92px, 1fr));
             }
         }
 
@@ -1423,7 +1424,7 @@ END MASTER DIRECTIVE
 
             .modalPlanetWrap,
             .modalStatGrid {
-                grid-template-columns: repeat(2, minmax(120px, 1fr));
+                grid-template-columns: repeat(2, minmax(92px, 1fr));
             }
 
             .modalActionRow {
