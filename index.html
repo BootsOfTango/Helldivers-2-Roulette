@@ -1267,54 +1267,57 @@ END MASTER DIRECTIVE
 
         .modalLoadoutGrid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-            gap: 6px;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 5px;
             justify-content: stretch;
         }
 
         .modalLoadoutColumn {
             display: grid;
-            gap: 6px;
+            gap: 5px;
             align-content: start;
         }
 
         .modalLoadoutItem {
             border: 1px solid var(--line2);
-            border-radius: 12px;
+            border-radius: 11px;
             background: rgba(255,255,255,.02);
-            padding: 4px 5px;
+            padding: 3px 5px;
             display: flex;
-            gap: 5px;
-            align-items: center;
+            gap: 6px;
+            align-items: flex-start;
+            min-height: 36px;
         }
 
         .modalLoadoutIcon {
-            width: 40px;
-            height: 40px;
-            border-radius: 8px;
+            width: 30px;
+            height: 30px;
+            border-radius: 7px;
             border: 1px solid rgba(255,255,255,.15);
             background: rgba(0,0,0,.25);
             object-fit: contain;
             padding: 2px;
-            flex: 0 0 40px;
+            flex: 0 0 30px;
         }
 
         .modalLoadoutText {
             min-width: 0;
-            font-size: 12px;
-            line-height: 1.2;
+            font-size: 11px;
+            line-height: 1.15;
+            padding-top: 1px;
         }
 
         .modalLoadoutText .k {
             color: var(--muted);
-            font-size: 10px;
+            font-size: 9px;
             text-transform: uppercase;
             letter-spacing: .4px;
+            line-height: 1.1;
         }
 
         .modalLoadoutText .v {
             font-weight: 700;
-            line-height: 1.2;
+            line-height: 1.15;
             overflow-wrap: break-word;
             word-break: normal;
             display: -webkit-box;
