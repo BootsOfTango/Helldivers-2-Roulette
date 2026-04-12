@@ -1024,6 +1024,30 @@ END MASTER DIRECTIVE
             min-width: 0;
         }
 
+        .resultSummaryHeading {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .difficultyTopBadge {
+            flex-shrink: 0;
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 10px;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 212, 0, .65);
+            color: #ffe36b;
+            background: rgba(255, 212, 0, .12);
+            font-size: 13px;
+            font-weight: 900;
+            letter-spacing: .2px;
+            text-transform: uppercase;
+            line-height: 1;
+            white-space: nowrap;
+        }
+
         .resultSummaryMetaGrid {
             margin-top: 6px;
             display: grid;
@@ -1540,6 +1564,7 @@ END MASTER DIRECTIVE
             font-weight: 900;
             font-size: 14px;
             letter-spacing: .2px;
+            min-width: 0;
         }
 
         .cardSeedLine {
@@ -4681,6 +4706,12 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const d = getCardDifficulty(card);
             const tierLabel = getDifficultyTierLabel(getCardDifficultyTier(card));
             return `D${d} • ${tierLabel}`;
+        }
+
+        function formatDifficultyTopLabel(card) {
+            const d = getCardDifficulty(card);
+            const tierLabel = getDifficultyTierLabel(getCardDifficultyTier(card));
+            return `D${d} ${tierLabel}`;
         }
 
         // Canonicalize faction names so filters/colors don't silently fail.
@@ -8076,15 +8107,16 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                       <button class="resultSummary" data-act="toggleCard" data-id="${card.id}">
                         <div class="resultSummaryTop">
                           <div class="resultSummaryInfo">
-                            <div class="cardTitle">
-                                <span class="cardSeedLine">${escapeHtml(getSeedDisplayName(card))}</span>
-                                <span class="cardPlayerLine">${escapeHtml(getPlayerName(card))}</span>
+                            <div class="resultSummaryHeading">
+                                <div class="cardTitle">
+                                    <span class="cardSeedLine">${escapeHtml(getSeedDisplayName(card))}</span>
+                                    <span class="cardPlayerLine">${escapeHtml(getPlayerName(card))}</span>
+                                </div>
+                                <span class="difficultyTopBadge">${escapeHtml(formatDifficultyTopLabel(card))}</span>
                             </div>
                             <div class="resultSummaryMetaGrid">
                                 <div class="resultMetaChip"><span class="k">Mode</span><span class="${getModeClass(card.mode)}">${escapeHtml(card.mode || "—")}</span></div>
                                 <div class="resultMetaChip"><span class="k">Faction</span><span class="${getFactionClass(card.faction)}">${escapeHtml(card.faction || "—")}</span></div>
-                                <div class="resultMetaChip"><span class="k">Difficulty</span>${escapeHtml(formatDifficultyLabel(card))}</div>
-                                <div class="resultMetaChip"><span class="k">Tier</span>${escapeHtml(difficultyTierLabel)}</div>
                                 <div class="resultMetaChip"><span class="k">Date</span>${escapeHtml(new Date(card.createdAt).toLocaleString())}</div>
                                 <div class="resultMetaChip"><span class="k">Planet</span>${escapeHtml(card.planet?.name || "Not rolled")}</div>
                             </div>
@@ -8211,9 +8243,12 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             body.innerHTML = `
                 <div class="resultDetail">
-                    <div class="cardTitle">
-                        <span class="cardSeedLine">${escapeHtml(getSeedDisplayName(card))}</span>
-                        <span class="cardPlayerLine">${escapeHtml(getPlayerName(card))}</span>
+                    <div class="resultSummaryHeading">
+                        <div class="cardTitle">
+                            <span class="cardSeedLine">${escapeHtml(getSeedDisplayName(card))}</span>
+                            <span class="cardPlayerLine">${escapeHtml(getPlayerName(card))}</span>
+                        </div>
+                        <span class="difficultyTopBadge">${escapeHtml(formatDifficultyTopLabel(card))}</span>
                     </div>
                     <div class="cardMeta"><span class="${getModeClass(card.mode)}">${escapeHtml(card.mode)}</span> • <span class="${getFactionClass(card.faction)}">${escapeHtml(card.faction)}</span> • ${escapeHtml(new Date(card.createdAt).toLocaleString())}</div>
 
@@ -8263,7 +8298,6 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                     <div class="hr"></div>
 
                     <div class="statsGrid modalStatGrid">
-                      <div><div class="label">Difficulty</div><input type="text" value="${escapeHtml(formatDifficultyLabel(card))}" readonly></div>
                       <div><div class="label">Kills</div><input type="number" min="0" value="${Number(draft.stats?.kills || 0)}" data-k="kills" data-id="${card.id}" ${editingLocked ? "disabled" : ""}></div>
                       <div><div class="label">Accuracy (%)</div><input type="number" min="0" value="${Number(draft.stats?.accuracy || 0)}" data-k="accuracy" data-id="${card.id}" ${editingLocked ? "disabled" : ""}></div>
                       <div><div class="label">Deaths</div><input type="number" min="0" value="${Number(draft.stats?.deaths || 0)}" data-k="deaths" data-id="${card.id}" ${editingLocked ? "disabled" : ""}></div>
