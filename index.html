@@ -878,11 +878,13 @@ END MASTER DIRECTIVE
         .slotGrid {
             display: grid;
             grid-template-columns: repeat(2, max-content);
-            column-gap: 10px;
+            column-gap: 14px;
             row-gap: 12px;
             justify-content: start;
             align-items: start;
             margin-top: 8px;
+            width: fit-content;
+            max-width: 100%;
         }
 
         .slotCol {
@@ -890,17 +892,19 @@ END MASTER DIRECTIVE
             flex-direction: column;
             gap: 8px;
             min-width: 0;
+            align-items: stretch;
+            flex: 0 0 auto;
         }
 
         .slotRow {
             display: grid;
-            grid-template-columns: 86px minmax(220px, 360px);
+            grid-template-columns: 86px auto;
             gap: 8px;
-            align-items: center;
+            align-items: start;
         }
 
         .slotRow-weapon {
-            grid-template-columns: 86px minmax(220px, 360px);
+            grid-template-columns: 86px auto;
         }
 
         .slotRow-weapon .slotVisual {
