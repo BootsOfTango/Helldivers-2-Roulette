@@ -3956,6 +3956,7 @@ END MASTER DIRECTIVE
                     <div class="formGrid3">
                         <select id="cmpSortMetric">
                             <option value="grade">Sort by Grade</option>
+                            <option value="raw">Sort by Raw score</option>
                             <option value="difficulty">Sort by Difficulty</option>
                             <option value="kills">Sort by Kills</option>
                             <option value="deaths">Sort by Deaths</option>
@@ -3967,6 +3968,14 @@ END MASTER DIRECTIVE
                             <option value="asc">Low → High</option>
                         </select>
                         <input id="cmpSearch" placeholder="Search by player, seed, weapon, strat, planet..." />
+                    </div>
+                    <div class="miniRow" style="margin-top:8px;">
+                        <select id="cmpCategoryScope">
+                            <option value="all">Category: All tiers (D1-D10)</option>
+                            <option value="cadet">Category: Cadet only (D1-D3)</option>
+                            <option value="veteran">Category: Veteran only (D4-D6)</option>
+                            <option value="helldive">Category: Helldiver only (D7-D10)</option>
+                        </select>
                     </div>
                 </div>
             </div>
@@ -5809,7 +5818,10 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             }
 
             const normalizedCard = getNormalizedCardView(card) || card;
+            const isAllTierScope = !["cadet", "veteran", "helldive"].includes(activeTier);
             const placementTier = tierForPlace(place);
+            const cardDifficultyTier = resolveCardDifficultyTier(normalizedCard);
+            const radarPlacementTier = isAllTierScope ? placementTier : cardDifficultyTier;
 
             const makeItemCard = (label, value, kind) => {
                 const visual = getItemVisual(value, kind);
@@ -5835,7 +5847,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 </div>
 
                 <div style="margin-top:10px;">
-                    ${buildRadarSVG(normalizedCard, radarMaxes, { placementTier })}
+                    ${buildRadarSVG(normalizedCard, radarMaxes, { placementTier: radarPlacementTier })}
                 </div>
 
                 <div style="margin-top:10px;" class="label">Loadout</div>
@@ -6133,6 +6145,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 card.lockedStatsSnapshot = null;
             }
             card.scoreRaw = Number(card.scoreRaw || 0);
+            card.scoreRawBase = Number(card.scoreRawBase || 0);
+            card.scoreRawBonusPercent = Number(card.scoreRawBonusPercent || getDifficultyBonusPercent(getCardDifficulty(card)));
             card.grade = clamp(Number(card.grade || 0), 0, 100);
             card.difficulty = getCardDifficulty(card);
             // Enforce strict tier mapping from D1-D10 only:
@@ -7160,11 +7174,15 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         /***********************
          * Ranking system (0-100 scale)
          ***********************/
-        function getDifficultyMultiplier(difficulty) {
-            const d = clamp(Math.round(Number(difficulty || 10)), 1, 10);
-            if (d <= 3) return 0.82 + ((d - 1) * 0.07);  // D1-D3: 0.82..0.96
-            if (d <= 6) return 1.00 + ((d - 4) * 0.08);  // D4-D6: 1.00..1.16
-            return 1.28 + ((d - 7) * 0.11);              // D7-D10: 1.28..1.61
+        function getDifficultyBonusPercent(difficulty) {
+            const d = clamp(Math.round(Number(difficulty || 1)), 1, 10);
+            return (d - 1) * 5; // D1=0%, D2=5% ... D10=45%
+        }
+
+        function getDifficultyBufferedRaw(rawBase, difficulty) {
+            const safeRaw = Math.max(0, Number(rawBase || 0));
+            const pct = getDifficultyBonusPercent(difficulty);
+            return safeRaw * (1 + (pct / 100));
         }
 
         function computeRawScore(card) {
@@ -7179,7 +7197,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             // Balance power (kills) with execution (accuracy/survival) and utility (stratagems/mobility).
             // Major Order status is metadata only (display/filter), not part of performance grading.
-            let raw =
+            let rawBase =
                 (kills * 0.7) +
                 (accuracy * 2.0) +
                 (stratUses * 3.0) +
@@ -7187,10 +7205,9 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 (deaths * 12.0) -
                 (stims * 5.0);
 
-            if (!isFinite(raw)) raw = 0;
-            raw *= getDifficultyMultiplier(difficulty);
-            raw = Math.max(0, raw);
-            return raw;
+            if (!isFinite(rawBase)) rawBase = 0;
+            rawBase = Math.max(0, rawBase);
+            return getDifficultyBufferedRaw(rawBase, difficulty);
         }
 
         /***********************
@@ -7845,8 +7862,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 const ordered = (Array.isArray(state.cards) ? state.cards : [])
                     .filter((card) => cardMatchesTierRange(card, leagueTier))
                     .slice()
-                    .sort((a, b) => Number(b?.grade || 0) - Number(a?.grade || 0)
-                        || Number(b?.scoreRaw || 0) - Number(a?.scoreRaw || 0)
+                    .sort((a, b) => Number(b?.scoreRaw || 0) - Number(a?.scoreRaw || 0)
+                        || Number(b?.grade || 0) - Number(a?.grade || 0)
                         || String(b?.createdAt || "").localeCompare(String(a?.createdAt || ""))
                         || String(a?.id || "").localeCompare(String(b?.id || "")));
                 ordered.forEach((card, idx) => map.set(card.id, tierForPlace(idx + 1)));
@@ -7870,7 +7887,19 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 raw: computeRawScore(card)
             }));
             cardsWithRaw.forEach(({ card, raw }) => {
+                const difficulty = getCardDifficulty(card);
+                const s = normalizeMissionStats(card?.stats, card);
+                let rawBase =
+                    (Number(s.kills ?? 0) * 0.7) +
+                    (Number(s.accuracy ?? 0) * 2.0) +
+                    (Number(s.stratUses ?? 0) * 3.0) +
+                    (Number(s.distanceKm ?? 0) * 4.0) -
+                    (Number(s.deaths ?? 0) * 12.0) -
+                    (Number(s.stims ?? 0) * 5.0);
+                if (!isFinite(rawBase)) rawBase = 0;
                 card.scoreRaw = raw;
+                card.scoreRawBase = Math.max(0, rawBase);
+                card.scoreRawBonusPercent = getDifficultyBonusPercent(difficulty);
                 card.grade = 0;
             });
 
@@ -8464,7 +8493,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                     </div>
 
                     <div class="miniRow modalActionRow" style="justify-content:space-between;">
-                      <div class="tiny">${escapeHtml(formatDifficultyLabel(card))} • Raw: <strong>${Number(card.scoreRaw || 0).toFixed(1)}</strong>${editingLocked ? ` • Finalized ${escapeHtml(new Date(card.statsLockedAt || card.createdAt).toLocaleString())}` : ""}</div>
+                      <div class="tiny">${escapeHtml(formatDifficultyLabel(card))} • Raw: <strong>${Number(card.scoreRaw || 0).toFixed(1)}</strong> (buffer +${Number(card.scoreRawBonusPercent || getDifficultyBonusPercent(getCardDifficulty(card)) || 0)}%)${editingLocked ? ` • Finalized ${escapeHtml(new Date(card.statsLockedAt || card.createdAt).toLocaleString())}` : ""}</div>
                       <div class="miniRow modalActionButtons">
                         <button class="btnPrimary" data-act="saveCard" data-id="${card.id}" ${editingLocked ? "disabled" : ""}>SAVE</button>
                         <button class="btnGhost" data-act="deleteCard" data-id="${card.id}">DELETE</button>
@@ -8614,7 +8643,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
       <div>
         <div style="font-size:20px;color:#9fb0cb;text-transform:uppercase;letter-spacing:.06em;">Deaths + Stims</div>
         <div style="font-size:28px;">${combo} <span style="color:#9fb0cb;">(lower = better endurance)</span></div>
-        <div style="margin-top:6px;font-size:24px;">Raw Score: <strong>${Number(card.scoreRaw || 0).toFixed(1)}</strong></div>
+        <div style="margin-top:6px;font-size:24px;">Raw Score: <strong>${Number(card.scoreRaw || 0).toFixed(1)}</strong> <span style="color:#9fb0cb;font-size:16px;">(buffer +${Number(card.scoreRawBonusPercent || getDifficultyBonusPercent(getCardDifficulty(card)) || 0)}%)</span></div>
       </div>
       <div style="border:1px solid #263146;border-radius:14px;padding:8px;display:flex;justify-content:center;align-items:center;min-height:250px;">
         ${radar}
@@ -9243,9 +9272,29 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             return Number(s[k] || 0);
         }
 
+        function getCardsForCompareScope(scope = "all") {
+            const normalizedScope = String(scope || "all").toLowerCase();
+            let scoped = (Array.isArray(state.cards) ? state.cards.slice() : []);
+            if (["cadet", "veteran", "helldive"].includes(normalizedScope)) {
+                scoped = scoped.filter(card => cardMatchesTierRange(card, normalizedScope));
+            }
+            return scoped.sort((a, b) => Number(b?.scoreRaw || 0) - Number(a?.scoreRaw || 0)
+                || Number(b?.grade || 0) - Number(a?.grade || 0)
+                || String(b?.createdAt || "").localeCompare(String(a?.createdAt || ""))
+                || String(a?.id || "").localeCompare(String(b?.id || "")));
+        }
+
+        function getCardScopeRank(card, scope = "all") {
+            if (!card || !card.id) return null;
+            const ordered = getCardsForCompareScope(scope);
+            const idx = ordered.findIndex(c => c.id === card.id);
+            return idx >= 0 ? (idx + 1) : null;
+        }
+
         function renderCompare() {
             const idA = $("#cmpA").value;
             const idB = $("#cmpB").value;
+            const scope = ($("#cmpCategoryScope")?.value || "all").toLowerCase();
             const ca = state.cards.find(c => c.id === idA);
             const cb = state.cards.find(c => c.id === idB);
 
@@ -9253,6 +9302,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             table.innerHTML = "";
 
             const rows = [
+                { name: "Scope category", k: "scopeCategory", better: "none" },
+                { name: "Rank in scope (Raw)", k: "scopeRank", better: "low" },
                 { name: "Grade (0-100)", k: "grade", better: "high" },
                 { name: "Difficulty", k: "difficulty", better: "high" },
                 { name: "Major Order", k: "majorOrderDone", better: "high" },
@@ -9283,7 +9334,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                     if (r.better === "high") {
                         if (va > vb) { clsA = "good"; clsB = "bad"; }
                         else if (vb > va) { clsB = "good"; clsA = "bad"; }
-                    } else {
+                    } else if (r.better === "low") {
                         if (va < vb) { clsA = "good"; clsB = "bad"; }
                         else if (vb < va) { clsB = "good"; clsA = "bad"; }
                     }
@@ -9292,8 +9343,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 table.insertAdjacentHTML("beforeend", `
                               <tr>
                                 <td class="muted">${escapeHtml(r.name)}</td>
-                                <td class="${clsA}">${r.k === "majorOrderDone" ? (ca ? (ca.majorOrderDone ? "MO DONE ✅" : "MO FAIL ❌") : "—") : formatMetricDisplay(va, r.k)}</td>
-                                <td class="${clsB}">${r.k === "majorOrderDone" ? (cb ? (cb.majorOrderDone ? "MO DONE ✅" : "MO FAIL ❌") : "—") : formatMetricDisplay(vb, r.k)}</td>
+                                <td class="${clsA}">${r.k === "majorOrderDone" ? (ca ? (ca.majorOrderDone ? "MO DONE ✅" : "MO FAIL ❌") : "—") : (r.k === "scopeCategory" ? escapeHtml(scope === "all" ? "All tiers (D1-D10)" : `${getDifficultyTierLabel(scope)} only (${getTierRangeLabel(scope)})`) : (r.k === "scopeRank" ? (ca ? `#${getCardScopeRank(ca, scope) ?? "—"}` : "—") : formatMetricDisplay(va, r.k)))}</td>
+                                <td class="${clsB}">${r.k === "majorOrderDone" ? (cb ? (cb.majorOrderDone ? "MO DONE ✅" : "MO FAIL ❌") : "—") : (r.k === "scopeCategory" ? escapeHtml(scope === "all" ? "All tiers (D1-D10)" : `${getDifficultyTierLabel(scope)} only (${getTierRangeLabel(scope)})`) : (r.k === "scopeRank" ? (cb ? `#${getCardScopeRank(cb, scope) ?? "—"}` : "—") : formatMetricDisplay(vb, r.k)))}</td>
                               </tr>
                             `);
             }
@@ -10914,8 +10965,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 .filter(card => card && typeof card === "object")
                 .map(card => getNormalizedCardView(card))
                 .filter(Boolean)
-                .sort((a, b) => Number(b?.grade || 0) - Number(a?.grade || 0)
-                    || Number(b?.scoreRaw || 0) - Number(a?.scoreRaw || 0)
+                .sort((a, b) => Number(b?.scoreRaw || 0) - Number(a?.scoreRaw || 0)
+                    || Number(b?.grade || 0) - Number(a?.grade || 0)
                     || String(b?.createdAt || "").localeCompare(String(a?.createdAt || ""))
                     || String(a?.id || "").localeCompare(String(b?.id || "")));
 
@@ -10957,6 +11008,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         function renderRankFallbackList(cards = []) {
             const box = $("#rankList");
             if (!box) return;
+            const hasActiveTier = ["cadet", "veteran", "helldive"].includes(activeTier);
             box.innerHTML = "";
             if (!cards.length) {
                 box.innerHTML = `<div class="tiny" style="padding:8px 10px; border:1px solid var(--line2); border-radius:10px; background:rgba(0,0,0,.22);">Need cards played and saved in this tier to show leaderboard results.</div>`;
@@ -10978,7 +11030,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 }
 
                 const cardDifficultyTier = resolveCardDifficultyTier(c);
-                row.classList.add(`rim-${placementTier || cardDifficultyTier}`);
+                const rimTier = hasActiveTier ? cardDifficultyTier : (placementTier || cardDifficultyTier);
+                row.classList.add(`rim-${rimTier}`);
                 const tierBadge = `${getDifficultyTierLabel(cardDifficultyTier)} • ${formatDifficultyLabel(c)}`;
 
                 row.innerHTML = `
@@ -11676,6 +11729,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             $("#cmpSortMetric").addEventListener("change", refreshCompareOptions);
             $("#cmpSortDir").addEventListener("change", refreshCompareOptions);
             $("#cmpSearch").addEventListener("input", refreshCompareOptions);
+            $("#cmpCategoryScope")?.addEventListener("change", refreshCompareOptions);
             $$("#rankTierCards .rankTierCard").forEach((btn) => {
                 btn.addEventListener("click", () => {
                     const tier = btn.dataset.tier || "";
@@ -11835,9 +11889,13 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             // Apply search + sort to the dropdown list shown in compare selectors
             const sortMetric = $("#cmpSortMetric")?.value || "grade";
             const sortDir = $("#cmpSortDir")?.value || "desc";
+            const scope = ($("#cmpCategoryScope")?.value || "all").toLowerCase();
             const q = normalizeText($("#cmpSearch")?.value || "");
 
             let list = state.cards.slice();
+            if (["cadet", "veteran", "helldive"].includes(scope)) {
+                list = list.filter(c => cardMatchesTierRange(c, scope));
+            }
 
             if (q) {
                 list = list.filter(c => {
@@ -11864,12 +11922,16 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                     ? Number(x.grade || 0)
                     : (sortMetric === "difficulty")
                         ? getCardDifficulty(x)
+                        : (sortMetric === "raw")
+                            ? Number(x.scoreRaw || 0)
                         : Number(x.stats?.[sortMetric] || 0);
 
                 const vy = (sortMetric === "grade")
                     ? Number(y.grade || 0)
                     : (sortMetric === "difficulty")
                         ? getCardDifficulty(y)
+                        : (sortMetric === "raw")
+                            ? Number(y.scoreRaw || 0)
                         : Number(y.stats?.[sortMetric] || 0);
 
                 const d = (vx - vy) * dir;
@@ -11883,7 +11945,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             const opts = list.map(c => ({
                 id: c.id,
-                text: `${getPlayerName(c)} • ${c.seed} • ${c.mode} • ${c.faction} • ${formatDifficultyLabel(c)} • Grade ${c.grade || 0}`
+                text: `${getPlayerName(c)} • ${c.seed} • ${c.mode} • ${c.faction} • ${formatDifficultyLabel(c)} • Grade ${c.grade || 0} • Raw ${Number(c.scoreRaw || 0).toFixed(1)}`
             }));
 
             const build = (sel) => {
@@ -11904,6 +11966,10 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             build(a); build(b);
             a.value = prevA || "";
             b.value = prevB || "";
+            if (a.value && !opts.some(o => o.id === a.value)) a.value = "";
+            if (b.value && !opts.some(o => o.id === b.value)) b.value = "";
+            if (!a.value && opts.length) a.value = opts[0].id;
+            if (!b.value && opts.length) b.value = opts[Math.min(1, opts.length - 1)].id;
 
             // Metric dropdowns for graph
             const gx = $("#gX"), gy = $("#gY");
