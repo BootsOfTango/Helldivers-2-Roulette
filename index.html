@@ -410,6 +410,43 @@ END MASTER DIRECTIVE
                 background: rgba(255,60,60,.07);
             }
 
+        .engagementDock {
+            position: fixed;
+            top: 76px;
+            right: 18px;
+            z-index: 12;
+            width: min(360px, calc(100vw - 24px));
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            pointer-events: none;
+        }
+
+        .engagementDock .pill {
+            border-radius: 14px;
+            backdrop-filter: blur(8px);
+            pointer-events: auto;
+        }
+
+        .engagementDockSummary {
+            font-size: 12px;
+            line-height: 1.35;
+            color: #c4cfdd;
+            white-space: normal;
+        }
+
+        .engagementDockSummary strong {
+            color: #f4f8ff;
+        }
+
+        @media (max-width: 900px) {
+            .engagementDock {
+                top: 70px;
+                right: 10px;
+                width: min(320px, calc(100vw - 20px));
+            }
+        }
+
         main {
             padding: 14px 18px 24px;
             max-width: 1200px;
@@ -3769,6 +3806,11 @@ END MASTER DIRECTIVE
         </div>
     </header>
 
+    <aside class="engagementDock" aria-live="polite">
+        <div class="pill">Cards: <strong id="dockSavedCount">0</strong></div>
+        <div class="pill engagementDockSummary" id="dockLastCardSummary">No cards yet. Spin and confirm a run to create your first card.</div>
+    </aside>
+
     <main>
         <div class="tabs">
             <div class="tabBtn active" data-tab="spin" onclick="switchTab('spin')">1. SPIN</div>
@@ -3787,7 +3829,6 @@ END MASTER DIRECTIVE
 
                 <div class="pillRow" style="margin-left:auto;">
                     <div class="pill"><span id="spinDifficultyPill">D10 • Helldive</span> • <strong>Solo</strong></div>
-                    <div class="pill">Cards: <strong id="spinSavedCount">0</strong></div>
                 </div>
             </div>
 
@@ -7975,9 +8016,10 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
          ***********************/
         function updateHeaderPills() {
             const pillSaved = $("#pillSaved");
-            const spinSavedCount = $("#spinSavedCount");
+            const dockSavedCount = $("#dockSavedCount");
             if (pillSaved) pillSaved.textContent = String(state.cards.length);
-            if (spinSavedCount) spinSavedCount.textContent = String(state.cards.length);
+            if (dockSavedCount) dockSavedCount.textContent = String(state.cards.length);
+            updateEngagementDockSummary();
 
             const c = state.current;
 
@@ -8008,6 +8050,46 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             // SEED: always show
             const pillSeed = $("#pillSeed");
             if (pillSeed) pillSeed.textContent = c.seed || "???";
+        }
+
+        function getLastCreatedCard() {
+            if (!Array.isArray(state.cards) || !state.cards.length) return null;
+            return state.cards.reduce((latest, card) => {
+                if (!latest) return card;
+                const latestTime = new Date(latest?.createdAt || 0).getTime();
+                const cardTime = new Date(card?.createdAt || 0).getTime();
+                return cardTime > latestTime ? card : latest;
+            }, null);
+        }
+
+        function formatTimeSince(dateLike) {
+            const createdTs = new Date(dateLike || 0).getTime();
+            if (!Number.isFinite(createdTs) || createdTs <= 0) return "unknown";
+            const diffMs = Math.max(0, Date.now() - createdTs);
+            const dayMs = 24 * 60 * 60 * 1000;
+            const hourMs = 60 * 60 * 1000;
+            const minMs = 60 * 1000;
+            const days = Math.floor(diffMs / dayMs);
+            if (days > 0) return `${days} day${days === 1 ? "" : "s"}`;
+            const hours = Math.floor(diffMs / hourMs);
+            if (hours > 0) return `${hours} hour${hours === 1 ? "" : "s"}`;
+            const mins = Math.floor(diffMs / minMs);
+            if (mins > 0) return `${mins} minute${mins === 1 ? "" : "s"}`;
+            return "just now";
+        }
+
+        function updateEngagementDockSummary() {
+            const summaryEl = $("#dockLastCardSummary");
+            if (!summaryEl) return;
+            const lastCard = getLastCreatedCard();
+            if (!lastCard) {
+                summaryEl.textContent = "No cards yet. Spin and confirm a run to create your first card.";
+                return;
+            }
+            const seedName = String(lastCard.seed || "Unknown seed");
+            const createdAt = lastCard.createdAt ? new Date(lastCard.createdAt).toLocaleString() : "unknown time";
+            const elapsed = formatTimeSince(lastCard.createdAt);
+            summaryEl.innerHTML = `Last card: <strong>${escapeHtml(seedName)}</strong> on <strong>${escapeHtml(createdAt)}</strong>.<br>It has been <strong>${escapeHtml(elapsed)}</strong> since your last created card.`;
         }
 
         function setSeedAnimationState(stateName) {
