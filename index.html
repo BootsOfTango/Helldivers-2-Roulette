@@ -1245,7 +1245,7 @@ END MASTER DIRECTIVE
         }
 
         .cardModalDialog {
-            width: min(640px, 92vw);
+            width: min(560px, 92vw);
             max-height: 84vh;
             overflow: auto;
             overflow-x: hidden;
@@ -1276,6 +1276,12 @@ END MASTER DIRECTIVE
             gap: 10px;
             flex-wrap: wrap;
             justify-content: flex-end;
+            min-width: 0;
+        }
+
+        .modalActionRow .tiny {
+            min-width: 0;
+            overflow-wrap: anywhere;
         }
 
         .modalLoadoutGrid {
@@ -1301,7 +1307,8 @@ END MASTER DIRECTIVE
             gap: 6px;
             align-items: flex-start;
             min-height: 36px;
-            width: 50%;
+            width: 100%;
+            min-width: 0;
         }
 
         .modalLoadoutIcon {
@@ -1432,7 +1439,7 @@ END MASTER DIRECTIVE
 
         @media (max-width: 980px) {
             .cardModalDialog {
-                width: min(620px, 94vw);
+                width: min(540px, 94vw);
             }
 
             .modalPlanetWrap {
