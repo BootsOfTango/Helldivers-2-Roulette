@@ -1371,6 +1371,27 @@ END MASTER DIRECTIVE
             font-size: 10px;
         }
 
+        .planetMiniFactionIconWrap {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+        }
+
+        .planetMiniFactionIcon {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .planetMiniFactionFallback {
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: .4px;
+            text-transform: uppercase;
+        }
+
         .modalStatGrid {
             display: grid;
             grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -8432,6 +8453,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const planetWeatherText = card.planet ? getPlanetWeatherText(card.planet) : "None";
             const planetWeatherTags = splitWeatherTags(planetWeatherText);
             const cardBiome = card.planet ? (card.planetBiome || getPlanetBiomeFromPlanet(card.planet) || "—") : "—";
+            const factionStickerData = getFactionStickerData(card.faction);
 
             body.innerHTML = `
                 <div class="resultDetail">
@@ -8489,7 +8511,12 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
                         <div class="planetMiniCard">
                           <div class="planetMiniLabel">Faction</div>
-                          <div class="planetMiniValue ${getFactionClass(card.faction)}">${escapeHtml(card.faction || "—")}</div>
+                          <div class="planetMiniValue ${getFactionClass(card.faction)}">
+                            ${factionStickerData.image
+                                ? `<span class="planetMiniFactionIconWrap"><img class="planetMiniFactionIcon" src="${escapeHtml(factionStickerData.image)}" alt="${escapeHtml(factionStickerData.label)}"></span>`
+                                : `<span class="planetMiniFactionFallback">${escapeHtml(card.faction || "—")}</span>`
+                            }
+                          </div>
                         </div>
                       </div>
                     ` : ``}
