@@ -1391,7 +1391,7 @@ END MASTER DIRECTIVE
         .modalMoNotesRow {
             margin-top: 6px;
             display: grid;
-            grid-template-columns: minmax(0, 1fr);
+            grid-template-columns: minmax(280px, 460px) minmax(0, 1fr);
             gap: 6px;
             align-items: start;
         }
@@ -1407,8 +1407,15 @@ END MASTER DIRECTIVE
             padding: 6px 8px;
         }
 
+        .modalNotes {
+            grid-column: 1;
+            width: 100%;
+        }
+
         .modalNotes textarea {
             min-height: 64px;
+            width: 100%;
+            max-width: 100%;
         }
 
         .cardModalDialog .hr {
