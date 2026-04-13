@@ -1276,6 +1276,7 @@ END MASTER DIRECTIVE
             display: grid;
             gap: 5px;
             align-content: start;
+            justify-items: start;
         }
 
         .modalLoadoutItem {
@@ -1287,6 +1288,7 @@ END MASTER DIRECTIVE
             gap: 6px;
             align-items: flex-start;
             min-height: 36px;
+            width: 50%;
         }
 
         .modalLoadoutIcon {
@@ -1423,6 +1425,10 @@ END MASTER DIRECTIVE
             .modalLoadoutGrid,
             .modalMoNotesRow {
                 grid-template-columns: 1fr;
+            }
+
+            .modalLoadoutItem {
+                width: 100%;
             }
 
             .modalPlanetWrap,
