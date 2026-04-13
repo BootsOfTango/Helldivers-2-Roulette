@@ -1383,7 +1383,7 @@ END MASTER DIRECTIVE
         .modalMoNotesRow {
             margin-top: 6px;
             display: grid;
-            grid-template-columns: minmax(150px, 210px) minmax(0, 1fr);
+            grid-template-columns: minmax(0, 1fr);
             gap: 6px;
             align-items: start;
         }
@@ -1462,14 +1462,60 @@ END MASTER DIRECTIVE
         }
 
         .resultDetail .resultSummaryHeading {
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 8px;
+            align-items: stretch;
+            text-align: left;
         }
 
-        .resultDetail .difficultyTopBadge {
-            align-self: center;
+        .resultDetailMetaItem {
+            min-width: 0;
+            border: 1px solid var(--line2);
+            border-radius: 10px;
+            background: rgba(255,255,255,.02);
+            padding: 7px 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .resultDetailMetaLabel {
+            color: var(--muted);
+            font-size: 10px;
+            line-height: 1.1;
+            text-transform: uppercase;
+            letter-spacing: .35px;
+        }
+
+        .resultDetailMetaValue {
+            font-size: 12px;
+            line-height: 1.2;
+            font-weight: 700;
+            overflow-wrap: anywhere;
+        }
+
+        .resultDetailMetaValue.moSuccess {
+            color: #33d69f;
+        }
+
+        .resultDetailMetaValue.moFail {
+            color: #ff5f5f;
+        }
+
+        @media (max-width: 760px) {
+            .resultDetail .resultSummaryHeading {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 6px;
+            }
+
+            .resultDetailMetaItem {
+                padding: 6px 7px;
+            }
+
+            .resultDetailMetaValue {
+                font-size: 11px;
+            }
         }
 
         /* Pentagon / radar mini chart (Results cards) */
@@ -8272,11 +8318,22 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             body.innerHTML = `
                 <div class="resultDetail">
                     <div class="resultSummaryHeading">
-                        <div class="cardTitle">
-                            <span class="cardSeedLine">${escapeHtml(getSeedDisplayName(card))}</span>
-                            <span class="cardPlayerLine">${escapeHtml(getPlayerName(card))}</span>
+                        <div class="resultDetailMetaItem">
+                            <div class="resultDetailMetaLabel">Seed name</div>
+                            <div class="resultDetailMetaValue">${escapeHtml(getSeedDisplayName(card))}</div>
                         </div>
-                        <span class="difficultyTopBadge">${escapeHtml(formatDifficultyTopLabel(card))}</span>
+                        <div class="resultDetailMetaItem">
+                            <div class="resultDetailMetaLabel">Player name</div>
+                            <div class="resultDetailMetaValue">${escapeHtml(getPlayerName(card))}</div>
+                        </div>
+                        <div class="resultDetailMetaItem">
+                            <div class="resultDetailMetaLabel">Difficulty level</div>
+                            <div class="resultDetailMetaValue">${escapeHtml(formatDifficultyTopLabel(card))}</div>
+                        </div>
+                        <div class="resultDetailMetaItem">
+                            <div class="resultDetailMetaLabel">MO status</div>
+                            <div class="resultDetailMetaValue ${draft.majorOrderDone ? "moSuccess" : "moFail"}">${draft.majorOrderDone ? "MO Success" : "MO Fail"}</div>
+                        </div>
                     </div>
                     <div class="cardMeta"><span class="${getModeClass(card.mode)}">${escapeHtml(card.mode)}</span> • <span class="${getFactionClass(card.faction)}">${escapeHtml(card.faction)}</span> • ${escapeHtml(new Date(card.createdAt).toLocaleString())}</div>
 
@@ -8335,13 +8392,6 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                     </div>
 
                     <div class="modalMoNotesRow">
-                      <div>
-                        <div class="label">Major order done</div>
-                        <select data-k="majorOrderDone" data-id="${card.id}" ${editingLocked ? "disabled" : ""}>
-                          <option value="false" ${draft.majorOrderDone ? "" : "selected"}>No</option>
-                          <option value="true" ${draft.majorOrderDone ? "selected" : ""}>Yes</option>
-                        </select>
-                      </div>
                       <div class="modalNotes">
                         <div class="label">Notes</div>
                         <textarea data-k="notes" data-id="${card.id}" placeholder="Write anything: what sucked, what worked, funny moments..." ${editingLocked ? "disabled" : ""}>${escapeHtml(draft.notes || "")}</textarea>
