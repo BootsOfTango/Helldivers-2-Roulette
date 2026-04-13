@@ -8520,30 +8520,36 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
       <div style="margin-top:8px;color:#aab8ce;">Environment: ${escapeHtml(planetWeatherTags.length ? planetWeatherTags.join(" / ") : (planetWeatherText || "None"))}</div>
     </div>
 
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:16px;">
-      <div style="border:1px solid #263146;border-radius:12px;padding:12px;">
+    <style>
+      .metrics-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:16px;}
+      .metric-card{border:1px solid #263146;border-radius:12px;padding:12px;min-width:0;box-sizing:border-box;}
+      @media (max-width:720px){.metrics-grid{grid-template-columns:repeat(2,minmax(0,1fr));}}
+      @media (max-width:460px){.metrics-grid{grid-template-columns:minmax(0,1fr);}}
+    </style>
+    <div class="metrics-grid">
+      <div class="metric-card">
         <div style="font-size:18px;color:#9fb0cb;text-transform:uppercase;letter-spacing:.06em;">Kills</div>
-        <div style="font-size:38px;font-weight:800;">${Number(s.kills || 0)}</div>
+        <div style="font-size:38px;font-weight:800;min-width:0;overflow-wrap:anywhere;">${Number(s.kills || 0)}</div>
       </div>
-      <div style="border:1px solid #263146;border-radius:12px;padding:12px;">
+      <div class="metric-card">
         <div style="font-size:18px;color:#9fb0cb;text-transform:uppercase;letter-spacing:.06em;">Accuracy (%)</div>
-        <div style="font-size:38px;font-weight:800;">${Number(s.accuracy || 0)}</div>
+        <div style="font-size:38px;font-weight:800;min-width:0;overflow-wrap:anywhere;">${Number(s.accuracy || 0)}</div>
       </div>
-      <div style="border:1px solid #263146;border-radius:12px;padding:12px;">
+      <div class="metric-card">
         <div style="font-size:18px;color:#9fb0cb;text-transform:uppercase;letter-spacing:.06em;">Deaths</div>
-        <div style="font-size:38px;font-weight:800;">${Number(s.deaths || 0)}</div>
+        <div style="font-size:38px;font-weight:800;min-width:0;overflow-wrap:anywhere;">${Number(s.deaths || 0)}</div>
       </div>
-      <div style="border:1px solid #263146;border-radius:12px;padding:12px;">
+      <div class="metric-card">
         <div style="font-size:18px;color:#9fb0cb;text-transform:uppercase;letter-spacing:.06em;">Stims</div>
-        <div style="font-size:38px;font-weight:800;">${Number(s.stims || 0)}</div>
+        <div style="font-size:38px;font-weight:800;min-width:0;overflow-wrap:anywhere;">${Number(s.stims || 0)}</div>
       </div>
-      <div style="border:1px solid #263146;border-radius:12px;padding:12px;">
+      <div class="metric-card">
         <div style="font-size:18px;color:#9fb0cb;text-transform:uppercase;letter-spacing:.06em;">Distance (km)</div>
-        <div style="font-size:38px;font-weight:800;">${Number(s.distanceKm || 0)}</div>
+        <div style="font-size:38px;font-weight:800;min-width:0;overflow-wrap:anywhere;">${Number(s.distanceKm || 0)}</div>
       </div>
-      <div style="border:1px solid #263146;border-radius:12px;padding:12px;">
+      <div class="metric-card">
         <div style="font-size:18px;color:#9fb0cb;text-transform:uppercase;letter-spacing:.06em;">Strat Uses</div>
-        <div style="font-size:38px;font-weight:800;">${Number(s.stratUses || 0)}</div>
+        <div style="font-size:38px;font-weight:800;min-width:0;overflow-wrap:anywhere;">${Number(s.stratUses || 0)}</div>
       </div>
     </div>
 
