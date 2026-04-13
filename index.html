@@ -1541,11 +1541,35 @@ END MASTER DIRECTIVE
         }
 
         .resultCardModalMoStatus {
+            appearance: none;
+            border: 0;
+            background: transparent;
+            padding: 0;
+            margin: 0;
             font-size: 11px;
             line-height: 1;
             font-weight: 800;
             letter-spacing: .3px;
             text-transform: uppercase;
+            cursor: pointer;
+            transition: opacity .15s ease, filter .15s ease;
+        }
+
+        .resultCardModalMoStatus:hover {
+            opacity: .95;
+            filter: brightness(1.1);
+        }
+
+        .resultCardModalMoStatus:focus-visible {
+            outline: 1px solid var(--line);
+            outline-offset: 4px;
+            border-radius: 6px;
+        }
+
+        .resultCardModalMoStatus[disabled] {
+            cursor: not-allowed;
+            opacity: .6;
+            filter: none;
         }
 
         .resultCardModalMoStatus.moSuccess {
@@ -3895,7 +3919,7 @@ END MASTER DIRECTIVE
                 <div class="miniRow" style="justify-content:space-between; margin-bottom:10px;">
                     <div class="resultCardModalHeaderMeta">
                         <div class="label">Card details</div>
-                        <span id="resultCardModalMoStatus" class="resultCardModalMoStatus" aria-live="polite"></span>
+                        <button type="button" id="resultCardModalMoStatus" class="resultCardModalMoStatus" aria-live="polite"></button>
                     </div>
                     <button class="btnGhost" id="btnCloseResultModal">CLOSE</button>
                 </div>
@@ -8403,11 +8427,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             if (!draft) return;
             const editingLocked = !!card.statsLocked;
 
-            if (headerMoStatus) {
-                const moStatusClass = draft.majorOrderDone ? "moSuccess" : "moFail";
-                headerMoStatus.className = `resultCardModalMoStatus ${moStatusClass}`;
-                headerMoStatus.textContent = draft.majorOrderDone ? "MO Success" : "MO Fail";
-            }
+            if (headerMoStatus) updateResultCardModalMoStatus(headerMoStatus, card.id, draft.majorOrderDone, editingLocked);
 
             const planetWeatherText = card.planet ? getPlanetWeatherText(card.planet) : "None";
             const planetWeatherTags = splitWeatherTags(planetWeatherText);
@@ -8513,6 +8533,19 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             state.ui.activeResultCardId = card.id;
             state.ui.modalOpen = true;
             modal.hidden = false;
+        }
+
+        function updateResultCardModalMoStatus(el, cardId, majorOrderDone, editingLocked) {
+            if (!el) return;
+            const moStatusClass = majorOrderDone ? "moSuccess" : "moFail";
+            el.className = `resultCardModalMoStatus ${moStatusClass}`;
+            el.textContent = majorOrderDone ? "MO Success" : "MO Fail";
+            el.value = majorOrderDone ? "true" : "false";
+            el.setAttribute("data-id", cardId);
+            el.setAttribute("data-k", "majorOrderDone");
+            el.setAttribute("aria-pressed", majorOrderDone ? "true" : "false");
+            el.setAttribute("title", editingLocked ? "Card is finalized; MO status is locked." : "Click to toggle Major Order status");
+            el.disabled = !!editingLocked;
         }
 
         function closeResultCardModal() {
@@ -9095,6 +9128,19 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             } else if (STAT_KEYS.includes(key)) {
                 draft.stats[key] = Number(el.value || 0);
             }
+        }
+
+        function toggleResultCardModalMoStatus() {
+            const cardId = state.ui.activeResultCardId;
+            if (!cardId) return;
+            const card = getCardById(cardId);
+            if (!card || !canEditCardStats(card, "toggleResultCardModalMoStatus")) return;
+            const draft = getMissionStatsDraft(cardId);
+            if (!draft) return;
+            draft.majorOrderDone = !draft.majorOrderDone;
+            const headerMoStatus = $("#resultCardModalMoStatus");
+            updateResultCardModalMoStatus(headerMoStatus, cardId, draft.majorOrderDone, !!card.statsLocked);
+            onCardFieldChange({ target: headerMoStatus });
         }
 
 
@@ -11640,6 +11686,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             $("#btnConfirmPlayer")?.addEventListener("click", () => doConfirmPlayerName());
 
             $("#btnCloseResultModal").addEventListener("click", closeResultCardModal);
+            $("#resultCardModalMoStatus")?.addEventListener("click", toggleResultCardModalMoStatus);
             $("#resultCardModal").addEventListener("click", (e) => {
                 if (e.target && e.target.id === "resultCardModal") closeResultCardModal();
             });
