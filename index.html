@@ -1378,15 +1378,21 @@ END MASTER DIRECTIVE
 
         .modalPlanetWrap {
             display: grid;
-            grid-template-columns: repeat(4, minmax(0, 1fr));
+            grid-template-columns: repeat(5, minmax(0, 1fr));
             gap: 6px;
             margin-top: 6px;
+            align-items: stretch;
         }
 
         .modalPlanetWrap .planetMiniCard {
             min-width: 0;
             min-height: 72px;
+            height: 72px;
             padding: 6px 8px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            overflow: hidden;
         }
 
         .modalPlanetWrap .planetMiniLabel {
@@ -1395,8 +1401,20 @@ END MASTER DIRECTIVE
         }
 
         .modalPlanetWrap .planetMiniValue {
-            font-size: 13px;
+            font-size: 12px;
             line-height: 1.1;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 2;
+            text-overflow: ellipsis;
+        }
+
+        .modalPlanetWrap .planetMiniValue.planetMiniValueFaction {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            -webkit-line-clamp: unset;
         }
 
         .modalPlanetWrap .planetTag {
@@ -1406,14 +1424,17 @@ END MASTER DIRECTIVE
         .modalPlanetWrap .planetConditionList {
             gap: 1px;
             font-size: 10px;
+            overflow: hidden;
+            max-height: 30px;
         }
 
         .planetMiniFactionIconWrap {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            width: 32px;
-            height: 32px;
+            width: 28px;
+            height: 28px;
+            margin-top: 2px;
         }
 
         .planetMiniFactionIcon {
@@ -1501,10 +1522,6 @@ END MASTER DIRECTIVE
                 width: min(500px, 94vw);
             }
 
-            .modalPlanetWrap {
-                grid-template-columns: repeat(2, minmax(0, 1fr));
-            }
-
             .modalStatGrid {
                 grid-template-columns: repeat(3, minmax(84px, 1fr));
             }
@@ -1520,7 +1537,6 @@ END MASTER DIRECTIVE
                 width: 100%;
             }
 
-            .modalPlanetWrap,
             .modalStatGrid {
                 grid-template-columns: repeat(2, minmax(92px, 1fr));
             }
@@ -8581,7 +8597,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                     </div>
 
 	                    ${card.planet ? `
-	                      <div class="planetCardWrap modalPlanetWrap">
+		                      <div class="modalPlanetWrap">
 	                        <div class="planetMiniCard">
 	                          <div class="planetMiniLabel">Planet</div>
 	                          <div class="planetMiniValue">${escapeHtml(card.planet.name || "—")}</div>
@@ -8606,7 +8622,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
                         <div class="planetMiniCard">
                           <div class="planetMiniLabel">Faction</div>
-                          <div class="planetMiniValue ${getFactionClass(card.faction)}">
+                          <div class="planetMiniValue planetMiniValueFaction ${getFactionClass(card.faction)}">
                             ${factionStickerData.image
                                 ? `<span class="planetMiniFactionIconWrap"><img class="planetMiniFactionIcon" src="${escapeHtml(factionStickerData.image)}" alt="${escapeHtml(factionStickerData.label)}"></span>`
                                 : `<span class="planetMiniFactionFallback">${escapeHtml(card.faction || "—")}</span>`
