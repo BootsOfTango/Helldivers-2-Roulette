@@ -1515,6 +1515,28 @@ END MASTER DIRECTIVE
             color: #ff5f5f;
         }
 
+        .resultCardModalHeaderMeta {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .resultCardModalMoStatus {
+            font-size: 11px;
+            line-height: 1;
+            font-weight: 800;
+            letter-spacing: .3px;
+            text-transform: uppercase;
+        }
+
+        .resultCardModalMoStatus.moSuccess {
+            color: #33d69f;
+        }
+
+        .resultCardModalMoStatus.moFail {
+            color: #ff5f5f;
+        }
+
         @media (max-width: 760px) {
             .resultDetail .resultSummaryHeading {
                 grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -3852,7 +3874,10 @@ END MASTER DIRECTIVE
         <div id="resultCardModal" class="cardModal" hidden>
             <div class="cardModalDialog">
                 <div class="miniRow" style="justify-content:space-between; margin-bottom:10px;">
-                    <div class="label">Card details</div>
+                    <div class="resultCardModalHeaderMeta">
+                        <div class="label">Card details</div>
+                        <span id="resultCardModalMoStatus" class="resultCardModalMoStatus" aria-live="polite"></span>
+                    </div>
                     <button class="btnGhost" id="btnCloseResultModal">CLOSE</button>
                 </div>
                 <div id="resultCardModalBody"></div>
@@ -8318,10 +8343,17 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const card = getCardById(cardId);
             const modal = $("#resultCardModal");
             const body = $("#resultCardModalBody");
+            const headerMoStatus = $("#resultCardModalMoStatus");
             if (!card || !modal || !body) return;
             const draft = getMissionStatsDraft(card.id);
             if (!draft) return;
             const editingLocked = !!card.statsLocked;
+
+            if (headerMoStatus) {
+                const moStatusClass = draft.majorOrderDone ? "moSuccess" : "moFail";
+                headerMoStatus.className = `resultCardModalMoStatus ${moStatusClass}`;
+                headerMoStatus.textContent = draft.majorOrderDone ? "MO Success" : "MO Fail";
+            }
 
             const planetWeatherText = card.planet ? getPlanetWeatherText(card.planet) : "None";
             const planetWeatherTags = splitWeatherTags(planetWeatherText);
@@ -8341,10 +8373,6 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                         <div class="resultDetailMetaItem">
                             <div class="resultDetailMetaLabel">Difficulty level</div>
                             <div class="resultDetailMetaValue">${escapeHtml(formatDifficultyTopLabel(card))}</div>
-                        </div>
-                        <div class="resultDetailMetaItem">
-                            <div class="resultDetailMetaLabel">MO status</div>
-                            <div class="resultDetailMetaValue ${draft.majorOrderDone ? "moSuccess" : "moFail"}">${draft.majorOrderDone ? "MO Success" : "MO Fail"}</div>
                         </div>
                     </div>
                     <div class="cardMeta"><span class="${getModeClass(card.mode)}">${escapeHtml(card.mode)}</span> • <span class="${getFactionClass(card.faction)}">${escapeHtml(card.faction)}</span> • ${escapeHtml(new Date(card.createdAt).toLocaleString())}</div>
