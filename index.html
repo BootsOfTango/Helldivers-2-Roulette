@@ -1398,7 +1398,7 @@ END MASTER DIRECTIVE
         .modalMoNotesRow {
             margin-top: 6px;
             display: grid;
-            grid-template-columns: minmax(0, 1fr);
+            grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: 6px;
             align-items: start;
         }
@@ -1417,6 +1417,7 @@ END MASTER DIRECTIVE
         .modalNotes {
             grid-column: 1;
             width: 100%;
+            justify-self: start;
         }
 
         .modalNotes textarea {
