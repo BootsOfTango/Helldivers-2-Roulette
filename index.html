@@ -1245,7 +1245,7 @@ END MASTER DIRECTIVE
         }
 
         .cardModalDialog {
-            width: min(560px, 92vw);
+            width: min(500px, 92vw);
             max-height: 84vh;
             overflow: auto;
             overflow-x: hidden;
@@ -1341,6 +1341,7 @@ END MASTER DIRECTIVE
             font-weight: 700;
             line-height: 1.15;
             overflow-wrap: break-word;
+            hyphens: auto;
             word-break: normal;
         }
 
@@ -1419,6 +1420,7 @@ END MASTER DIRECTIVE
         .modalMoNotesRow textarea {
             font-size: 10px;
             padding: 6px 8px;
+            overflow-wrap: anywhere;
         }
 
         .modalNotes {
@@ -1433,13 +1435,18 @@ END MASTER DIRECTIVE
             max-width: 100%;
         }
 
+        .modalActionButtons button {
+            min-width: 0;
+            white-space: normal;
+        }
+
         .cardModalDialog .hr {
             margin: 6px 0;
         }
 
         @media (max-width: 980px) {
             .cardModalDialog {
-                width: min(540px, 94vw);
+                width: min(500px, 94vw);
             }
 
             .modalPlanetWrap {
