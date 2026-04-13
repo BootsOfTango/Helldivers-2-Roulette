@@ -1367,9 +1367,14 @@ END MASTER DIRECTIVE
 
         .modalStatGrid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(82px, 104px));
+            grid-template-columns: repeat(3, minmax(0, 1fr));
             gap: 5px;
-            justify-content: start;
+            align-items: start;
+        }
+
+        .modalStatGrid > div {
+            width: 100%;
+            min-width: 0;
         }
 
         .modalStatGrid .label {
@@ -1380,6 +1385,7 @@ END MASTER DIRECTIVE
         }
 
         .modalStatGrid input {
+            width: 100%;
             min-height: 34px;
             padding: 6px 8px;
             font-size: 10px;
@@ -8428,7 +8434,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                       <div><div class="label">Deaths</div><input type="number" min="0" value="${Number(draft.stats?.deaths || 0)}" data-k="deaths" data-id="${card.id}" ${editingLocked ? "disabled" : ""}></div>
                       <div><div class="label">Stims</div><input type="number" min="0" value="${Number(draft.stats?.stims || 0)}" data-k="stims" data-id="${card.id}" ${editingLocked ? "disabled" : ""}></div>
                       <div><div class="label">Distance (km)</div><input type="number" min="0" step="0.1" value="${Number(draft.stats?.distanceKm || 0)}" data-k="distanceKm" data-id="${card.id}" ${editingLocked ? "disabled" : ""}></div>
-                      <div><div class="label">Strat uses</div><input type="number" min="0" value="${Number(draft.stats?.stratUses || 0)}" data-k="stratUses" data-id="${card.id}" ${editingLocked ? "disabled" : ""}></div>
+                      <div><div class="label">Strat Uses</div><input type="number" min="0" value="${Number(draft.stats?.stratUses || 0)}" data-k="stratUses" data-id="${card.id}" ${editingLocked ? "disabled" : ""}></div>
                     </div>
 
                     <div class="modalMoNotesRow">
