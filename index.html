@@ -1063,6 +1063,24 @@ END MASTER DIRECTIVE
             white-space: nowrap;
         }
 
+        .difficultyTopBadge.tier-cadet {
+            color: #60f9a8;
+            border-color: rgba(96,249,168,.55);
+            background: rgba(96,249,168,.14);
+        }
+
+        .difficultyTopBadge.tier-veteran {
+            color: #ffbf66;
+            border-color: rgba(255,191,102,.58);
+            background: rgba(255,191,102,.14);
+        }
+
+        .difficultyTopBadge.tier-helldive {
+            color: #ff6a75;
+            border-color: rgba(255,106,117,.58);
+            background: rgba(255,106,117,.14);
+        }
+
         .resultSummaryMetaGrid {
             margin-top: 6px;
             display: grid;
@@ -1150,33 +1168,6 @@ END MASTER DIRECTIVE
         .resultsDifficultyBtn[data-tier="helldive"].is-active {
             color: #ff6a75;
             border-color: rgba(255,106,117,.6);
-        }
-
-        .resultTierTag {
-            align-self: flex-end;
-            border: 1px solid var(--line2);
-            border-radius: 999px;
-            padding: 4px 10px;
-            font-size: 11px;
-            font-weight: 800;
-            letter-spacing: .35px;
-            text-transform: uppercase;
-            background: rgba(255,255,255,.04);
-        }
-
-        .resultTierTag.tier-cadet {
-            color: #60f9a8;
-            border-color: rgba(96,249,168,.5);
-        }
-
-        .resultTierTag.tier-veteran {
-            color: #ffbf66;
-            border-color: rgba(255,191,102,.52);
-        }
-
-        .resultTierTag.tier-helldive {
-            color: #ff6a75;
-            border-color: rgba(255,106,117,.52);
         }
 
         .factionSticker {
@@ -8240,7 +8231,6 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 const moBadge = card.majorOrderDone ? `<span class="badge good">MO DONE</span>` : `<span class="badge red">MO NO</span>`;
                 const placementTier = tierMap.get(card.id) || "";
                 const difficultyTier = resolveCardDifficultyTier(card);
-                const difficultyTierLabel = getDifficultyTierLabel(difficultyTier);
                 const factionClass = getFactionClass(card.faction);
                 const factionStickerData = getFactionStickerData(card.faction);
                 const el = document.createElement("div");
@@ -8259,7 +8249,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                                     <span class="cardSeedLine">${escapeHtml(getSeedDisplayName(card))}</span>
                                     <span class="cardPlayerLine">${escapeHtml(getPlayerName(card))}</span>
                                 </div>
-                                <span class="difficultyTopBadge">${escapeHtml(formatDifficultyTopLabel(card))}</span>
+                                <span class="difficultyTopBadge tier-${escapeHtml(difficultyTier)}">${escapeHtml(formatDifficultyTopLabel(card))}</span>
                             </div>
                             <div class="resultSummaryMetaGrid">
                                 <div class="resultMetaChip"><span class="k">Mode</span><span class="${getModeClass(card.mode)}">${escapeHtml(card.mode || "—")}</span></div>
@@ -8270,7 +8260,6 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                           </div>
                           <div class="resultSummaryBadges">
                             <span class="badge yellow">Grade ${Number(card.grade || 0)}</span>
-                            <span class="resultTierTag tier-${escapeHtml(difficultyTier)}">${escapeHtml(difficultyTierLabel)}</span>
                             ${moBadge}
                             <span class="factionSticker ${factionClass}">
                                 <span class="factionStickerIconWrap">${factionStickerData.image ? `<img class="factionStickerIcon" src="${escapeHtml(factionStickerData.image)}" alt="${escapeHtml(factionStickerData.label)}">` : `<span class="factionStickerIconFallback">?</span>`}</span>
