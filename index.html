@@ -864,8 +864,8 @@ END MASTER DIRECTIVE
 
         .spinTopLayout {
             display: grid;
-            grid-template-columns: minmax(0, 2fr) minmax(300px, 1fr);
-            gap: 14px;
+            grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
+            gap: 12px;
             align-items: start;
         }
 
@@ -877,8 +877,11 @@ END MASTER DIRECTIVE
 
         .slotGrid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 14px 18px;
+            grid-template-columns: repeat(2, max-content);
+            column-gap: 10px;
+            row-gap: 12px;
+            justify-content: start;
+            align-items: start;
             margin-top: 8px;
         }
 
@@ -886,17 +889,18 @@ END MASTER DIRECTIVE
             display: flex;
             flex-direction: column;
             gap: 8px;
+            min-width: 0;
         }
 
         .slotRow {
             display: grid;
-            grid-template-columns: 86px minmax(220px, 420px);
-            gap: 10px;
+            grid-template-columns: 86px minmax(220px, 360px);
+            gap: 8px;
             align-items: center;
         }
 
         .slotRow-weapon {
-            grid-template-columns: 86px minmax(110px, 420px);
+            grid-template-columns: 86px minmax(220px, 360px);
         }
 
         .slotRow-weapon .slotVisual {
@@ -918,6 +922,10 @@ END MASTER DIRECTIVE
 
         @media (max-width: 1200px) {
             .spinTopLayout {
+                grid-template-columns: 1fr;
+            }
+
+            .slotGrid {
                 grid-template-columns: 1fr;
             }
         }
