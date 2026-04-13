@@ -2967,8 +2967,8 @@ END MASTER DIRECTIVE
             position: sticky;
             top: 82px;
             align-self: start;
-            max-height: calc(100vh - 96px);
-            overflow: auto;
+            max-height: none;
+            overflow: visible;
         }
 
         @media (min-width: 960px) {
@@ -5818,6 +5818,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             }
 
             const normalizedCard = getNormalizedCardView(card) || card;
+            const placementTier = tierForPlace(place);
 
             const makeItemCard = (label, value, kind) => {
                 const visual = getItemVisual(value, kind);
@@ -5843,7 +5844,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 </div>
 
                 <div style="margin-top:10px;">
-                    ${buildRadarSVG(normalizedCard, radarMaxes)}
+                    ${buildRadarSVG(normalizedCard, radarMaxes, { placementTier })}
                 </div>
 
                 <div style="margin-top:10px;" class="label">Loadout</div>
@@ -7271,7 +7272,14 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         }
 
 
-        function getTierRadarColor(card) {
+        function getTierRadarColor(card, opts = {}) {
+            const placementTier = String(opts?.placementTier || "").trim().toLowerCase();
+            if (placementTier === "rainbow") return { fill: "rgba(255,255,255,.15)", stroke: "url(#rainbowStroke)" };
+            if (placementTier === "gold") return { fill: "rgba(255,212,0,.38)", stroke: "#ffd400" };
+            if (placementTier === "silver") return { fill: "rgba(200,210,220,.38)", stroke: "#c8d2dc" };
+            if (placementTier === "bronze") return { fill: "rgba(230,170,90,.38)", stroke: "#e6aa5a" };
+            if (placementTier === "gray" || placementTier === "darkbronze") return { fill: "rgba(139,149,168,.34)", stroke: "#8b95a8" };
+
             const tier = (card && card.id && typeof buildTierMap === "function")
                 ? (buildTierMap().get(card.id) || card.tier || "")
                 : ((card && card.tier) || "");
@@ -7281,7 +7289,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             return { fill: "rgba(255,212,0,.18)", stroke: "#ffd400" };
         }
 
-        function buildRadarSVG(card, maxes) {
+        function buildRadarSVG(card, maxes, opts = {}) {
             const s = normalizeMissionStats(card?.stats, card);
             const combo = getEnduranceLoad(s);
 
@@ -7346,7 +7354,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 return `<polygon points="${pts}" />`;
             };
 
-            const col = getTierRadarColor(card);
+            const col = getTierRadarColor(card, opts);
 
             return `
                   <div class="radarWrap">
