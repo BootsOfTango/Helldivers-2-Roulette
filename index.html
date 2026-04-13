@@ -1241,9 +1241,10 @@ END MASTER DIRECTIVE
         }
 
         .cardModalDialog {
-            width: min(740px, 92vw);
+            width: min(640px, 92vw);
             max-height: 84vh;
             overflow: auto;
+            overflow-x: hidden;
             border: 1px solid var(--line2);
             border-radius: 16px;
             background: #090b10;
@@ -1330,10 +1331,6 @@ END MASTER DIRECTIVE
             line-height: 1.15;
             overflow-wrap: break-word;
             word-break: normal;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
         }
 
         .modalPlanetWrap {
@@ -1391,7 +1388,7 @@ END MASTER DIRECTIVE
         .modalMoNotesRow {
             margin-top: 6px;
             display: grid;
-            grid-template-columns: minmax(280px, 460px) minmax(0, 1fr);
+            grid-template-columns: minmax(0, 1fr);
             gap: 6px;
             align-items: start;
         }
@@ -1424,7 +1421,7 @@ END MASTER DIRECTIVE
 
         @media (max-width: 980px) {
             .cardModalDialog {
-                width: min(680px, 94vw);
+                width: min(620px, 94vw);
             }
 
             .modalPlanetWrap {
