@@ -1481,8 +1481,8 @@ END MASTER DIRECTIVE
         .modalMoNotesRow {
             margin-top: 6px;
             display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 6px;
+            grid-template-columns: 1fr;
+            gap: 8px;
             align-items: start;
         }
 
@@ -1508,6 +1508,117 @@ END MASTER DIRECTIVE
             min-height: 64px;
             width: 100%;
             max-width: 100%;
+        }
+
+        .modalMajorOrderBlock {
+            border: 1px solid var(--line2);
+            border-radius: 10px;
+            padding: 8px;
+            background: rgba(255,255,255,.02);
+        }
+
+        .modalMajorOrderQuestion {
+            font-size: 11px;
+            color: var(--muted);
+            margin-bottom: 6px;
+        }
+
+        .modalMajorOrderButtons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .modalMajorOrderBtn {
+            flex: 1 1 140px;
+            border-radius: 10px;
+            border: 1px solid var(--line2);
+            background: rgba(255,255,255,.02);
+            color: #d7e4ff;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: .2px;
+            padding: 8px 10px;
+            cursor: pointer;
+            transition: border-color .14s ease, background .14s ease, color .14s ease;
+        }
+
+        .modalMajorOrderBtn[data-choice="true"].active {
+            border-color: #33d69f;
+            background: rgba(51,214,159,.16);
+            color: #59f4c0;
+        }
+
+        .modalMajorOrderBtn[data-choice="false"].active {
+            border-color: #ff5f5f;
+            background: rgba(255,95,95,.14);
+            color: #ff8080;
+        }
+
+        .modalMajorOrderBtn:disabled {
+            opacity: .55;
+            cursor: not-allowed;
+        }
+
+        .modalMajorOrderHint {
+            margin-top: 4px;
+            font-size: 10px;
+            color: #ffcf68;
+        }
+
+        .modalCommentThread {
+            display: grid;
+            gap: 6px;
+            margin-top: 6px;
+        }
+
+        .modalCommentComposer {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 6px;
+            align-items: start;
+        }
+
+        .modalCommentComposer textarea {
+            min-height: 54px;
+            width: 100%;
+            font-size: 10px;
+        }
+
+        .modalCommentComposer button {
+            align-self: stretch;
+            min-width: 108px;
+        }
+
+        .modalCommentList {
+            display: grid;
+            gap: 6px;
+        }
+
+        .modalCommentItem {
+            border: 1px solid var(--line2);
+            border-radius: 10px;
+            background: rgba(255,255,255,.02);
+            padding: 6px 8px;
+        }
+
+        .modalCommentItem summary {
+            cursor: pointer;
+            list-style: none;
+            font-size: 10px;
+            color: var(--muted);
+            font-weight: 700;
+        }
+
+        .modalCommentItem summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .modalCommentBody {
+            margin-top: 6px;
+            font-size: 11px;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
         }
 
         .modalActionButtons button {
@@ -1626,46 +1737,6 @@ END MASTER DIRECTIVE
             display: inline-flex;
             align-items: center;
             gap: 8px;
-        }
-
-        .resultCardModalMoStatus {
-            appearance: none;
-            border: 0;
-            background: transparent;
-            padding: 0;
-            margin: 0;
-            font-size: 11px;
-            line-height: 1;
-            font-weight: 800;
-            letter-spacing: .3px;
-            text-transform: uppercase;
-            cursor: pointer;
-            transition: opacity .15s ease, filter .15s ease;
-        }
-
-        .resultCardModalMoStatus:hover {
-            opacity: .95;
-            filter: brightness(1.1);
-        }
-
-        .resultCardModalMoStatus:focus-visible {
-            outline: 1px solid var(--line);
-            outline-offset: 4px;
-            border-radius: 6px;
-        }
-
-        .resultCardModalMoStatus[disabled] {
-            cursor: not-allowed;
-            opacity: .6;
-            filter: none;
-        }
-
-        .resultCardModalMoStatus.moSuccess {
-            color: #33d69f;
-        }
-
-        .resultCardModalMoStatus.moFail {
-            color: #ff5f5f;
         }
 
         @media (max-width: 760px) {
@@ -4011,7 +4082,6 @@ END MASTER DIRECTIVE
                 <div class="miniRow" style="justify-content:space-between; margin-bottom:10px;">
                     <div class="resultCardModalHeaderMeta">
                         <div class="label">Card details</div>
-                        <button type="button" id="resultCardModalMoStatus" class="resultCardModalMoStatus" aria-live="polite"></button>
                     </div>
                     <button class="btnGhost" id="btnCloseResultModal">CLOSE</button>
                 </div>
@@ -6240,7 +6310,24 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             if (!card.stats || typeof card.stats !== "object") card.stats = {};
 
             card.majorOrderDone = !!card.majorOrderDone;
-            card.notes = String(card.notes || "");
+            card.originalNote = String(card.originalNote || card.notes || "");
+            card.notes = card.originalNote;
+            if (!Array.isArray(card.commentNotes)) {
+                card.commentNotes = [];
+            } else {
+                card.commentNotes = card.commentNotes
+                    .map((comment) => {
+                        if (!comment || typeof comment !== "object") return null;
+                        const text = String(comment.text || "").trim();
+                        if (!text) return null;
+                        return {
+                            id: String(comment.id || uid()),
+                            text,
+                            createdAt: String(comment.createdAt || nowISO())
+                        };
+                    })
+                    .filter(Boolean);
+            }
             const hasStatsLocked = Object.prototype.hasOwnProperty.call(card, "statsLocked");
             const hasStatsLockedAt = Object.prototype.hasOwnProperty.call(card, "statsLockedAt");
             card.statsLocked = hasStatsLocked ? !!card.statsLocked : false;
@@ -8569,10 +8656,11 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             }
             const existing = state.ui.resultCardDrafts[cardId];
             if (existing && typeof existing === "object") return existing;
+            const originalNote = String(card.originalNote || card.notes || "");
             const draft = {
                 stats: normalizeMissionStats(card.stats, card),
-                majorOrderDone: !!card.majorOrderDone,
-                notes: String(card.notes || "")
+                majorOrderDone: card.statsLocked ? !!card.majorOrderDone : null,
+                originalNote
             };
             state.ui.resultCardDrafts[cardId] = draft;
             return draft;
@@ -8582,13 +8670,11 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const card = getCardById(cardId);
             const modal = $("#resultCardModal");
             const body = $("#resultCardModalBody");
-            const headerMoStatus = $("#resultCardModalMoStatus");
             if (!card || !modal || !body) return;
             const draft = getMissionStatsDraft(card.id);
             if (!draft) return;
             const editingLocked = !!card.statsLocked;
-
-            if (headerMoStatus) updateResultCardModalMoStatus(headerMoStatus, card.id, draft.majorOrderDone, editingLocked);
+            const comments = Array.isArray(card.commentNotes) ? card.commentNotes : [];
 
             const planetWeatherText = card.planet ? getPlanetWeatherText(card.planet) : "None";
             const planetWeatherTags = splitWeatherTags(planetWeatherText);
@@ -8674,9 +8760,40 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                     </div>
 
                     <div class="modalMoNotesRow">
+                      <div class="modalMajorOrderBlock">
+                        <div class="label">Major order</div>
+                        <div class="modalMajorOrderQuestion">Did your team complete the Major Order in this run?</div>
+                        <div class="modalMajorOrderButtons" data-role="moButtons" data-id="${card.id}">
+                          <button type="button" class="modalMajorOrderBtn ${draft.majorOrderDone === true ? "active" : ""}" data-act="chooseMoStatus" data-id="${card.id}" data-choice="true" ${editingLocked ? "disabled" : ""}>Major Order Success?</button>
+                          <button type="button" class="modalMajorOrderBtn ${draft.majorOrderDone === false ? "active" : ""}" data-act="chooseMoStatus" data-id="${card.id}" data-choice="false" ${editingLocked ? "disabled" : ""}>Major Order Fail?</button>
+                        </div>
+                        ${draft.majorOrderDone == null && !editingLocked ? `<div class="modalMajorOrderHint">Pick success or fail before saving.</div>` : ``}
+                      </div>
+
                       <div class="modalNotes">
-                        <div class="label">Notes</div>
-                        <textarea data-k="notes" data-id="${card.id}" placeholder="Write anything: what sucked, what worked, funny moments..." ${editingLocked ? "disabled" : ""}>${escapeHtml(draft.notes || "")}</textarea>
+                        <div class="label">Original run note (locked after save)</div>
+                        <textarea data-k="originalNote" data-id="${card.id}" placeholder="Write your first impression of this run. This becomes permanent after Save." ${editingLocked ? "disabled" : ""}>${escapeHtml(draft.originalNote || "")}</textarea>
+                      </div>
+
+                      <div class="modalNotes">
+                        <div class="label">Additional comments (editable thread)</div>
+                        <div class="modalCommentThread">
+                          <div class="modalCommentComposer">
+                            <textarea data-k="newCommentText" data-id="${card.id}" placeholder="Add a follow-up comment (mistakes, clarifications, questions, etc)."></textarea>
+                            <button type="button" class="btnGhost" data-act="addCardComment" data-id="${card.id}">Add Comment</button>
+                          </div>
+                          <div class="modalCommentList">
+                            ${comments.length
+                                ? comments.map((comment, idx) => `
+                                    <details class="modalCommentItem">
+                                      <summary>Comment ${idx + 1} • ${escapeHtml(new Date(comment.createdAt || nowISO()).toLocaleString())}</summary>
+                                      <div class="modalCommentBody">${escapeHtml(String(comment.text || ""))}</div>
+                                    </details>
+                                  `).join("")
+                                : `<div class="tiny">No additional comments yet.</div>`
+                            }
+                          </div>
+                        </div>
                       </div>
                     </div>
 
@@ -8701,19 +8818,6 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             state.ui.activeResultCardId = card.id;
             state.ui.modalOpen = true;
             modal.hidden = false;
-        }
-
-        function updateResultCardModalMoStatus(el, cardId, majorOrderDone, editingLocked) {
-            if (!el) return;
-            const moStatusClass = majorOrderDone ? "moSuccess" : "moFail";
-            el.className = `resultCardModalMoStatus ${moStatusClass}`;
-            el.textContent = majorOrderDone ? "MO Success" : "MO Fail";
-            el.value = majorOrderDone ? "true" : "false";
-            el.setAttribute("data-id", cardId);
-            el.setAttribute("data-k", "majorOrderDone");
-            el.setAttribute("aria-pressed", majorOrderDone ? "true" : "false");
-            el.setAttribute("title", editingLocked ? "Card is finalized; MO status is locked." : "Click to toggle Major Order status");
-            el.disabled = !!editingLocked;
         }
 
         function closeResultCardModal() {
@@ -9019,7 +9123,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         }
 
         function getDiscordNotesText(card, maxLen = Infinity) {
-            const notes = String(card?.notes || "").trim();
+            const notes = String(card?.originalNote || card?.notes || "").trim();
             if (!notes) return "";
             if (!Number.isFinite(maxLen) || maxLen <= 0) return notes;
             return notes.length > maxLen ? `${notes.slice(0, Math.max(0, maxLen - 3))}...` : notes;
@@ -9069,7 +9173,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const createdAt = card.createdAt ? new Date(card.createdAt).toLocaleString() : "—";
             const tier = getCardTierClass(card);
             const tierVisual = getDiscordTierVisual(tier);
-            const notes = String(card.notes || "").trim();
+            const notes = String(card.originalNote || card.notes || "").trim();
+            const commentCount = Array.isArray(card.commentNotes) ? card.commentNotes.length : 0;
 
             const embed = {
                 color: tierVisual.embedColor,
@@ -9121,8 +9226,14 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             if (notes) {
                 embed.fields.push({
-                    name: "📝 Notes",
+                    name: "📝 Original note",
                     value: notes.length > 1024 ? `${notes.slice(0, 1021)}...` : notes
+                });
+            }
+            if (commentCount > 0) {
+                embed.fields.push({
+                    name: "💬 Additional comments",
+                    value: `${commentCount} comment${commentCount === 1 ? "" : "s"}`
                 });
             }
 
@@ -9291,26 +9402,12 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             if (key === "majorOrderDone") {
                 draft.majorOrderDone = (el.value === "true");
-            } else if (key === "notes") {
-                draft.notes = el.value;
+            } else if (key === "originalNote") {
+                draft.originalNote = el.value;
             } else if (STAT_KEYS.includes(key)) {
                 draft.stats[key] = Number(el.value || 0);
             }
         }
-
-        function toggleResultCardModalMoStatus() {
-            const cardId = state.ui.activeResultCardId;
-            if (!cardId) return;
-            const card = getCardById(cardId);
-            if (!card || !canEditCardStats(card, "toggleResultCardModalMoStatus")) return;
-            const draft = getMissionStatsDraft(cardId);
-            if (!draft) return;
-            draft.majorOrderDone = !draft.majorOrderDone;
-            const headerMoStatus = $("#resultCardModalMoStatus");
-            updateResultCardModalMoStatus(headerMoStatus, cardId, draft.majorOrderDone, !!card.statsLocked);
-            onCardFieldChange({ target: headerMoStatus });
-        }
-
 
         function syncCardFromResultInputs(cardId, rootEl) {
             const card = getCardById(cardId);
@@ -9328,8 +9425,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 if (!key) return;
                 if (key === "majorOrderDone") {
                     draft.majorOrderDone = (String(el.value) === "true");
-                } else if (key === "notes") {
-                    draft.notes = el.value;
+                } else if (key === "originalNote") {
+                    draft.originalNote = el.value;
                 } else if (STAT_KEYS.includes(key)) {
                     if (!draft.stats || typeof draft.stats !== "object") draft.stats = {};
                     draft.stats[key] = Number(el.value || 0);
@@ -9359,9 +9456,58 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 closeResultCardModal();
                 return;
             }
+            if (act === "chooseMoStatus") {
+                if (!canEditCardStats(card, "onCardAction:chooseMoStatus")) return;
+                const draft = getMissionStatsDraft(id);
+                if (!draft) return;
+                const choice = actionBtn.getAttribute("data-choice");
+                if (choice !== "true" && choice !== "false") return;
+                draft.majorOrderDone = (choice === "true");
+                openResultCardModal(id);
+                return;
+            }
+            if (act === "addCardComment") {
+                const source = sourceRoot.querySelector(`[data-id="${id}"][data-k="newCommentText"]`);
+                if (!source) return;
+                const text = String(source.value || "").trim();
+                if (!text) {
+                    alert("Type a comment before adding it.");
+                    source.focus();
+                    return;
+                }
+                if (!Array.isArray(card.commentNotes)) card.commentNotes = [];
+                card.commentNotes.unshift({
+                    id: uid(),
+                    text,
+                    createdAt: nowISO()
+                });
+                source.value = "";
+                saveState();
+                openResultCardModal(id);
+                return;
+            }
             if (act === "saveCard") {
                 if (!canEditCardStats(card, "onCardAction:saveCard")) return;
                 syncCardFromResultInputs(id, sourceRoot);
+                const draft = getMissionStatsDraft(id);
+                if (!draft) return;
+                const requiredKeys = ["kills", "accuracy", "deaths", "stims", "distanceKm", "stratUses"];
+                const hasEmptyStatInput = requiredKeys.some((k) => {
+                    const el = sourceRoot.querySelector(`[data-id="${id}"][data-k="${k}"]`);
+                    return !el || !String(el.value || "").trim();
+                });
+                if (hasEmptyStatInput) {
+                    alert("Please complete all mission stat entries before saving.");
+                    return;
+                }
+                if (draft.majorOrderDone !== true && draft.majorOrderDone !== false) {
+                    alert("Please choose Major Order Success or Major Order Fail before saving.");
+                    return;
+                }
+                if (!String(draft.originalNote || "").trim()) {
+                    alert("Please add your original run note before saving.");
+                    return;
+                }
                 openFinalizeStatsModal();
                 return;
             }
@@ -9378,7 +9524,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             card.stats = normalizeMissionStats(draft.stats, card);
             card.majorOrderDone = !!draft.majorOrderDone;
-            card.notes = String(draft.notes || "");
+            card.originalNote = String(draft.originalNote || "");
+            card.notes = card.originalNote;
             card.statsLocked = true;
             card.statsLockedAt = nowISO();
             card.lockedStatsSnapshot = normalizeMissionStats(card.stats, card);
@@ -11715,7 +11862,9 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 },
 
                 majorOrderDone: false,
+                originalNote: "",
                 notes: "",
+                commentNotes: [],
                 statsLocked: false,
                 statsLockedAt: null,
                 lockedStatsSnapshot: null,
@@ -11854,7 +12003,6 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             $("#btnConfirmPlayer")?.addEventListener("click", () => doConfirmPlayerName());
 
             $("#btnCloseResultModal").addEventListener("click", closeResultCardModal);
-            $("#resultCardModalMoStatus")?.addEventListener("click", toggleResultCardModalMoStatus);
             $("#resultCardModal").addEventListener("click", (e) => {
                 if (e.target && e.target.id === "resultCardModal") closeResultCardModal();
             });
