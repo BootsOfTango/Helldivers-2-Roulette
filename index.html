@@ -742,9 +742,11 @@ END MASTER DIRECTIVE
         .slotLabel {
             min-width: 0;
             white-space: nowrap;
-            text-overflow: ellipsis;
+            text-overflow: clip;
             overflow: hidden;
             font-weight: 700;
+            font-size: 14px;
+            line-height: 1.2;
         }
 
         .slot.skeleton .slotVisual,
@@ -7153,7 +7155,10 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const text = name || "—";
 
             el.classList.toggle("skeleton", !!options.skeleton);
-            if (label) label.textContent = text;
+            if (label) {
+                label.textContent = text;
+                fitSlotLabelText(label);
+            }
 
             if (!visual) return;
             visual.innerHTML = "";
@@ -7174,8 +7179,32 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             visual.appendChild(img);
         }
 
+        const SLOT_LABEL_BASE_FONT_PX = 14;
+        const SLOT_LABEL_MIN_FONT_PX = 10;
+        const SLOT_LABEL_STEP_FONT_PX = 0.5;
+
+        function fitSlotLabelText(labelEl) {
+            if (!labelEl) return;
+            const text = String(labelEl.textContent || "").trim();
+
+            labelEl.style.fontSize = `${SLOT_LABEL_BASE_FONT_PX}px`;
+            if (!text || text === "—" || text === "-") return;
+            if (labelEl.closest(".slot")?.classList.contains("slot-spinning")) return;
+
+            let currentSize = SLOT_LABEL_BASE_FONT_PX;
+            while (labelEl.scrollWidth > labelEl.clientWidth + 1 && currentSize > SLOT_LABEL_MIN_FONT_PX) {
+                currentSize = Math.max(SLOT_LABEL_MIN_FONT_PX, currentSize - SLOT_LABEL_STEP_FONT_PX);
+                labelEl.style.fontSize = `${currentSize}px`;
+            }
+        }
+
+        function fitAllSpinSlotLabels() {
+            document.querySelectorAll("#tab-spin .slotLabel").forEach(label => fitSlotLabelText(label));
+        }
+
         if (typeof window !== "undefined") {
             window.addEventListener("beforeprint", () => prepareItemVisualsForPrint());
+            window.addEventListener("resize", fitAllSpinSlotLabels);
             if (window.matchMedia) {
                 const printMedia = window.matchMedia("print");
                 const onPrintMediaChange = (event) => {
@@ -7230,6 +7259,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             setSlotVisualState(el, finalText ?? "—", slotCategory);
             el.classList.remove("slot-spinning");
+            fitSlotLabelText(el.querySelector(".slotLabel"));
             el.style.transform = "scale(1.15)";
             el.style.transition = "transform 0.15s ease";
             playTone("final");
