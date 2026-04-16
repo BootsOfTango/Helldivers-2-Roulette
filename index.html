@@ -3179,6 +3179,40 @@ END MASTER DIRECTIVE
             width: min(100%, 210px);
         }
 
+        .rankDetailHeader {
+            display: grid;
+            grid-template-columns: 1fr auto auto;
+            gap: 8px;
+            align-items: start;
+        }
+
+        .rankDetailFactionIconWrap {
+            width: 44px;
+            height: 44px;
+            border: 1px solid var(--line2);
+            border-radius: 12px;
+            background: rgba(0,0,0,.22);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 1px;
+        }
+
+        .rankDetailFactionIcon {
+            width: 80%;
+            height: 80%;
+            object-fit: contain;
+        }
+
+        .rankDetailFactionFallback {
+            font-size: 10px;
+            line-height: 1;
+            letter-spacing: .35px;
+            text-transform: uppercase;
+            color: var(--muted);
+            font-weight: 800;
+        }
+
         .rankDetailLoadout {
             display: grid;
             grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -6008,6 +6042,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const placementTier = tierForPlace(place);
             const cardDifficultyTier = resolveCardDifficultyTier(normalizedCard);
             const radarPlacementTier = isAllTierScope ? placementTier : cardDifficultyTier;
+            const factionStickerData = getFactionStickerData(normalizedCard.faction);
 
             const makeItemCard = (label, value, kind) => {
                 const visual = getItemVisual(value, kind);
@@ -6024,10 +6059,15 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const strats = (Array.isArray(normalizedCard.stratagems) ? normalizedCard.stratagems : []).map(s => makeItemCard("Stratagem", s, "stratagem")).join("");
 
             panel.innerHTML = `
-                <div style="display:flex; justify-content:space-between; gap:8px; align-items:flex-start;">
+                <div class="rankDetailHeader">
                     <div>
                         <div style="font-weight:900;">#${place} • ${escapeHtml(formatSeedWithPlayer(normalizedCard))}</div>
                         <div class="tiny muted">${escapeHtml(normalizedCard.mode)} • ${escapeHtml(normalizedCard.faction)} • ${escapeHtml(getPlayerName(normalizedCard))} • ${escapeHtml(formatDifficultyLabel(normalizedCard))}</div>
+                    </div>
+                    <div class="rankDetailFactionIconWrap" aria-label="${escapeHtml(factionStickerData.label)}">
+                        ${factionStickerData.image
+                            ? `<img class="rankDetailFactionIcon" src="${escapeHtml(factionStickerData.image)}" alt="${escapeHtml(factionStickerData.label)}">`
+                            : `<span class="rankDetailFactionFallback">${escapeHtml((factionStickerData.label || "?").slice(0, 3))}</span>`}
                     </div>
                     <div class="badge yellow">Grade ${Number(normalizedCard.grade || 0)}</div>
                 </div>
