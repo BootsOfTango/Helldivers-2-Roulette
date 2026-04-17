@@ -7876,6 +7876,23 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             return { winner, pctInt: Math.max(0, Math.round(pct)) };
         }
 
+        function getCompareOverlayRadarColor(slotKey, fallbackCard) {
+            const fallback = getTierRadarColor(fallbackCard);
+            const radarPoly = document.querySelector(`[data-cmp-card="${slotKey}"] .radarValue`);
+            if (!radarPoly || typeof window.getComputedStyle !== "function") return fallback;
+
+            const computed = window.getComputedStyle(radarPoly);
+            const stroke = String(computed.stroke || "").trim();
+            const fill = String(computed.fill || "").trim();
+            const hasStroke = stroke && stroke !== "none" && stroke !== "transparent";
+            const hasFill = fill && fill !== "none" && fill !== "transparent";
+
+            return {
+                stroke: hasStroke ? stroke : fallback.stroke,
+                fill: hasFill ? fill : fallback.fill
+            };
+        }
+
         function buildOverlayRadar() {
             const overlay = document.querySelector("#cmpRadarOverlay");
             const insight = document.querySelector("#cmpInsight");
@@ -7935,8 +7952,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const polyA = ptsA.map(fmt).join(" ");
             const polyB = ptsB.map(fmt).join(" ");
 
-            const colA = getTierRadarColor(cardA);
-            const colB = getTierRadarColor(cardB);
+            const colA = getCompareOverlayRadarColor("A", cardA);
+            const colB = getCompareOverlayRadarColor("B", cardB);
             const labelRadius = rOuter + 24;
             const labelNudge = {
                 ENDURANCE: { x: 4, y: 0 },
