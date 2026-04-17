@@ -1739,6 +1739,30 @@ END MASTER DIRECTIVE
             gap: 8px;
         }
 
+        .resultCardModalMoTag {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 999px;
+            border: 1px solid transparent;
+            padding: 2px 9px;
+            font-size: 12px;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .resultCardModalMoTag.success {
+            color: #33d69f;
+            border-color: rgba(51, 214, 159, .45);
+            background: rgba(51, 214, 159, .12);
+        }
+
+        .resultCardModalMoTag.fail {
+            color: #ff5f5f;
+            border-color: rgba(255, 95, 95, .45);
+            background: rgba(255, 95, 95, .12);
+        }
+
         @media (max-width: 760px) {
             .resultDetail .resultSummaryHeading {
                 grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -4116,6 +4140,7 @@ END MASTER DIRECTIVE
                 <div class="miniRow" style="justify-content:space-between; margin-bottom:10px;">
                     <div class="resultCardModalHeaderMeta">
                         <div class="label">Card details</div>
+                        <div id="resultCardModalMoTag" class="resultCardModalMoTag" hidden></div>
                     </div>
                     <button class="btnGhost" id="btnCloseResultModal">CLOSE</button>
                 </div>
@@ -8715,6 +8740,20 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             if (!draft) return;
             const editingLocked = !!card.statsLocked;
             const comments = Array.isArray(card.commentNotes) ? card.commentNotes : [];
+            const modalMoTag = $("#resultCardModalMoTag");
+
+            if (modalMoTag) {
+                const showMoTag = editingLocked && draft.majorOrderDone != null;
+                modalMoTag.hidden = !showMoTag;
+                if (showMoTag) {
+                    const moSuccess = draft.majorOrderDone === true;
+                    modalMoTag.textContent = moSuccess ? "MO✅" : "MO❌";
+                    modalMoTag.className = `resultCardModalMoTag ${moSuccess ? "success" : "fail"}`;
+                } else {
+                    modalMoTag.textContent = "";
+                    modalMoTag.className = "resultCardModalMoTag";
+                }
+            }
 
             const planetWeatherText = card.planet ? getPlanetWeatherText(card.planet) : "None";
             const planetWeatherTags = splitWeatherTags(planetWeatherText);
@@ -8800,15 +8839,17 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                     </div>
 
                     <div class="modalMoNotesRow">
-                      <div class="modalMajorOrderBlock">
-                        <div class="label">Major order</div>
-                        <div class="modalMajorOrderQuestion">Did your team complete the Major Order in this run?</div>
-                        <div class="modalMajorOrderButtons" data-role="moButtons" data-id="${card.id}">
-                          <button type="button" class="modalMajorOrderBtn ${draft.majorOrderDone === true ? "active" : ""}" data-act="chooseMoStatus" data-id="${card.id}" data-choice="true" ${editingLocked ? "disabled" : ""}>Major Order Success?</button>
-                          <button type="button" class="modalMajorOrderBtn ${draft.majorOrderDone === false ? "active" : ""}" data-act="chooseMoStatus" data-id="${card.id}" data-choice="false" ${editingLocked ? "disabled" : ""}>Major Order Fail?</button>
+                      ${!editingLocked ? `
+                        <div class="modalMajorOrderBlock">
+                          <div class="label">Major order</div>
+                          <div class="modalMajorOrderQuestion">Did your team complete the Major Order in this run?</div>
+                          <div class="modalMajorOrderButtons" data-role="moButtons" data-id="${card.id}">
+                            <button type="button" class="modalMajorOrderBtn ${draft.majorOrderDone === true ? "active" : ""}" data-act="chooseMoStatus" data-id="${card.id}" data-choice="true">Major Order Success?</button>
+                            <button type="button" class="modalMajorOrderBtn ${draft.majorOrderDone === false ? "active" : ""}" data-act="chooseMoStatus" data-id="${card.id}" data-choice="false">Major Order Fail?</button>
+                          </div>
+                          ${draft.majorOrderDone == null ? `<div class="modalMajorOrderHint">Pick success or fail before saving.</div>` : ``}
                         </div>
-                        ${draft.majorOrderDone == null && !editingLocked ? `<div class="modalMajorOrderHint">Pick success or fail before saving.</div>` : ``}
-                      </div>
+                      ` : ``}
 
                       <div class="modalNotes">
                         <div class="label">Original run note (locked after save)</div>
