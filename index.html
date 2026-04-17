@@ -7876,6 +7876,52 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             return { winner, pctInt: Math.max(0, Math.round(pct)) };
         }
 
+        function getCompareOverlayRadarColor(slotKey, fallbackCard) {
+            const cardNode = document.querySelector(`[data-cmp-card="${slotKey}"]`);
+            const className = String(cardNode?.className || "");
+            const placementTier = className.includes("tier-rainbow") || className.includes("tier-helldive")
+                ? "rainbow"
+                : className.includes("tier-gold")
+                    ? "gold"
+                    : className.includes("tier-silver")
+                        ? "silver"
+                        : className.includes("tier-bronze")
+                            ? "bronze"
+                            : (className.includes("tier-gray") || className.includes("tier-darkbronze"))
+                                ? "gray"
+                                : "";
+
+            const fallback = placementTier
+                ? getTierRadarColor(fallbackCard, { placementTier })
+                : getTierRadarColor(fallbackCard);
+            const radarPoly = cardNode?.querySelector(".radarValue");
+            if (!radarPoly || typeof window.getComputedStyle !== "function") return fallback;
+
+            const isUsablePaint = (value) => {
+                const v = String(value || "").trim();
+                const low = v.toLowerCase();
+                if (!v) return false;
+                if (["none", "transparent", "inherit", "initial", "unset", "currentcolor"].includes(low)) return false;
+                return true;
+            };
+
+            const attrStroke = radarPoly.getAttribute("stroke");
+            const attrFill = radarPoly.getAttribute("fill");
+            const styleStroke = radarPoly.style?.stroke;
+            const styleFill = radarPoly.style?.fill;
+            const computed = window.getComputedStyle(radarPoly);
+            const computedStroke = computed.stroke;
+            const computedFill = computed.fill;
+
+            const strokeCandidate = [attrStroke, styleStroke, computedStroke].find(isUsablePaint);
+            const fillCandidate = [attrFill, styleFill, computedFill].find(isUsablePaint);
+
+            return {
+                stroke: strokeCandidate || fallback.stroke,
+                fill: fillCandidate || fallback.fill
+            };
+        }
+
         function buildOverlayRadar() {
             const overlay = document.querySelector("#cmpRadarOverlay");
             const insight = document.querySelector("#cmpInsight");
@@ -7935,8 +7981,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const polyA = ptsA.map(fmt).join(" ");
             const polyB = ptsB.map(fmt).join(" ");
 
-            const colA = getTierRadarColor(cardA);
-            const colB = getTierRadarColor(cardB);
+            const colA = getCompareOverlayRadarColor("A", cardA);
+            const colB = getCompareOverlayRadarColor("B", cardB);
             const labelRadius = rOuter + 24;
             const labelNudge = {
                 ENDURANCE: { x: 4, y: 0 },
