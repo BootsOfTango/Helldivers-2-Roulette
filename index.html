@@ -7816,6 +7816,26 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             bindCompareCardHover(wrapA.querySelector('[data-cmp-card="A"]'), cardA);
             bindCompareCardHover(wrapB.querySelector('[data-cmp-card="B"]'), cardB);
 
+            const getSlotPalette = (slotKey, fallbackCard) => {
+                const slotCard = document.querySelector(`[data-cmp-card="${slotKey}"]`);
+                const fallback = getTierRadarColor(fallbackCard);
+                if (!slotCard || typeof window.getComputedStyle !== "function") return fallback;
+                const styles = window.getComputedStyle(slotCard);
+                const stroke = String(styles.getPropertyValue("--radarStroke") || "").trim();
+                const fill = String(styles.getPropertyValue("--radarFill") || "").trim();
+                return {
+                    stroke: stroke || fallback.stroke,
+                    fill: fill || fallback.fill
+                };
+            };
+
+            if (window.__cmpCtx) {
+                window.__cmpCtx.slotColors = {
+                    A: getSlotPalette("A", cardA),
+                    B: getSlotPalette("B", cardB)
+                };
+            }
+
             if (overlay) {
                 overlay.innerHTML = `<div class="tiny muted">Click <strong>STACK RADARS</strong> to overlap both pentagons, then hover each stat wedge to see who wins.<br>Stacked radar uses raw stat values per axis (no Grade/MO size scaling) so winners and % are accurate for any pair.</div>`;
             }
@@ -7877,6 +7897,9 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         }
 
         function getCompareOverlayRadarColor(slotKey, fallbackCard) {
+            const slotColors = window.__cmpCtx?.slotColors?.[slotKey];
+            if (slotColors?.stroke && slotColors?.fill) return slotColors;
+
             const fallback = getTierRadarColor(fallbackCard);
             const radarPoly = document.querySelector(`[data-cmp-card="${slotKey}"] .radarValue`);
             if (!radarPoly || typeof window.getComputedStyle !== "function") return fallback;
