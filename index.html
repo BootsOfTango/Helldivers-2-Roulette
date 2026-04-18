@@ -1210,12 +1210,36 @@ END MASTER DIRECTIVE
             border-color: rgba(255,106,117,.6);
         }
 
-        .searchCompactRow {
-            margin-top: 4px;
+        .compactFieldBlock {
             display: grid;
-            grid-template-columns: minmax(150px, 220px) minmax(220px, 1fr) auto minmax(170px, 220px);
+            gap: 4px;
+            align-content: start;
+        }
+
+        .compactFieldBlock > .label {
+            margin-bottom: 0;
+        }
+
+        .compactSearchRow,
+        .searchCompactRow {
+            margin-top: 0;
+            display: grid;
+            grid-template-columns: var(--compact-search-columns, minmax(150px, 220px) minmax(220px, 1fr) auto minmax(170px, 220px));
             gap: 8px;
             align-items: center;
+        }
+
+        .compactSearchRow > * {
+            min-width: 0;
+        }
+
+        .compactSearchRow--3 {
+            --compact-search-columns: minmax(130px, 180px) minmax(200px, 1fr) auto;
+        }
+
+        .compactSearchRow--planet {
+            --compact-search-columns: minmax(130px, 170px) minmax(260px, 1fr) auto;
+            align-items: stretch;
         }
 
         .searchCompactAdvanced {
@@ -1242,14 +1266,17 @@ END MASTER DIRECTIVE
         }
 
         @media (max-width: 1080px) {
+            .compactSearchRow,
             .searchCompactRow {
                 grid-template-columns: repeat(2, minmax(180px, 1fr));
             }
         }
 
         @media (max-width: 760px) {
+            .compactSearchRow,
             .searchCompactRow {
                 grid-template-columns: 1fr;
+                gap: 6px;
             }
         }
 
@@ -3179,14 +3206,6 @@ END MASTER DIRECTIVE
             gap: 6px;
         }
 
-        .rankSearchRow {
-            display: grid;
-            grid-template-columns: 140px minmax(0, 1fr) auto;
-            gap: 6px;
-            align-items: center;
-            margin-top: 2px;
-        }
-
         .rankSearchRow select,
         .rankSearchRow input {
             height: 32px;
@@ -3850,13 +3869,6 @@ END MASTER DIRECTIVE
             overflow: visible;
         }
 
-        .planetSearchControls {
-            display: grid;
-            grid-template-columns: minmax(130px, 170px) minmax(260px, 1fr) auto;
-            gap: 8px;
-            align-items: stretch;
-        }
-
         .planetSearchControls select,
         .planetSearchControls input,
         .planetSearchControls button {
@@ -3867,10 +3879,24 @@ END MASTER DIRECTIVE
             min-width: 0;
         }
 
-        @media (max-width: 780px) {
-            .planetSearchControls {
-                grid-template-columns: 1fr;
-            }
+        .compareCompactGroup {
+            display: grid;
+            gap: 8px;
+            margin-top: 0;
+        }
+
+        .compareCompactScope {
+            margin-top: 0;
+        }
+
+        input:focus-visible,
+        select:focus-visible,
+        textarea:focus-visible,
+        button:focus-visible,
+        .tabBtn:focus-visible {
+            outline: 2px solid rgba(255, 212, 0, 0.95);
+            outline-offset: 2px;
+            box-shadow: 0 0 0 2px rgba(0,0,0,.65);
         }
 
         .planetSearchResults {
@@ -4139,9 +4165,9 @@ END MASTER DIRECTIVE
                 </div>
             </div>
 
-            <div id="planetSearchPanel" class="box planetSearchPanel" style="display:none;">
+            <div id="planetSearchPanel" class="box planetSearchPanel compactFieldBlock" style="display:none;">
                 <div class="label">Manual planet selection</div>
-                <div class="planetSearchControls">
+                <div class="planetSearchControls compactSearchRow compactSearchRow--planet">
                     <select id="planetSearchMode">
                         <option value="sector">Sector</option>
                         <option value="name">Name</option>
@@ -4179,7 +4205,7 @@ END MASTER DIRECTIVE
             <div class="divider"></div>
 
             <div class="row">
-                <div class="col">
+                <div class="col compactFieldBlock">
                     <div class="label">Filter</div>
                     <div class="searchCompactRow">
                         <select id="resSearchCategory">
@@ -4305,10 +4331,10 @@ END MASTER DIRECTIVE
                     </div>
                     <div class="smallHelp">Green = better. Red = worse. If you put garbage stats in, the comparison will reflect that. Shocking.</div>
                 </div>
-                <div class="col">
+                <div class="col compactFieldBlock">
                     <div class="label">Sort & search</div>
                     <div class="compareCompactGroup">
-                        <div class="compareCompactRow">
+                        <div class="compareCompactRow compactSearchRow">
                             <select id="cmpSortMetric">
                                 <option value="grade">Sort by Grade</option>
                                 <option value="raw">Sort by Raw score</option>
@@ -4323,7 +4349,7 @@ END MASTER DIRECTIVE
                                 <option value="asc">Low → High</option>
                             </select>
                         </div>
-                        <div class="compareCompactSearch">
+                        <div class="compareCompactSearch compactSearchRow compactSearchRow--3">
                             <select id="cmpSearchCategory" aria-label="Compare search category">
                                 <option value="all">All fields</option>
                                 <option value="player">Player</option>
@@ -4596,7 +4622,7 @@ END MASTER DIRECTIVE
 
             <div id="rankSplitView">
                 <div class="rankListColumn">
-                    <div class="rankSearchRow">
+                    <div class="rankSearchRow compactSearchRow compactSearchRow--3">
                         <select id="rankSearchCategory" aria-label="Rank search category">
                             <option value="seed">Seed</option>
                             <option value="difficulty">Difficulty</option>
@@ -12442,6 +12468,11 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             $("#cmpSortMetric").addEventListener("change", refreshCompareOptions);
             $("#cmpSortDir").addEventListener("change", refreshCompareOptions);
             $("#cmpSearch").addEventListener("input", refreshCompareOptions);
+            $("#cmpSearch")?.addEventListener("keydown", (e) => {
+                if (e.key !== "Enter") return;
+                e.preventDefault();
+                refreshCompareOptions();
+            });
             $("#cmpSearchCategory")?.addEventListener("change", refreshCompareOptions);
             $("#btnCmpSearch")?.addEventListener("click", refreshCompareOptions);
             $("#cmpCategoryScope")?.addEventListener("change", refreshCompareOptions);
@@ -12580,6 +12611,11 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             });
             $("#btnConfirmPlanetInline")?.addEventListener("click", () => doUseThisRun());
             $("#planetSearchInput").addEventListener("input", () => {
+                renderPlanetSearchResults();
+            });
+            $("#planetSearchInput").addEventListener("keydown", (e) => {
+                if (e.key !== "Enter") return;
+                e.preventDefault();
                 renderPlanetSearchResults();
             });
 
