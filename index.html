@@ -3179,6 +3179,55 @@ END MASTER DIRECTIVE
             gap: 6px;
         }
 
+        .rankSearchRow {
+            display: grid;
+            grid-template-columns: 140px minmax(0, 1fr) auto;
+            gap: 6px;
+            align-items: center;
+            margin-top: 2px;
+        }
+
+        .rankSearchRow select,
+        .rankSearchRow input {
+            height: 32px;
+            min-height: 32px;
+            padding: 6px 8px;
+        }
+
+        #rankSearchStatus {
+            min-height: 14px;
+            margin: 0 2px 2px 2px;
+            color: rgba(255,255,255,.78);
+            font-size: 11px;
+            line-height: 1.25;
+        }
+
+        #rankSearchStatus.is-empty {
+            color: #ffb6b6;
+        }
+
+        .rankRow.rankBlinkMatch {
+            animation: rankSearchBlink 220ms ease-in-out 6;
+        }
+
+        @keyframes rankSearchBlink {
+            0%, 100% {
+                border-color: rgba(255, 233, 112, .95);
+                box-shadow:
+                    0 0 0 1px rgba(255, 233, 112, .55),
+                    0 0 10px rgba(255, 221, 87, .22),
+                    inset 0 0 8px rgba(255, 233, 112, .14);
+            }
+
+            50% {
+                border-color: rgba(123, 210, 255, .95);
+                box-shadow:
+                    0 0 0 1px rgba(123, 210, 255, .65),
+                    0 0 16px rgba(123, 210, 255, .4),
+                    inset 0 0 10px rgba(123, 210, 255, .22);
+            }
+        }
+
         #rankList {
             display: flex;
             flex-direction: column;
@@ -4547,6 +4596,17 @@ END MASTER DIRECTIVE
 
             <div id="rankSplitView">
                 <div class="rankListColumn">
+                    <div class="rankSearchRow">
+                        <select id="rankSearchCategory" aria-label="Rank search category">
+                            <option value="seed">Seed</option>
+                            <option value="difficulty">Difficulty</option>
+                            <option value="player">Player</option>
+                            <option value="all">All</option>
+                        </select>
+                        <input id="rankSearchInput" type="text" placeholder="Search visible rank rows..." autocomplete="off" />
+                        <button id="btnRankSearch" class="btnGhost" type="button">SEARCH</button>
+                    </div>
+                    <div id="rankSearchStatus" class="tiny" aria-live="polite"></div>
                     <div id="rankList"></div>
                 </div>
                 <aside id="rankDetailPanel">
@@ -6076,6 +6136,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         let itemImageDb = null;
         let selectedRankCardId = null;
         let activeTier = null;
+        let rankSearchCleanupTimer = null;
         const TIER_DIFFICULTY_RANGES = {
             cadet: { min: 1, max: 3 },
             veteran: { min: 4, max: 6 },
@@ -11522,6 +11583,80 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             return difficulty >= range.min && difficulty <= range.max;
         }
 
+        function clearRankSearchHighlights() {
+            if (rankSearchCleanupTimer) {
+                clearTimeout(rankSearchCleanupTimer);
+                rankSearchCleanupTimer = null;
+            }
+            $$("#rankList .rankRow.rankBlinkMatch").forEach((row) => {
+                row.classList.remove("rankBlinkMatch");
+            });
+        }
+
+        function setRankSearchStatus(message, isEmpty = false) {
+            const status = $("#rankSearchStatus");
+            if (!status) return;
+            status.textContent = message || "";
+            status.classList.toggle("is-empty", !!isEmpty);
+        }
+
+        function parseDifficultyQuery(input) {
+            const text = String(input || "").trim().toLowerCase();
+            if (!text) return null;
+            const compact = text.replace(/\s+/g, "");
+            const match = compact.match(/^d?(\d{1,2})$/);
+            if (!match) return null;
+            const value = Number(match[1]);
+            if (!Number.isFinite(value) || value < 1 || value > 10) return null;
+            return value;
+        }
+
+        function runRankSearch() {
+            const category = normalizeText($("#rankSearchCategory")?.value || "all");
+            const rawInput = String($("#rankSearchInput")?.value || "").trim();
+            const query = normalizeText(rawInput);
+            const rows = $$("#rankList .rankRow");
+            clearRankSearchHighlights();
+
+            if (!rows.length) {
+                setRankSearchStatus("No rows in the current rank scope yet.", true);
+                return;
+            }
+            if (!query) {
+                setRankSearchStatus("Enter a search term.", false);
+                return;
+            }
+
+            const parsedDifficulty = parseDifficultyQuery(rawInput);
+            const matched = rows.filter((row) => {
+                const seed = normalizeText(row.dataset.seed || "");
+                const player = normalizeText(row.dataset.player || "");
+                const difficulty = Number(row.dataset.difficulty || 0);
+                const difficultyLabel = normalizeText(row.dataset.difficultyLabel || "");
+                if (category === "seed") return seed.includes(query);
+                if (category === "player") return player.includes(query);
+                if (category === "difficulty") {
+                    if (parsedDifficulty != null) return difficulty === parsedDifficulty;
+                    return difficultyLabel.includes(query);
+                }
+                if (parsedDifficulty != null && difficulty === parsedDifficulty) return true;
+                return seed.includes(query) || player.includes(query) || difficultyLabel.includes(query);
+            });
+
+            if (!matched.length) {
+                setRankSearchStatus(`No matches in this ${activeTier ? `${getDifficultyTierLabel(activeTier)} ` : ""}scope.`, true);
+                return;
+            }
+
+            matched.forEach((row) => row.classList.add("rankBlinkMatch"));
+            matched[0].scrollIntoView({ behavior: "smooth", block: "center" });
+            setRankSearchStatus(`${matched.length} match${matched.length === 1 ? "" : "es"} found in current scope.`);
+            rankSearchCleanupTimer = setTimeout(() => {
+                matched.forEach((row) => row.classList.remove("rankBlinkMatch"));
+                rankSearchCleanupTimer = null;
+            }, 1800);
+        }
+
         function renderRank() {
             syncRankTierCardUi();
             const hasActiveTier = ["cadet", "veteran", "helldive"].includes(activeTier);
@@ -11586,6 +11721,10 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 const row = document.createElement("div");
                 row.className = "rankRow";
                 row.dataset.id = c.id;
+                row.dataset.seed = String(c.seed || "");
+                row.dataset.player = String(getPlayerName(c) || "");
+                row.dataset.difficulty = String(getCardDifficulty(c));
+                row.dataset.difficultyLabel = String(formatDifficultyLabel(c) || "");
                 const outer = document.createElement("div");
                 outer.className = "rankOuter rankAnimate";
                 outer.style.setProperty("--rank-stagger", `${idx * 65}ms`);
@@ -12375,6 +12514,12 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 alert("Ranks recalculated.");
             });
             $("#btnRefreshItemInsights")?.addEventListener("click", refreshItemInsightsFromJson);
+            $("#btnRankSearch")?.addEventListener("click", runRankSearch);
+            $("#rankSearchInput")?.addEventListener("keydown", (e) => {
+                if (e.key !== "Enter") return;
+                e.preventDefault();
+                runRankSearch();
+            });
 
             $("#btnResetDefaults").addEventListener("click", () => {
                 if (!confirm("Reset item lists to defaults? Your custom edits will be overwritten.")) return;
