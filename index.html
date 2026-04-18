@@ -1209,6 +1209,53 @@ END MASTER DIRECTIVE
             border-color: rgba(255,106,117,.6);
         }
 
+        .compareCompactGroup {
+            display: grid;
+            gap: 6px;
+        }
+
+        .compareCompactRow {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 6px;
+        }
+
+        .compareCompactSearch {
+            display: grid;
+            grid-template-columns: minmax(130px, .95fr) minmax(0, 1.4fr) auto;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .compareCompactGroup select,
+        .compareCompactGroup input {
+            border: 1px solid var(--line2);
+            border-radius: 10px;
+            padding: 6px 8px;
+            font-size: 12px;
+            min-height: 32px;
+            background: rgba(255,255,255,.03);
+        }
+
+        .compareCompactSearch .btnGhost {
+            border-radius: 10px;
+            padding: 6px 10px;
+            min-height: 32px;
+            font-size: 12px;
+            line-height: 1;
+        }
+
+        .compareCompactScope {
+            margin-top: 4px;
+        }
+
+        @media (max-width: 820px) {
+            .compareCompactRow,
+            .compareCompactSearch {
+                grid-template-columns: 1fr;
+            }
+        }
+
         .factionSticker {
             flex: 1;
             min-height: 68px;
@@ -4198,23 +4245,36 @@ END MASTER DIRECTIVE
                 </div>
                 <div class="col">
                     <div class="label">Sort & search</div>
-                    <div class="formGrid3">
-                        <select id="cmpSortMetric">
-                            <option value="grade">Sort by Grade</option>
-                            <option value="raw">Sort by Raw score</option>
-                            <option value="difficulty">Sort by Difficulty</option>
-                            <option value="kills">Sort by Kills</option>
-                            <option value="deaths">Sort by Deaths</option>
-                            <option value="stims">Sort by Stims</option>
-                            <option value="playerName">Sort by Player</option>
-                        </select>
-                        <select id="cmpSortDir">
-                            <option value="desc">High → Low</option>
-                            <option value="asc">Low → High</option>
-                        </select>
-                        <input id="cmpSearch" placeholder="Search by player, seed, weapon, strat, planet..." />
+                    <div class="compareCompactGroup">
+                        <div class="compareCompactRow">
+                            <select id="cmpSortMetric">
+                                <option value="grade">Sort by Grade</option>
+                                <option value="raw">Sort by Raw score</option>
+                                <option value="difficulty">Sort by Difficulty</option>
+                                <option value="kills">Sort by Kills</option>
+                                <option value="deaths">Sort by Deaths</option>
+                                <option value="stims">Sort by Stims</option>
+                                <option value="playerName">Sort by Player</option>
+                            </select>
+                            <select id="cmpSortDir">
+                                <option value="desc">High → Low</option>
+                                <option value="asc">Low → High</option>
+                            </select>
+                        </div>
+                        <div class="compareCompactSearch">
+                            <select id="cmpSearchCategory" aria-label="Compare search category">
+                                <option value="all">All fields</option>
+                                <option value="player">Player</option>
+                                <option value="seed">Seed</option>
+                                <option value="gear">Weapons + stratagems</option>
+                                <option value="planet">Planet</option>
+                                <option value="meta">Mode + faction + difficulty</option>
+                            </select>
+                            <input id="cmpSearch" placeholder="Search..." />
+                            <button id="btnCmpSearch" type="button" class="btnGhost">Search</button>
+                        </div>
                     </div>
-                    <div class="miniRow" style="margin-top:8px;">
+                    <div class="miniRow compareCompactScope">
                         <select id="cmpCategoryScope">
                             <option value="all">Category: All tiers (D1-D10)</option>
                             <option value="cadet">Category: Cadet only (D1-D3)</option>
@@ -12213,6 +12273,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             $("#cmpSortMetric").addEventListener("change", refreshCompareOptions);
             $("#cmpSortDir").addEventListener("change", refreshCompareOptions);
             $("#cmpSearch").addEventListener("input", refreshCompareOptions);
+            $("#cmpSearchCategory")?.addEventListener("change", refreshCompareOptions);
+            $("#btnCmpSearch")?.addEventListener("click", refreshCompareOptions);
             $("#cmpCategoryScope")?.addEventListener("change", refreshCompareOptions);
             $$("#rankTierCards .rankTierCard").forEach((btn) => {
                 btn.addEventListener("click", () => {
@@ -12374,6 +12436,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const sortMetric = $("#cmpSortMetric")?.value || "grade";
             const sortDir = $("#cmpSortDir")?.value || "desc";
             const scope = ($("#cmpCategoryScope")?.value || "all").toLowerCase();
+            const searchCategory = ($("#cmpSearchCategory")?.value || "all").toLowerCase();
             const q = normalizeText($("#cmpSearch")?.value || "");
 
             let list = state.cards.slice();
@@ -12382,14 +12445,35 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             }
 
             if (q) {
-                list = list.filter(c => {
-                    const hay = normalizeText([
-                        getPlayerName(c), c.seed, c.title, c.mode, c.faction,
-                        formatDifficultyLabel(c),
-                        c.primary, c.sidearm, c.throwable, c.booster,
-                        (c.stratagems || []).join(" "),
-                        c.planet?.name, c.planet?.sector, (c.planet?.weatherText || c.planet?.weather)
+                const buildCompareSearchText = (card, category) => {
+                    if (category === "player") return normalizeText(getPlayerName(card));
+                    if (category === "seed") return normalizeText(card?.seed || "");
+                    if (category === "gear") {
+                        return normalizeText([
+                            card?.primary, card?.sidearm, card?.throwable, card?.booster,
+                            (card?.stratagems || []).join(" ")
+                        ].join(" "));
+                    }
+                    if (category === "planet") {
+                        return normalizeText([
+                            card?.planet?.name, card?.planet?.sector, (card?.planet?.weatherText || card?.planet?.weather)
+                        ].join(" "));
+                    }
+                    if (category === "meta") {
+                        return normalizeText([
+                            card?.title, card?.mode, card?.faction, formatDifficultyLabel(card)
+                        ].join(" "));
+                    }
+                    return normalizeText([
+                        getPlayerName(card), card?.seed, card?.title, card?.mode, card?.faction,
+                        formatDifficultyLabel(card),
+                        card?.primary, card?.sidearm, card?.throwable, card?.booster,
+                        (card?.stratagems || []).join(" "),
+                        card?.planet?.name, card?.planet?.sector, (card?.planet?.weatherText || card?.planet?.weather)
                     ].join(" "));
+                };
+                list = list.filter(c => {
+                    const hay = buildCompareSearchText(c, searchCategory);
                     return hay.includes(q);
                 });
             }
