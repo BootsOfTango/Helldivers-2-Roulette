@@ -1160,15 +1160,22 @@ END MASTER DIRECTIVE
 
         .resultsDifficultyFilters {
             margin-top: 10px;
-            border: 1px solid var(--line2);
-            border-radius: 12px;
-            padding: 10px;
-            background: rgba(255,255,255,.02);
             display: grid;
             gap: 10px;
         }
 
-        .resultsDifficultyTierRow,
+        #resultsTierCards {
+            margin-top: 2px;
+        }
+
+        #resultsTierCards .rankTierCard {
+            min-height: 96px;
+        }
+
+        #resultsScopeState {
+            color: var(--muted);
+        }
+
         .resultsDifficultyLevelRow {
             display: flex;
             flex-wrap: wrap;
@@ -4230,37 +4237,65 @@ END MASTER DIRECTIVE
                             <option value="grade_desc">Grade (high → low)</option>
                         </select>
                     </div>
-                    <details class="searchCompactAdvanced">
-                        <summary>Advanced filters</summary>
-                        <div class="searchCompactAdvancedBody">
-                            <div class="formGrid">
-                                <select id="resFilterMode">
-                                    <option value="">All modes</option>
-                                    <option value="Blitz (12)">Blitz (12)</option>
-                                    <option value="Defense (20min)">Defense (20min)</option>
-                                    <option value="Eradication (15)">Eradication (15)</option>
-                                    <option value="Normal (40)">Normal (40)</option>
-                                    <option value="Rapid Acquisition (15)">Rapid Acquisition (15)</option>
-                                </select>
-                                <select id="resFilterFaction">
-                                    <option value="">All factions</option>
-                                    <option value="Terminids">Terminids</option>
-                                    <option value="Automatons">Automatons</option>
-                                    <option value="Illuminate">Illuminate</option>
-                                </select>
-                            </div>
-                            <div class="resultsDifficultyFilters">
-                                <div class="tiny">Difficulty scope</div>
-                                <div id="resultsDifficultyTierFilters" class="resultsDifficultyTierRow">
-                                    <button type="button" class="resultsDifficultyBtn" data-tier="cadet">Cadet (D1-D3)</button>
-                                    <button type="button" class="resultsDifficultyBtn" data-tier="veteran">Veteran (D4-D6)</button>
-                                    <button type="button" class="resultsDifficultyBtn" data-tier="helldive">Helldive (D7-D10)</button>
-                                    <button type="button" class="resultsDifficultyBtn" id="btnResultsTierClear">All tiers</button>
-                                </div>
-                                <div id="resultsDifficultyLevelFilters" class="resultsDifficultyLevelRow"></div>
+                    <div class="formGrid" style="margin-top:10px;">
+                        <select id="resFilterMode">
+                            <option value="">All modes</option>
+                            <option value="Blitz (12)">Blitz (12)</option>
+                            <option value="Defense (20min)">Defense (20min)</option>
+                            <option value="Eradication (15)">Eradication (15)</option>
+                            <option value="Normal (40)">Normal (40)</option>
+                            <option value="Rapid Acquisition (15)">Rapid Acquisition (15)</option>
+                        </select>
+                        <select id="resFilterFaction">
+                            <option value="">All factions</option>
+                            <option value="Terminids">Terminids</option>
+                            <option value="Automatons">Automatons</option>
+                            <option value="Illuminate">Illuminate</option>
+                        </select>
+                    </div>
+                    <div class="resultsDifficultyFilters">
+                        <div class="label" style="margin-top:10px;">Choose tier</div>
+                        <div class="rankTierTopBar">
+                            <div class="rankTierCards" id="resultsTierCards">
+                                <button type="button" class="rankTierCard rankTierAllCard" data-tier="all" aria-pressed="false">
+                                    <span class="rankTierCardInfo">
+                                        <span class="rankTierCardName">ALL TIER RESULTS</span>
+                                        <span class="rankTierCardRange">D1-D10 complete list</span>
+                                        <span class="rankTierCardSummary" id="resultsAllTierSummary">D1-D10 • 0 saved cards • Grade Σ 0 • Raw Σ 0.0</span>
+                                    </span>
+                                </button>
+                                <button type="button" class="rankTierCard" data-tier="cadet" aria-pressed="false">
+                                    <span class="rankTierThumbFrame">
+                                        <img class="rankTierThumb" src="cadet.png" alt="Cadet tier visual" onerror="this.onerror=null;this.src='assets/placeholders/rank-tiers/cadet-placeholder.svg';" />
+                                    </span>
+                                    <span class="rankTierCardInfo">
+                                        <span class="rankTierCardName">Cadet</span>
+                                        <span class="rankTierCardRange">Levels 1-3</span>
+                                    </span>
+                                </button>
+                                <button type="button" class="rankTierCard" data-tier="veteran" aria-pressed="false">
+                                    <span class="rankTierThumbFrame">
+                                        <img class="rankTierThumb" src="veteran.png" alt="Veteran tier visual" onerror="this.onerror=null;this.src='assets/placeholders/rank-tiers/veteran-placeholder.svg';" />
+                                    </span>
+                                    <span class="rankTierCardInfo">
+                                        <span class="rankTierCardName">Veteran</span>
+                                        <span class="rankTierCardRange">Levels 4-6</span>
+                                    </span>
+                                </button>
+                                <button type="button" class="rankTierCard" data-tier="helldive" aria-pressed="false">
+                                    <span class="rankTierThumbFrame">
+                                        <img class="rankTierThumb" src="helldive.png" alt="Helldiver tier visual" onerror="this.onerror=null;this.src='assets/placeholders/rank-tiers/helldiver-placeholder.svg';" />
+                                    </span>
+                                    <span class="rankTierCardInfo">
+                                        <span class="rankTierCardName">Helldiver</span>
+                                        <span class="rankTierCardRange">Levels 7-10</span>
+                                    </span>
+                                </button>
                             </div>
                         </div>
-                    </details>
+                        <div id="resultsScopeState" class="tiny">Showing all Results cards.</div>
+                        <div id="resultsDifficultyLevelFilters" class="resultsDifficultyLevelRow"></div>
+                    </div>
                     <div class="smallHelp">Cards only exist if you hit “USE THIS RUN” from SPIN. Because your viewers don’t care about your indecision.</div>
                 </div>
             </div>
@@ -8789,6 +8824,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             }[sort] || ((a, b) => 0);
 
             list.sort(sorter);
+            updateResultsScopeUi(list.length);
             const tierMap = buildTierMap();
 
             const grid = $("#resultsGrid");
@@ -8867,18 +8903,45 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             refreshCompareOptions();
         }
 
+        function getAllTierResultsTotals() {
+            const savedCards = (Array.isArray(state.cards) ? state.cards : [])
+                .filter(card => card && typeof card === "object")
+                .map(card => getNormalizedCardView(card))
+                .filter(Boolean);
+
+            return savedCards.reduce((acc, card) => {
+                acc.cardCount += 1;
+                acc.gradeSum += clamp(Math.round(Number(card.grade || 0)), 0, 100);
+                acc.rawSum += clamp(Number(card.scoreRaw || 0), 0, 500);
+                return acc;
+            }, { cardCount: 0, gradeSum: 0, rawSum: 0 });
+        }
+
+        function updateResultsScopeUi(filteredCount = 0) {
+            const hasActiveTier = ["cadet", "veteran", "helldive"].includes(activeResultsDifficultyTier);
+            const stateEl = $("#resultsScopeState");
+            if (stateEl) {
+                const tierLabel = hasActiveTier
+                    ? `${getDifficultyTierLabel(activeResultsDifficultyTier)} active`
+                    : "All tiers active";
+                stateEl.textContent = `${tierLabel} • ${filteredCount} visible card${filteredCount === 1 ? "" : "s"}.`;
+            }
+            const summaryEl = $("#resultsAllTierSummary");
+            if (summaryEl) {
+                const totals = getAllTierResultsTotals();
+                summaryEl.textContent = `D1-D10 • ${totals.cardCount} saved card${totals.cardCount === 1 ? "" : "s"} • Grade Σ ${totals.gradeSum} • Raw Σ ${totals.rawSum.toFixed(1)}`;
+            }
+        }
+
         function syncResultsDifficultyFilterButtons() {
-            $$("#resultsDifficultyTierFilters .resultsDifficultyBtn[data-tier]").forEach((btn) => {
-                const isActive = btn.dataset.tier === activeResultsDifficultyTier;
+            $$("#resultsTierCards .rankTierCard[data-tier]").forEach((btn) => {
+                const tier = String(btn.dataset.tier || "");
+                const isActive = tier === "all"
+                    ? !activeResultsDifficultyTier
+                    : tier === activeResultsDifficultyTier;
                 btn.classList.toggle("is-active", isActive);
                 btn.setAttribute("aria-pressed", isActive ? "true" : "false");
             });
-            const clearBtn = $("#btnResultsTierClear");
-            if (clearBtn) {
-                const noneSelected = !activeResultsDifficultyTier;
-                clearBtn.classList.toggle("is-active", noneSelected);
-                clearBtn.setAttribute("aria-pressed", noneSelected ? "true" : "false");
-            }
 
             $$("#resultsDifficultyLevelFilters .resultsDifficultyBtn[data-level]").forEach((btn) => {
                 const level = Number(btn.dataset.level || 0);
@@ -12437,10 +12500,13 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 renderResults();
             });
             $("#btnResSearch")?.addEventListener("click", renderResults);
-            $$("#resultsDifficultyTierFilters .resultsDifficultyBtn[data-tier]").forEach((btn) => {
+            $$("#resultsTierCards .rankTierCard[data-tier]").forEach((btn) => {
                 btn.addEventListener("click", () => {
                     const nextTier = String(btn.dataset.tier || "");
-                    if (activeResultsDifficultyTier === nextTier) {
+                    if (nextTier === "all") {
+                        activeResultsDifficultyTier = "";
+                        activeResultsDifficultyLevel = null;
+                    } else if (activeResultsDifficultyTier === nextTier) {
                         activeResultsDifficultyTier = "";
                         activeResultsDifficultyLevel = null;
                     } else {
@@ -12450,12 +12516,6 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                     syncResultsDifficultyFilterButtons();
                     renderResults();
                 });
-            });
-            $("#btnResultsTierClear")?.addEventListener("click", () => {
-                activeResultsDifficultyTier = "";
-                activeResultsDifficultyLevel = null;
-                syncResultsDifficultyFilterButtons();
-                renderResults();
             });
             renderResultsDifficultyFilters();
 
