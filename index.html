@@ -542,6 +542,7 @@ END MASTER DIRECTIVE
             background: rgba(255,255,255,.03);
             color: var(--text);
             padding: 10px 12px;
+            min-height: 38px;
             border-radius: 12px;
             font-weight: 700;
             font-size: 12px;
@@ -1207,6 +1208,49 @@ END MASTER DIRECTIVE
         .resultsDifficultyBtn[data-tier="helldive"].is-active {
             color: #ff6a75;
             border-color: rgba(255,106,117,.6);
+        }
+
+        .searchCompactRow {
+            margin-top: 4px;
+            display: grid;
+            grid-template-columns: minmax(150px, 220px) minmax(220px, 1fr) auto minmax(170px, 220px);
+            gap: 8px;
+            align-items: center;
+        }
+
+        .searchCompactAdvanced {
+            margin-top: 8px;
+            border: 1px solid var(--line2);
+            border-radius: 12px;
+            background: rgba(255,255,255,.02);
+            padding: 8px 10px 10px;
+        }
+
+        .searchCompactAdvanced > summary {
+            cursor: pointer;
+            font-size: 12px;
+            color: var(--muted);
+            font-weight: 700;
+            letter-spacing: .3px;
+            text-transform: uppercase;
+        }
+
+        .searchCompactAdvancedBody {
+            margin-top: 8px;
+            display: grid;
+            gap: 8px;
+        }
+
+        @media (max-width: 1080px) {
+            .searchCompactRow {
+                grid-template-columns: repeat(2, minmax(180px, 1fr));
+            }
+        }
+
+        @media (max-width: 760px) {
+            .searchCompactRow {
+                grid-template-columns: 1fr;
+            }
         }
 
         .factionSticker {
@@ -1970,6 +2014,7 @@ END MASTER DIRECTIVE
             color: var(--text);
             border-radius: 12px;
             padding: 10px 10px;
+            min-height: 38px;
             font-size: 12px;
             outline: none;
         }
@@ -4087,21 +4132,18 @@ END MASTER DIRECTIVE
             <div class="row">
                 <div class="col">
                     <div class="label">Filter</div>
-                    <div class="formGrid3">
-                        <select id="resFilterMode">
-                            <option value="">All modes</option>
-                            <option value="Blitz (12)">Blitz (12)</option>
-                            <option value="Defense (20min)">Defense (20min)</option>
-                            <option value="Eradication (15)">Eradication (15)</option>
-                            <option value="Normal (40)">Normal (40)</option>
-                            <option value="Rapid Acquisition (15)">Rapid Acquisition (15)</option>
+                    <div class="searchCompactRow">
+                        <select id="resSearchCategory">
+                            <option value="all">Category: All</option>
+                            <option value="seed">Seed</option>
+                            <option value="player">Player</option>
+                            <option value="difficulty">Difficulty</option>
+                            <option value="mode">Mode</option>
+                            <option value="faction">Faction</option>
+                            <option value="planet">Planet</option>
                         </select>
-                        <select id="resFilterFaction">
-                            <option value="">All factions</option>
-                            <option value="Terminids">Terminids</option>
-                            <option value="Automatons">Automatons</option>
-                            <option value="Illuminate">Illuminate</option>
-                        </select>
+                        <input id="resSearch" placeholder="Search results..." />
+                        <button id="btnResSearch" class="btnPrimary" type="button">Search</button>
                         <select id="resSort">
                             <option value="new">Sort: newest</option>
                             <option value="old">Sort: oldest</option>
@@ -4113,19 +4155,37 @@ END MASTER DIRECTIVE
                             <option value="grade_desc">Grade (high → low)</option>
                         </select>
                     </div>
-                    <div class="formGrid" style="margin-top:10px;">
-                        <input id="resSearch" placeholder="Search by player, seed, weapon, strat, planet..." />
-                    </div>
-                    <div class="resultsDifficultyFilters">
-                        <div class="tiny">Difficulty scope</div>
-                        <div id="resultsDifficultyTierFilters" class="resultsDifficultyTierRow">
-                            <button type="button" class="resultsDifficultyBtn" data-tier="cadet">Cadet (D1-D3)</button>
-                            <button type="button" class="resultsDifficultyBtn" data-tier="veteran">Veteran (D4-D6)</button>
-                            <button type="button" class="resultsDifficultyBtn" data-tier="helldive">Helldive (D7-D10)</button>
-                            <button type="button" class="resultsDifficultyBtn" id="btnResultsTierClear">All tiers</button>
+                    <details class="searchCompactAdvanced">
+                        <summary>Advanced filters</summary>
+                        <div class="searchCompactAdvancedBody">
+                            <div class="formGrid">
+                                <select id="resFilterMode">
+                                    <option value="">All modes</option>
+                                    <option value="Blitz (12)">Blitz (12)</option>
+                                    <option value="Defense (20min)">Defense (20min)</option>
+                                    <option value="Eradication (15)">Eradication (15)</option>
+                                    <option value="Normal (40)">Normal (40)</option>
+                                    <option value="Rapid Acquisition (15)">Rapid Acquisition (15)</option>
+                                </select>
+                                <select id="resFilterFaction">
+                                    <option value="">All factions</option>
+                                    <option value="Terminids">Terminids</option>
+                                    <option value="Automatons">Automatons</option>
+                                    <option value="Illuminate">Illuminate</option>
+                                </select>
+                            </div>
+                            <div class="resultsDifficultyFilters">
+                                <div class="tiny">Difficulty scope</div>
+                                <div id="resultsDifficultyTierFilters" class="resultsDifficultyTierRow">
+                                    <button type="button" class="resultsDifficultyBtn" data-tier="cadet">Cadet (D1-D3)</button>
+                                    <button type="button" class="resultsDifficultyBtn" data-tier="veteran">Veteran (D4-D6)</button>
+                                    <button type="button" class="resultsDifficultyBtn" data-tier="helldive">Helldive (D7-D10)</button>
+                                    <button type="button" class="resultsDifficultyBtn" id="btnResultsTierClear">All tiers</button>
+                                </div>
+                                <div id="resultsDifficultyLevelFilters" class="resultsDifficultyLevelRow"></div>
+                            </div>
                         </div>
-                        <div id="resultsDifficultyLevelFilters" class="resultsDifficultyLevelRow"></div>
-                    </div>
+                    </details>
                     <div class="smallHelp">Cards only exist if you hit “USE THIS RUN” from SPIN. Because your viewers don’t care about your indecision.</div>
                 </div>
             </div>
@@ -8582,6 +8642,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const modeFilter = $("#resFilterMode").value;
             const factionFilter = $("#resFilterFaction").value;
             const sort = $("#resSort").value;
+            const searchCategory = String($("#resSearchCategory")?.value || "all");
             const query = normalizeText($("#resSearch")?.value || "");
 
             let list = state.cards.slice();
@@ -8596,13 +8657,22 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             }
             if (query) {
                 list = list.filter(c => {
-                    const hay = normalizeText([
-                        getPlayerName(c), c.seed, c.title, c.mode, c.faction,
-                        formatDifficultyLabel(c),
-                        c.primary, c.sidearm, c.throwable, c.booster,
-                        (c.stratagems || []).join(" "),
-                        c.planet?.name, c.planet?.sector, (c.planet?.weatherText || c.planet?.weather)
-                    ].join(" "));
+                    const categoryHaystacks = {
+                        all: [
+                            getPlayerName(c), c.seed, c.title, c.mode, c.faction,
+                            formatDifficultyLabel(c),
+                            c.primary, c.sidearm, c.throwable, c.booster,
+                            (c.stratagems || []).join(" "),
+                            c.planet?.name, c.planet?.sector, (c.planet?.weatherText || c.planet?.weather)
+                        ],
+                        seed: [c.seed],
+                        player: [getPlayerName(c)],
+                        difficulty: [formatDifficultyLabel(c), `d${getCardDifficulty(c)}`, String(getCardDifficulty(c))],
+                        mode: [c.mode],
+                        faction: [c.faction],
+                        planet: [c.planet?.name, c.planet?.sector, (c.planet?.weatherText || c.planet?.weather)]
+                    };
+                    const hay = normalizeText((categoryHaystacks[searchCategory] || categoryHaystacks.all).join(" "));
                     return hay.includes(query);
                 });
             }
@@ -12180,8 +12250,15 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             $("#resFilterMode").addEventListener("change", renderResults);
             $("#resFilterFaction").addEventListener("change", renderResults);
+            $("#resSearchCategory")?.addEventListener("change", renderResults);
             $("#resSort").addEventListener("change", renderResults);
             $("#resSearch").addEventListener("input", renderResults);
+            $("#resSearch").addEventListener("keydown", (e) => {
+                if (e.key !== "Enter") return;
+                e.preventDefault();
+                renderResults();
+            });
+            $("#btnResSearch")?.addEventListener("click", renderResults);
             $$("#resultsDifficultyTierFilters .resultsDifficultyBtn[data-tier]").forEach((btn) => {
                 btn.addEventListener("click", () => {
                     const nextTier = String(btn.dataset.tier || "");
