@@ -11908,6 +11908,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
          * Event wiring
          ***********************/
         function switchTab(tab) {
+            const previousTab = document.querySelector(".tabBtn.active")?.dataset.tab || "";
             $$(".tabBtn").forEach(b => b.classList.toggle("active", b.dataset.tab === tab));
             $("#tab-spin").style.display = (tab === "spin") ? "" : "none";
             $("#tab-results").style.display = (tab === "results") ? "" : "none";
@@ -11916,6 +11917,10 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             $("#tab-rank").style.display = (tab === "rank") ? "" : "none";
 
             if (tab !== "results") closeResultCardModal();
+            if (previousTab === "results" && tab !== "results") {
+                const resultsSearchInput = $("#resSearch");
+                if (resultsSearchInput) resultsSearchInput.value = "";
+            }
             if (tab === "results") {
                 runViewOnlyRender("switchTab:results", () => renderResults());
             }
