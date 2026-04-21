@@ -4431,7 +4431,7 @@ END MASTER DIRECTIVE
                             <button id="btnOverlayRadar" class="btnPrimary" disabled>STACK RADARS</button>
                         </div>
                         <div id="cmpHoverBanner" class="cmpHoverBanner">
-                            <div class="cmpHoverBannerSide left" data-side="left">Hover a stat section</div>
+                            <div class="cmpHoverBannerSide left" data-side="left">Hover a 6-axis stat</div>
                             <div class="cmpHoverBannerSide right" data-side="right">to see who is stronger</div>
                         </div>
                         <div id="cmpRadarOverlay" class="cmpRadarOverlay"></div>
@@ -8117,7 +8117,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             }
 
             if (overlay) {
-                overlay.innerHTML = `<div class="tiny muted">Click <strong>STACK RADARS</strong> to overlap both radars, then hover each stat wedge to see who wins.<br>Stacked radar uses raw stat values per axis (no Grade/MO size scaling) so winners and % are accurate for any pair.</div>`;
+                overlay.innerHTML = `<div class="tiny muted">Click <strong>STACK RADARS</strong> to overlap both cards on a 6-axis radar, then hover each stat wedge to see who wins.<br>Stacked radar uses raw stat values per axis (no Grade/MO size scaling) so winners and % are accurate for any pair.</div>`;
             }
             if (insight) insight.textContent = "";
 
@@ -8132,25 +8132,27 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const s = normalizeMissionStats(card?.stats, card);
             // Overlay comparisons must use raw stat-normalized values (no grade/MO scaling),
             // otherwise a stronger overall grade can incorrectly flip per-axis winners.
-            return RADAR_AXES
-                .map((axis) => getRadarAxisNormalizedValue(s, axis, maxes))
+            return COMPARE_AXIS_META
+                .map((axisMeta) => getRadarAxisNormalizedValue(s, RADAR_AXES[axisMeta.index], maxes))
                 .map(v => clamp(v, 0, 1));
         }
 
         function getCompareMetricValue(card, axisKey) {
             const s = normalizeMissionStats(card?.stats, card);
-            const axis = RADAR_AXES.find((entry) => entry.key === axisKey);
+            const axisMeta = COMPARE_AXIS_META_BY_KEY[axisKey];
+            if (!axisMeta) return 0;
+            const axis = RADAR_AXES[axisMeta.index];
             if (!axis) return 0;
             return getRadarAxisRawValue(s, axis);
         }
 
         function isLowerBetterCompareAxis(axisKey) {
-            const axis = RADAR_AXES.find((entry) => entry.key === axisKey);
-            return !!axis && axis.normalize === "inverse";
+            return !!COMPARE_AXIS_META_BY_KEY[axisKey]?.lowerIsBetter;
         }
 
         function getCompareAxes() {
-            return RADAR_AXES.map((axis) => ({
+            // Keep compare overlay order identical to the main radar axis map.
+            return COMPARE_AXIS_META.map((axis) => ({
                 key: axis.key,
                 label: axis.label,
                 metric: axis.metric,
@@ -8335,12 +8337,12 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 ${tipLabels}
             </svg>`;
 
-            if (insight) insight.textContent = "Hover a stat section to glow only the winning stat slice and view % difference.";
+            if (insight) insight.textContent = "Hover a 6-axis stat section to glow only the winning stat slice and view % difference.";
             if (hoverBanner) {
                 hoverBanner.className = "cmpHoverBanner";
                 const left = hoverBanner.querySelector('[data-side="left"]');
                 const right = hoverBanner.querySelector('[data-side="right"]');
-                if (left) left.textContent = "Hover a stat section";
+                if (left) left.textContent = "Hover a 6-axis stat";
                 if (right) right.textContent = "to reveal winner side";
             }
 
@@ -8394,12 +8396,12 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 overlay.querySelectorAll(".cmpOverlayPoly").forEach((poly) => {
                     poly.classList.remove("is-win", "is-dim");
                 });
-                if (insight) insight.textContent = "Hover a stat section to glow only the winning stat slice and view % difference.";
+                if (insight) insight.textContent = "Hover a 6-axis stat section to glow only the winning stat slice and view % difference.";
                 if (hoverBanner) {
                     hoverBanner.className = "cmpHoverBanner";
                     const left = hoverBanner.querySelector('[data-side="left"]');
                     const right = hoverBanner.querySelector('[data-side="right"]');
-                    if (left) left.textContent = "Hover a stat section";
+                    if (left) left.textContent = "Hover a 6-axis stat";
                     if (right) right.textContent = "to reveal winner side";
                 }
             };
@@ -9821,10 +9823,23 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             { k: "deathsPlusStims", label: "Deaths + Stims (Endurance, low is good)" },
             { k: "distanceKm", label: "Distance km (Mobility)" },
             { k: "stratUses", label: "Strat uses (Utility)" },
+            { k: "shotsFired", label: "Shots fired (Democracy)" },
             { k: "bulletCount", label: "Bullet count (Democracy)" },
             { k: "raw", label: "Raw score" }
         ]);
         const COMPARE_METRIC_KEYS = Object.freeze(COMPARE_METRICS.map((metric) => metric.k));
+        const COMPARE_AXIS_META = Object.freeze(RADAR_AXES.map((axis, index) => ({
+            index,
+            key: axis.key,
+            label: axis.label,
+            metric: axis.metric,
+            compareLabel: axis.compareLabel,
+            lowerIsBetter: axis.normalize === "inverse"
+        })));
+        const COMPARE_AXIS_META_BY_KEY = Object.freeze(COMPARE_AXIS_META.reduce((acc, axis) => {
+            acc[axis.key] = axis;
+            return acc;
+        }, {}));
 
         function getRadarAngles(axisCount) {
             return Array.from({ length: axisCount }, (_, i) => (-Math.PI / 2) + (i * (Math.PI * 2 / axisCount)));
@@ -10064,6 +10079,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             const s = card.stats || {};
             if (k === "deathsPlusStims") return Number(s.deaths || 0) + Number(s.stims || 0);
+            if (k === "shotsFired" || k === "bulletCount") return Number(s.bulletCount ?? s.shotsFired ?? 0);
 
             return Number(s[k] || 0);
         }
@@ -10109,6 +10125,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 { name: "Stims", k: "stims", better: "low" },
                 { name: "Distance (km)", k: "distanceKm", better: "high" },
                 { name: "Strat Uses", k: "stratUses", better: "high" },
+                { name: "Shots fired", k: "shotsFired", better: "high" },
                 { name: "Raw score", k: "raw", better: "high" },
             ];
 
