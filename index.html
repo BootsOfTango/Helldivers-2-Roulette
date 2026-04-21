@@ -7711,7 +7711,24 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             return safeRaw * (1 + (pct / 100));
         }
 
-        function computeRawScore(card) {
+        function getPercentile(sortedValues, percentile) {
+            if (!Array.isArray(sortedValues) || sortedValues.length === 0) return 0;
+            const pct = clamp(Number(percentile || 0), 0, 1);
+            const idx = clamp(Math.round((sortedValues.length - 1) * pct), 0, sortedValues.length - 1);
+            const value = Number(sortedValues[idx] || 0);
+            return Number.isFinite(value) ? value : 0;
+        }
+
+        function getDynamicKillTarget(cards) {
+            const killValues = (Array.isArray(cards) ? cards : [])
+                .map((c) => Number(normalizeMissionStats(c?.stats, c).kills || 0))
+                .filter((v) => Number.isFinite(v) && v > 0)
+                .sort((a, b) => a - b);
+            const p60 = getPercentile(killValues, 0.6);
+            return Math.max(1, p60 > 0 ? p60 : 120);
+        }
+
+        function computeRawBaseScore(card, options = {}) {
             const s = normalizeMissionStats(card?.stats, card);
             const kills = Number(s.kills ?? 0);
             const accuracy = Number(s.accuracy ?? 0);
@@ -7719,20 +7736,46 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const stims = Number(s.stims ?? 0);
             const distanceKm = Number(s.distanceKm ?? 0);
             const stratUses = Number(s.stratUses ?? 0);
-            const difficulty = getCardDifficulty(card);
+            const bullets = Number(s.bulletCount ?? s.shotsFired ?? 0);
+            const killTarget = Math.max(1, Number(options.killTarget ?? getDynamicKillTarget(state.cards)) || 120);
 
-            // Balance power (kills) with execution (accuracy/survival) and utility (stratagems/mobility).
-            // Major Order status is metadata only (display/filter), not part of performance grading.
+            const killsAboveTargetRatio = clamp((kills - killTarget) / killTarget, -0.35, 1.25);
+            const lowBulletFactor = clamp((2000 - bullets) / 2000, 0, 1);
+            const highBulletFactor = clamp((bullets - 2000) / 3000, 0, 1.4);
+            const stratUsageFactor = clamp(stratUses / 24, 0, 1.1);
+
+            // Utility gets a bounded multiplier from bullet discipline, strat usage, and kills above target.
+            const utilityMultiplier = clamp(
+                1 + (lowBulletFactor * 0.2) + (stratUsageFactor * 0.22) + (Math.max(0, killsAboveTargetRatio) * 0.2),
+                0.9,
+                1.6
+            );
+            const utilityScore = ((stratUses * 3.0) + (distanceKm * 4.0)) * utilityMultiplier;
+
+            const highBulletPenalty = highBulletFactor * 18;
+            const lowAccuracyAgilityPenalty = (accuracy < 40)
+                ? clamp(((40 - accuracy) / 40) * (1 + (kills / killTarget)), 0, 2.2) * 12
+                : 0;
+
             let rawBase =
                 (kills * 0.7) +
                 (accuracy * 2.0) +
-                (stratUses * 3.0) +
-                (distanceKm * 4.0) -
+                utilityScore -
                 (deaths * 12.0) -
-                (stims * 5.0);
+                (stims * 5.0) -
+                highBulletPenalty -
+                lowAccuracyAgilityPenalty;
 
             if (!isFinite(rawBase)) rawBase = 0;
-            rawBase = Math.max(0, rawBase);
+            return {
+                rawBase: Math.max(0, rawBase),
+                killTarget
+            };
+        }
+
+        function computeRawScore(card, options = {}) {
+            const difficulty = getCardDifficulty(card);
+            const { rawBase } = computeRawBaseScore(card, options);
             return getDifficultyBufferedRaw(rawBase, difficulty);
         }
 
@@ -8452,24 +8495,18 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 c.difficulty = getCardDifficulty(c);
             }
 
+            const killTarget = getDynamicKillTarget(state.cards);
             const cardsWithRaw = state.cards.map((card) => ({
                 card,
-                raw: computeRawScore(card)
+                components: computeRawBaseScore(card, { killTarget }),
+                raw: computeRawScore(card, { killTarget })
             }));
-            cardsWithRaw.forEach(({ card, raw }) => {
+            cardsWithRaw.forEach(({ card, raw, components }) => {
                 const difficulty = getCardDifficulty(card);
-                const s = normalizeMissionStats(card?.stats, card);
-                let rawBase =
-                    (Number(s.kills ?? 0) * 0.7) +
-                    (Number(s.accuracy ?? 0) * 2.0) +
-                    (Number(s.stratUses ?? 0) * 3.0) +
-                    (Number(s.distanceKm ?? 0) * 4.0) -
-                    (Number(s.deaths ?? 0) * 12.0) -
-                    (Number(s.stims ?? 0) * 5.0);
-                if (!isFinite(rawBase)) rawBase = 0;
                 card.scoreRaw = raw;
-                card.scoreRawBase = Math.max(0, rawBase);
+                card.scoreRawBase = Math.max(0, Number(components?.rawBase || 0));
                 card.scoreRawBonusPercent = getDifficultyBonusPercent(difficulty);
+                card.scoreKillTarget = Math.round(Number(components?.killTarget || killTarget));
                 card.grade = 0;
             });
 
