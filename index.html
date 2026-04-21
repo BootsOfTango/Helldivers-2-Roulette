@@ -6343,14 +6343,14 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 });
             }
 
-            state.cards = normalizeCardsCollection(parsed.cards);
-            const migratedCardTiers = migrateCardDifficultyTiers(state.cards);
-            const migratedLegacyShots = migrateLegacyCardShots(state.cards);
+            const incomingCards = Array.isArray(parsed.cards) ? parsed.cards : [];
+            const incomingCardsResult = normalizeAndMigrateIncomingCards(incomingCards);
+            state.cards = incomingCardsResult.cards;
             if (parsed.settings && typeof parsed.settings === "object") {
                 state.settings.rememberedPlayerName = String(parsed.settings.rememberedPlayerName || "").trim();
             }
             normalizeItemWarbondAssignments();
-            if (migratedCardTiers || migratedLegacyShots) {
+            if (incomingCardsResult.migrated) {
                 saveState();
             }
         }
@@ -6652,6 +6652,16 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         function normalizeCardsCollection(cards) {
             if (!Array.isArray(cards)) return [];
             return cards.map(normalizeCardRecord).filter(Boolean);
+        }
+
+        function normalizeAndMigrateIncomingCards(cards) {
+            const normalized = normalizeCardsCollection(cards);
+            const migratedCardTiers = migrateCardDifficultyTiers(normalized);
+            const migratedLegacyShots = migrateLegacyCardShots(normalized);
+            return {
+                cards: normalized,
+                migrated: migratedCardTiers || migratedLegacyShots
+            };
         }
 
         function migrateCardDifficultyTiers(cards) {
@@ -12406,6 +12416,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                     stims: 0,
                     distanceKm: 0,
                     stratUses: 0,
+                    bulletCount: 0,
+                    shotsFired: 0,
                 },
 
                 majorOrderDone: false,
@@ -12454,7 +12466,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
 
         function exportJSON() {
-            const payload = JSON.stringify({ items: state.items, cards: state.cards }, null, 2);
+            const cardsForExport = normalizeAndMigrateIncomingCards(deepClone(state.cards)).cards;
+            const payload = JSON.stringify({ items: state.items, cards: cardsForExport }, null, 2);
             const filename = `hd2_roulette_backup_${new Date().toISOString().slice(0, 10)}.json`;
             download(filename, payload);
         }
@@ -12467,9 +12480,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                     if (!parsed || typeof parsed !== "object") throw new Error("bad");
                     if (parsed.items) state.items = parsed.items;
                     if (parsed.cards) {
-                        state.cards = normalizeCardsCollection(parsed.cards);
-                        migrateCardDifficultyTiers(state.cards);
-                        migrateLegacyCardShots(state.cards);
+                        state.cards = normalizeAndMigrateIncomingCards(parsed.cards).cards;
                     }
                     recalcGrades();
                     saveState();
