@@ -9924,11 +9924,18 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             { k: "deathsPlusStims", label: "Deaths + Stims (Endurance, low is good)" },
             { k: "distanceKm", label: "Distance km (Mobility)" },
             { k: "stratUses", label: "Strat uses (Utility)" },
-            { k: "shotsFired", label: "Democracy / Shots Fired" },
-            { k: "bulletCount", label: "Democracy / Shots Fired (count)" },
+            { k: "bulletCount", label: "Democracy / Shots Fired" },
             { k: "raw", label: "Raw score" }
         ]);
+        const COMPARE_METRIC_ALIASES = Object.freeze({
+            shotsFired: "bulletCount"
+        });
         const COMPARE_METRIC_KEYS = Object.freeze(COMPARE_METRICS.map((metric) => metric.k));
+
+        function normalizeCompareMetricKey(key, fallback = "kills") {
+            const normalized = COMPARE_METRIC_ALIASES[String(key || "")] || String(key || "");
+            return COMPARE_METRIC_KEYS.includes(normalized) ? normalized : fallback;
+        }
         const COMPARE_AXIS_META = Object.freeze(RADAR_AXES.map((axis, index) => ({
             index,
             key: axis.key,
@@ -10153,6 +10160,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             // Metric dropdowns for graph (optional; some builds remove the graph UI)
             const gx = $("#gX"), gy = $("#gY");
             if (gx && gy) {
+                const prevX = normalizeCompareMetricKey(gx.value, "kills");
+                const prevY = normalizeCompareMetricKey(gy.value, "deaths");
                 gx.innerHTML = ""; gy.innerHTML = "";
                 for (const m of COMPARE_METRICS) {
                     const ox = document.createElement("option");
@@ -10165,8 +10174,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                     oy.textContent = m.label;
                     gy.appendChild(oy);
                 }
-                gx.value = gx.value || "kills";
-                gy.value = gy.value || "deaths";
+                gx.value = normalizeCompareMetricKey(prevX, "kills");
+                gy.value = normalizeCompareMetricKey(prevY, "deaths");
             }
 
             renderCompare();
@@ -10174,17 +10183,18 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         }
 
         function metricValue(card, k) {
-            if (!COMPARE_METRIC_KEYS.includes(k) && k !== "majorOrderDone") return 0;
-            if (k === "grade") return Number(card.grade || 0);
-            if (k === "raw") return Number(card.scoreRaw || 0);
-            if (k === "difficulty") return getCardDifficulty(card);
             if (k === "majorOrderDone") return card?.majorOrderDone ? 1 : 0;
+            const metricKey = normalizeCompareMetricKey(k, "");
+            if (!metricKey) return 0;
+            if (metricKey === "grade") return Number(card.grade || 0);
+            if (metricKey === "raw") return Number(card.scoreRaw || 0);
+            if (metricKey === "difficulty") return getCardDifficulty(card);
 
             const s = card.stats || {};
-            if (k === "deathsPlusStims") return Number(s.deaths || 0) + Number(s.stims || 0);
-            if (k === "shotsFired" || k === "bulletCount") return Number(s.bulletCount ?? s.shotsFired ?? 0);
+            if (metricKey === "deathsPlusStims") return Number(s.deaths || 0) + Number(s.stims || 0);
+            if (metricKey === "bulletCount") return Number(s.bulletCount ?? s.shotsFired ?? 0);
 
-            return Number(s[k] || 0);
+            return Number(s[metricKey] || 0);
         }
 
         function getCardsForCompareScope(scope = "all") {
@@ -10228,7 +10238,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 { name: "Stims", k: "stims", better: "low" },
                 { name: "Distance (km)", k: "distanceKm", better: "high" },
                 { name: "Strat Uses", k: "stratUses", better: "high" },
-                { name: "Democracy / Shots Fired", k: "shotsFired", better: "high" },
+                { name: "Democracy / Shots Fired", k: "bulletCount", better: "high" },
                 { name: "Raw score", k: "raw", better: "high" },
             ];
 
@@ -10414,8 +10424,10 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             if (!$("#graphCanvas") || !$("#gX") || !$("#gY") || !$("#gFilterFaction") || !$("#gFilterMode") || !$("#gFilterHas")) return;
             wireGraphHover();
 
-            const xK = $("#gX").value;
-            const yK = $("#gY").value;
+            const xK = normalizeCompareMetricKey($("#gX").value, "kills");
+            const yK = normalizeCompareMetricKey($("#gY").value, "deaths");
+            $("#gX").value = xK;
+            $("#gY").value = yK;
             const fFaction = $("#gFilterFaction").value;
             const fMode = $("#gFilterMode").value;
             const contains = normalizeText($("#gFilterHas").value);
@@ -13022,6 +13034,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             // Metric dropdowns for graph
             const gx = $("#gX"), gy = $("#gY");
             if (gx && gy) {
+                const prevX = normalizeCompareMetricKey(gx.value, "kills");
+                const prevY = normalizeCompareMetricKey(gy.value, "deaths");
                 gx.innerHTML = ""; gy.innerHTML = "";
                 for (const m of COMPARE_METRICS) {
                     const ox = document.createElement("option");
@@ -13034,8 +13048,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                     oy.textContent = m.label;
                     gy.appendChild(oy);
                 }
-                gx.value = gx.value || "kills";
-                gy.value = gy.value || "deaths";
+                gx.value = normalizeCompareMetricKey(prevX, "kills");
+                gy.value = normalizeCompareMetricKey(prevY, "deaths");
             }
 
             renderCompare();
