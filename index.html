@@ -7829,13 +7829,12 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             // Axis order matches your screenshot-style labels:
             // Power, Agility, Endurance, Mobility, Utility
-            const vals = [
-                normPos(s.kills, maxes.maxKills),
-                normPos(s.accuracy, maxes.maxAccuracy),
-                normInverse(combo, maxes.minDeathsPlusStims, maxes.maxDeathsPlusStims),
-                normPos(s.distanceKm, maxes.maxDistanceKm),
-                normPos(s.stratUses, maxes.maxStratUses),
-            ];
+            const vals = RADAR_AXES.map((axis) => {
+                if (axis.normalize === "inverse") {
+                    return normInverse(combo, maxes[axis.minKey], maxes[axis.maxKey]);
+                }
+                return normPos(s[axis.statKey], maxes[axis.maxKey]);
+            });
 
             const renderSize = 250;
             const viewSize = 320;
@@ -7844,7 +7843,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const rOuter = 74;
             const r = rOuter;
 
-            const angles = [-90, -18, 54, 126, 198].map(a => a * Math.PI / 180);
+            const angles = getRadarAngles(RADAR_AXIS_KEYS.length);
 
             const pt = (radius, a) => ({
                 x: cx + radius * Math.cos(a),
@@ -7854,7 +7853,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const outerPts = angles.map(a => pt(rOuter, a));
             const valuePts = angles.map((a, i) => pt(r * vals[i], a));
             const labelRadius = rOuter + 30;
-            const axisLabels = ["POWER", "AGILITY", "ENDURANCE", "MOBILITY", "UTILITY"];
+            const axisLabels = RADAR_AXIS_LABELS;
 
             const fmt = (p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`;
             const polyOuter = outerPts.map(fmt).join(" ");
@@ -8083,29 +8082,40 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const combo = getEnduranceLoad(s);
             // Overlay comparisons must use raw stat-normalized values (no grade/MO scaling),
             // otherwise a stronger overall grade can incorrectly flip per-axis winners.
-            return [
-                normPos(s.kills, maxes.maxKills),
-                normPos(s.accuracy, maxes.maxAccuracy),
-                normInverse(combo, maxes.minDeathsPlusStims, maxes.maxDeathsPlusStims),
-                normPos(s.distanceKm, maxes.maxDistanceKm),
-                normPos(s.stratUses, maxes.maxStratUses),
-            ].map(v => clamp(v, 0, 1));
+            return RADAR_AXES.map((axis) => {
+                if (axis.normalize === "inverse") {
+                    return normInverse(combo, maxes[axis.minKey], maxes[axis.maxKey]);
+                }
+                return normPos(s[axis.statKey], maxes[axis.maxKey]);
+            }).map(v => clamp(v, 0, 1));
         }
 
         function getCompareMetricValue(card, axisKey) {
             const s = normalizeMissionStats(card?.stats, card);
-            if (axisKey === "POWER") return Number(s.kills || 0);
-            if (axisKey === "AGILITY") return Number(s.accuracy || 0);
-            if (axisKey === "ENDURANCE") return getEnduranceLoad(s);
-            if (axisKey === "MOBILITY") return Number(s.distanceKm || 0);
-            if (axisKey === "UTILITY") return Number(s.stratUses || 0);
-            return 0;
+            const axis = RADAR_AXES.find((entry) => entry.key === axisKey);
+            if (!axis) return 0;
+            if (axis.normalize === "inverse") return getEnduranceLoad(s);
+            return Number(s[axis.statKey] || 0);
+        }
+
+        function isLowerBetterCompareAxis(axisKey) {
+            const axis = RADAR_AXES.find((entry) => entry.key === axisKey);
+            return !!axis && axis.normalize === "inverse";
+        }
+
+        function getCompareAxes() {
+            return RADAR_AXES.map((axis) => ({
+                key: axis.key,
+                label: axis.label,
+                metric: axis.metric,
+                compareLabel: axis.compareLabel
+            }));
         }
 
         function getComparePercentDiff(cardA, cardB, axisKey) {
             const aRaw = getCompareMetricValue(cardA, axisKey);
             const bRaw = getCompareMetricValue(cardB, axisKey);
-            const lowerIsBetter = axisKey === "ENDURANCE";
+            const lowerIsBetter = isLowerBetterCompareAxis(axisKey);
 
             if (Math.abs(aRaw - bRaw) < 0.000001) {
                 return { winner: "tie", pctInt: 0 };
@@ -8173,15 +8183,9 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             }
 
             const size = 320, cx = 160, cy = 160, rOuter = 90;
-            const axes = [
-                { key: "POWER", label: "Power", metric: "Kills", compareLabel: "POWER" },
-                { key: "AGILITY", label: "Agility", metric: "Accuracy", compareLabel: "AGILITY" },
-                { key: "ENDURANCE", label: "Endurance", metric: "Deaths + Stims", compareLabel: "ENDURANCE" },
-                { key: "MOBILITY", label: "Mobility", metric: "Distance", compareLabel: "MOBILITY" },
-                { key: "UTILITY", label: "Utility", metric: "Strat uses", compareLabel: "UTILITY" },
-            ];
+            const axes = getCompareAxes();
             const axisStep = (Math.PI * 2) / axes.length;
-            const angles = axes.map((_, i) => (-Math.PI / 2) + (i * (Math.PI * 2 / axes.length)));
+            const angles = getRadarAngles(axes.length);
             const pt = (r, a) => ({ x: cx + r * Math.cos(a), y: cy + r * Math.sin(a) });
             const fmt = (p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`;
 
@@ -9769,6 +9773,34 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             });
         }
 
+        const MISSION_STAT_KEYS = Object.freeze(["kills", "accuracy", "deaths", "stims", "distanceKm", "stratUses"]);
+        const REQUIRED_SAVE_KEYS = Object.freeze([...MISSION_STAT_KEYS]);
+        const RADAR_AXES = Object.freeze([
+            { key: "POWER", label: "Power", metric: "Kills", compareLabel: "POWER", statKey: "kills", normalize: "pos", maxKey: "maxKills" },
+            { key: "AGILITY", label: "Agility", metric: "Accuracy", compareLabel: "AGILITY", statKey: "accuracy", normalize: "pos", maxKey: "maxAccuracy" },
+            { key: "ENDURANCE", label: "Endurance", metric: "Deaths + Stims", compareLabel: "ENDURANCE", normalize: "inverse", minKey: "minDeathsPlusStims", maxKey: "maxDeathsPlusStims" },
+            { key: "MOBILITY", label: "Mobility", metric: "Distance", compareLabel: "MOBILITY", statKey: "distanceKm", normalize: "pos", maxKey: "maxDistanceKm" },
+            { key: "UTILITY", label: "Utility", metric: "Strat uses", compareLabel: "UTILITY", statKey: "stratUses", normalize: "pos", maxKey: "maxStratUses" },
+        ]);
+        const RADAR_AXIS_KEYS = Object.freeze(RADAR_AXES.map((axis) => axis.key));
+        const RADAR_AXIS_LABELS = Object.freeze([...RADAR_AXIS_KEYS]);
+
+        const COMPARE_METRICS = Object.freeze([
+            { k: "grade", label: "Grade (0-100)" },
+            { k: "difficulty", label: "Difficulty (D1-D10)" },
+            { k: "kills", label: "Kills (Power)" },
+            { k: "accuracy", label: "Accuracy (Agility)" },
+            { k: "deathsPlusStims", label: "Deaths + Stims (Endurance, low is good)" },
+            { k: "distanceKm", label: "Distance km (Mobility)" },
+            { k: "stratUses", label: "Strat uses (Utility)" },
+            { k: "raw", label: "Raw score" }
+        ]);
+        const COMPARE_METRIC_KEYS = Object.freeze(COMPARE_METRICS.map((metric) => metric.k));
+
+        function getRadarAngles(axisCount) {
+            return Array.from({ length: axisCount }, (_, i) => (-Math.PI / 2) + (i * (Math.PI * 2 / axisCount)));
+        }
+
         async function sendCardToDiscord(card) {
             void card;
             alert("Discord webhook integration is currently disabled.");
@@ -9787,13 +9819,11 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const draft = getMissionStatsDraft(id);
             if (!draft) return;
 
-            const STAT_KEYS = ["kills", "accuracy", "deaths", "stims", "distanceKm", "stratUses"];
-
             if (key === "majorOrderDone") {
                 draft.majorOrderDone = (el.value === "true");
             } else if (key === "originalNote") {
                 draft.originalNote = el.value;
-            } else if (STAT_KEYS.includes(key)) {
+            } else if (MISSION_STAT_KEYS.includes(key)) {
                 draft.stats[key] = Number(el.value || 0);
             }
         }
@@ -9807,8 +9837,6 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             const scope = rootEl || document;
             const fields = scope.querySelectorAll(`[data-id="${cardId}"][data-k]`);
-            const STAT_KEYS = ["kills", "accuracy", "deaths", "stims", "distanceKm", "stratUses"];
-
             fields.forEach(el => {
                 const key = el.getAttribute("data-k");
                 if (!key) return;
@@ -9816,7 +9844,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                     draft.majorOrderDone = (String(el.value) === "true");
                 } else if (key === "originalNote") {
                     draft.originalNote = el.value;
-                } else if (STAT_KEYS.includes(key)) {
+                } else if (MISSION_STAT_KEYS.includes(key)) {
                     if (!draft.stats || typeof draft.stats !== "object") draft.stats = {};
                     draft.stats[key] = Number(el.value || 0);
                 }
@@ -9880,8 +9908,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 syncCardFromResultInputs(id, sourceRoot);
                 const draft = getMissionStatsDraft(id);
                 if (!draft) return;
-                const requiredKeys = ["kills", "accuracy", "deaths", "stims", "distanceKm", "stratUses"];
-                const hasEmptyStatInput = requiredKeys.some((k) => {
+                const hasEmptyStatInput = REQUIRED_SAVE_KEYS.some((k) => {
                     const el = sourceRoot.querySelector(`[data-id="${id}"][data-k="${k}"]`);
                     return !el || !String(el.value || "").trim();
                 });
@@ -9939,17 +9966,6 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         /***********************
          * Compare
          ***********************/
-        const METRICS = [
-            { k: "grade", label: "Grade (0-100)" },
-            { k: "difficulty", label: "Difficulty (D1-D10)" },
-            { k: "kills", label: "Kills (Power)" },
-            { k: "accuracy", label: "Accuracy (Agility)" },
-            { k: "deathsPlusStims", label: "Deaths + Stims (Endurance, low is good)" },
-            { k: "distanceKm", label: "Distance km (Mobility)" },
-            { k: "stratUses", label: "Strat uses (Utility)" },
-            { k: "raw", label: "Raw score" }
-        ];
-
         function refreshCompareOptions() {
             const a = $("#cmpA"), b = $("#cmpB");
             if (!a || !b) return;
@@ -9991,7 +10007,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const gx = $("#gX"), gy = $("#gY");
             if (gx && gy) {
                 gx.innerHTML = ""; gy.innerHTML = "";
-                for (const m of METRICS) {
+                for (const m of COMPARE_METRICS) {
                     const ox = document.createElement("option");
                     ox.value = m.k;
                     ox.textContent = m.label;
@@ -10011,6 +10027,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         }
 
         function metricValue(card, k) {
+            if (!COMPARE_METRIC_KEYS.includes(k) && k !== "majorOrderDone") return 0;
             if (k === "grade") return Number(card.grade || 0);
             if (k === "raw") return Number(card.scoreRaw || 0);
             if (k === "difficulty") return getCardDifficulty(card);
@@ -10381,7 +10398,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
 
         function metricLabel(k) {
-            const m = METRICS.find(x => x.k === k);
+            const m = COMPARE_METRICS.find(x => x.k === k);
             return m ? m.label : k;
         }
 
@@ -12855,7 +12872,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const gx = $("#gX"), gy = $("#gY");
             if (gx && gy) {
                 gx.innerHTML = ""; gy.innerHTML = "";
-                for (const m of METRICS) {
+                for (const m of COMPARE_METRICS) {
                     const ox = document.createElement("option");
                     ox.value = m.k;
                     ox.textContent = m.label;
