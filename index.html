@@ -6489,7 +6489,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 Number(s.deaths || 0).toFixed(4),
                 Number(s.stims || 0).toFixed(4),
                 Number(s.distanceKm || 0).toFixed(4),
-                Number(s.stratUses || 0).toFixed(4)
+                Number(s.stratUses || 0).toFixed(4),
+                Number(s.bulletCount ?? s.shotsFired ?? 0).toFixed(4)
             ].join("|");
         }
 
@@ -9190,6 +9191,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                       <div><div class="label">Stims</div><input type="number" min="0" value="${Number(draft.stats?.stims || 0)}" data-k="stims" data-id="${card.id}" ${editingLocked ? "disabled" : ""}></div>
                       <div><div class="label">Distance (km)</div><input type="number" min="0" step="0.1" value="${Number(draft.stats?.distanceKm || 0)}" data-k="distanceKm" data-id="${card.id}" ${editingLocked ? "disabled" : ""}></div>
                       <div><div class="label">Strat Uses</div><input type="number" min="0" value="${Number(draft.stats?.stratUses || 0)}" data-k="stratUses" data-id="${card.id}" ${editingLocked ? "disabled" : ""}></div>
+                      <div><div class="label">Shots Fired</div><input type="number" min="0" value="${Number(draft.stats?.bulletCount ?? draft.stats?.shotsFired ?? 0)}" data-k="bulletCount" data-id="${card.id}" ${editingLocked ? "disabled" : ""}></div>
                     </div>
 
                     <div class="modalMoNotesRow">
@@ -9802,7 +9804,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             });
         }
 
-        const MISSION_STAT_KEYS = Object.freeze(["kills", "accuracy", "deaths", "stims", "distanceKm", "stratUses"]);
+        const MISSION_STAT_KEYS = Object.freeze(["kills", "accuracy", "deaths", "stims", "distanceKm", "stratUses", "bulletCount"]);
         const REQUIRED_SAVE_KEYS = Object.freeze([...MISSION_STAT_KEYS]);
         const RADAR_AXES = Object.freeze([
             { key: "POWER", label: "Power", metric: "Kills", compareLabel: "POWER", statKey: "kills", normalize: "pos", maxKey: "maxKills", baselineKey: "kills", discordValue: (s) => `${Number(s.kills || 0)} kills` },
@@ -9982,13 +9984,15 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const draft = state.ui.resultCardDrafts?.[cardId];
             if (!draft) return;
 
-            card.stats = normalizeMissionStats(draft.stats, card);
+            const normalizedStats = normalizeMissionStats(draft.stats, card);
+            draft.stats = normalizedStats;
+            card.stats = normalizedStats;
             card.majorOrderDone = !!draft.majorOrderDone;
             card.originalNote = String(draft.originalNote || "");
             card.notes = card.originalNote;
             card.statsLocked = true;
             card.statsLockedAt = nowISO();
-            card.lockedStatsSnapshot = normalizeMissionStats(card.stats, card);
+            card.lockedStatsSnapshot = normalizeMissionStats(normalizedStats, card);
 
             recalcGrades();
             saveState();
