@@ -6210,6 +6210,71 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         let activeResultsDifficultyTier = "";
         let activeResultsDifficultyLevel = null;
         const manualPlanetSearchGroupState = new Map();
+        const BULLET_MULTIPLIER_FLAG = Object.seal({
+            enabled: true,
+            disabledReason: "",
+            samples: []
+        });
+
+        function isBulletMultiplierEnabled() {
+            return BULLET_MULTIPLIER_FLAG.enabled === true;
+        }
+
+        function captureBulletMultiplierSample(sample) {
+            const safeSample = (sample && typeof sample === "object") ? sample : {};
+            BULLET_MULTIPLIER_FLAG.samples.push({
+                at: nowISO(),
+                cardId: safeSample.cardId || null,
+                bullets: Number(safeSample.bullets || 0),
+                killTarget: Number(safeSample.killTarget || 0),
+                lowBulletFactor: Number(safeSample.lowBulletFactor || 0),
+                highBulletFactor: Number(safeSample.highBulletFactor || 0),
+                stratUsageFactor: Number(safeSample.stratUsageFactor || 0),
+                killsAboveTargetRatio: Number(safeSample.killsAboveTargetRatio || 0),
+                multipliersEnabled: isBulletMultiplierEnabled()
+            });
+            if (BULLET_MULTIPLIER_FLAG.samples.length > 300) {
+                BULLET_MULTIPLIER_FLAG.samples.shift();
+            }
+        }
+
+        function disableBulletMultipliers(reason, context) {
+            if (!isBulletMultiplierEnabled()) return;
+            BULLET_MULTIPLIER_FLAG.enabled = false;
+            BULLET_MULTIPLIER_FLAG.disabledReason = `${String(context || "unknown")}: ${String(reason || "sanity check failed")}`;
+            console.warn("[score] bullet multiplier disabled", {
+                context: String(context || ""),
+                reason: String(reason || "sanity check failed")
+            });
+        }
+
+        function runBulletMultiplierSanityChecks(context = "") {
+            const checkContext = String(context || "unknown");
+            const cards = Array.isArray(state.cards) ? state.cards : [];
+            const hasNormalizedBulletCount = cards.every((card) => {
+                const normalized = normalizeMissionStats(card?.stats, card);
+                const stats = (card?.stats && typeof card.stats === "object") ? card.stats : {};
+                const candidate = Number(stats.bulletCount ?? stats.shotsFired ?? Number.NaN);
+                return Number.isFinite(candidate)
+                    && candidate >= 0
+                    && candidate <= 15000
+                    && Math.abs(candidate - Number(normalized.bulletCount || 0)) < 1e-6;
+            });
+            const compareIncludesBulletCount = COMPARE_METRIC_KEYS.includes("bulletCount");
+            const radarAxisCountOk = (RADAR_AXES.length === 6)
+                && (COMPARE_AXIS_META.length === 6)
+                && (RADAR_AXIS_KEYS.length === 6);
+
+            if (!hasNormalizedBulletCount) {
+                disableBulletMultipliers("every card must have normalized bulletCount", checkContext);
+            }
+            if (!compareIncludesBulletCount) {
+                disableBulletMultipliers("compare metrics must include bulletCount", checkContext);
+            }
+            if (!radarAxisCountOk) {
+                disableBulletMultipliers("radar axis count must be 6 for card/compare/discord", checkContext);
+            }
+        }
 
         function loadItemImageDb() {
             return fetch("assets/item-images.json")
@@ -7756,6 +7821,16 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const lowBulletFactor = clamp((2000 - bullets) / 2000, 0, 1);
             const highBulletFactor = clamp((bullets - 2000) / 3000, 0, 1.4);
             const stratUsageFactor = clamp(stratUses / 24, 0, 1.1);
+            const bulletMultiplierCapture = {
+                cardId: card?.id || null,
+                bullets,
+                killTarget,
+                lowBulletFactor,
+                highBulletFactor,
+                stratUsageFactor,
+                killsAboveTargetRatio
+            };
+            captureBulletMultiplierSample(bulletMultiplierCapture);
 
             // Utility gets a bounded multiplier from bullet discipline, strat usage, and kills above target.
             const utilityMultiplier = clamp(
@@ -7763,7 +7838,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 0.9,
                 1.6
             );
-            const utilityScore = ((stratUses * 3.0) + (distanceKm * 4.0)) * utilityMultiplier;
+            const activeUtilityMultiplier = isBulletMultiplierEnabled() ? utilityMultiplier : 1;
+            const utilityScore = ((stratUses * 3.0) + (distanceKm * 4.0)) * activeUtilityMultiplier;
 
             const highBulletPenalty = highBulletFactor * 18;
             const lowAccuracyAgilityPenalty = (accuracy < 40)
@@ -8536,6 +8612,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 });
             });
             assertLockedStatsDeterminism("recalcGrades:after");
+            runBulletMultiplierSanityChecks("recalcGrades");
         }
 
         /***********************
@@ -8927,6 +9004,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             if (!list.length) {
                 closeResultCardModal();
                 grid.innerHTML = `<div class="tiny">No cards yet. Go spin something awful and commit to it.</div>`;
+                runBulletMultiplierSanityChecks("renderResults:empty");
                 return;
             }
 
@@ -8995,6 +9073,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             });
 
             refreshCompareOptions();
+            runBulletMultiplierSanityChecks("renderResults");
         }
 
         function getAllTierResultsTotals() {
@@ -9323,6 +9402,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         const DISCORD_CARD_SCALE = 4;
 
         function discordCardMarkup(card) {
+            runBulletMultiplierSanityChecks("discordCardMarkup");
             const s = card.stats || {};
             const combo = Number(s.deaths || 0) + Number(s.stims || 0);
             const radar = buildRadarSVG(card, getRadarMaxes(state.cards || []));
@@ -9696,6 +9776,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         }
 
         async function drawDiscordRankPanelCanvas(card) {
+            runBulletMultiplierSanityChecks("drawDiscordRankPanelCanvas");
             const baseWidth = 1200;
             const baseHeight = 1200;
             const DISCORD_RANK_PANEL_SCALE = 1.2;
@@ -10183,6 +10264,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                               </tr>
                             `);
             }
+            runBulletMultiplierSanityChecks("renderCompare");
         }
 
         // --- Graph hover state (global) ---
