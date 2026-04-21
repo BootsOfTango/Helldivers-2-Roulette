@@ -1121,6 +1121,18 @@ END MASTER DIRECTIVE
             background: rgba(255,106,117,.14);
         }
 
+        .tier-cadet {
+            color: #60f9a8;
+        }
+
+        .tier-veteran {
+            color: #ffbf66;
+        }
+
+        .tier-helldive {
+            color: #ff6a75;
+        }
+
         .resultSummaryMetaGrid {
             margin-top: 6px;
             display: grid;
@@ -3285,8 +3297,8 @@ END MASTER DIRECTIVE
             position: sticky;
             top: 110px;
             align-self: start;
-            max-height: none;
-            overflow: visible;
+            max-height: calc(100vh - 128px);
+            overflow: auto;
         }
 
         @media (min-width: 960px) {
@@ -3368,32 +3380,32 @@ END MASTER DIRECTIVE
         .rankDetailItemCard {
             border: 1px solid var(--line2);
             border-radius: 12px;
-            padding: 6px;
+            padding: 5px;
             background: rgba(0,0,0,.22);
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: 3px;
             align-items: center;
             min-width: 0;
         }
 
             .rankDetailItemCard img {
                 width: 100%;
-                max-width: 86px;
+                max-width: 72px;
                 aspect-ratio: 1 / 1;
                 object-fit: contain;
                 background: rgba(0,0,0,.35);
                 border-radius: 10px;
                 border: 1px solid var(--line2);
-                padding: 4px;
+                padding: 3px;
             }
 
         .rankDetailItemCard.kind-booster img {
-            max-width: 74px;
+            max-width: 64px;
         }
 
         .rankDetailItemCard.kind-stratagem img {
-            max-width: 68px;
+            max-width: 58px;
         }
 
         .rankDetailItemName {
@@ -3439,6 +3451,26 @@ END MASTER DIRECTIVE
             font-weight: 700;
             line-height: 1.25;
             overflow-wrap: anywhere;
+        }
+
+        .rankDetailMetaValue.tier-cadet {
+            color: #60f9a8;
+        }
+
+        .rankDetailMetaValue.tier-veteran {
+            color: #ffbf66;
+        }
+
+        .rankDetailMetaValue.tier-helldive {
+            color: #ff6a75;
+        }
+
+        .rankDetailMetaValue.condition-alert {
+            color: #ff8a8a;
+        }
+
+        .rankDetailMetaValue.condition-weather {
+            color: #8fd0ff;
         }
 
         .rankDetailSectionTitle {
@@ -6421,6 +6453,10 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const createdAtText = normalizedCard.createdAt ? new Date(normalizedCard.createdAt).toLocaleString() : "—";
             const comments = Array.isArray(normalizedCard.commentNotes) ? normalizedCard.commentNotes : [];
             const latestComments = comments.slice(-2);
+            const difficultyClass = `tier-${cardDifficultyTier}`;
+            const conditionClass = getConditionClass(weatherTags.length ? weatherTags.join(" • ") : weatherText);
+            const factionClass = getFactionClass(normalizedCard.faction);
+            const modeClass = getModeClass(normalizedCard.mode);
 
             const makeItemCard = (label, value, kind) => {
                 const visual = getItemVisual(value, kind);
@@ -6438,7 +6474,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const metaCard = (label, value, extraClass = "") => `
                 <div class="rankDetailMetaCard ${extraClass}">
                     <div class="rankDetailMetaLabel">${escapeHtml(label)}</div>
-                    <div class="rankDetailMetaValue">${escapeHtml(value)}</div>
+                    <div class="rankDetailMetaValue ${extraClass}">${escapeHtml(value)}</div>
                 </div>
             `;
 
@@ -6446,7 +6482,12 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 <div class="rankDetailHeader">
                     <div>
                         <div style="font-weight:900;">#${place} • ${escapeHtml(formatSeedWithPlayer(normalizedCard))}</div>
-                        <div class="tiny muted">${escapeHtml(normalizedCard.mode)} • ${escapeHtml(normalizedCard.faction)} • ${escapeHtml(getPlayerName(normalizedCard))} • ${escapeHtml(formatDifficultyLabel(normalizedCard))}</div>
+                        <div class="tiny muted">
+                            <span class="${modeClass}">${escapeHtml(normalizedCard.mode)}</span> •
+                            <span class="${factionClass}">${escapeHtml(normalizedCard.faction)}</span> •
+                            ${escapeHtml(getPlayerName(normalizedCard))} •
+                            <span class="${difficultyClass}">${escapeHtml(formatDifficultyLabel(normalizedCard))}</span>
+                        </div>
                     </div>
                     <div class="rankDetailFactionIconWrap" aria-label="${escapeHtml(factionStickerData.label)}">
                         ${factionStickerData.image
@@ -6463,12 +6504,13 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 <div class="rankDetailMetaGrid">
                     ${metaCard("Seed", getSeedDisplayName(normalizedCard))}
                     ${metaCard("Player", getPlayerName(normalizedCard))}
-                    ${metaCard("Difficulty", formatDifficultyTopLabel(normalizedCard))}
+                    ${metaCard("Difficulty", formatDifficultyTopLabel(normalizedCard), difficultyClass)}
                     ${metaCard("Date", createdAtText)}
+                    ${metaCard("Faction", normalizedCard.faction || "—", factionClass)}
                     ${metaCard("Planet", planetName)}
                     ${metaCard("Sector", sectorName)}
                     ${metaCard("Biome", biomeName)}
-                    ${metaCard("Conditions", weatherTags.length ? weatherTags.join(" • ") : weatherText)}
+                    ${metaCard("Conditions", weatherTags.length ? weatherTags.join(" • ") : weatherText, conditionClass)}
                 </div>
 
                 <div class="rankDetailSectionTitle">Loadout</div>
@@ -8855,6 +8897,13 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             if (m === "Defense (20)" || m === "Defense (20min)") return "mode-defense";
             if (m === "Eradication (15)") return "mode-eradication";
             if (m === "Rapid Acquisition (15)") return "mode-rapid-acquisition";
+            return "";
+        }
+        function getConditionClass(conditionsText) {
+            const text = String(conditionsText || "").toLowerCase();
+            if (!text || text === "none") return "";
+            if (/blizzard|storm|fire tornado|fog|rain|sand|meteor|volcanic/.test(text)) return "condition-weather";
+            if (/extreme|acid|ion|heat|cold|tremor/.test(text)) return "condition-alert";
             return "";
         }
         function getFactionStickerData(faction) {
