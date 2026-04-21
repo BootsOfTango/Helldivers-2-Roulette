@@ -6343,11 +6343,12 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             state.cards = normalizeCardsCollection(parsed.cards);
             const migratedCardTiers = migrateCardDifficultyTiers(state.cards);
+            const migratedLegacyShots = migrateLegacyCardShots(state.cards);
             if (parsed.settings && typeof parsed.settings === "object") {
                 state.settings.rememberedPlayerName = String(parsed.settings.rememberedPlayerName || "").trim();
             }
             normalizeItemWarbondAssignments();
-            if (migratedCardTiers) {
+            if (migratedCardTiers || migratedLegacyShots) {
                 saveState();
             }
         }
@@ -6404,6 +6405,9 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             // Normalize any mismatched faction strings from defaults/imports/saves
             sanitizeFactionData();
+            if (migrateLegacyCardShots(state.cards)) {
+                saveState();
+            }
             refreshLockedStatsBaseline();
             try {
                 const savedAuditRaw = localStorage.getItem(STORAGE_LOCKED_STATS_AUDIT_KEY);
@@ -6450,6 +6454,10 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 const n = Number(v ?? 0);
                 return Number.isFinite(n) ? n : 0;
             };
+            const clampStat = (value, min, max = Number.POSITIVE_INFINITY) => {
+                const n = toFiniteNumber(value);
+                return Math.min(max, Math.max(min, n));
+            };
             const source = (stats && typeof stats === "object") ? stats : {};
             const fallbackSource = (fallback && typeof fallback === "object") ? fallback : {};
             const out = { ...source };
@@ -6462,12 +6470,14 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 return 0;
             };
 
-            out.kills = toFiniteNumber(firstPresent("kills", "power"));
-            out.accuracy = toFiniteNumber(firstPresent("accuracy", "agility"));
-            out.deaths = toFiniteNumber(firstPresent("deaths", "endurance"));
-            out.stims = toFiniteNumber(firstPresent("stims"));
-            out.distanceKm = toFiniteNumber(firstPresent("distanceKm", "mobility"));
-            out.stratUses = toFiniteNumber(firstPresent("stratUses", "utility"));
+            out.kills = clampStat(firstPresent("kills", "power"), 0);
+            out.accuracy = clampStat(firstPresent("accuracy", "agility"), 0, 100);
+            out.deaths = clampStat(firstPresent("deaths", "endurance"), 0);
+            out.stims = clampStat(firstPresent("stims"), 0);
+            out.distanceKm = clampStat(firstPresent("distanceKm", "mobility"), 0, 20);
+            out.stratUses = clampStat(firstPresent("stratUses", "utility"), 0);
+            out.bulletCount = clampStat(firstPresent("bulletCount", "shotsFired"), 0, 15000);
+            out.shotsFired = out.bulletCount;
             return out;
         }
 
@@ -6655,6 +6665,31 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 if (card.difficultyTier !== beforeTier || hadLegacyTierTag || hadLegacyTier) {
                     changed = true;
                 }
+            });
+            return changed;
+        }
+
+        function migrateLegacyCardShots(cards) {
+            if (!Array.isArray(cards)) return false;
+            let changed = false;
+            cards.forEach((card) => {
+                if (!card || typeof card !== "object") return;
+                const legacyMissingShots = (
+                    (!card.stats || typeof card.stats !== "object" || (!Object.prototype.hasOwnProperty.call(card.stats, "bulletCount") && !Object.prototype.hasOwnProperty.call(card.stats, "shotsFired")))
+                    && (!card.lockedStatsSnapshot || typeof card.lockedStatsSnapshot !== "object" || (!Object.prototype.hasOwnProperty.call(card.lockedStatsSnapshot, "bulletCount") && !Object.prototype.hasOwnProperty.call(card.lockedStatsSnapshot, "shotsFired")))
+                );
+                if (!legacyMissingShots) return;
+                if (!card.stats || typeof card.stats !== "object") card.stats = {};
+                card.stats.bulletCount = 500;
+                card.stats.shotsFired = 500;
+                if (card.statsLocked) {
+                    if (!card.lockedStatsSnapshot || typeof card.lockedStatsSnapshot !== "object") {
+                        card.lockedStatsSnapshot = {};
+                    }
+                    card.lockedStatsSnapshot.bulletCount = 500;
+                    card.lockedStatsSnapshot.shotsFired = 500;
+                }
+                changed = true;
             });
             return changed;
         }
@@ -12359,6 +12394,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                     if (parsed.cards) {
                         state.cards = normalizeCardsCollection(parsed.cards);
                         migrateCardDifficultyTiers(state.cards);
+                        migrateLegacyCardShots(state.cards);
                     }
                     recalcGrades();
                     saveState();
