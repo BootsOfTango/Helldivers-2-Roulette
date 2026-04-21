@@ -3411,6 +3411,81 @@ END MASTER DIRECTIVE
             margin-top: 8px;
         }
 
+        .rankDetailMetaGrid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 6px;
+            margin-top: 8px;
+        }
+
+        .rankDetailMetaCard {
+            border: 1px solid var(--line2);
+            border-radius: 10px;
+            background: rgba(0,0,0,.2);
+            padding: 6px 8px;
+            min-width: 0;
+        }
+
+        .rankDetailMetaLabel {
+            font-size: 10px;
+            letter-spacing: .35px;
+            color: var(--muted);
+            text-transform: uppercase;
+        }
+
+        .rankDetailMetaValue {
+            margin-top: 2px;
+            font-size: 12px;
+            font-weight: 700;
+            line-height: 1.25;
+            overflow-wrap: anywhere;
+        }
+
+        .rankDetailSectionTitle {
+            margin-top: 10px;
+            margin-bottom: 2px;
+            font-size: 11px;
+            letter-spacing: .45px;
+            text-transform: uppercase;
+            color: rgba(255,255,255,.88);
+            font-weight: 800;
+        }
+
+        .rankDetailStatsGrid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 6px;
+            margin-top: 8px;
+        }
+
+        .rankDetailTextBlock {
+            margin-top: 8px;
+            border: 1px solid var(--line2);
+            border-radius: 10px;
+            background: rgba(0,0,0,.18);
+            padding: 8px;
+        }
+
+        .rankDetailTextBlock .rankDetailMetaValue {
+            margin-top: 4px;
+            font-size: 11px;
+            white-space: pre-wrap;
+        }
+
+        .rankDetailCommentList {
+            margin: 4px 0 0;
+            padding-left: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .rankDetailCommentList li {
+            font-size: 11px;
+            line-height: 1.3;
+            color: rgba(255,255,255,.9);
+        }
+
         .itemInsightCards {
             display: grid;
             grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -3625,6 +3700,12 @@ END MASTER DIRECTIVE
             }
 
             .rankDetailLoadout {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .rankDetailStrats,
+            .rankDetailMetaGrid,
+            .rankDetailStatsGrid {
                 grid-template-columns: repeat(2, minmax(0, 1fr));
             }
         }
@@ -6331,6 +6412,15 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const cardDifficultyTier = resolveCardDifficultyTier(normalizedCard);
             const radarPlacementTier = isAllTierScope ? placementTier : cardDifficultyTier;
             const factionStickerData = getFactionStickerData(normalizedCard.faction);
+            const safeStats = normalizeMissionStats(normalizedCard.stats, normalizedCard);
+            const planetName = normalizedCard.planet?.name || "—";
+            const sectorName = normalizedCard.planet?.sector || "—";
+            const biomeName = normalizedCard.planet ? (normalizedCard.planetBiome || getPlanetBiomeFromPlanet(normalizedCard.planet) || "—") : "—";
+            const weatherText = normalizedCard.planet ? (getPlanetWeatherText(normalizedCard.planet) || "None") : "None";
+            const weatherTags = splitWeatherTags(weatherText);
+            const createdAtText = normalizedCard.createdAt ? new Date(normalizedCard.createdAt).toLocaleString() : "—";
+            const comments = Array.isArray(normalizedCard.commentNotes) ? normalizedCard.commentNotes : [];
+            const latestComments = comments.slice(-2);
 
             const makeItemCard = (label, value, kind) => {
                 const visual = getItemVisual(value, kind);
@@ -6345,6 +6435,12 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             };
 
             const strats = (Array.isArray(normalizedCard.stratagems) ? normalizedCard.stratagems : []).map(s => makeItemCard("Stratagem", s, "stratagem")).join("");
+            const metaCard = (label, value, extraClass = "") => `
+                <div class="rankDetailMetaCard ${extraClass}">
+                    <div class="rankDetailMetaLabel">${escapeHtml(label)}</div>
+                    <div class="rankDetailMetaValue">${escapeHtml(value)}</div>
+                </div>
+            `;
 
             panel.innerHTML = `
                 <div class="rankDetailHeader">
@@ -6364,7 +6460,18 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                     ${buildRadarSVG(normalizedCard, radarMaxes, { placementTier: radarPlacementTier })}
                 </div>
 
-                <div style="margin-top:10px;" class="label">Loadout</div>
+                <div class="rankDetailMetaGrid">
+                    ${metaCard("Seed", getSeedDisplayName(normalizedCard))}
+                    ${metaCard("Player", getPlayerName(normalizedCard))}
+                    ${metaCard("Difficulty", formatDifficultyTopLabel(normalizedCard))}
+                    ${metaCard("Date", createdAtText)}
+                    ${metaCard("Planet", planetName)}
+                    ${metaCard("Sector", sectorName)}
+                    ${metaCard("Biome", biomeName)}
+                    ${metaCard("Conditions", weatherTags.length ? weatherTags.join(" • ") : weatherText)}
+                </div>
+
+                <div class="rankDetailSectionTitle">Loadout</div>
                 <div class="rankDetailLoadout">
                     ${makeItemCard("Primary", normalizedCard.primary, "primary")}
                     ${makeItemCard("Sidearm", normalizedCard.sidearm, "sidearm")}
@@ -6372,9 +6479,33 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                     ${makeItemCard("Booster", normalizedCard.booster, "booster")}
                 </div>
 
-                <div style="margin-top:10px;" class="label">Stratagems</div>
+                <div class="rankDetailSectionTitle">Stratagems</div>
                 <div class="rankDetailStrats">
                     ${strats || `<div class="tiny muted">No stratagem data.</div>`}
+                </div>
+
+                <div class="rankDetailSectionTitle">Mission stats</div>
+                <div class="rankDetailStatsGrid">
+                    ${metaCard("Kills", String(Number(safeStats.kills || 0)))}
+                    ${metaCard("Accuracy (%)", String(Number(safeStats.accuracy || 0)))}
+                    ${metaCard("Deaths", String(Number(safeStats.deaths || 0)))}
+                    ${metaCard("Stims", String(Number(safeStats.stims || 0)))}
+                    ${metaCard("Democracy / Shots", String(Number(safeStats.bulletCount ?? safeStats.shotsFired ?? 0)))}
+                    ${metaCard("Strat Uses", String(Number(safeStats.stratUses || 0)))}
+                    ${metaCard("Distance (km)", String(Number(safeStats.distanceKm || 0)))}
+                    ${metaCard("MO", normalizedCard.majorOrderDone == null ? "N/A" : (normalizedCard.majorOrderDone ? "Success" : "Fail"))}
+                </div>
+
+                <div class="rankDetailTextBlock">
+                    <div class="rankDetailMetaLabel">Original run note</div>
+                    <div class="rankDetailMetaValue">${escapeHtml(String(normalizedCard.originalNote || normalizedCard.notes || "No note saved."))}</div>
+                </div>
+
+                <div class="rankDetailTextBlock">
+                    <div class="rankDetailMetaLabel">Additional comments</div>
+                    ${latestComments.length
+                        ? `<ul class="rankDetailCommentList">${latestComments.map(comment => `<li>${escapeHtml(String(comment?.text || ""))}</li>`).join("")}</ul>`
+                        : `<div class="rankDetailMetaValue">No additional comments.</div>`}
                 </div>
             `;
         }
