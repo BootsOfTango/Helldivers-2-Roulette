@@ -91,7 +91,7 @@ After mission completion user enters stats.
 8. CARD ACTIVATION
 After saving stats:
 - card becomes ACTIVE dataset
-- radar pentagon generated
+- radar chart generated
 - rank system includes card
 - tier color applied
 
@@ -131,7 +131,7 @@ If SUCCESS:
 
 If FAIL:
 - ALL ranking values reduced by 25%
-- radar pentagon scaled to 75%
+- radar chart scaled to 75%
 - ranking score reduced equally
 
 IMPORTANT:
@@ -153,7 +153,7 @@ Once ranked:
 
 Tier color MUST apply consistently to:
 - Card rim
-- Radar pentagon stroke/fill
+- Radar chart stroke/fill
 - Seed name text
 - Rank display
 - Compare visualization
@@ -188,7 +188,7 @@ Click ranked card →
 Two comparison slots displayed horizontally.
 
 Each slot shows:
-- Enlarged radar pentagon
+- Enlarged radar chart
 - LARGE readable stat labels at each vertex
 (no tiny text)
 
@@ -7780,7 +7780,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         }
 
         /***********************
-         * Pentagon / Radar chart helpers (per-card SVG)
+         * Radar chart helpers (per-card SVG)
          ***********************/
         function normPos(v, maxV) {
             v = Number(v || 0);
@@ -7815,35 +7815,52 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
         // Baseline caps keep radar shape meaningful even when there is only one saved card.
         // Without these floors, single-card normalization makes every axis look "maxed",
-        // which collapses the pentagon into a misleading near-regular shape.
+        // which collapses the radar into a misleading near-regular polygon.
         const RADAR_BASELINE_MAXES = {
             kills: 300,
             accuracy: 100,
             distanceKm: 12,
             stratUses: 30,
-            deathsPlusStims: 16
+            deathsPlusStims: 16,
+            bulletCount: 5000
         };
 
+        function getRadarAxisRawValue(stats, axis) {
+            if (axis.normalize === "inverse") return getEnduranceLoad(stats);
+            return Number(stats?.[axis.statKey] || 0);
+        }
+
+        function getRadarAxisNormalizedValue(stats, axis, maxes) {
+            const raw = getRadarAxisRawValue(stats, axis);
+            if (axis.normalize === "inverse") {
+                return normInverse(raw, maxes[axis.minKey], maxes[axis.maxKey]);
+            }
+            return normPos(raw, maxes[axis.maxKey]);
+        }
+
         function getRadarMaxes(cards) {
-            const out = {
-                maxKills: RADAR_BASELINE_MAXES.kills,
-                maxAccuracy: RADAR_BASELINE_MAXES.accuracy,
-                maxDistanceKm: RADAR_BASELINE_MAXES.distanceKm,
-                maxStratUses: RADAR_BASELINE_MAXES.stratUses,
-                minDeathsPlusStims: 0,
-                maxDeathsPlusStims: RADAR_BASELINE_MAXES.deathsPlusStims
-            };
+            const out = {};
+            RADAR_AXES.forEach((axis) => {
+                const baseline = Number(RADAR_BASELINE_MAXES[axis.baselineKey] || 0);
+                if (axis.normalize === "inverse") {
+                    out[axis.minKey] = 0;
+                    out[axis.maxKey] = baseline;
+                    return;
+                }
+                out[axis.maxKey] = baseline;
+            });
 
             for (const c of (cards || [])) {
                 const s = normalizeMissionStats(c?.stats, c);
-                const combo = getEnduranceLoad(s);
-                out.maxKills = Math.max(out.maxKills, Number(s.kills || 0));
-                out.maxAccuracy = Math.max(out.maxAccuracy, Number(s.accuracy || 0));
-                out.maxDistanceKm = Math.max(out.maxDistanceKm, Number(s.distanceKm || 0));
-                out.maxStratUses = Math.max(out.maxStratUses, Number(s.stratUses || 0));
-
-                out.maxDeathsPlusStims = Math.max(out.maxDeathsPlusStims, combo);
-                out.minDeathsPlusStims = Math.min(out.minDeathsPlusStims, combo);
+                RADAR_AXES.forEach((axis) => {
+                    const raw = getRadarAxisRawValue(s, axis);
+                    if (axis.normalize === "inverse") {
+                        out[axis.maxKey] = Math.max(out[axis.maxKey], raw);
+                        out[axis.minKey] = Math.min(out[axis.minKey], raw);
+                        return;
+                    }
+                    out[axis.maxKey] = Math.max(out[axis.maxKey], raw);
+                });
             }
             return out;
         }
@@ -7868,16 +7885,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
         function buildRadarSVG(card, maxes, opts = {}) {
             const s = normalizeMissionStats(card?.stats, card);
-            const combo = getEnduranceLoad(s);
-
-            // Axis order matches your screenshot-style labels:
-            // Power, Agility, Endurance, Mobility, Utility
-            const vals = RADAR_AXES.map((axis) => {
-                if (axis.normalize === "inverse") {
-                    return normInverse(combo, maxes[axis.minKey], maxes[axis.maxKey]);
-                }
-                return normPos(s[axis.statKey], maxes[axis.maxKey]);
-            });
+            const vals = RADAR_AXES.map((axis) => getRadarAxisNormalizedValue(s, axis, maxes));
 
             const renderSize = 250;
             const viewSize = 320;
@@ -7934,7 +7942,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             return `
                   <div class="radarWrap">
-                    <svg viewBox="0 0 ${viewSize} ${viewSize}" width="${renderSize}" height="${renderSize}" aria-label="Performance pentagon">
+                    <svg viewBox="0 0 ${viewSize} ${viewSize}" width="${renderSize}" height="${renderSize}" aria-label="Performance radar">
                       <g class="radarGrid">
                         ${ring(0.33)}
                         ${ring(0.66)}
@@ -8052,7 +8060,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 maxes: maxes || null
             };
 
-            const safeMaxes = maxes || { maxKills: 1, maxAccuracy: 1, maxDistanceKm: 1, maxStratUses: 1, minDeathsPlusStims: 0, maxDeathsPlusStims: 1 };
+            const safeMaxes = maxes || getRadarMaxes([]);
             const cardClassA = `card${tA ? ` tier-${tA}` : ""}`.trim();
             const cardClassB = `card${tB ? ` tier-${tB}` : ""}`.trim();
 
@@ -8109,7 +8117,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             }
 
             if (overlay) {
-                overlay.innerHTML = `<div class="tiny muted">Click <strong>STACK RADARS</strong> to overlap both pentagons, then hover each stat wedge to see who wins.<br>Stacked radar uses raw stat values per axis (no Grade/MO size scaling) so winners and % are accurate for any pair.</div>`;
+                overlay.innerHTML = `<div class="tiny muted">Click <strong>STACK RADARS</strong> to overlap both radars, then hover each stat wedge to see who wins.<br>Stacked radar uses raw stat values per axis (no Grade/MO size scaling) so winners and % are accurate for any pair.</div>`;
             }
             if (insight) insight.textContent = "";
 
@@ -8122,23 +8130,18 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
         function getCompareVals(card, maxes) {
             const s = normalizeMissionStats(card?.stats, card);
-            const combo = getEnduranceLoad(s);
             // Overlay comparisons must use raw stat-normalized values (no grade/MO scaling),
             // otherwise a stronger overall grade can incorrectly flip per-axis winners.
-            return RADAR_AXES.map((axis) => {
-                if (axis.normalize === "inverse") {
-                    return normInverse(combo, maxes[axis.minKey], maxes[axis.maxKey]);
-                }
-                return normPos(s[axis.statKey], maxes[axis.maxKey]);
-            }).map(v => clamp(v, 0, 1));
+            return RADAR_AXES
+                .map((axis) => getRadarAxisNormalizedValue(s, axis, maxes))
+                .map(v => clamp(v, 0, 1));
         }
 
         function getCompareMetricValue(card, axisKey) {
             const s = normalizeMissionStats(card?.stats, card);
             const axis = RADAR_AXES.find((entry) => entry.key === axisKey);
             if (!axis) return 0;
-            if (axis.normalize === "inverse") return getEnduranceLoad(s);
-            return Number(s[axis.statKey] || 0);
+            return getRadarAxisRawValue(s, axis);
         }
 
         function isLowerBetterCompareAxis(axisKey) {
@@ -9562,14 +9565,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         function getDiscordRadarValues(card) {
             const maxes = getRadarMaxes(state.cards || []);
             const s = normalizeMissionStats(card?.stats, card);
-            const combo = getEnduranceLoad(s);
-            return [
-                normPos(s.kills, maxes.maxKills),
-                normPos(s.accuracy, maxes.maxAccuracy),
-                normInverse(combo, maxes.minDeathsPlusStims, maxes.maxDeathsPlusStims),
-                normPos(s.distanceKm, maxes.maxDistanceKm),
-                normPos(s.stratUses, maxes.maxStratUses),
-            ];
+            return RADAR_AXES.map((axis) => getRadarAxisNormalizedValue(s, axis, maxes));
         }
 
         function getDiscordTierVisual(tier) {
@@ -9716,13 +9712,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             ctx.strokeRect(22, 22, baseWidth - 44, baseHeight - 44);
 
             const radarValues = getDiscordRadarValues(card);
-            const labels = [
-                `POWER\n${Number(s.kills || 0)} kills`,
-                `AGILITY\n${Number(s.accuracy || 0)}% acc`,
-                `ENDURANCE\n${getEnduranceLoad(s).toFixed(1)} combo`,
-                `MOBILITY\n${formatMetricDisplay(s.distanceKm, "distanceKm")} km`,
-                `UTILITY\n${Number(s.stratUses || 0)} uses`
-            ];
+            const labels = RADAR_AXES.map((axis) => `${axis.compareLabel}\n${axis.discordValue(s)}`);
             const cx = baseWidth / 2;
             const cy = 620;
             const radius = 340;
@@ -9813,11 +9803,12 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         const MISSION_STAT_KEYS = Object.freeze(["kills", "accuracy", "deaths", "stims", "distanceKm", "stratUses"]);
         const REQUIRED_SAVE_KEYS = Object.freeze([...MISSION_STAT_KEYS]);
         const RADAR_AXES = Object.freeze([
-            { key: "POWER", label: "Power", metric: "Kills", compareLabel: "POWER", statKey: "kills", normalize: "pos", maxKey: "maxKills" },
-            { key: "AGILITY", label: "Agility", metric: "Accuracy", compareLabel: "AGILITY", statKey: "accuracy", normalize: "pos", maxKey: "maxAccuracy" },
-            { key: "ENDURANCE", label: "Endurance", metric: "Deaths + Stims", compareLabel: "ENDURANCE", normalize: "inverse", minKey: "minDeathsPlusStims", maxKey: "maxDeathsPlusStims" },
-            { key: "MOBILITY", label: "Mobility", metric: "Distance", compareLabel: "MOBILITY", statKey: "distanceKm", normalize: "pos", maxKey: "maxDistanceKm" },
-            { key: "UTILITY", label: "Utility", metric: "Strat uses", compareLabel: "UTILITY", statKey: "stratUses", normalize: "pos", maxKey: "maxStratUses" },
+            { key: "POWER", label: "Power", metric: "Kills", compareLabel: "POWER", statKey: "kills", normalize: "pos", maxKey: "maxKills", baselineKey: "kills", discordValue: (s) => `${Number(s.kills || 0)} kills` },
+            { key: "AGILITY", label: "Agility", metric: "Accuracy", compareLabel: "AGILITY", statKey: "accuracy", normalize: "pos", maxKey: "maxAccuracy", baselineKey: "accuracy", discordValue: (s) => `${Number(s.accuracy || 0)}% acc` },
+            { key: "ENDURANCE", label: "Endurance", metric: "Deaths + Stims", compareLabel: "ENDURANCE", normalize: "inverse", minKey: "minDeathsPlusStims", maxKey: "maxDeathsPlusStims", baselineKey: "deathsPlusStims", discordValue: (s) => `${getEnduranceLoad(s).toFixed(1)} combo` },
+            { key: "MOBILITY", label: "Mobility", metric: "Distance", compareLabel: "MOBILITY", statKey: "distanceKm", normalize: "pos", maxKey: "maxDistanceKm", baselineKey: "distanceKm", discordValue: (s) => `${formatMetricDisplay(s.distanceKm, "distanceKm")} km` },
+            { key: "UTILITY", label: "Utility", metric: "Strat uses", compareLabel: "UTILITY", statKey: "stratUses", normalize: "pos", maxKey: "maxStratUses", baselineKey: "stratUses", discordValue: (s) => `${Number(s.stratUses || 0)} uses` },
+            { key: "DEMOCRACY", label: "Democracy", metric: "Bullet count", compareLabel: "DEMOCRACY", statKey: "bulletCount", normalize: "pos", maxKey: "maxBulletCount", baselineKey: "bulletCount", discordValue: (s) => `${Number(s.bulletCount ?? s.shotsFired ?? 0)} rounds` },
         ]);
         const RADAR_AXIS_KEYS = Object.freeze(RADAR_AXES.map((axis) => axis.key));
         const RADAR_AXIS_LABELS = Object.freeze([...RADAR_AXIS_KEYS]);
@@ -9830,6 +9821,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             { k: "deathsPlusStims", label: "Deaths + Stims (Endurance, low is good)" },
             { k: "distanceKm", label: "Distance km (Mobility)" },
             { k: "stratUses", label: "Strat uses (Utility)" },
+            { k: "bulletCount", label: "Bullet count (Democracy)" },
             { k: "raw", label: "Raw score" }
         ]);
         const COMPARE_METRIC_KEYS = Object.freeze(COMPARE_METRICS.map((metric) => metric.k));
@@ -12986,7 +12978,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 if (boxA) boxA.innerHTML = "";
                 if (boxB) boxB.innerHTML = "";
                 if (boxO) boxO.innerHTML = "";
-                if (insight) insight.textContent = "Select Card A and Card B to render the pentagon comparison.";
+                if (insight) insight.textContent = "Select Card A and Card B to render the radar comparison.";
                 return;
             }
 
