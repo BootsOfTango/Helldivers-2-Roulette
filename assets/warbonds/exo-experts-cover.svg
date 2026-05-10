@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" role="img" aria-label="Exo Experts Warbond Cover">
+  <defs>
+    <linearGradient id="g" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#101923"/><stop offset="1" stop-color="#35210a"/></linearGradient>
+  </defs>
+  <rect width="960" height="540" fill="url(#g)"/>
+  <path d="M92 428h776" stroke="#f2c94c" stroke-width="12" stroke-linecap="round" opacity=".7"/>
+  <path d="M302 126h356l82 82v158l-82 82H302l-82-82V208z" fill="#15191f" stroke="#f2c94c" stroke-width="16"/>
+  <path d="M340 220h280M340 286h280M340 352h280" stroke="#f2c94c" stroke-width="18" stroke-linecap="round"/>
+  <path d="M250 268h-88M710 268h88M390 448l-42 62M570 448l42 62" stroke="#f2c94c" stroke-width="20" stroke-linecap="round"/>
+  <text x="480" y="86" text-anchor="middle" fill="#f6d65a" font-family="Arial, sans-serif" font-size="54" font-weight="900">EXO EXPERTS</text>
+  <text x="480" y="490" text-anchor="middle" fill="#ffffff" font-family="Arial, sans-serif" font-size="28" font-weight="700">WAR BOND CONTENT</text>
+</svg>

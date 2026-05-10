@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-label="SMG-203 Gallant">
+  <rect width="640" height="360" rx="28" fill="#101923"/>
+  <path d="M42 258h556" stroke="#2f3b45" stroke-width="10" stroke-linecap="round"/>
+  <path d="M108 178h300l42-44h84v42h-58l-28 68H248l-42-34h-98z" fill="#d79a2f" stroke="#ffe36c" stroke-width="10" stroke-linejoin="round"/>
+  <path d="M168 214h76l22 64h-64zM384 176h70M112 178l-52-36" stroke="#101923" stroke-width="18" stroke-linecap="round"/>
+  <text x="48" y="68" fill="#f6d65a" font-family="Arial, sans-serif" font-size="34" font-weight="900">SMG-203</text>
+  <text x="48" y="108" fill="#ffffff" font-family="Arial, sans-serif" font-size="30" font-weight="700">GALLANT</text>
+</svg>

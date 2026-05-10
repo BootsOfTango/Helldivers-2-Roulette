@@ -1530,6 +1530,14 @@
       "assetPath": "assets/weapons/primaries/sweeper.svg"
     },
     {
+      "name": "SMG-203 Gallant",
+      "type": "primary",
+      "subgroup": "smg",
+      "warbond": "Exo Experts",
+      "source": "Exo Experts",
+      "assetPath": "assets/weapons/primaries/smg-203-gallant.png"
+    },
+    {
       "name": "Entrenchment Tool",
       "type": "sidearm",
       "subgroup": "special-sidearm",
@@ -1544,6 +1552,14 @@
       "warbond": "Entrenched Division",
       "source": "Entrenched Division",
       "assetPath": "assets/weapons/sidearms/veto.svg"
+    },
+    {
+      "name": "P-33 Missile Pistol",
+      "type": "sidearm",
+      "subgroup": "special-sidearm",
+      "warbond": "Exo Experts",
+      "source": "Exo Experts",
+      "assetPath": "assets/weapons/sidearms/p-33-missile-pistol.png"
     },
     {
       "name": "Giga Grenade",
@@ -1568,6 +1584,30 @@
       "warbond": "Entrenched Division",
       "source": "Entrenched Division",
       "assetPath": "assets/stratagems/support/cremator.svg"
+    },
+    {
+      "name": "MGX-42 Bullet Storm",
+      "type": "stratagem",
+      "subgroup": "support",
+      "warbond": "Exo Experts",
+      "source": "Exo Experts",
+      "assetPath": "assets/stratagems/support/mgx-42-bullet-storm.svg"
+    },
+    {
+      "name": "EXO-51 Lumberer Exosuit",
+      "type": "stratagem",
+      "subgroup": "support",
+      "warbond": "Exo Experts",
+      "source": "Exo Experts",
+      "assetPath": "assets/stratagems/exosuits/exo-51-lumberer-exosuit.svg"
+    },
+    {
+      "name": "EXO-55 Breakthrough Exosuit",
+      "type": "stratagem",
+      "subgroup": "support",
+      "warbond": "Exo Experts",
+      "source": "Exo Experts",
+      "assetPath": "assets/stratagems/exosuits/exo-55-breakthrough-exosuit.svg"
     }
   ]
 }

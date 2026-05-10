@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="EXO-51 Lumberer Exosuit">
+  <rect width="256" height="256" rx="34" fill="#0b1016"/>
+  <path d="M16 16h224v224H16z" fill="none" stroke="#2c3742" stroke-width="8"/>
+  <path d="M78 66 h100 l42 35 v69 l-42 36 H78 l-42-36 v-69 Z" fill="#15191f" stroke="#f2c94c" stroke-width="12"/><path d="M31 117 H7 M225 117 h24 M91 206 l-18 37 M165 206 l18 37" stroke="#f2c94c" stroke-width="14" stroke-linecap="round"/><circle cx="103" cy="121" r="13" fill="#f2c94c"/><circle cx="153" cy="121" r="13" fill="#f2c94c"/>
+</svg>
