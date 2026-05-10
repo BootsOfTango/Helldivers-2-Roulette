@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="EXO-55 Breakthrough Exosuit">
+  <rect width="256" height="256" rx="34" fill="#0b1016"/>
+  <path d="M16 16h224v224H16z" fill="none" stroke="#2c3742" stroke-width="8"/>
+  <path d="M56 48 h112 l40 42 v76 l-40 42 H56 l-24-24 V72 Z" fill="#15191f" stroke="#f2c94c" stroke-width="12"/><path d="M184 77 h37 v102 h-37" fill="none" stroke="#f2c94c" stroke-width="14" stroke-linejoin="round"/><path d="M72 100 h88 M72 130 h88 M72 160 h88" stroke="#f2c94c" stroke-width="12" stroke-linecap="round"/>
+</svg>

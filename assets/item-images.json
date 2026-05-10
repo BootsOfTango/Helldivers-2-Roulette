@@ -40,6 +40,7 @@
     "de escalator": "De-Escalator",
     "dead sprint": "Dead Sprint",
     "defoliation tool": "Defoliation Tool",
+    "detonation tool": "Defoliation Tool",
     "directional shield": "Directional Shield",
     "eagle 110mm rocket pods": "Eagle 110MM Rocket Pods",
     "eagle 500kg bomb": "Eagle 500KG Bomb",
@@ -54,10 +55,13 @@
     "ems strike": "EMS Strike",
     "entrenchment tool": "Entrenchment Tool",
     "epoch": "Epoch",
+    "exo 51 lumberer exosuit": "EXO-51 Lumberer Exosuit",
+    "exo 55 breakthrough exosuit": "EXO-55 Breakthrough Exosuit",
     "expendable napalm": "Expendable Napalm",
     "experimental infusion": "Experimental Infusion",
     "expert extraction pilot": "Expert Extraction Pilot",
     "faf 14 spear": "FAF-14 Spear",
+    "fast recon vehicle": "M-102 Fast Recon Vehicle",
     "firebomb hellpods": "Firebomb Hellpods",
     "flam 40 flamethrower": "FLAM-40 Flamethrower",
     "flam 66 torcher": "FLAM-66 Torcher",
@@ -87,8 +91,11 @@
     "gp 20 ultimatum": "GP-20 Ultimatum",
     "gp 31 grenade pistol": "GP-31 Grenade Pistol",
     "gr 8 recoilless rifle": "GR-8 Recoilless Rifle",
+    "grenadier battalion": "Grenadier Battlement",
     "grenadier battlement": "Grenadier Battlement",
     "guard dog": "Guard Dog",
+    "guard dog arc": "AX/ARC-3 K-9",
+    "guard dog breath": "AX/TX-13 Dog Breath",
     "guard dog rover": "Guard Dog Rover",
     "hellpod space optimization": "Hellpod Space Optimization",
     "hmg emplacement": "HMG Emplacement",
@@ -120,6 +127,7 @@
     "maxigun": "Maxigun",
     "mg 206 heavy machine gun": "MG-206 Heavy Machine Gun",
     "mg 43 machine gun": "MG-43 Machine Gun",
+    "mgx 42 bullet storm": "MGX-42 Bullet Storm",
     "mls 4x commando": "MLS-4X Commando",
     "mortar sentry": "Mortar Sentry",
     "motivational shocks": "Motivational Shocks",
@@ -142,6 +150,7 @@
     "p 113 verdict": "P-113 Verdict",
     "p 19 redeemer": "P-19 Redeemer",
     "p 2 peacemaker": "P-2 Peacemaker",
+    "p 33 missile pistol": "P-33 Missile Pistol",
     "p 35 re educator": "P-35 Re-Educator",
     "p 4 senator": "P-4 Senator",
     "p 72 crisper": "P-72 Crisper",
@@ -152,6 +161,7 @@
     "plas 15 loyalist": "PLAS-15 Loyalist",
     "plas 39 accelerator rifle": "PLAS-39 Accelerator Rifle",
     "portable hellbomb": "Portable Hellbomb",
+    "r 0 variable": "VG-70 Variable",
     "r 2 amendment": "R-2 Amendment",
     "r 2124 constitution": "R-2124 Constitution",
     "r 36 eruptor": "R-36 Eruptor",
@@ -177,6 +187,7 @@
     "sg 8s slugger": "SG-8S Slugger",
     "shield generator pack": "Shield Generator Pack",
     "shield generator relay": "Shield Generator Relay",
+    "smg 203 gallant": "SMG-203 Gallant",
     "smg 32 reprimand": "SMG-32 Reprimand",
     "smg 37 defender": "SMG-37 Defender",
     "smg 72 pummeler": "SMG-72 Pummeler",
@@ -199,13 +210,7 @@
     "vg 70 variable": "VG-70 Variable",
     "vitality enhancement": "Vitality Enhancement",
     "warp pack": "Warp Pack",
-    "wasp": "Wasp",
-    "detonation tool": "Defoliation Tool",
-    "fast recon vehicle": "M-102 Fast Recon Vehicle",
-    "grenadier battalion": "Grenadier Battlement",
-    "guard dog arc": "AX/ARC-3 K-9",
-    "guard dog breath": "AX/TX-13 Dog Breath",
-    "r 0 variable": "VG-70 Variable"
+    "wasp": "Wasp"
   },
   "primary": [
     {
@@ -599,6 +604,12 @@
       "wikiTitle": "Sweeper",
       "sourceUrl": "https://helldivers.wiki.gg/wiki/Sweeper",
       "imageUrl": "https://helldivers.wiki.gg/images/thumb/SG-97_Shotgun_Primary_Render.png/1200px-SG-97_Shotgun_Primary_Render.png?255318"
+    },
+    {
+      "name": "SMG-203 Gallant",
+      "assetPath": "assets/weapons/primaries/smg-203-gallant.png",
+      "kind": "image",
+      "imageUrl": "data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20640%20360%22%20role%3D%22img%22%20aria-label%3D%22SMG-203%20Gallant%22%3E%0A%20%20%3Crect%20width%3D%22640%22%20height%3D%22360%22%20rx%3D%2228%22%20fill%3D%22%23101923%22%2F%3E%0A%20%20%3Cpath%20d%3D%22M42%20258h556%22%20stroke%3D%22%232f3b45%22%20stroke-width%3D%2210%22%20stroke-linecap%3D%22round%22%2F%3E%0A%20%20%3Cpath%20d%3D%22M108%20178h300l42-44h84v42h-58l-28%2068H248l-42-34h-98z%22%20fill%3D%22%23d79a2f%22%20stroke%3D%22%23ffe36c%22%20stroke-width%3D%2210%22%20stroke-linejoin%3D%22round%22%2F%3E%0A%20%20%3Cpath%20d%3D%22M168%20214h76l22%2064h-64zM384%20176h70M112%20178l-52-36%22%20stroke%3D%22%23101923%22%20stroke-width%3D%2218%22%20stroke-linecap%3D%22round%22%2F%3E%0A%20%20%3Ctext%20x%3D%2248%22%20y%3D%2268%22%20fill%3D%22%23f6d65a%22%20font-family%3D%22Arial%2C%20sans-serif%22%20font-size%3D%2234%22%20font-weight%3D%22900%22%3ESMG-203%3C%2Ftext%3E%0A%20%20%3Ctext%20x%3D%2248%22%20y%3D%22108%22%20fill%3D%22%23ffffff%22%20font-family%3D%22Arial%2C%20sans-serif%22%20font-size%3D%2230%22%20font-weight%3D%22700%22%3EGALLANT%3C%2Ftext%3E%0A%3C%2Fsvg%3E%0A"
     }
   ],
   "sidearm": [
@@ -777,6 +788,12 @@
       "wikiTitle": "Veto",
       "sourceUrl": "https://helldivers.wiki.gg/wiki/Veto",
       "imageUrl": "https://helldivers.wiki.gg/images/thumb/P-69_Veto_Secondary_Icon.png/1200px-P-69_Veto_Secondary_Icon.png?e02465"
+    },
+    {
+      "name": "P-33 Missile Pistol",
+      "assetPath": "assets/weapons/sidearms/p-33-missile-pistol.png",
+      "kind": "image",
+      "imageUrl": "data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20640%20360%22%20role%3D%22img%22%20aria-label%3D%22P-33%20Missile%20Pistol%22%3E%0A%20%20%3Crect%20width%3D%22640%22%20height%3D%22360%22%20rx%3D%2228%22%20fill%3D%22%23111827%22%2F%3E%0A%20%20%3Cpath%20d%3D%22M94%20190h252l38-44h106l54%2044-54%2044H350l-38%2054H198l26-54H94z%22%20fill%3D%22%23e2ad38%22%20stroke%3D%22%23ffe36c%22%20stroke-width%3D%2210%22%20stroke-linejoin%3D%22round%22%2F%3E%0A%20%20%3Cpath%20d%3D%22M234%20232l-16%2072h78l48-72M414%20146v88M496%20190h54%22%20stroke%3D%22%23111827%22%20stroke-width%3D%2218%22%20stroke-linecap%3D%22round%22%2F%3E%0A%20%20%3Ccircle%20cx%3D%22150%22%20cy%3D%22210%22%20r%3D%2218%22%20fill%3D%22%23111827%22%2F%3E%0A%20%20%3Ctext%20x%3D%2248%22%20y%3D%2268%22%20fill%3D%22%23f6d65a%22%20font-family%3D%22Arial%2C%20sans-serif%22%20font-size%3D%2234%22%20font-weight%3D%22900%22%3EP-33%3C%2Ftext%3E%0A%20%20%3Ctext%20x%3D%2248%22%20y%3D%22108%22%20fill%3D%22%23ffffff%22%20font-family%3D%22Arial%2C%20sans-serif%22%20font-size%3D%2230%22%20font-weight%3D%22700%22%3EMISSILE%20PISTOL%3C%2Ftext%3E%0A%3C%2Fsvg%3E%0A"
     }
   ],
   "throwable": [
@@ -1723,6 +1740,24 @@
       "wikiTitle": "Cremator",
       "sourceUrl": "https://helldivers.wiki.gg/wiki/Cremator",
       "imageUrl": "https://helldivers.wiki.gg/images/Cremator_Stratagem_Icon.svg?a0a2d3",
+      "rimCategory": "support"
+    },
+    {
+      "name": "MGX-42 Bullet Storm",
+      "assetPath": "assets/stratagems/support/mgx-42-bullet-storm.svg",
+      "kind": "icon",
+      "rimCategory": "support"
+    },
+    {
+      "name": "EXO-51 Lumberer Exosuit",
+      "assetPath": "assets/stratagems/exosuits/exo-51-lumberer-exosuit.svg",
+      "kind": "icon",
+      "rimCategory": "support"
+    },
+    {
+      "name": "EXO-55 Breakthrough Exosuit",
+      "assetPath": "assets/stratagems/exosuits/exo-55-breakthrough-exosuit.svg",
+      "kind": "icon",
       "rimCategory": "support"
     }
   ],

@@ -4975,6 +4975,11 @@ END MASTER DIRECTIVE
 
         const LOCAL_PLANET_DATA = [
             { name: "SUPER EARTH", biome: "Super Earth", hazard: "NONE" },
+            { name: "BRILLIANCE", biome: "Temperate Forest", hazard: "NONE" },
+            { name: "LUXURIANT", biome: "Temperate Forest", hazard: "NONE" },
+            { name: "BIG ROCK", biome: "Oasis Dunes", hazard: "NONE" },
+            { name: "ZYGOS", biome: "Oasis Dunes", hazard: "NONE" },
+            { name: "FRONTERIA", biome: "Oasis Dunes", hazard: "NONE" },
             { name: "KLEN DAHTH II", biome: "Desert Dunes", hazard: "SANDSTORMS" },
             { name: "PATHFINDER V", biome: "Plains", hazard: "NONE" },
             { name: "WIDOW'S HARBOR", biome: "Moon", hazard: "METEOR STORMS" },
@@ -5592,7 +5597,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 "Reform", "Compliance", "Salute", "Ration", "Tax", "Boot", "Directive", "Glory", "Witness"
             ],
 
-                                                                                                items: {
+                                                                                                            items: {
                 primaries: [
                     { name: "AR-2 Coyote", enabled: true, warbond: "Dust Devils", subgroup: "assault-rifle", source: "Dust Devils" },
                     { name: "AR-23 Liberator", enabled: true, warbond: "Unassigned / Custom", subgroup: "assault-rifle", source: "Unassigned / Custom" },
@@ -5643,6 +5648,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                     { name: "PLAS-39 Accelerator Rifle", enabled: true, warbond: "Righteous Revenants", subgroup: "energy", source: "Righteous Revenants" },
                     { name: "Stoker", enabled: true, warbond: "Entrenched Division", subgroup: "shotgun", source: "Entrenched Division" },
                     { name: "Sweeper", enabled: true, warbond: "Entrenched Division", subgroup: "marksman-rifle", source: "Entrenched Division" },
+                    { name: "SMG-203 Gallant", enabled: true, warbond: "Exo Experts", subgroup: "smg", source: "Exo Experts" },
                 ],
 
                 sidearms: [
@@ -5668,6 +5674,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                     { name: "SG-22 Bushwhacker", enabled: true, warbond: "Viper Commandos", subgroup: "special-sidearm", source: "Viper Commandos" },
                     { name: "Entrenchment Tool", enabled: true, warbond: "Entrenched Division", subgroup: "special-sidearm", source: "Entrenched Division" },
                     { name: "Veto", enabled: true, warbond: "Entrenched Division", subgroup: "pistol", source: "Entrenched Division" },
+                    { name: "P-33 Missile Pistol", enabled: true, warbond: "Exo Experts", subgroup: "special-sidearm", source: "Exo Experts" },
                 ],
 
                 throwables: [
@@ -5781,6 +5788,9 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                     { name: "Wasp", enabled: true, warbond: "Unassigned / Custom", subgroup: "support", source: "Unassigned / Custom" },
                     { name: "Gas Mortar", enabled: true, warbond: "Entrenched Division", subgroup: "defensive", source: "Entrenched Division" },
                     { name: "Cremator", enabled: true, warbond: "Entrenched Division", subgroup: "support", source: "Entrenched Division" },
+                    { name: "MGX-42 Bullet Storm", enabled: true, warbond: "Exo Experts", subgroup: "support", source: "Exo Experts" },
+                    { name: "EXO-51 Lumberer Exosuit", enabled: true, warbond: "Exo Experts", subgroup: "support", source: "Exo Experts" },
+                    { name: "EXO-55 Breakthrough Exosuit", enabled: true, warbond: "Exo Experts", subgroup: "support", source: "Exo Experts" },
                 ],
 
                 boosters: [
@@ -5911,7 +5921,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
                     { name: "Sulfura", faction: "Super Earth", sector: "Celeste Sector", biome: "Ethereal Jungle", weather: "None", links: ["Nublaria I", "Azterra"], regions: [] },
 
-                    { name: "Crimsica", faction: "Super Earth", sector: "Draco Sector", biome: "Ionic Crimson", weather: "Ion Storms", links: ["Acamar IV", "Estanu", "Fori Prime"], regions: ["Settlement – LIL’OME", "City – LLANFAIRPWLLGWYNGYLLGOGERYCHWYRNDROBWLLLLANTYSILIOGOGOGOCH II"] },
+                    { name: "Crimsica", faction: "Super Earth", sector: "Draco Sector", biome: "Ionic Crimson", weather: "Ion Storms", links: ["Fronteria", "Acamar IV", "Estanu", "Fori Prime"], regions: ["Settlement – LIL’OME", "City – LLANFAIRPWLLGWYNGYLLGOGERYCHWYRNDROBWLLLLANTYSILIOGOGOGOCH II"] },
 
                     { name: "Estanu", faction: "Super Earth", sector: "Draco Sector", biome: "Boneyard", weather: "Extreme Cold", links: ["Hellmire", "Crimsica", "Fori Prime"], regions: [] },
 
@@ -6033,7 +6043,9 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
                     { name: "Phact Bay", faction: "Terminid", sector: "Jin Xi Sector", biome: "Desert Dunes", weather: "Intense Heat; Sandstorms", links: ["Gatria", "Pandion-XXIV", "Partion", "Darius II", "Gar Haren"], regions: ["Town – OLD DOVE", "City – BRNO", "MegaCity – NEW EAGLE"] },
 
-                    { name: "Gatria", faction: "Terminid", sector: "Jin Xi Sector", biome: "Ionic Crimson", weather: "Ion Storms", links: ["Trandor", "Gar Haren", "Phact Bay", "Pherkad Secundus"], regions: ["Settlement – ALTONBURG", "City – ERSATZ"] },
+                    { name: "Gatria", faction: "Terminid", sector: "Jin Xi Sector", biome: "Ionic Crimson", weather: "Ion Storms", links: ["Trandor", "Gar Haren", "Phact Bay", "Pherkad Secundus", "Luxuriant"], regions: ["Settlement – ALTONBURG", "City – ERSATZ"] },
+
+                    { name: "Luxuriant", faction: "Terminid", sector: "Jin Xi Sector", biome: "Deciduous Forest", weather: "None", links: ["Gatria", "Peacock"], regions: [] },
 
                     { name: "Gar Haren", faction: "Terminid", sector: "Jin Xi Sector", biome: "Haunted Swamp", weather: "Thick Fog", links: ["Phact Bay", "Achernar Secundus", "Gatria", "Grand Errant"], regions: [] },
 
@@ -6139,19 +6151,23 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
                     { name: "Seasse", faction: "Illuminate", sector: "Omega Sector", biome: "Basic Swamp", weather: "Rainstorms", links: ["Rogue 5", "Rirga Bay", "Senge 23"], regions: [] },
 
-                    { name: "Veld", faction: "Super Earth", sector: "Orion Sector", biome: "Ionic Jungle", weather: "Ion Storms", links: ["Slif", "Inari", "Turing"], regions: ["Town – CLE ELUM REDIVIVA", "MegaCity – LAELIA"] },
+                    { name: "Veld", faction: "Super Earth", sector: "Orion Sector", biome: "Ionic Jungle", weather: "Ion Storms", links: ["Slif", "Inari", "Zygos", "Turing"], regions: ["Town – CLE ELUM REDIVIVA", "MegaCity – LAELIA"] },
 
                     { name: "Angel’s Venture", faction: "Super Earth", sector: "Orion Sector", biome: "Tundra", weather: "None", links: [], regions: [] },
 
-                    { name: "Heeth", faction: "Super Earth", sector: "Orion Sector", biome: "Icy Glaciers", weather: "Blizzards; Extreme Cold", links: ["Cirrus", "Fenrir III", "Erata Prime"], regions: [] },
+                    { name: "Heeth", faction: "Super Earth", sector: "Orion Sector", biome: "Icy Glaciers", weather: "Blizzards; Extreme Cold", links: ["Fronteria", "Cirrus", "Fenrir III", "Erata Prime", "Brilliance"], regions: [] },
 
-                    { name: "Terrek", faction: "Super Earth", sector: "Orion Sector", biome: "Moon", weather: "Extreme Cold; Meteor Storms", links: ["Azterra", "Cirrus", "Bore Rock"], regions: [] },
+                    { name: "Terrek", faction: "Super Earth", sector: "Orion Sector", biome: "Moon", weather: "Extreme Cold; Meteor Storms", links: ["Azterra", "Cirrus", "Bore Rock", "Brilliance"], regions: [] },
 
                     { name: "Azterra", faction: "Super Earth", sector: "Orion Sector", biome: "Rocky Canyons", weather: "Thick Fog", links: ["Sulfura", "Cirrus", "Terrek"], regions: [] },
 
-                    { name: "Fort Union", faction: "Super Earth", sector: "Orion Sector", biome: "Plains", weather: "Rainstorms", links: ["Nublaria I", "Cirrus"], regions: ["Town – OTARU’S PLEDGE", "City – XIAMEN ANEW", "Town – MUNITION CITY", "MegaCity – NEW HOPE CITY"] },
+                    { name: "Fort Union", faction: "Super Earth", sector: "Orion Sector", biome: "Plains", weather: "Rainstorms", links: ["Nublaria I", "Zygos", "Cirrus"], regions: ["Town – OTARU’S PLEDGE", "City – XIAMEN ANEW", "Town – MUNITION CITY", "MegaCity – NEW HOPE CITY"] },
 
-                    { name: "Cirrus", faction: "Super Earth", sector: "Orion Sector", biome: "Deadlands", weather: "Thick Fog", links: ["Fort Union", "Terrek", "Heeth", "Azterra"], regions: [] },
+                    { name: "Cirrus", faction: "Super Earth", sector: "Orion Sector", biome: "Deadlands", weather: "Thick Fog", links: ["Fort Union", "Terrek", "Heeth", "Zygos", "Azterra"], regions: [] },
+
+                    { name: "Brilliance", faction: "Terminid", sector: "Orion Sector", biome: "Deciduous Forest", weather: "None", links: ["Terrek", "Heeth", "Bore Rock"], regions: [] },
+
+                    { name: "Zygos", faction: "Super Earth", sector: "Orion Sector", biome: "Desert Oasis", weather: "Intense Heat", links: ["Veld", "Cirrus", "Fort Union"], regions: [] },
 
                     { name: "Leng Secundus", faction: "Super Earth", sector: "Quintus Sector", biome: "Acidic Badlands", weather: "Acid Storms", links: ["Klaka 5", "Kraz", "Stout"], regions: [] },
 
@@ -6219,11 +6235,13 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
                     { name: "Azur Secundus", faction: "Terminid", sector: "Sten Sector", biome: "Desert Cliffs", weather: "Intense Heat; Tremors", links: ["Overgoe Prime"], regions: [] },
 
-                    { name: "Overgoe Prime", faction: "Terminid", sector: "Sten Sector", biome: "Ionic Crimson", weather: "Ion Storms", links: ["Azur Secundus", "Partion"], regions: [] },
+                    { name: "Overgoe Prime", faction: "Terminid", sector: "Sten Sector", biome: "Ionic Crimson", weather: "Ion Storms", links: ["Azur Secundus", "Partion", "Big Rock"], regions: [] },
 
                     { name: "Partion", faction: "Terminid", sector: "Sten Sector", biome: "Scorched Moor", weather: "Fire Tornados; Intense Heat", links: ["Peacock", "Gacrux", "Overgoe Prime", "Phact Bay"], regions: [] },
 
-                    { name: "Peacock", faction: "Terminid", sector: "Sten Sector", biome: "Ionic Jungle", weather: "Ion Storms", links: ["Trandor", "Partion"], regions: ["Settlement – QUASAR", "Town – SYZYGY"] },
+                    { name: "Peacock", faction: "Terminid", sector: "Sten Sector", biome: "Ionic Jungle", weather: "Ion Storms", links: ["Trandor", "Partion", "Big Rock", "Luxuriant"], regions: ["Settlement – QUASAR", "Town – SYZYGY"] },
+
+                    { name: "Big Rock", faction: "Terminid", sector: "Sten Sector", biome: "Desert Oasis", weather: "Intense Heat", links: ["Overgoe Prime", "Peacock"], regions: [] },
 
                     { name: "Shallus", faction: "Super Earth", sector: "Talus Sector", biome: "Ethereal Jungle", weather: "None", links: ["Mastia", "Shelt"], regions: [] },
 
@@ -6254,6 +6272,14 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                     { name: "Bunda Secundus", faction: "Super Earth", sector: "Tarragon Sector", biome: "Tundra", weather: "None", links: ["Kraz", "Canopus"], regions: [] },
 
                     { name: "Brink-2", faction: "Super Earth", sector: "Tarragon Sector", biome: "Ionic Jungle", weather: "Ion Storms", links: ["East Iridium Trading Bay", "Osupsam", "Kneth Port"], regions: [] },
+
+                    { name: "Fenrir III", faction: "Super Earth", sector: "Umlaut Sector", biome: "Moon", weather: "Extreme Cold; Meteor Storms", links: ["Hellmire", "Heeth", "Fronteria"], regions: ["Town – LOKAHEIM", "Town – PSEUDOTOPIA", "MegaCity – FAMEWOLF PEAK"] },
+
+                    { name: "Turing", faction: "Super Earth", sector: "Umlaut Sector", biome: "Ethereal Jungle", weather: "None", links: ["Veld", "Acamar IV", "Achird III", "Fronteria"], regions: ["City – CHATOYANT", "Town – CARBONDALE", "City – PERIWINKLE MILLS"] },
+
+                    { name: "Erata Prime", faction: "Super Earth", sector: "Umlaut Sector", biome: "Desert Cliffs", weather: "Intense Heat; Tremors", links: ["Heeth", "Hellmire", "Bore Rock", "Nivel 43"], regions: ["Town – NEW DA NANG", "Settlement – PHAM'S SITE", "Town – OLD CHEMLAND"] },
+
+                    { name: "Fronteria", faction: "Super Earth", sector: "Umlaut Sector", biome: "Desert Oasis", weather: "Intense Heat", links: ["Fenrir III", "Turing", "Crimsica", "Heeth"], regions: [] },
                 ]
             };
 
@@ -10792,6 +10818,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             "Entrenched Division",
             "Obedient Democracy Support Troopers",
             "Righteous Revenants",
+            "Exo Experts",
             "Unassigned / Custom"
         ];
 
@@ -10817,8 +10844,11 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             "Siege Breakers": "https://helldivers.wiki.gg/images/thumb/Siege_Breakers_Premium_Warbond_Cover.png/1920px-Siege_Breakers_Premium_Warbond_Cover.png?22d8ca",
             "Entrenched Division": "https://helldivers.wiki.gg/images/thumb/Entrenched_Division_Premium_Warbond_Marketing_13.png/1780px-Entrenched_Division_Premium_Warbond_Marketing_13.png?24cc5a",
             "Obedient Democracy Support Troopers": "https://helldivers.wiki.gg/images/thumb/Halo_ODST_Legendary_Warbond_Cover.png/1920px-Halo_ODST_Legendary_Warbond_Cover.png?3e16b0",
-            "Righteous Revenants": "https://helldivers.wiki.gg/images/Righteous_Revenants_Legendary_Warbond_Cover.png?da3de4"
+            "Righteous Revenants": "https://helldivers.wiki.gg/images/Righteous_Revenants_Legendary_Warbond_Cover.png?da3de4",
+            "Exo Experts": "assets/warbonds/exo-experts-cover.svg"
         };
+
+
 
 
 
@@ -11019,11 +11049,16 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             "Concealed Insertion": "Redacted Regiment",
             "Stoker": "Entrenched Division",
             "Sweeper": "Entrenched Division",
+            "SMG-203 Gallant": "Exo Experts",
             "Entrenchment Tool": "Entrenched Division",
             "Veto": "Entrenched Division",
+            "P-33 Missile Pistol": "Exo Experts",
             "Giga Grenade": "Entrenched Division",
             "Gas Mortar": "Entrenched Division",
             "Cremator": "Entrenched Division",
+            "MGX-42 Bullet Storm": "Exo Experts",
+            "EXO-51 Lumberer Exosuit": "Exo Experts",
+            "EXO-55 Breakthrough Exosuit": "Exo Experts",
         };
 
         function getItemWarbond(item) {
