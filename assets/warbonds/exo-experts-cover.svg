@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 250" role="img" aria-label="Exo Experts Warbond Cover">
+  <rect width="480" height="250" rx="24" fill="#222328"/>
+  <rect x="10" y="10" width="460" height="230" rx="20" fill="none" stroke="#3f4148" stroke-width="6"/>
+  <text x="240" y="34" text-anchor="middle" fill="#ffdd43" font-family="Arial, sans-serif" font-size="26" font-weight="900">EXO EXPERTS</text>
+  <path d="M160 74h160l50 50-50 50H160l-50-50z" fill="none" stroke="#ffdd43" stroke-width="10" stroke-linejoin="round"/>
+  <path d="M175 94h130M175 124h130M175 154h130" stroke="#ffdd43" stroke-width="10" stroke-linecap="round"/>
+  <path d="M70 124h58M352 124h58M158 174l-42 36M322 174l42 36" stroke="#ffdd43" stroke-width="9" stroke-linecap="round"/>
+</svg>

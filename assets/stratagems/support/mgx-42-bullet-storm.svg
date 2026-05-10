@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="MGX-42 Bullet Storm">
+  <rect width="256" height="256" fill="#061d21"/>
+  <rect x="9" y="9" width="238" height="238" fill="#061d21" stroke="#55bfd8" stroke-width="18"/>
+  <path d="M72 44h14v34H72zm28 0h84l26 14-26 14h-84zm-28 52h14v34H72zm28 0h84l26 14-26 14h-84zm-28 52h14v34H72zm28 0h84l26 14-26 14h-84z" fill="#fffcea"/>
+  <path d="M24 174h30l22-8h80l24-16h42v8h18v48h-10v10H142l-10 8H66l-28 24-24-2 24-42H24z" fill="#55bfd8"/>
+  <path d="M42 204l-22 28M68 198h10M92 198h10M128 214h44M208 158h42" stroke="#061d21" stroke-width="9" stroke-linecap="square"/>
+</svg>

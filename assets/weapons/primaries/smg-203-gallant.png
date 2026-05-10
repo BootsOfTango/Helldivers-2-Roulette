@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" role="img" aria-label="SMG-203 Gallant">
+  <rect width="640" height="360" fill="#232323"/>
+  <g transform="translate(80 110)" stroke-linejoin="round">
+    <path d="M28 88h38v-24h270l34 18h64v32h-78l-28 16H98l-22-18H28z" fill="#4d4f50"/>
+    <path d="M82 62h238l46 24h78v22h-86l-30 17H98L72 104H34V88h42z" fill="#797b7b"/>
+    <path d="M102 48h198v18H102z" fill="#6f7172"/>
+    <path d="M148 126h86l-34 60h-68z" fill="#343536"/>
+    <path d="M256 126h80v20h-80zM328 96h144v18H328zM442 78h34v14h-34z" fill="#3b3c3d"/>
+    <path d="M54 66h32v74H54zM22 76h32v54H22z" fill="#5d5f60"/>
+    <path d="M370 81h76M112 84h178M318 95h34" stroke="#1d1d1d" stroke-width="8" stroke-linecap="round"/>
+    <path d="M312 54v-44M326 58v-26M342 68v-18" stroke="#555" stroke-width="8" stroke-linecap="round"/>
+  </g>
+</svg>
