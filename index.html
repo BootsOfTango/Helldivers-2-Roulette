@@ -8013,6 +8013,26 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             return (d - 1) * 5; // D1=0%, D2=5% ... D10=45%
         }
 
+        function getExtractionBonusPercent(extractedSafely) {
+            if (extractedSafely === true) return 5;
+            if (extractedSafely === false) return -5;
+            return 0;
+        }
+
+        function getBlueSideObjectivesBonusPercent(blueSideObjCount) {
+            const count = Math.max(0, Math.floor(Number(blueSideObjCount || 0)));
+            return count * 3;
+        }
+
+        function getRawScoreBonusMultiplier(card, difficulty) {
+            const s = normalizeMissionStats(card?.stats, card);
+            const pct =
+                getDifficultyBonusPercent(difficulty) +
+                getExtractionBonusPercent(s.extractedSafely) +
+                getBlueSideObjectivesBonusPercent(s.blueSideObjCount);
+            return 1 + (pct / 100);
+        }
+
         function getDifficultyBufferedRaw(rawBase, difficulty) {
             const safeRaw = Math.max(0, Number(rawBase || 0));
             const pct = getDifficultyBonusPercent(difficulty);
@@ -8095,7 +8115,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         function computeRawScore(card, options = {}) {
             const difficulty = getCardDifficulty(card);
             const { rawBase } = computeRawBaseScore(card, options);
-            return getDifficultyBufferedRaw(rawBase, difficulty);
+            const safeRaw = Math.max(0, Number(rawBase || 0));
+            return safeRaw * getRawScoreBonusMultiplier(card, difficulty);
         }
 
         /***********************
