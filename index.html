@@ -9647,8 +9647,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                       </div>
 
                       <div class="modalNotes">
-                        <div class="label">Original run note (locked after save)</div>
-                        <textarea data-k="originalNote" data-id="${card.id}" placeholder="Write your first impression of this run. This becomes permanent after Save." ${editingLocked ? "disabled" : ""}>${escapeHtml(draft.originalNote || "")}</textarea>
+                        <div class="label">Original run note (optional, locked after save)</div>
+                        <textarea data-k="originalNote" data-id="${card.id}" placeholder="Optional: write your first impression of this run. This becomes permanent after Save." ${editingLocked ? "disabled" : ""}>${escapeHtml(draft.originalNote || "")}</textarea>
                       </div>
 
                       <div class="modalNotes">
@@ -10484,10 +10484,6 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 }
                 if (draft.extractedSafely !== true && draft.extractedSafely !== false) {
                     alert("Please choose Extraction Success or Not Extracted before saving.");
-                    return;
-                }
-                if (!String(draft.originalNote || "").trim()) {
-                    alert("Please add your original run note before saving.");
                     return;
                 }
                 openFinalizeStatsModal();
