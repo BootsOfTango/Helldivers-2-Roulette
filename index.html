@@ -9404,11 +9404,22 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 state.ui.resultCardDrafts = {};
             }
             const existing = state.ui.resultCardDrafts[cardId];
-            if (existing && typeof existing === "object") return existing;
+            if (existing && typeof existing === "object") {
+                if (!existing.stats || typeof existing.stats !== "object") existing.stats = normalizeMissionStats(card.stats, card);
+                if (existing.extractedSafely !== true && existing.extractedSafely !== false) {
+                    existing.extractedSafely = normalizeMissionStats(existing.stats, card).extractedSafely;
+                }
+                if (existing.stats.extractedSafely !== existing.extractedSafely) {
+                    existing.stats.extractedSafely = existing.extractedSafely;
+                }
+                return existing;
+            }
             const originalNote = String(card.originalNote || card.notes || "");
+            const normalizedStats = normalizeMissionStats(card.stats, card);
             const draft = {
-                stats: normalizeMissionStats(card.stats, card),
+                stats: normalizedStats,
                 majorOrderDone: card.statsLocked ? !!card.majorOrderDone : null,
+                extractedSafely: normalizedStats.extractedSafely,
                 originalNote
             };
             state.ui.resultCardDrafts[cardId] = draft;
@@ -9541,10 +9552,10 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                         <div class="label">Extraction</div>
                         <div class="modalMajorOrderQuestion">Did your team extract from this run?</div>
                         <div class="modalMajorOrderButtons" data-role="extractionButtons" data-id="${card.id}">
-                          <button type="button" class="modalMajorOrderBtn ${draft.stats?.extractedSafely === true ? "active" : ""}" data-act="chooseExtractionStatus" data-id="${card.id}" data-choice="true" ${editingLocked ? "disabled" : ""}>Extraction Success</button>
-                          <button type="button" class="modalMajorOrderBtn ${draft.stats?.extractedSafely === false ? "active" : ""}" data-act="chooseExtractionStatus" data-id="${card.id}" data-choice="false" ${editingLocked ? "disabled" : ""}>Not Extracted</button>
+                          <button type="button" class="modalMajorOrderBtn ${draft.extractedSafely === true ? "active" : ""}" data-act="chooseExtractionStatus" data-id="${card.id}" data-choice="true" ${editingLocked ? "disabled" : ""}>Extraction Success</button>
+                          <button type="button" class="modalMajorOrderBtn ${draft.extractedSafely === false ? "active" : ""}" data-act="chooseExtractionStatus" data-id="${card.id}" data-choice="false" ${editingLocked ? "disabled" : ""}>Not Extracted</button>
                         </div>
-                        ${!editingLocked && draft.stats?.extractedSafely == null ? `<div class="modalMajorOrderHint">Pick extraction success or not extracted before saving.</div>` : ``}
+                        ${!editingLocked && draft.extractedSafely == null ? `<div class="modalMajorOrderHint">Pick extraction success or not extracted before saving.</div>` : ``}
                       </div>
 
                       <div class="modalNotes">
@@ -10290,8 +10301,10 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 if (!draft) return;
                 const choice = actionBtn.getAttribute("data-choice");
                 if (choice !== "true" && choice !== "false") return;
+                const extractedSafely = (choice === "true");
+                draft.extractedSafely = extractedSafely;
                 if (!draft.stats || typeof draft.stats !== "object") draft.stats = {};
-                draft.stats.extractedSafely = (choice === "true");
+                draft.stats.extractedSafely = extractedSafely;
                 openResultCardModal(id);
                 return;
             }
@@ -10332,7 +10345,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                     alert("Please choose Major Order Success or Major Order Fail before saving.");
                     return;
                 }
-                if (draft.stats?.extractedSafely !== true && draft.stats?.extractedSafely !== false) {
+                if (draft.extractedSafely !== true && draft.extractedSafely !== false) {
                     alert("Please choose Extraction Success or Not Extracted before saving.");
                     return;
                 }
@@ -10355,8 +10368,11 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             if (!draft) return;
 
             const normalizedStats = normalizeMissionStats(draft.stats, card);
+            normalizedStats.extractedSafely = draft.extractedSafely === true ? true : draft.extractedSafely === false ? false : normalizedStats.extractedSafely;
             draft.stats = normalizedStats;
+            draft.extractedSafely = normalizedStats.extractedSafely;
             card.stats = normalizedStats;
+            card.extractedSafely = draft.extractedSafely;
             card.majorOrderDone = !!draft.majorOrderDone;
             card.originalNote = String(draft.originalNote || "");
             card.notes = card.originalNote;
