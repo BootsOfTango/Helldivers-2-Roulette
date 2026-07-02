@@ -2053,6 +2053,12 @@ END MASTER DIRECTIVE
                 color: rgba(46,204,113,.95);
             }
 
+            .badge.blue {
+                border-color: rgba(102,166,255,.35);
+                background: rgba(102,166,255,.08);
+                color: rgba(138,199,255,.95);
+            }
+
         input, select, textarea {
             width: 100%;
             border: 1px solid var(--line);
@@ -4491,6 +4497,8 @@ END MASTER DIRECTIVE
                                 <option value="kills">Sort by Kills</option>
                                 <option value="deaths">Sort by Deaths</option>
                                 <option value="stims">Sort by Stims</option>
+                                <option value="extractedSafely">Sort by Extraction</option>
+                                <option value="blueSideObjCount">Sort by Blue Side Objects</option>
                                 <option value="playerName">Sort by Player</option>
                             </select>
                             <select id="cmpSortDir">
@@ -5294,6 +5302,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             if (metricKey === "distanceKm") return clamp(n, 0, 20).toFixed(1);
             if (metricKey === "shotsFired" || metricKey === "bulletCount") return String(Math.round(Math.max(0, n)));
             if (metricKey === "raw") return roundToSingleDecimal(n).toFixed(1);
+            if (metricKey === "extractedSafely") return n > 0 ? "Success" : "Not Extracted";
+            if (metricKey === "blueSideObjCount") return String(Math.round(Math.max(0, n)));
             return Number.isInteger(n) ? String(n) : roundToSingleDecimal(n).toFixed(1);
         }
 
@@ -9349,6 +9359,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                           <div class="resultSummaryBadges">
                             <span class="badge yellow">Grade ${Number(card.grade || 0)}</span>
                             ${moBadge}
+                            <span class="badge ${normalizeMissionStats(card.stats, card).extractedSafely ? "good" : "red"}">Extraction ${escapeHtml(getExtractionDisplayText(card))}</span>
+                            <span class="badge blue">Blue Side ${getBlueSideObjectCount(card)}</span>
                             <span class="factionSticker ${factionClass}">
                                 <span class="factionStickerIconWrap">${factionStickerData.image ? `<img class="factionStickerIcon" src="${escapeHtml(factionStickerData.image)}" alt="${escapeHtml(factionStickerData.label)}">` : `<span class="factionStickerIconFallback">?</span>`}</span>
                             </span>
@@ -9602,6 +9614,16 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                     </div>
 
                     <div class="modalMoNotesRow">
+                      ${editingLocked ? `
+                        <div class="modalMajorOrderBlock">
+                          <div class="label">Major order</div>
+                          <div class="modalMajorOrderQuestion">${draft.majorOrderDone ? "Major Order Success" : "Major Order Fail"}</div>
+                        </div>
+                        <div class="modalMajorOrderBlock">
+                          <div class="label">Blue Side Object counts</div>
+                          <div class="modalMajorOrderQuestion">${Number(draft.stats?.blueSideObjCount || 0)}</div>
+                        </div>
+                      ` : ``}
                       ${!editingLocked ? `
                         <div class="modalMajorOrderBlock">
                           <div class="label">Major order</div>
@@ -9718,6 +9740,16 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             return state.cards.find(c => c.id === id) || null;
         }
 
+        function getExtractionDisplayText(card) {
+            const stats = normalizeMissionStats(card?.stats, card);
+            return stats.extractedSafely ? "Success" : "Not Extracted";
+        }
+
+        function getBlueSideObjectCount(card) {
+            const stats = normalizeMissionStats(card?.stats, card);
+            return Number(stats.blueSideObjCount || 0);
+        }
+
         function getCardTierClass(card) {
             const tierMap = buildTierMap();
             return tierMap.get(card.id) || "";
@@ -9753,6 +9785,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
       <div style="text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex-shrink:0;">
         <div style="display:inline-flex;white-space:nowrap;padding:8px 14px;border-radius:999px;border:1px solid #ffe05b;color:#ffe05b;font-weight:800;font-size:24px;line-height:1;">Grade ${Number(card.grade || 0)}</div>
         <div style="display:inline-flex;white-space:nowrap;padding:7px 12px;border-radius:999px;border:1px solid ${card.majorOrderDone ? "#33d69f" : "#ff5f5f"};color:${card.majorOrderDone ? "#33d69f" : "#ff5f5f"};font-weight:700;font-size:22px;line-height:1;">${card.majorOrderDone ? "MO DONE" : "MO NO"}</div>
+        <div style="display:inline-flex;white-space:nowrap;padding:7px 12px;border-radius:999px;border:1px solid ${s.extractedSafely ? "#33d69f" : "#ff5f5f"};color:${s.extractedSafely ? "#33d69f" : "#ff5f5f"};font-weight:700;font-size:18px;line-height:1;">Extraction: ${escapeHtml(getExtractionDisplayText(card))}</div>
+        <div style="display:inline-flex;white-space:nowrap;padding:7px 12px;border-radius:999px;border:1px solid #66a6ff;color:#8ac7ff;font-weight:700;font-size:18px;line-height:1;">Blue Side Objects: ${getBlueSideObjectCount(card)}</div>
       </div>
     </div>
 
@@ -9800,6 +9834,14 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
       <div class="metric-card">
         <div style="font-size:18px;color:#9fb0cb;text-transform:uppercase;letter-spacing:.06em;">Democracy / Shots Fired</div>
         <div style="font-size:38px;font-weight:800;min-width:0;overflow-wrap:anywhere;">${formatMetricDisplay(s.bulletCount ?? s.shotsFired ?? 0, "bulletCount")}</div>
+      </div>
+      <div class="metric-card">
+        <div style="font-size:18px;color:#9fb0cb;text-transform:uppercase;letter-spacing:.06em;">Extraction</div>
+        <div style="font-size:32px;font-weight:800;min-width:0;overflow-wrap:anywhere;">${escapeHtml(getExtractionDisplayText(card))}</div>
+      </div>
+      <div class="metric-card">
+        <div style="font-size:18px;color:#9fb0cb;text-transform:uppercase;letter-spacing:.06em;">Blue Side Object counts</div>
+        <div style="font-size:38px;font-weight:800;min-width:0;overflow-wrap:anywhere;">${getBlueSideObjectCount(card)}</div>
       </div>
     </div>
 
@@ -9866,7 +9908,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
         function drawDiscordCardCanvasFallback(card) {
             const baseWidth = 1200;
-            const baseHeight = 720;
+            const baseHeight = 800;
             const width = Math.round(baseWidth * DISCORD_CARD_SCALE);
             const height = Math.round(baseHeight * DISCORD_CARD_SCALE);
             const canvas = document.createElement("canvas");
@@ -9952,6 +9994,11 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             ctx.fillStyle = card.majorOrderDone ? "#33d69f" : "#ff5f5f";
             ctx.font = "700 28px Inter, Segoe UI, Arial, sans-serif";
             ctx.fillText(card.majorOrderDone ? "MO DONE" : "MO NO", 910, 216);
+            ctx.fillStyle = s.extractedSafely ? "#33d69f" : "#ff5f5f";
+            ctx.font = "700 22px Inter, Segoe UI, Arial, sans-serif";
+            ctx.fillText(`Extraction: ${getExtractionDisplayText(card)}`, 820, 250);
+            ctx.fillStyle = "#8ac7ff";
+            ctx.fillText(`Blue Side Objects: ${getBlueSideObjectCount(card)}`, 820, 280);
 
             ctx.font = "700 30px Inter, Segoe UI, Arial, sans-serif";
             let y = 190;
@@ -9970,10 +10017,12 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             statLine("Distance", `${formatMetricDisplay(s.distanceKm, "distanceKm")} km`, 470);
             statLine("Strat Uses", Number(s.stratUses || 0), 525);
             statLine("Democracy / Shots Fired", formatMetricDisplay(s.bulletCount ?? s.shotsFired ?? 0, "bulletCount"), 580);
+            statLine("Extraction", getExtractionDisplayText(card), 635);
+            statLine("Blue Side Objects", getBlueSideObjectCount(card), 690);
 
             ctx.fillStyle = "#f5dc54";
             ctx.font = "700 28px Inter, Segoe UI, Arial, sans-serif";
-            ctx.fillText(`Raw Score: ${Number(card.scoreRaw || 0).toFixed(1)}`, 700, 600);
+            ctx.fillText(`Raw Score: ${Number(card.scoreRaw || 0).toFixed(1)}`, 700, 760);
             return new Promise((resolve, reject) => {
                 canvas.toBlob((pngBlob) => {
                     if (!pngBlob) return reject(new Error("Fallback PNG export failed"));
@@ -10038,6 +10087,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                     `**Faction:** ${card.faction || "—"}`,
                     `**Difficulty:** ${formatDifficultyLabel(card)}`,
                     `**Major Order:** ${card.majorOrderDone ? "✅ DONE" : "❌ FAIL"}`,
+                    `**Extraction:** ${getExtractionDisplayText(card)}`,
+                    `**Blue Side Object counts:** ${getBlueSideObjectCount(card)}`,
                     `**Grade:** ${Number(card.grade || 0)}`,
                     `**Raw Score:** ${Number(card.scoreRaw || 0).toFixed(1)}`
                 ].join("\n"),
@@ -10069,7 +10120,9 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                             `Stims: **${Number(s.stims || 0)}**`,
                             `Distance: **${formatMetricDisplay(s.distanceKm, "distanceKm")} km**`,
                             `Strat Uses: **${Number(s.stratUses || 0)}**`,
-                            `Democracy / Shots Fired: **${formatMetricDisplay(s.bulletCount ?? s.shotsFired ?? 0, "bulletCount")}**`
+                            `Democracy / Shots Fired: **${formatMetricDisplay(s.bulletCount ?? s.shotsFired ?? 0, "bulletCount")}**`,
+                            `Extraction: **${getExtractionDisplayText(card)}**`,
+                            `Blue Side Object counts: **${getBlueSideObjectCount(card)}**`
                         ].join("\n")
                     }
                 ],
@@ -10251,6 +10304,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             { k: "distanceKm", label: "Distance km (Mobility)" },
             { k: "stratUses", label: "Strat uses (Utility)" },
             { k: "bulletCount", label: "Democracy / Shots Fired" },
+            { k: "extractedSafely", label: "Extraction" },
+            { k: "blueSideObjCount", label: "Blue Side Object counts" },
             { k: "raw", label: "Raw score" }
         ]);
         const COMPARE_METRIC_ALIASES = Object.freeze({
@@ -10539,6 +10594,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const s = card.stats || {};
             if (metricKey === "deathsPlusStims") return Number(s.deaths || 0) + Number(s.stims || 0);
             if (metricKey === "bulletCount") return Number(s.bulletCount ?? s.shotsFired ?? 0);
+            if (metricKey === "extractedSafely") return normalizeMissionStats(s, card).extractedSafely ? 1 : 0;
+            if (metricKey === "blueSideObjCount") return getBlueSideObjectCount(card);
 
             return Number(s[metricKey] || 0);
         }
@@ -10578,6 +10635,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 { name: "Grade (0-100)", k: "grade", better: "high" },
                 { name: "Difficulty", k: "difficulty", better: "high" },
                 { name: "Major Order", k: "majorOrderDone", better: "high" },
+                { name: "Extraction", k: "extractedSafely", better: "high" },
+                { name: "Blue Side Object counts", k: "blueSideObjCount", better: "high" },
                 { name: "Kills", k: "kills", better: "high" },
                 { name: "Accuracy (%)", k: "accuracy", better: "high" },
                 { name: "Deaths", k: "deaths", better: "low" },
@@ -13341,7 +13400,11 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                         ? getCardDifficulty(x)
                         : (sortMetric === "raw")
                             ? Number(x.scoreRaw || 0)
-                        : Number(x.stats?.[sortMetric] || 0);
+                        : (sortMetric === "extractedSafely")
+                            ? (normalizeMissionStats(x.stats, x).extractedSafely ? 1 : 0)
+                            : (sortMetric === "blueSideObjCount")
+                                ? getBlueSideObjectCount(x)
+                                : Number(x.stats?.[sortMetric] || 0);
 
                 const vy = (sortMetric === "grade")
                     ? Number(y.grade || 0)
@@ -13349,7 +13412,11 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                         ? getCardDifficulty(y)
                         : (sortMetric === "raw")
                             ? Number(y.scoreRaw || 0)
-                        : Number(y.stats?.[sortMetric] || 0);
+                        : (sortMetric === "extractedSafely")
+                            ? (normalizeMissionStats(y.stats, y).extractedSafely ? 1 : 0)
+                            : (sortMetric === "blueSideObjCount")
+                                ? getBlueSideObjectCount(y)
+                                : Number(y.stats?.[sortMetric] || 0);
 
                 const d = (vx - vy) * dir;
                 if (d !== 0) return d;
