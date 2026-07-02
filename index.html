@@ -6916,7 +6916,14 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             card.extractedSafely = card.stats.extractedSafely;
             card.scoreRaw = Number(card.scoreRaw || 0);
             card.scoreRawBase = Number(card.scoreRawBase || 0);
-            card.scoreRawBonusPercent = Number(card.scoreRawBonusPercent || getDifficultyBonusPercent(getCardDifficulty(card)));
+            card.scoreDifficultyBonusPercent = Number(card.scoreDifficultyBonusPercent || getDifficultyBonusPercent(getCardDifficulty(card)));
+            card.scoreExtractionBonusPercent = Number(card.scoreExtractionBonusPercent || getExtractionBonusPercent(card.stats?.extractedSafely));
+            card.scoreBlueSideObjBonusPercent = Number(card.scoreBlueSideObjBonusPercent || getBlueSideObjectivesBonusPercent(card.stats?.blueSideObjCount));
+            card.scoreRawBonusPercent = Number(card.scoreRawBonusPercent || (
+                card.scoreDifficultyBonusPercent +
+                card.scoreExtractionBonusPercent +
+                card.scoreBlueSideObjBonusPercent
+            ));
             card.grade = clamp(Number(card.grade || 0), 0, 100);
             card.difficulty = getCardDifficulty(card);
             // Enforce strict tier mapping from D1-D10 only:
@@ -8024,6 +8031,37 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             return count * 3;
         }
 
+        function getScoreBonusBreakdown(card, difficulty = getCardDifficulty(card)) {
+            const s = normalizeMissionStats(card?.stats, card);
+            const legacyRawBonus = Number(card?.scoreRawBonusPercent);
+            const difficultyBonus = Number.isFinite(Number(card?.scoreDifficultyBonusPercent))
+                ? Number(card.scoreDifficultyBonusPercent)
+                : getDifficultyBonusPercent(difficulty);
+            const extractionBonus = Number.isFinite(Number(card?.scoreExtractionBonusPercent))
+                ? Number(card.scoreExtractionBonusPercent)
+                : getExtractionBonusPercent(s.extractedSafely);
+            const blueSideObjBonus = Number.isFinite(Number(card?.scoreBlueSideObjBonusPercent))
+                ? Number(card.scoreBlueSideObjBonusPercent)
+                : getBlueSideObjectivesBonusPercent(s.blueSideObjCount);
+            const computedRawBonus = difficultyBonus + extractionBonus + blueSideObjBonus;
+            return {
+                difficultyBonus,
+                extractionBonus,
+                blueSideObjBonus,
+                rawBonus: Number.isFinite(legacyRawBonus) ? legacyRawBonus : computedRawBonus
+            };
+        }
+
+        function formatSignedPercent(value) {
+            const n = Number(value || 0);
+            return `${n >= 0 ? "+" : ""}${n}%`;
+        }
+
+        function formatScoreBonusBreakdown(card) {
+            const breakdown = getScoreBonusBreakdown(card);
+            return `D bonus ${formatSignedPercent(breakdown.difficultyBonus)} • Extraction ${formatSignedPercent(breakdown.extractionBonus)} • Blue Obj ${formatSignedPercent(breakdown.blueSideObjBonus)}`;
+        }
+
         function getRawScoreBonusMultiplier(card, difficulty) {
             const s = normalizeMissionStats(card?.stats, card);
             const pct =
@@ -8849,9 +8887,16 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             }));
             cardsWithRaw.forEach(({ card, raw, components }) => {
                 const difficulty = getCardDifficulty(card);
+                const s = normalizeMissionStats(card?.stats, card);
+                const difficultyBonus = getDifficultyBonusPercent(difficulty);
+                const extractionBonus = getExtractionBonusPercent(s.extractedSafely);
+                const blueSideObjBonus = getBlueSideObjectivesBonusPercent(s.blueSideObjCount);
                 card.scoreRaw = raw;
                 card.scoreRawBase = Math.max(0, Number(components?.rawBase || 0));
-                card.scoreRawBonusPercent = getDifficultyBonusPercent(difficulty);
+                card.scoreDifficultyBonusPercent = difficultyBonus;
+                card.scoreExtractionBonusPercent = extractionBonus;
+                card.scoreBlueSideObjBonusPercent = blueSideObjBonus;
+                card.scoreRawBonusPercent = difficultyBonus + extractionBonus + blueSideObjBonus;
                 card.scoreKillTarget = Math.round(Number(components?.killTarget || killTarget));
                 card.grade = 0;
             });
@@ -9607,7 +9652,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                     </div>
 
                     <div class="miniRow modalActionRow" style="justify-content:space-between;">
-                      <div class="tiny">${escapeHtml(formatDifficultyLabel(card))} • Raw: <strong>${Number(card.scoreRaw || 0).toFixed(1)}</strong> (buffer +${Number(card.scoreRawBonusPercent || getDifficultyBonusPercent(getCardDifficulty(card)) || 0)}%)${editingLocked ? ` • Finalized ${escapeHtml(new Date(card.statsLockedAt || card.createdAt).toLocaleString())}` : ""}</div>
+                      <div class="tiny">${escapeHtml(formatDifficultyLabel(card))} • Raw: <strong>${Number(card.scoreRaw || 0).toFixed(1)}</strong> (${escapeHtml(formatScoreBonusBreakdown(card))})${editingLocked ? ` • Finalized ${escapeHtml(new Date(card.statsLockedAt || card.createdAt).toLocaleString())}` : ""}</div>
                       <div class="miniRow modalActionButtons">
                         <button class="btnPrimary" data-act="saveCard" data-id="${card.id}" ${editingLocked ? "disabled" : ""}>SAVE</button>
                         <button class="btnGhost" data-act="deleteCard" data-id="${card.id}">DELETE</button>
@@ -9762,7 +9807,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
       <div>
         <div style="font-size:20px;color:#9fb0cb;text-transform:uppercase;letter-spacing:.06em;">Deaths + Stims</div>
         <div style="font-size:28px;">${combo} <span style="color:#9fb0cb;">(lower = better endurance)</span></div>
-        <div style="margin-top:6px;font-size:24px;">Raw Score: <strong>${Number(card.scoreRaw || 0).toFixed(1)}</strong> <span style="color:#9fb0cb;font-size:16px;">(buffer +${Number(card.scoreRawBonusPercent || getDifficultyBonusPercent(getCardDifficulty(card)) || 0)}%)</span></div>
+        <div style="margin-top:6px;font-size:24px;">Raw Score: <strong>${Number(card.scoreRaw || 0).toFixed(1)}</strong> <span style="color:#9fb0cb;font-size:16px;">(${escapeHtml(formatScoreBonusBreakdown(card))})</span></div>
       </div>
       <div style="border:1px solid #263146;border-radius:14px;padding:8px;display:flex;justify-content:center;align-items:center;min-height:250px;">
         ${radar}
