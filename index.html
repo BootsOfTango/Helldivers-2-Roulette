@@ -6559,6 +6559,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                     ${metaCard("Deaths", String(Number(safeStats.deaths || 0)))}
                     ${metaCard("Stims", String(Number(safeStats.stims || 0)))}
                     ${metaCard("Democracy / Shots", String(Number(safeStats.bulletCount ?? safeStats.shotsFired ?? 0)))}
+                    ${metaCard("Blue Side Objectives", String(Number(safeStats.blueSideObjCount || 0)))}
                     ${metaCard("Strat Uses", String(Number(safeStats.stratUses || 0)))}
                     ${metaCard("Distance (km)", String(Number(safeStats.distanceKm || 0)))}
                     ${metaCard("MO", normalizedCard.majorOrderDone == null ? "N/A" : (normalizedCard.majorOrderDone ? "Success" : "Fail"))}
@@ -6727,14 +6728,36 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             };
             const source = (stats && typeof stats === "object") ? stats : {};
             const fallbackSource = (fallback && typeof fallback === "object") ? fallback : {};
+            const fallbackStats = (fallbackSource.stats && typeof fallbackSource.stats === "object") ? fallbackSource.stats : {};
             const out = { ...source };
             const hasOwn = (obj, key) => Object.prototype.hasOwnProperty.call(obj, key);
             const firstPresent = (...keys) => {
                 for (const key of keys) {
                     if (hasOwn(source, key) && source[key] != null) return source[key];
                     if (hasOwn(fallbackSource, key) && fallbackSource[key] != null) return fallbackSource[key];
+                    if (hasOwn(fallbackStats, key) && fallbackStats[key] != null) return fallbackStats[key];
                 }
                 return 0;
+            };
+            const firstPresentValue = (...keys) => {
+                for (const key of keys) {
+                    if (hasOwn(source, key)) return source[key];
+                    if (hasOwn(fallbackSource, key)) return fallbackSource[key];
+                    if (hasOwn(fallbackStats, key)) return fallbackStats[key];
+                }
+                return null;
+            };
+            const toNullableBoolean = (value) => {
+                if (value === null || value === undefined || value === "") return null;
+                if (value === true || value === false) return value;
+                if (typeof value === "number") return Number.isFinite(value) ? value !== 0 : null;
+                if (typeof value === "string") {
+                    const normalized = value.trim().toLowerCase();
+                    if (!normalized) return null;
+                    if (["true", "yes", "y", "1", "extracted", "success", "safe"].includes(normalized)) return true;
+                    if (["false", "no", "n", "0", "failed", "fail", "unsafe"].includes(normalized)) return false;
+                }
+                return null;
             };
 
             out.kills = clampStat(firstPresent("kills", "power"), 0);
@@ -6743,8 +6766,10 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             out.stims = clampStat(firstPresent("stims"), 0);
             out.distanceKm = clampStat(firstPresent("distanceKm", "mobility"), 0, 20);
             out.stratUses = clampStat(firstPresent("stratUses", "utility"), 0);
+            out.blueSideObjCount = clampStat(firstPresent("blueSideObjCount"), 0);
             out.bulletCount = clampStat(firstPresent("bulletCount", "shotsFired"), 0, 15000);
             out.shotsFired = out.bulletCount;
+            out.extractedSafely = toNullableBoolean(firstPresentValue("extractedSafely"));
             return out;
         }
 
@@ -6757,7 +6782,9 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 Number(s.stims || 0).toFixed(4),
                 Number(s.distanceKm || 0).toFixed(4),
                 Number(s.stratUses || 0).toFixed(4),
-                Number(s.bulletCount ?? s.shotsFired ?? 0).toFixed(4)
+                Number(s.blueSideObjCount || 0).toFixed(4),
+                Number(s.bulletCount ?? s.shotsFired ?? 0).toFixed(4),
+                s.extractedSafely === null ? "null" : String(!!s.extractedSafely)
             ].join("|");
         }
 
@@ -6885,6 +6912,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             } else {
                 card.lockedStatsSnapshot = null;
             }
+            card.stats = normalizeMissionStats(card.stats, card);
+            card.extractedSafely = card.stats.extractedSafely;
             card.scoreRaw = Number(card.scoreRaw || 0);
             card.scoreRawBase = Number(card.scoreRawBase || 0);
             card.scoreRawBonusPercent = Number(card.scoreRawBonusPercent || getDifficultyBonusPercent(getCardDifficulty(card)));
@@ -6905,6 +6934,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             delete card.tier;
             card.playerName = getPlayerName(card);
             card.stats = normalizeMissionStats(card.stats, card);
+            card.extractedSafely = card.stats.extractedSafely;
 
             return card;
         }
@@ -9489,6 +9519,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                       <div><div class="label">Deaths</div><input type="number" min="0" value="${Number(draft.stats?.deaths || 0)}" data-k="deaths" data-id="${card.id}" ${editingLocked ? "disabled" : ""}></div>
                       <div><div class="label">Stims</div><input type="number" min="0" value="${Number(draft.stats?.stims || 0)}" data-k="stims" data-id="${card.id}" ${editingLocked ? "disabled" : ""}></div>
                       <div><div class="label">Democracy / Shots Fired</div><input type="number" min="0" value="${Number(draft.stats?.bulletCount ?? draft.stats?.shotsFired ?? 0)}" data-k="bulletCount" data-id="${card.id}" ${editingLocked ? "disabled" : ""}></div>
+                      <div><div class="label">Blue Side Objectives</div><input type="number" min="0" value="${Number(draft.stats?.blueSideObjCount || 0)}" data-k="blueSideObjCount" data-id="${card.id}" ${editingLocked ? "disabled" : ""}></div>
                       <div><div class="label">Strat Uses</div><input type="number" min="0" value="${Number(draft.stats?.stratUses || 0)}" data-k="stratUses" data-id="${card.id}" ${editingLocked ? "disabled" : ""}></div>
                       <div><div class="label">Distance (km)</div><input type="number" min="0" step="0.1" value="${Number(draft.stats?.distanceKm || 0)}" data-k="distanceKm" data-id="${card.id}" ${editingLocked ? "disabled" : ""}></div>
                     </div>
@@ -10111,7 +10142,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             });
         }
 
-        const MISSION_STAT_KEYS = Object.freeze(["kills", "accuracy", "deaths", "stims", "distanceKm", "stratUses", "bulletCount"]);
+        const MISSION_STAT_KEYS = Object.freeze(["kills", "accuracy", "deaths", "stims", "distanceKm", "stratUses", "bulletCount", "blueSideObjCount"]);
         const REQUIRED_SAVE_KEYS = Object.freeze([...MISSION_STAT_KEYS]);
         const RADAR_AXES = Object.freeze([
             { key: "POWER", label: "Power", metric: "Kills", compareLabel: "POWER", statKey: "kills", normalize: "pos", maxKey: "maxKills", baselineKey: "kills", discordValue: (s) => `${Number(s.kills || 0)} kills` },
@@ -12729,6 +12760,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                     stratUses: 0,
                     bulletCount: 0,
                     shotsFired: 0,
+                    blueSideObjCount: 0,
+                    extractedSafely: null,
                 },
 
                 majorOrderDone: false,
