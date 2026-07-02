@@ -9359,7 +9359,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                           <div class="resultSummaryBadges">
                             <span class="badge yellow">Grade ${Number(card.grade || 0)}</span>
                             ${moBadge}
-                            <span class="badge ${normalizeMissionStats(card.stats, card).extractedSafely ? "good" : "red"}">Extraction ${escapeHtml(getExtractionDisplayText(card))}</span>
+                            <span class="badge ${getExtractionBadgeClass(card)}">Extraction ${escapeHtml(getExtractionDisplayText(card))}</span>
                             <span class="badge blue">Blue Side ${getBlueSideObjectCount(card)}</span>
                             <span class="factionSticker ${factionClass}">
                                 <span class="factionStickerIconWrap">${factionStickerData.image ? `<img class="factionStickerIcon" src="${escapeHtml(factionStickerData.image)}" alt="${escapeHtml(factionStickerData.label)}">` : `<span class="factionStickerIconFallback">?</span>`}</span>
@@ -9742,7 +9742,23 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
         function getExtractionDisplayText(card) {
             const stats = normalizeMissionStats(card?.stats, card);
-            return stats.extractedSafely ? "Success" : "Not Extracted";
+            if (stats.extractedSafely === true) return "Success";
+            if (stats.extractedSafely === false) return "Not Extracted";
+            return "N/A";
+        }
+
+        function getExtractionBadgeClass(card) {
+            const stats = normalizeMissionStats(card?.stats, card);
+            if (stats.extractedSafely === true) return "good";
+            if (stats.extractedSafely === false) return "red";
+            return "yellow";
+        }
+
+        function getExtractionAccentColor(card) {
+            const stats = normalizeMissionStats(card?.stats, card);
+            if (stats.extractedSafely === true) return "#33d69f";
+            if (stats.extractedSafely === false) return "#ff5f5f";
+            return "#ffd166";
         }
 
         function getBlueSideObjectCount(card) {
@@ -9785,7 +9801,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
       <div style="text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex-shrink:0;">
         <div style="display:inline-flex;white-space:nowrap;padding:8px 14px;border-radius:999px;border:1px solid #ffe05b;color:#ffe05b;font-weight:800;font-size:24px;line-height:1;">Grade ${Number(card.grade || 0)}</div>
         <div style="display:inline-flex;white-space:nowrap;padding:7px 12px;border-radius:999px;border:1px solid ${card.majorOrderDone ? "#33d69f" : "#ff5f5f"};color:${card.majorOrderDone ? "#33d69f" : "#ff5f5f"};font-weight:700;font-size:22px;line-height:1;">${card.majorOrderDone ? "MO DONE" : "MO NO"}</div>
-        <div style="display:inline-flex;white-space:nowrap;padding:7px 12px;border-radius:999px;border:1px solid ${s.extractedSafely ? "#33d69f" : "#ff5f5f"};color:${s.extractedSafely ? "#33d69f" : "#ff5f5f"};font-weight:700;font-size:18px;line-height:1;">Extraction: ${escapeHtml(getExtractionDisplayText(card))}</div>
+        <div style="display:inline-flex;white-space:nowrap;padding:7px 12px;border-radius:999px;border:1px solid ${getExtractionAccentColor(card)};color:${getExtractionAccentColor(card)};font-weight:700;font-size:18px;line-height:1;">Extraction: ${escapeHtml(getExtractionDisplayText(card))}</div>
         <div style="display:inline-flex;white-space:nowrap;padding:7px 12px;border-radius:999px;border:1px solid #66a6ff;color:#8ac7ff;font-weight:700;font-size:18px;line-height:1;">Blue Side Objects: ${getBlueSideObjectCount(card)}</div>
       </div>
     </div>
@@ -9994,7 +10010,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             ctx.fillStyle = card.majorOrderDone ? "#33d69f" : "#ff5f5f";
             ctx.font = "700 28px Inter, Segoe UI, Arial, sans-serif";
             ctx.fillText(card.majorOrderDone ? "MO DONE" : "MO NO", 910, 216);
-            ctx.fillStyle = s.extractedSafely ? "#33d69f" : "#ff5f5f";
+            ctx.fillStyle = getExtractionAccentColor(card);
             ctx.font = "700 22px Inter, Segoe UI, Arial, sans-serif";
             ctx.fillText(`Extraction: ${getExtractionDisplayText(card)}`, 820, 250);
             ctx.fillStyle = "#8ac7ff";
