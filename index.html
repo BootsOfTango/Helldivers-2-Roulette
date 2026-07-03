@@ -5766,6 +5766,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                     { name: "FAF-14 Spear", enabled: true, warbond: "Unassigned / Custom", subgroup: "support", source: "Unassigned / Custom" },
                     { name: "FLAM-40 Flamethrower", enabled: true, warbond: "Unassigned / Custom", subgroup: "support", source: "Unassigned / Custom" },
                     { name: "M-102 Fast Recon Vehicle", enabled: true, warbond: "Unassigned / Custom", subgroup: "support", source: "Unassigned / Custom" },
+                    { name: "M-103 Supply FRV", enabled: true, warbond: "Unassigned / Custom", subgroup: "support", source: "Unassigned / Custom" },
                     { name: "GL-21 Grenade Launcher", enabled: true, warbond: "Unassigned / Custom", subgroup: "support", source: "Unassigned / Custom" },
                     { name: "GR-8 Recoilless Rifle", enabled: true, warbond: "Unassigned / Custom", subgroup: "support", source: "Unassigned / Custom" },
                     { name: "Guard Dog", enabled: true, warbond: "Unassigned / Custom", subgroup: "support", source: "Unassigned / Custom" },
@@ -7110,24 +7111,35 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         function isExosuitStratagem(name) {
             return /exosuit/i.test(String(name || ""));
         }
-        function enforceSingleExosuit(stratagems, stratagemPool) {
+        function isFrvStratagem(name) {
+            return /\b(?:frv|fast recon vehicle)\b/i.test(String(name || ""));
+        }
+        function enforceSingleStratagemGroups(stratagems, stratagemPool) {
             const picks = Array.isArray(stratagems) ? stratagems.slice() : [];
-            const exosuitIndexes = [];
-            picks.forEach((name, idx) => {
-                if (isExosuitStratagem(name)) exosuitIndexes.push(idx);
-            });
-            if (exosuitIndexes.length <= 1) return picks;
+            const groups = [isExosuitStratagem, isFrvStratagem];
 
-            const replacementPool = enabledNames(stratagemPool).filter(name => {
-                if (!name || name === "—") return false;
-                if (isExosuitStratagem(name)) return false;
-                return !picks.includes(name);
+            groups.forEach(isGroupedStratagem => {
+                const groupedIndexes = [];
+                picks.forEach((name, idx) => {
+                    if (isGroupedStratagem(name)) groupedIndexes.push(idx);
+                });
+                if (groupedIndexes.length <= 1) return;
+
+                const replacementPool = enabledNames(stratagemPool).filter(name => {
+                    if (!name || name === "—") return false;
+                    if (picks.includes(name)) return false;
+                    return groups.every(isSingleGroup => {
+                        if (!isSingleGroup(name)) return true;
+                        return !picks.some(pick => isSingleGroup(pick));
+                    });
+                });
+
+                for (let i = 1; i < groupedIndexes.length; i++) {
+                    const idx = groupedIndexes[i];
+                    picks[idx] = replacementPool.length ? replacementPool.shift() : "—";
+                }
             });
 
-            for (let i = 1; i < exosuitIndexes.length; i++) {
-                const idx = exosuitIndexes[i];
-                picks[idx] = replacementPool.length ? replacementPool.shift() : "—";
-            }
             return picks;
         }
 
@@ -7211,7 +7223,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             const sidearm = pickOne(state.items.sidearms);
             const throwable = pickOne(state.items.throwables);
             const rawStratagems = pickManyUnique(state.items.stratagems, 4);
-            const stratagems = enforceSingleExosuit(rawStratagems, state.items.stratagems);
+            const stratagems = enforceSingleStratagemGroups(rawStratagems, state.items.stratagems);
             const booster = pickOne(state.items.boosters);
 
             const temp = { mode, faction, primary, sidearm, throwable, stratagems, booster };
@@ -11208,6 +11220,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             "FAF-14 Spear": "Unassigned / Custom",
             "FLAM-40 Flamethrower": "Unassigned / Custom",
             "M-102 Fast Recon Vehicle": "Unassigned / Custom",
+            "M-103 Supply FRV": "Unassigned / Custom",
             "GL-21 Grenade Launcher": "Unassigned / Custom",
             "GR-8 Recoilless Rifle": "Unassigned / Custom",
             "Guard Dog": "Unassigned / Custom",

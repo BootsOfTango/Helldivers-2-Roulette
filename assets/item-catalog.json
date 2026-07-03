@@ -1130,6 +1130,14 @@
       "assetPath": "assets/stratagems/support/fast-recon-vehicle.svg"
     },
     {
+      "name": "M-103 Supply FRV",
+      "type": "stratagem",
+      "subgroup": "support",
+      "warbond": "Unassigned / Custom",
+      "source": "Unassigned / Custom",
+      "assetPath": "assets/stratagems/support/supply-frv.svg"
+    },
+    {
       "name": "GL-21 Grenade Launcher",
       "type": "stratagem",
       "subgroup": "support",

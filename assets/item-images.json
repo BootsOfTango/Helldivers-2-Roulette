@@ -118,6 +118,7 @@
     "leveller": "Leveller",
     "localization confusion": "Localization Confusion",
     "m 102 fast recon vehicle": "M-102 Fast Recon Vehicle",
+    "m 103 supply frv": "M-103 Supply FRV",
     "m 105 stalwart": "M-105 Stalwart",
     "m6c socom pistol": "M6C/SOCOM Pistol",
     "m7s smg": "M7S SMG",
@@ -200,6 +201,7 @@
     "sterilizer": "Sterilizer",
     "stoker": "Stoker",
     "stun pods": "Stun Pods",
+    "supply frv": "M-103 Supply FRV",
     "supply pack": "Supply Pack",
     "sweeper": "Sweeper",
     "ted 63 dynamite": "TED-63 Dynamite",
@@ -1456,6 +1458,15 @@
       "wikiTitle": "M-102 Fast Recon Vehicle",
       "sourceUrl": "https://helldivers.wiki.gg/wiki/M-102_Fast_Recon_Vehicle",
       "imageUrl": "https://helldivers.wiki.gg/images/Fast_Recon_Vehicle_Stratagem_Icon.svg?3c3758",
+      "rimCategory": "support"
+    },
+    {
+      "name": "M-103 Supply FRV",
+      "assetPath": "assets/stratagems/support/supply-frv.svg",
+      "kind": "icon",
+      "wikiTitle": "M-103 Supply FRV",
+      "sourceUrl": "https://helldivers.wiki.gg/wiki/M-103_Supply_FRV",
+      "imageUrl": "https://helldivers.wiki.gg/images/Supply_FRV_Stratagem_Icon.svg",
       "rimCategory": "support"
     },
     {
