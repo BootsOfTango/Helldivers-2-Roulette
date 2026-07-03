@@ -1,0 +1,6 @@
+<svg viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg" xml:space="preserve" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2">
+  <desc>Supply FRV stratagem icon recreated from Helldivers wiki reference</desc>
+  <path style="fill:#011419" d="M0 0h256v256H0z"/>
+  <path d="M112 24h16v32h24V24h16v64h-56zM64 80h32v16h16V80h32v16h16V80h32v48H64z" style="fill:#ffe"/>
+  <path d="M96 168h64l32 32H64v-32zM64 200h28c0 7.732-6.268 14-14 14s-14-6.268-14-14zm128 0c0 7.732-6.268 14-14 14s-14-6.268-14-14h28zM80 144h40l8 8h56v16h-56l-8-8H80z" style="fill:#53bcda"/>
+</svg>
