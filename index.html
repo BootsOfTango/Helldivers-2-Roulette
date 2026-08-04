@@ -4320,7 +4320,7 @@ END MASTER DIRECTIVE
                 </div>
                 <div class="col right">
                     <div id="resultsBackupReminder" class="resultsBackupReminder">
-                        Desktop saves are stored in a state.json file with dated automatic backups. Export JSON is still available for manual copies.
+                        Desktop saves are stored in a state.json file with dated automatic backups. Use Export JSON to make a portable copy before moving devices or importing data.
                     </div>
                     <div class="miniRow" style="justify-content:flex-end;">
                         <button id="btnExport" class="btnGhost">EXPORT JSON</button>
@@ -10565,7 +10565,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             try {
                 const alreadySeen = localStorage.getItem(FIRST_BACKUP_WARNING_KEY) === "1";
                 if (alreadySeen) return;
-                alert("Reminder: Export your cards JSON backup to your PC. If you clear browser cache/cookies, local saved cards can be deleted.");
+                alert("Desktop save reminder: your cards, item changes, and supported settings are stored in the app save folder with automatic backups. Use Export JSON any time you want a portable copy. First launch from the browser version? Export JSON in the browser version, open this desktop version, then Import JSON here.");
                 localStorage.setItem(FIRST_BACKUP_WARNING_KEY, "1");
             } catch (e) { }
         }
@@ -13029,36 +13029,84 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         }
 
 
-        function exportJSON() {
+        function refreshAllDataViews(context = "refreshAllDataViews") {
+            renderItems();
+            renderSpin();
+            renderResults();
+            updateSavedCount();
+            refreshCompareOptions();
+            safeRenderRank(context);
+            drawGraph();
+            loadAndRenderApiActivePlanets();
+        }
+
+        async function exportJSON() {
             const cardsForExport = normalizeAndMigrateIncomingCards(deepClone(state.cards)).cards;
-            const payload = JSON.stringify({ items: state.items, cards: cardsForExport }, null, 2);
-            const filename = `hd2_roulette_backup_${new Date().toISOString().slice(0, 10)}.json`;
+            const data = { ...buildPersistedStatePayload(), cards: cardsForExport };
+            if (desktopStorage?.exportJson) {
+                const result = await desktopStorage.exportJson(data);
+                if (result?.ok) alert("Export complete. Your JSON copy includes cards, item changes, supported settings, save-format version, app version, and export date.");
+                return;
+            }
+            const payload = JSON.stringify({ items: data.items, cards: data.cards, settings: data.settings }, null, 2);
+            const filename = `hd2_roulette_browser_export_${new Date().toISOString().slice(0, 10)}.json`;
             download(filename, payload);
         }
 
-        function importJSONFile(file) {
+        function applyImportedData(data) {
+            applyLoadedStateData(data);
+            recalcGrades();
+            refreshLockedStatsBaseline();
+        }
+
+        async function importJSONFile(file) {
+            if (desktopStorage?.importJson && !file) {
+                const result = await desktopStorage.importJson();
+                if (!result || result.canceled) return;
+                if (!result.ok) { alert(result.error || "Import failed. That file is not a supported roulette JSON export."); return; }
+                applyImportedData(result.data);
+                storageLoadComplete = true;
+                refreshAllDataViews("importJSONFile");
+                alert("Import complete. A recovery backup was created before the import, and the imported data has been saved for the next restart.");
+                return;
+            }
             const reader = new FileReader();
             reader.onload = () => {
                 try {
-                    const parsed = JSON.parse(String(reader.result || ""));
-                    if (!parsed || typeof parsed !== "object") throw new Error("bad");
-                    if (parsed.items) state.items = parsed.items;
-                    if (parsed.cards) {
-                        state.cards = normalizeAndMigrateIncomingCards(parsed.cards).cards;
-                    }
-                    recalcGrades();
+                    const parsed = parseLegacyBrowserPayload(String(reader.result || ""));
+                    applyImportedData(parsed);
                     saveState();
-                    renderItems();
-                    renderResults();
-                    safeRenderRank("importJSONFile");
-                    refreshCompareOptions();
-                    drawGraph();
+                    refreshAllDataViews("importJSONFile");
                     alert("Import complete.");
-                } catch {
-                    alert("Import failed. That file is not valid roulette JSON.");
+                } catch (err) {
+                    alert(`Import failed. ${err?.message || "That file is not valid roulette JSON."}`);
                 }
             };
             reader.readAsText(file);
+        }
+
+        async function clearAllData() {
+            const message = "CLEAR ALL DATA will erase saved loadout cards, mission stats, item ownership changes, remembered player name, current spin details, rank comparisons, and roulette settings from the working desktop save. A final recovery backup will be created first. Type CLEAR ALL DATA to continue.";
+            const typed = prompt(message, "");
+            if (typed !== "CLEAR ALL DATA") return;
+            const blankData = { items: deepClone(DEFAULTS.items), cards: [], settings: { rememberedPlayerName: "" } };
+            if (desktopStorage?.clearAll) {
+                const result = await desktopStorage.clearAll(blankData);
+                if (!result?.ok) { alert("Clear All Data was stopped because the recovery backup could not be created."); return; }
+            } else {
+                localStorage.setItem(STORAGE_BACKUP_KEY, JSON.stringify(buildPersistedStatePayload()));
+                localStorage.removeItem(STORAGE_KEY);
+                localStorage.removeItem(STORAGE_CORRUPT_KEY);
+            }
+            state.items = deepClone(DEFAULTS.items);
+            state.cards = [];
+            state.settings.rememberedPlayerName = "";
+            state.current = { seed: null, seedBase: null, mode: null, manualModeDraft: null, modeApplied: false, difficulty: 10, difficultySelected: false, faction: null, loadout: null, locked: false, planet: null, planetLocked: false, planetConfirmed: false, modeConfirmed: false, planetBiome: null, manualPlanetCandidate: null, playerNameDraft: "", specialActive: false, rerollsLeft: 0, spinning: false };
+            normalizeItemWarbondAssignments();
+            storageLoadComplete = true;
+            saveState();
+            refreshAllDataViews("btnClearAll");
+            alert("All working data was cleared after the recovery backup succeeded.");
         }
 
         function wireCollapsibleBlocks() {
@@ -13265,7 +13313,10 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             });
 
             $("#btnExport").addEventListener("click", exportJSON);
-            $("#btnImport").addEventListener("click", () => $("#importFile").click());
+            $("#btnImport").addEventListener("click", () => {
+                if (desktopStorage?.importJson) importJSONFile();
+                else $("#importFile").click();
+            });
             const openSaveFolderBtn = $("#btnOpenSaveFolder");
             if (openSaveFolderBtn) {
                 openSaveFolderBtn.addEventListener("click", () => {
@@ -13279,23 +13330,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 e.target.value = "";
             });
 
-            $("#btnClearAll").addEventListener("click", () => {
-                if (!confirm("This will delete ALL saved cards and item edits. Continue?")) return;
-                localStorage.removeItem(STORAGE_KEY);
-                localStorage.removeItem(STORAGE_BACKUP_KEY);
-                localStorage.removeItem(STORAGE_CORRUPT_KEY);
-                loadState();
-                saveState();
-                renderResults();
-                updateSavedCount();
-                state.current = { seed: null, seedBase: null, mode: null, manualModeDraft: null, modeApplied: false, difficulty: 10, difficultySelected: false, faction: null, loadout: null, locked: false, planet: null, planetLocked: false, planetConfirmed: false, modeConfirmed: false, planetBiome: null, manualPlanetCandidate: null, playerNameDraft: "", specialActive: false, rerollsLeft: 0, spinning: false };
-                renderSpin();
-                renderResults();
-                refreshCompareOptions();
-                safeRenderRank("btnClearAll");
-                renderItems();
-                loadAndRenderApiActivePlanets();
-            });
+            $("#btnClearAll").addEventListener("click", clearAllData);
 
             $("#btnRecalcRanks").addEventListener("click", () => {
                 recalcGrades();

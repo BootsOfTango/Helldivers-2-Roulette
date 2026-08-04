@@ -27,3 +27,28 @@ To open the folder, go to **Results** and select **Open Save Folder**. Windows E
 - `recovery/` — damaged working saves or damaged backups preserved for manual inspection.
 
 On startup, the app tries `state.json` first. If it is damaged, the app copies it into `recovery/` instead of silently discarding it, then tries backups from newest to oldest. If a backup is recovered, the app shows a friendly message so you know what happened. A blank save is used only when no valid working save or backup exists.
+
+## Exporting, importing, and clearing data
+
+Use the existing **Results → Export JSON** button to make a portable copy of your supported roulette state. In the desktop app this opens the normal Windows **Save As** dialog with a dated filename such as `helldivers-2-chaos-roulette-export-2026-08-04.json`. The exported JSON includes:
+
+- Saved loadout cards and mission stats.
+- Item ownership/enabled changes.
+- Supported settings, including the remembered player name.
+- Save-format version.
+- Application version.
+- Export date.
+
+Use **Results → Import JSON** to open the normal Windows file-selection dialog. The app validates the selected JSON before touching the current working save. Unsupported JSON, incorrectly shaped JSON, files over 5 MB, and exports from future save formats are rejected with a friendly explanation. When an import is accepted, the app creates an automatic backup of the current data before saving the imported data, refreshes the affected pages, and writes the imported data to `state.json` so it remains available after restarting the desktop app.
+
+### Moving data from the browser version on first launch
+
+1. Open the browser version.
+2. Select **Export JSON** and save the exported file somewhere easy to find.
+3. Open the desktop version.
+4. Go to **Results → Import JSON** and choose the exported JSON file.
+5. Restart the desktop app if you want to confirm the imported cards and item changes were persisted.
+
+### Clear All Data recovery behavior
+
+**Results → Clear All Data** explains that it will erase saved cards, mission stats, item ownership changes, remembered player name, current spin details, rank comparisons, and roulette settings from the working desktop save. It requires typing `CLEAR ALL DATA` exactly. The desktop app creates one final recovery backup before clearing; if that backup cannot be created, the clear operation stops and the working save is left alone.

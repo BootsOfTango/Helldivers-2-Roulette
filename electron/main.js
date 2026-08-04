@@ -1,6 +1,6 @@
-const { app, BrowserWindow, ipcMain, shell } = require('electron');
+const { app, BrowserWindow, dialog, ipcMain, shell } = require('electron');
 const path = require('node:path');
-const { loadStateFile, saveStateFile, validateData } = require('./storage');
+const { backupCurrentState, exportStateFile, importStateFile, loadStateFile, saveStateFile, validateData } = require('./storage');
 
 const APP_ID = 'com.bootsoftango.helldivers2chaosroulette';
 const YOUTUBE_CHANNEL_URL = 'https://www.youtube.com/@BootsOfTango';
@@ -18,6 +18,14 @@ async function openAllowedExternal(url) {
   if (!isAllowedExternalUrl(url)) return false;
   await shell.openExternal(url);
   return true;
+}
+
+function exportFilename(date = new Date()) {
+  return `helldivers-2-chaos-roulette-export-${date.toISOString().slice(0, 10)}.json`;
+}
+
+function friendlyDialogError(err, fallback) {
+  return err && err.friendly ? err.message : fallback;
 }
 
 function createMainWindow() {
@@ -81,6 +89,41 @@ ipcMain.handle('storage:save', (_event, data) => {
   return saveStateFile(app.getPath('userData'), data, app.getVersion());
 });
 ipcMain.handle('storage:openSaveFolder', () => shell.openPath(app.getPath('userData')));
+
+ipcMain.handle('storage:exportJson', async (event, data) => {
+  validateData(data);
+  const owner = BrowserWindow.fromWebContents(event.sender);
+  const result = await dialog.showSaveDialog(owner, {
+    title: 'Export Helldivers 2 Chaos Roulette JSON',
+    defaultPath: exportFilename(),
+    filters: [{ name: 'JSON Files', extensions: ['json'] }]
+  });
+  if (result.canceled || !result.filePath) return { ok: false, canceled: true };
+  return exportStateFile(result.filePath, data, app.getVersion());
+});
+
+ipcMain.handle('storage:importJson', async (event) => {
+  const owner = BrowserWindow.fromWebContents(event.sender);
+  const result = await dialog.showOpenDialog(owner, {
+    title: 'Import Helldivers 2 Chaos Roulette JSON',
+    properties: ['openFile'],
+    filters: [{ name: 'JSON Files', extensions: ['json'] }]
+  });
+  if (result.canceled || !result.filePaths?.[0]) return { ok: false, canceled: true };
+  try {
+    return importStateFile(app.getPath('userData'), result.filePaths[0], app.getVersion());
+  } catch (err) {
+    return { ok: false, error: friendlyDialogError(err, 'Import failed. That file is not a supported Helldivers 2 Chaos Roulette JSON export.') };
+  }
+});
+
+ipcMain.handle('storage:clearAll', (_event, data) => {
+  validateData(data);
+  const backup = backupCurrentState(app.getPath('userData'), 'state-before-clear-all');
+  const saved = saveStateFile(app.getPath('userData'), data, app.getVersion());
+  return { ok: true, backup, path: saved.path };
+});
+
 
 app.whenReady().then(() => {
   createMainWindow();
