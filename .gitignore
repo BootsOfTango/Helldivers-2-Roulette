@@ -22,3 +22,28 @@ assets/stratagems/exosuits/*
 
 # Mapping file is committed
 !assets/item-images.json
+
+# Node / Electron dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+
+# Generated desktop icon outputs
+/build/icon.png
+/build/icon.ico
+
+# Electron generated build output
+/dist/
+/release/
+out/
+*.blockmap
+*.snap
+*.AppImage
+*.exe
+*.msi
+*.dmg
+
+# Local test screenshots
+/test-artifacts/

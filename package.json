@@ -1,0 +1,44 @@
+{
+  "name": "helldivers-2-chaos-roulette",
+  "version": "1.0.7",
+  "description": "Desktop wrapper for Helldivers 2 Chaos Roulette.",
+  "main": "electron/main.js",
+  "private": true,
+  "author": "Boots Of Tango",
+  "license": "SEE LICENSE IN LICENSE.txt",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --dev",
+    "prepare:icons": "node scripts/create_icon.js",
+    "prebuild:win": "npm run prepare:icons",
+    "build:win": "electron-builder --win"
+  },
+  "devDependencies": {
+    "electron": "^43.3.0",
+    "electron-builder": "^26.0.12",
+    "png-to-ico": "^2.1.8"
+  },
+  "build": {
+    "productName": "Helldivers 2 Chaos Roulette",
+    "appId": "com.bootsoftango.helldivers2chaosroulette",
+    "files": [
+      "index.html",
+      "electron/**/*",
+      "assets/**/*",
+      "*.png",
+      "LICENSE.txt"
+    ],
+    "directories": {
+      "buildResources": "build"
+    },
+    "win": {
+      "target": "nsis",
+      "icon": "build/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true
+    }
+  }
+}

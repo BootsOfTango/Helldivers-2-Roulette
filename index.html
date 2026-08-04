@@ -4179,8 +4179,10 @@ END MASTER DIRECTIVE
 
                 <div style="display:flex; align-items:center; gap:10px; position:relative;">
 
-                    <a href="https://www.youtube.com/@BootsOfTango"
+                    <a id="youtubeChannelLink"
+                       href="https://www.youtube.com/@BootsOfTango"
                        target="_blank"
+                       rel="noopener noreferrer"
                        style="display:flex; align-items:center;">
                         <img src="youtube_logo.png.png"
                              alt="Boots Of Tango"
@@ -4843,6 +4845,21 @@ END MASTER DIRECTIVE
                 WIRED_ONCE = false;
                 console.error("[wire] failed during event wiring", err);
             }
+        }
+
+        function wireDesktopExternalLinks() {
+            const youtubeLink = document.getElementById("youtubeChannelLink");
+            if (!youtubeLink || !window.chaosRoulette?.openYouTubeChannel) return;
+            youtubeLink.addEventListener("click", (event) => {
+                event.preventDefault();
+                window.chaosRoulette.openYouTubeChannel();
+            });
+        }
+
+        if (document.readyState === "loading") {
+            document.addEventListener("DOMContentLoaded", wireDesktopExternalLinks);
+        } else {
+            wireDesktopExternalLinks();
         }
 
 
