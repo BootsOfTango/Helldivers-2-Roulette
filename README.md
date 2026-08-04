@@ -52,3 +52,13 @@ Use **Results → Import JSON** to open the normal Windows file-selection dialog
 ### Clear All Data recovery behavior
 
 **Results → Clear All Data** explains that it will erase saved cards, mission stats, item ownership changes, remembered player name, current spin details, rank comparisons, and roulette settings from the working desktop save. It requires typing `CLEAR ALL DATA` exactly. The desktop app creates one final recovery backup before clearing; if that backup cannot be created, the clear operation stops and the working save is left alone.
+
+## Offline behavior and optional live data
+
+The core roulette app is designed to work without internet access. Application startup, Spin, difficulty selection, built-in planet selection, card creation, Results, Compare, Armory, Rank, Save, Import, and Export all use bundled data and local storage.
+
+The desktop package includes the item catalog and image manifest at `assets/item-catalog.json` and `assets/item-images.json`. In Electron, those files are read through a limited preload bridge that only allows those packaged JSON resources, so ordinary relative-file quirks in packaged builds do not prevent the Armory and item insights from loading. Browser security protections remain enabled.
+
+The **Current active planets (live API)** panel is optional bonus information and requires internet. It checks the public Helldivers 2 campaigns API with a short timeout, does not block startup, and can be refreshed manually from **Armory → Current active planets (live API) → Refresh Live Planets**. If the request fails, the app keeps the built-in planet list available, shows a friendly offline message, and displays the last successful live result when one has been cached. Cached live data is labeled with its last-updated date.
+
+The YouTube channel link is also optional external navigation. In the desktop app it opens only through the secure Electron external-link handler and is not required for any roulette feature.
