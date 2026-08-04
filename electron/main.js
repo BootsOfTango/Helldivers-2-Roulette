@@ -29,6 +29,12 @@ function friendlyDialogError(err, fallback) {
   return err && err.friendly ? err.message : fallback;
 }
 
+function getWindowIconPath() {
+  return app.isPackaged
+    ? path.join(process.resourcesPath, 'build', 'icon.png')
+    : path.join(__dirname, '..', 'build', 'icon.png');
+}
+
 function createMainWindow() {
   const mainWindow = new BrowserWindow({
     width: 1280,
@@ -36,7 +42,7 @@ function createMainWindow() {
     minWidth: 1100,
     minHeight: 720,
     title: 'Helldivers 2 Chaos Roulette',
-    icon: path.join(__dirname, '..', 'build', 'icon.png'),
+    icon: getWindowIconPath(),
     backgroundColor: '#060805',
     show: false,
     webPreferences: {

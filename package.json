@@ -1,6 +1,6 @@
 {
   "name": "helldivers-2-chaos-roulette",
-  "version": "1.0.7",
+  "version": "1.1.0",
   "description": "Desktop wrapper for Helldivers 2 Chaos Roulette.",
   "main": "electron/main.js",
   "private": true,
@@ -11,15 +11,17 @@
     "dev": "electron . --dev",
     "prepare:icons": "node scripts/create_icon.js",
     "prebuild:win": "npm run validate:catalog && npm run validate:assets && npm run prepare:icons",
-    "build:win": "electron-builder --win",
+    "build:win": "electron-builder --win zip --x64",
     "test": "node --test && npm run validate:catalog && npm run validate:assets",
     "validate:assets": "python scripts/validate_assets.py",
-    "validate:catalog": "python scripts/validate_item_catalog.py"
+    "validate:catalog": "python scripts/validate_item_catalog.py",
+    "release:win": "npm run build:win && python scripts/verify_win_zip.py"
   },
   "devDependencies": {
     "electron": "^43.3.0",
     "electron-builder": "^26.0.12",
-    "png-to-ico": "^2.1.8"
+    "png-to-ico": "^2.1.8",
+    "pngjs": "^7.0.0"
   },
   "build": {
     "productName": "Helldivers 2 Chaos Roulette",
@@ -28,20 +30,57 @@
       "index.html",
       "electron/**/*",
       "assets/**/*",
+      "build/icon.ico",
+      "build/icon.png",
       "*.png",
-      "LICENSE.txt"
+      "LICENSE.txt",
+      "README.md",
+      "package.json",
+      "!**/.git/**",
+      "!**/node_modules/**",
+      "!test/**",
+      "!scripts/**",
+      "!*.md",
+      "README.md",
+      "!RELEASE_NOTES*.md",
+      "!sample-card-tidied.html",
+      "!**/*.map",
+      "!**/*.tmp",
+      "!**/*.log",
+      "!**/.env*",
+      "!**/*secret*",
+      "!**/coverage/**"
     ],
     "directories": {
       "buildResources": "build"
     },
     "win": {
-      "target": "nsis",
+      "target": [
+        {
+          "target": "zip",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
       "icon": "build/icon.ico"
     },
-    "nsis": {
-      "oneClick": false,
-      "perMachine": false,
-      "allowToChangeInstallationDirectory": true
-    }
+    "artifactName": "Helldivers-2-Chaos-Roulette-v${version}-win-${arch}.${ext}",
+    "extraFiles": [
+      {
+        "from": "README-FIRST.txt",
+        "to": "README-FIRST.txt"
+      }
+    ],
+    "extraResources": [
+      {
+        "from": "build/icon.ico",
+        "to": "build/icon.ico"
+      },
+      {
+        "from": "build/icon.png",
+        "to": "build/icon.png"
+      }
+    ]
   }
 }
