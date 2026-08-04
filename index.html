@@ -4613,7 +4613,7 @@ END MASTER DIRECTIVE
                             <button id="btnRefreshApiPlanets" class="btnGhost">REFRESH LIVE PLANETS</button>
                         </div>
                     </div>
-                    <div id="apiPlanetStatus" class="tiny muted" style="margin-bottom:8px;">Loading live planets...</div>
+                    <div id="apiPlanetStatus" class="tiny muted" style="margin-bottom:8px;">Live planets are optional. The built-in planet list is ready offline.</div>
                     <div id="apiActivePlanetsList"></div>
                 </div>
             </div>
@@ -4810,6 +4810,7 @@ END MASTER DIRECTIVE
 
     </main>
 
+    <script src="assets/live-planets.js"></script>
     <script>
         let WIRED_ONCE = false;
         function bindCriticalControls() {
@@ -4973,7 +4974,7 @@ END MASTER DIRECTIVE
             window.__apiPlanetsLoadedOnce = true;
 
             await loadItemImageDb();
-            await loadAndRenderApiActivePlanets();
+            void loadAndRenderApiActivePlanets({ manual: false });
 
             // Kick off biome load, but do NOT block the app.
             // Biomes are a UI enhancement, not a dependency.
@@ -6320,10 +6321,12 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         const STORAGE_CORRUPT_KEY = "hd2_chaos_roulette_corrupt_v1";
         const STORAGE_LOCKED_STATS_AUDIT_KEY = "hd2_chaos_roulette_locked_stats_audit_v1";
         const FIRST_BACKUP_WARNING_KEY = "hd2_backup_warning_seen_v1";
+        const LIVE_PLANETS_CACHE_KEY = "hd2_live_planets_cache_v1";
         let shouldPersistOnBoot = true;
         let storageLoadComplete = false;
         let pendingSaveAfterLoad = false;
         const desktopStorage = window.chaosRoulette && typeof window.chaosRoulette.loadState === "function" && typeof window.chaosRoulette.saveState === "function" ? window.chaosRoulette : null;
+        const desktopResourceReader = window.chaosRoulette && typeof window.chaosRoulette.readJsonResource === "function" ? window.chaosRoulette : null;
         const state = {
             items: null,
             cards: [],
@@ -6448,12 +6451,16 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             }
         }
 
+        function readPackagedJsonResource(resourcePath, fetchOptions = {}) {
+            if (desktopResourceReader) return desktopResourceReader.readJsonResource(resourcePath);
+            return fetch(resourcePath, fetchOptions).then(res => {
+                if (!res.ok) throw new Error(`${resourcePath} ${res.status}`);
+                return res.json();
+            });
+        }
+
         function loadItemImageDb() {
-            return fetch("assets/item-images.json")
-                .then(r => {
-                    if (!r.ok) throw new Error(`Failed to load item images (${r.status})`);
-                    return r.json();
-                })
+            return readPackagedJsonResource("assets/item-images.json")
                 .then(data => {
                     itemImageDb = data;
                 })
@@ -7657,11 +7664,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                 });
                 itemVisuals.aliases.clear();
             }
-            return fetch("assets/item-images.json", { cache: "no-store" })
-                .then(res => {
-                    if (!res.ok) throw new Error(`item-images.json ${res.status}`);
-                    return res.json();
-                })
+            return readPackagedJsonResource("assets/item-images.json", { cache: "no-store" })
                 .then(data => {
                     ["primary", "sidearm", "throwable", "stratagem", "booster"].forEach(cat => {
                         const map = itemVisuals.byCategory[cat];
@@ -7681,11 +7684,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         }
 
         function loadItemCatalogForValidation() {
-            return fetch("assets/item-catalog.json", { cache: "no-store" })
-                .then(res => {
-                    if (!res.ok) throw new Error(`item-catalog.json ${res.status}`);
-                    return res.json();
-                });
+            return readPackagedJsonResource("assets/item-catalog.json", { cache: "no-store" });
         }
 
         async function refreshItemInsightsFromJson() {
@@ -11073,29 +11072,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         ];
 
         const WARBOND_ART = {
-            "Helldiver Basics (Mobilize)": "https://helldivers.wiki.gg/images/Helldivers_Mobilize_Warbond_Cover.png?76622f",
-            "Steeled Veterans": "https://helldivers.wiki.gg/images/Steeled_Veterans_Premium_Warbond_Cover.png?f28782",
-            "Cutting Edge": "https://helldivers.wiki.gg/images/Cutting_Edge_Premium_Warbond_Cover.png?77ee57",
-            "Democratic Detonation": "https://helldivers.wiki.gg/images/Democratic_Detonation_Premium_Warbond_Cover.png?3a5fe5",
-            "Polar Patriots": "https://helldivers.wiki.gg/images/Polar_Patriots_Premium_Warbond_Cover.png?636036",
-            "Viper Commandos": "https://helldivers.wiki.gg/images/Viper_Commandos_Premium_Warbond_Cover.png?1535b6",
-            "Freedom's Flame": "https://helldivers.wiki.gg/images/Freedom%27s_Flame_Premium_Warbond_Cover.png?31d352",
-            "Chemical Agents": "https://helldivers.wiki.gg/images/Chemical_Agents_Premium_Warbond_Cover.png?351fa0",
-            "Truth Enforcers": "https://helldivers.wiki.gg/images/Truth_Enforcers_Premium_Warbond_Cover.png?ed26e0",
-            "Urban Legends": "https://helldivers.wiki.gg/images/Urban_Legends_Premium_Warbond_Cover.png?66990d",
-            "Servants of Freedom": "https://helldivers.wiki.gg/images/Servants_of_Freedom_Premium_Warbond_Cover.png?2f2dcb",
-            "Borderline Justice": "https://helldivers.wiki.gg/images/Borderline_Justice_Premium_Warbond_Cover.png?f4d7aa",
-            "Masters of Ceremony": "https://helldivers.wiki.gg/images/Masters_of_Ceremony_Premium_Warbond_Cover.png?b85f69",
-            "Force of Law": "https://helldivers.wiki.gg/images/Force_of_Law_Premium_Warbond_Cover.png?58f3d8",
-            "Control Group": "https://helldivers.wiki.gg/images/Control_Group_Premium_Warbond_Cover.png?3b16f0",
-            "Dust Devils": "https://helldivers.wiki.gg/images/Dust_Devils_Premium_Warbond_Cover.png?ad2a4f",
-            "Python Commandos": "https://helldivers.wiki.gg/images/Python_Commandos_Premium_Warbond_Cover.png?37db96",
-            "Redacted Regiment": "https://helldivers.wiki.gg/images/Redacted_Regiment_Premium_Warbond_Cover.png?631f8b",
-            "Siege Breakers": "https://helldivers.wiki.gg/images/thumb/Siege_Breakers_Premium_Warbond_Cover.png/1920px-Siege_Breakers_Premium_Warbond_Cover.png?22d8ca",
-            "Entrenched Division": "https://helldivers.wiki.gg/images/thumb/Entrenched_Division_Premium_Warbond_Marketing_13.png/1780px-Entrenched_Division_Premium_Warbond_Marketing_13.png?24cc5a",
-            "Obedient Democracy Support Troopers": "https://helldivers.wiki.gg/images/thumb/Halo_ODST_Legendary_Warbond_Cover.png/1920px-Halo_ODST_Legendary_Warbond_Cover.png?3e16b0",
-            "Righteous Revenants": "https://helldivers.wiki.gg/images/Righteous_Revenants_Legendary_Warbond_Cover.png?da3de4",
-            "Exo Experts": "https://helldivers.wiki.gg/images/Exo_Experts_Premium_Warbond_Cover.png?23c0b8"
+            "Exo Experts": "assets/warbonds/exo-experts-cover.svg"
         };
 
 
@@ -11936,46 +11913,64 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             box.appendChild(wrap);
         }
 
-        async function loadAndRenderApiActivePlanets() {
+        function getCachedLivePlanets() {
+            try {
+                const parsed = JSON.parse(localStorage.getItem(LIVE_PLANETS_CACHE_KEY) || "null");
+                const valid = window.HD2LivePlanets.validateCachedPlanets(parsed);
+                if (valid) return valid;
+            } catch (err) { console.warn("[API planets] cache read failed", err); }
+            return null;
+        }
+
+        function setCachedLivePlanets(planets) {
+            const payload = { planets, updatedAt: nowISO() };
+            try { localStorage.setItem(LIVE_PLANETS_CACHE_KEY, JSON.stringify(payload)); }
+            catch (err) { console.warn("[API planets] cache write failed", err); }
+            return payload;
+        }
+
+        function formatLivePlanetsUpdatedAt(value) {
+            try { return new Date(value).toLocaleString(); }
+            catch (_) { return String(value || "unknown time"); }
+        }
+
+        function renderCachedOrOfflineApiPlanets(message) {
             const status = $("#apiPlanetStatus");
             const box = $("#apiActivePlanetsList");
             if (!status || !box) return;
+            const cached = getCachedLivePlanets();
+            if (cached) {
+                window.__apiActivePlanetsCache = cached.planets;
+                status.textContent = `${message} Showing cached live planets from ${formatLivePlanetsUpdatedAt(cached.updatedAt)}. Built-in planets remain available for roulette.`;
+                renderApiActivePlanetsRows(cached.planets);
+            } else {
+                window.__apiActivePlanetsCache = [];
+                status.textContent = `${message} Core roulette features are ready offline using the built-in planet list.`;
+                box.innerHTML = `<div class="tiny">Live planets require internet. Spin, difficulty selection, built-in planet selection, card creation, results, compare, armory, rank, save, import, and export still work offline.</div>`;
+            }
+        }
+
+        async function loadAndRenderApiActivePlanets({ manual = false } = {}) {
+            const status = $("#apiPlanetStatus");
+            const box = $("#apiActivePlanetsList");
+            if (!status || !box) return;
+            if (isApiPlanetSyncInProgress()) return;
 
             state.ui.apiPlanetSyncInProgress = true;
-            status.textContent = "Loading live planets from API...";
-            box.innerHTML = "";
+            status.textContent = manual ? "Refreshing live planets (internet optional)..." : "Checking for live planets briefly. Offline roulette is ready.";
+            if (!manual && !box.innerHTML.trim()) renderCachedOrOfflineApiPlanets("Live planet data has not been refreshed yet.");
             renderSpin();
 
             try {
-                const res = await fetch("https://api.helldivers2.dev/api/v1/campaigns", {
-                    headers: {
-                        "X-Super-Client": "helldivers-2-roulette",
-                        "X-Super-Contact": "https://github.com/"
-                    }
-                });
-                if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-                const data = await res.json();
-                const active = (Array.isArray(data) ? data : [])
-                    .map(c => c?.planet)
-                    .filter(Boolean)
-                    .filter(p => !p.disabled)
-                    .map(p => ({
-                        name: p.name || "Unknown",
-                        sector: p.sector || "—",
-                        faction: normalizeFactionFromOwner(p.currentOwner || p.owner),
-                        biome: p.biome?.name || "—"
-                    }))
-                    .sort((a, b) => a.name.localeCompare(b.name));
-
-                status.textContent = `Live API returned ${active.length} active planets.`;
+                const active = await window.HD2LivePlanets.fetchActivePlanets(window.fetch.bind(window));
+                const cached = setCachedLivePlanets(active);
+                status.textContent = `Live API returned ${active.length} active planets. Last updated ${formatLivePlanetsUpdatedAt(cached.updatedAt)}.`;
                 window.__apiActivePlanetsCache = active;
                 syncEditablePlanetsToLiveActive(active);
                 renderApiActivePlanetsRows(active);
             } catch (err) {
                 console.warn("[API planets] failed", err);
-                status.textContent = "Unable to load live planets from API right now.";
-                box.innerHTML = `<div class="tiny">Check internet connection, CORS policy, or try refresh again.</div>`;
+                renderCachedOrOfflineApiPlanets("Unable to reach live planets right now.");
             } finally {
                 state.ui.apiPlanetSyncInProgress = false;
                 renderSpin();
@@ -12038,7 +12033,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             if (!window.__apiPlanetsLoadedOnce) {
                 window.__apiPlanetsLoadedOnce = true;
-                loadAndRenderApiActivePlanets();
+                loadAndRenderApiActivePlanets({ manual: false });
             }
         }
 
@@ -13037,7 +13032,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             refreshCompareOptions();
             safeRenderRank(context);
             drawGraph();
-            loadAndRenderApiActivePlanets();
+            loadAndRenderApiActivePlanets({ manual: false });
         }
 
         async function exportJSON() {
@@ -13356,7 +13351,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
 
             $("#btnRefreshApiPlanets").addEventListener("click", () => {
-                loadAndRenderApiActivePlanets();
+                loadAndRenderApiActivePlanets({ manual: true });
             });
 
             // Add item buttons
