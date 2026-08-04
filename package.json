@@ -10,9 +10,11 @@
     "start": "electron .",
     "dev": "electron . --dev",
     "prepare:icons": "node scripts/create_icon.js",
-    "prebuild:win": "npm run prepare:icons",
+    "prebuild:win": "npm run validate:catalog && npm run validate:assets && npm run prepare:icons",
     "build:win": "electron-builder --win",
-    "test": "node --test"
+    "test": "node --test && npm run validate:catalog && npm run validate:assets",
+    "validate:assets": "python scripts/validate_assets.py",
+    "validate:catalog": "python scripts/validate_item_catalog.py"
   },
   "devDependencies": {
     "electron": "^43.3.0",
