@@ -11,7 +11,8 @@
     "dev": "electron . --dev",
     "prepare:icons": "node scripts/create_icon.js",
     "prebuild:win": "npm run prepare:icons",
-    "build:win": "electron-builder --win"
+    "build:win": "electron-builder --win",
+    "test": "node --test"
   },
   "devDependencies": {
     "electron": "^43.3.0",
