@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 160" role="img" aria-label="LOCAL WARBOND PLACEHOLDER">
+  <rect width="256" height="160" rx="18" fill="#111827"/>
+  <rect x="10" y="10" width="236" height="140" rx="14" fill="none" stroke="#f5c542" stroke-width="4" stroke-dasharray="14 8"/>
+  <text x="128" y="72" text-anchor="middle" fill="#f5c542" font-family="Arial, sans-serif" font-size="22" font-weight="700">WARBOND</text>
+  <text x="128" y="104" text-anchor="middle" fill="#e5e7eb" font-family="Arial, sans-serif" font-size="14">LOCAL PLACEHOLDER</text>
+</svg>

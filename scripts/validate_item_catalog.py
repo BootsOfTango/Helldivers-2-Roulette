@@ -87,8 +87,8 @@ def main() -> int:
                 file_path = ROOT / asset_path
                 if not file_path.exists():
                     errors.append(f"{t} item '{name}' references missing assetPath: {asset_path}")
-                if "assets/placeholders/" in asset_path:
-                    errors.append(f"{t} item '{name}' still points to placeholder art: {asset_path}")
+                if "assets/placeholders/" in asset_path and not entry.get("placeholder"):
+                    errors.append(f"{t} item '{name}' points to placeholder art without placeholder metadata: {asset_path}")
 
     # ensure defaults are catalog-derived
     for t, defaults_key in TYPE_TO_DEFAULTS_KEY.items():

@@ -11072,7 +11072,8 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         ];
 
         const WARBOND_ART = {
-            "Exo Experts": "assets/warbonds/exo-experts-cover.svg"
+            "Exo Experts": "assets/warbonds/exo-experts-cover.svg",
+            "__placeholder": "assets/placeholders/warbond/warbond-placeholder.svg"
         };
 
 
@@ -11740,7 +11741,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
                 const groupHeader = document.createElement("div");
                 groupHeader.className = "warbondHeader";
-                const art = WARBOND_ART[warbond];
+                const art = WARBOND_ART[warbond] || WARBOND_ART.__placeholder;
                 if (art) {
                     const img = document.createElement("img");
                     img.loading = "lazy";
