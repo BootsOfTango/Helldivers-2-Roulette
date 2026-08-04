@@ -12,7 +12,7 @@ This repository now includes an Electron shell for the existing `index.html` app
 - `npm run dev` launches the Electron desktop application for local development.
 - `npm start` launches the Electron desktop application normally.
 - `npm run prepare:icons` regenerates the local desktop icon files from the existing repository logo asset.
-- `npm run build:win` regenerates those icon files, then creates a Windows installer build with the product name `Helldivers 2 Chaos Roulette` and stable app ID `com.bootsoftango.helldivers2chaosroulette`.
+- `npm run build:win` regenerates those icon files, then creates the dependable Windows x64 ZIP package with the product name `Helldivers 2 Chaos Roulette` and stable app ID `com.bootsoftango.helldivers2chaosroulette`. The ZIP is named `Helldivers-2-Chaos-Roulette-v1.1.0-win-x64.zip`, includes `README-FIRST.txt`, and should be extracted as a complete folder before running the `.exe`.
 
 ## Desktop save files and recovery
 
