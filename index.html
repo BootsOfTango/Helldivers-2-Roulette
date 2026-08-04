@@ -4320,11 +4320,12 @@ END MASTER DIRECTIVE
                 </div>
                 <div class="col right">
                     <div id="resultsBackupReminder" class="resultsBackupReminder">
-                        ⚠️ Save/Export your cards JSON to your PC before clearing browser cache or cookies.
+                        Desktop saves are stored in a state.json file with dated automatic backups. Export JSON is still available for manual copies.
                     </div>
                     <div class="miniRow" style="justify-content:flex-end;">
                         <button id="btnExport" class="btnGhost">EXPORT JSON</button>
                         <button id="btnImport" class="btnGhost">IMPORT JSON</button>
+                        <button id="btnOpenSaveFolder" class="btnGhost">OPEN SAVE FOLDER</button>
                         <input id="importFile" type="file" accept="application/json" style="display:none;" />
                         <button id="btnClearAll" class="btnDanger">CLEAR ALL DATA</button>
                     </div>
@@ -6320,6 +6321,9 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         const STORAGE_LOCKED_STATS_AUDIT_KEY = "hd2_chaos_roulette_locked_stats_audit_v1";
         const FIRST_BACKUP_WARNING_KEY = "hd2_backup_warning_seen_v1";
         let shouldPersistOnBoot = true;
+        let storageLoadComplete = false;
+        let pendingSaveAfterLoad = false;
+        const desktopStorage = window.chaosRoulette && typeof window.chaosRoulette.loadState === "function" && typeof window.chaosRoulette.saveState === "function" ? window.chaosRoulette : null;
         const state = {
             items: null,
             cards: [],
@@ -6649,61 +6653,71 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
             }
         }
 
-        function loadState() {
-            const raw = localStorage.getItem(STORAGE_KEY);
-            const rawBackup = localStorage.getItem(STORAGE_BACKUP_KEY);
+        function buildPersistedStatePayload() {
+            return {
+                items: state.items,
+                cards: state.cards,
+                settings: {
+                    rememberedPlayerName: String(state.settings?.rememberedPlayerName || "").trim()
+                }
+            };
+        }
 
+        function validatePersistedStateData(data) {
+            if (!data || typeof data !== "object" || Array.isArray(data)) throw new Error("State data must be an object.");
+            if (data.items != null && (typeof data.items !== "object" || Array.isArray(data.items))) throw new Error("Items must be an object.");
+            if (data.cards != null && !Array.isArray(data.cards)) throw new Error("Cards must be an array.");
+            if (data.settings != null && (typeof data.settings !== "object" || Array.isArray(data.settings))) throw new Error("Settings must be an object.");
+        }
+
+        function parseLegacyBrowserPayload(raw) {
+            const parsed = JSON.parse(raw);
+            if (parsed && typeof parsed === "object" && parsed.data && Number(parsed.saveFormatVersion || 0) >= 1) {
+                return parsed.data;
+            }
+            return parsed;
+        }
+
+        function applyLoadedStateData(data) {
+            validatePersistedStateData(data);
+            parseAndApplyState(JSON.stringify(data));
+        }
+
+        async function loadState() {
             // Always start from defaults
             state.items = deepClone(DEFAULTS.items);
             state.cards = [];
-
-            // Normalize default faction strings immediately
             sanitizeFactionData();
-
-            // Discord webhook sending is intentionally disabled.
             state.settings.discordWebhookUrl = "";
             state.settings.rememberedPlayerName = "";
 
-            if (!raw && !rawBackup) {
-                normalizeItemWarbondAssignments();
-                return;
-            }
-
-            try {
-                parseAndApplyState(raw || rawBackup);
-            } catch (primaryErr) {
-                if (raw) {
-                    try { localStorage.setItem(STORAGE_CORRUPT_KEY, raw); } catch (_) {}
-                }
-
-                if (rawBackup && rawBackup !== raw) {
-                    try {
-                        state.items = deepClone(DEFAULTS.items);
-                        state.cards = [];
-                        sanitizeFactionData();
-                        parseAndApplyState(rawBackup);
-                        console.warn("[storage] Loaded backup state after primary state parse failure.", primaryErr);
-                    } catch (backupErr) {
-                        console.error("[storage] Failed to parse both primary and backup state.", backupErr);
-                        state.items = deepClone(DEFAULTS.items);
-                        normalizeItemWarbondAssignments();
-                        state.cards = [];
-                        shouldPersistOnBoot = false;
+            let loadedData = null;
+            if (desktopStorage) {
+                const result = await desktopStorage.loadState();
+                if (result?.data) {
+                    loadedData = result.data;
+                    if (result.recovered) {
+                        alert("Your save file was damaged, so Helldivers 2 Chaos Roulette recovered your latest valid backup. The damaged file was preserved in the recovery folder.");
                     }
-                } else {
-                    state.items = deepClone(DEFAULTS.items);
-                    normalizeItemWarbondAssignments();
-                    state.cards = [];
-                    shouldPersistOnBoot = false;
-                    console.error("[storage] Failed to parse primary state; preserving corrupt payload for manual recovery.", primaryErr);
+                }
+            } else {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                const rawBackup = localStorage.getItem(STORAGE_BACKUP_KEY);
+                if (raw || rawBackup) {
+                    try { loadedData = parseLegacyBrowserPayload(raw || rawBackup); }
+                    catch (primaryErr) {
+                        if (raw) { try { localStorage.setItem(STORAGE_CORRUPT_KEY, raw); } catch (_) {} }
+                        if (rawBackup && rawBackup !== raw) loadedData = parseLegacyBrowserPayload(rawBackup);
+                        else { shouldPersistOnBoot = false; console.error("[storage] Failed to parse browser fallback state; preserving corrupt payload.", primaryErr); }
+                    }
                 }
             }
 
-            // Normalize any mismatched faction strings from defaults/imports/saves
+            if (loadedData) applyLoadedStateData(loadedData);
+            else normalizeItemWarbondAssignments();
+
             sanitizeFactionData();
-            if (migrateLegacyCardShots(state.cards)) {
-                saveState();
-            }
+            if (migrateLegacyCardShots(state.cards)) saveState();
             refreshLockedStatsBaseline();
             try {
                 const savedAuditRaw = localStorage.getItem(STORAGE_LOCKED_STATS_AUDIT_KEY);
@@ -6711,26 +6725,24 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
                     const savedAudit = JSON.parse(savedAuditRaw);
                     const savedKeys = Object.keys(savedAudit || {}).sort().join("|");
                     const currentKeys = Object.keys(state.ui.lockedStatsBaseline || {}).sort().join("|");
-                    if (savedKeys === currentKeys) {
-                        assertLockedStatsDeterminism("loadState");
-                    }
+                    if (savedKeys === currentKeys) assertLockedStatsDeterminism("loadState");
                 }
-            } catch (err) {
-                console.warn("[card-stats] skipped locked stats audit load check", err);
-            }
-
+            } catch (err) { console.warn("[card-stats] skipped locked stats audit load check", err); }
+            storageLoadComplete = true;
+            if (pendingSaveAfterLoad) { pendingSaveAfterLoad = false; saveState(); }
         }
 
         function saveState() {
-            const payload = JSON.stringify({
-                items: state.items,
-                cards: state.cards,
-                settings: {
-                    rememberedPlayerName: String(state.settings?.rememberedPlayerName || "").trim()
-                }
-            });
-            localStorage.setItem(STORAGE_KEY, payload);
-            localStorage.setItem(STORAGE_BACKUP_KEY, payload);
+            if (!storageLoadComplete) { pendingSaveAfterLoad = true; return; }
+            const data = buildPersistedStatePayload();
+            validatePersistedStateData(data);
+            if (desktopStorage) {
+                desktopStorage.saveState(data).catch(err => console.error("[storage] desktop save failed", err));
+            } else {
+                const payload = JSON.stringify(data);
+                localStorage.setItem(STORAGE_KEY, payload);
+                localStorage.setItem(STORAGE_BACKUP_KEY, payload);
+            }
             refreshLockedStatsBaseline();
             persistLockedStatsAudit();
 
@@ -13254,6 +13266,13 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
 
             $("#btnExport").addEventListener("click", exportJSON);
             $("#btnImport").addEventListener("click", () => $("#importFile").click());
+            const openSaveFolderBtn = $("#btnOpenSaveFolder");
+            if (openSaveFolderBtn) {
+                openSaveFolderBtn.addEventListener("click", () => {
+                    if (desktopStorage?.openSaveFolder) desktopStorage.openSaveFolder();
+                    else alert("Save folder opening is available in the desktop app. Browser development mode uses localStorage fallback.");
+                });
+            }
             $("#importFile").addEventListener("change", (e) => {
                 const f = e.target.files && e.target.files[0];
                 if (f) importJSONFile(f);
@@ -13535,13 +13554,13 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         // Boot sequence must stay resilient even if saved data is malformed.
         // Wire UI controls first so tabs/buttons remain clickable.
         wireOnce();
-        try {
-            loadState();
-        } catch (err) {
+        const bootStateReady = loadState().catch((err) => {
             console.error("[boot] loadState failed; resetting runtime state", err);
             state.items = deepClone(DEFAULTS.items);
             state.cards = [];
-        }
+            storageLoadComplete = true;
+        });
+        bootStateReady.then(() => {
         preloadItemVisuals()
             .then(() => renderItems())
             .catch((err) => console.error("[boot] preload visuals failed", err));
@@ -13555,6 +13574,7 @@ function normalizeText(s) { return String(s || "").toLowerCase().trim(); }
         try { switchTab("spin"); } catch (err) { console.error("[boot] switchTab failed", err); }
         try { runViewOnlyRender("boot:renderSpin", () => renderSpin()); } catch (err) { console.error("[boot] renderSpin failed", err); }
         setTimeout(() => { try { runViewOnlyRender("boot:renderResults", () => renderResults()); } catch (err) { console.error("[boot] renderResults failed", err); } }, 0);
+        });
 
         /* ===== AUTO COMPARE RADAR WIRING ===== */
         function updateCompareRadar() {

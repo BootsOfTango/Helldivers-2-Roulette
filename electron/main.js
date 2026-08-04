@@ -1,5 +1,6 @@
 const { app, BrowserWindow, ipcMain, shell } = require('electron');
 const path = require('node:path');
+const { loadStateFile, saveStateFile, validateData } = require('./storage');
 
 const APP_ID = 'com.bootsoftango.helldivers2chaosroulette';
 const YOUTUBE_CHANNEL_URL = 'https://www.youtube.com/@BootsOfTango';
@@ -73,6 +74,13 @@ ipcMain.handle('app:getInfo', () => ({
 }));
 
 ipcMain.handle('links:openYouTubeChannel', () => openAllowedExternal(YOUTUBE_CHANNEL_URL));
+
+ipcMain.handle('storage:load', () => loadStateFile(app.getPath('userData')));
+ipcMain.handle('storage:save', (_event, data) => {
+  validateData(data);
+  return saveStateFile(app.getPath('userData'), data, app.getVersion());
+});
+ipcMain.handle('storage:openSaveFolder', () => shell.openPath(app.getPath('userData')));
 
 app.whenReady().then(() => {
   createMainWindow();
