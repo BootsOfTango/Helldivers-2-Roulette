@@ -1,14 +1,11 @@
 #!/usr/bin/env python3
 import hashlib
-import json
 import sys
 import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-package = json.loads((ROOT / 'package.json').read_text())
-version = package['version']
-zip_path = ROOT / 'dist' / f'Helldivers-2-Chaos-Roulette-v{version}-win-x64.zip'
+zip_path = ROOT / 'dist' / 'Helldivers-2-Roulette-Windows.zip'
 if not zip_path.exists():
     raise SystemExit(f'Missing ZIP: {zip_path}')
 
