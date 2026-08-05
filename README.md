@@ -14,6 +14,11 @@ This repository now includes an Electron shell for the existing `index.html` app
 - `npm run prepare:icons` regenerates the local desktop icon files from the existing repository logo asset.
 - `npm run build:win` regenerates those icon files, then creates the dependable Windows x64 ZIP package with the product name `Helldivers 2 Chaos Roulette` and stable app ID `com.bootsoftango.helldivers2chaosroulette`. The ZIP is named `Helldivers-2-Chaos-Roulette-v1.1.0-win-x64.zip`, includes `README-FIRST.txt`, and should be extracted as a complete folder before running the `.exe`.
 
+
+## Windows releases
+
+Maintainers publish the Windows ZIP with the **Windows Release ZIP** GitHub Actions workflow. Push a version tag that matches `package.json`, such as `v1.1.0`, to run validation, tests, packaging, ZIP inspection, checksum generation, and GitHub Release upload on GitHub's Windows runner. Use **Actions → Windows Release ZIP → Run workflow** for a manual test build on a branch before tagging. See `docs/RELEASE.md` for the release checklist and owner steps.
+
 ## Desktop save files and recovery
 
 The desktop app uses Electron's stable per-user application data directory for the app ID `com.bootsoftango.helldivers2chaosroulette`, which keeps the save location consistent across future updates. On Windows, Electron stores this under your user profile's AppData area for **Helldivers 2 Chaos Roulette**.
