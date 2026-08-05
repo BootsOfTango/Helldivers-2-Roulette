@@ -11,6 +11,11 @@ on:
         required: true
         default: '22'
         type: string
+      sign-build:
+        description: 'Sign this manual build with Azure Trusted Signing secrets'
+        required: true
+        default: false
+        type: boolean
 
 permissions:
   contents: write
@@ -21,6 +26,15 @@ jobs:
     runs-on: windows-latest
     env:
       NODE_VERSION: ${{ inputs.node-version || '22' }}
+      WINDOWS_SIGNING_REQUIRED: ${{ startsWith(github.ref, 'refs/tags/') || inputs.sign-build == true }}
+      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+      AZURE_TRUSTED_SIGNING_ENDPOINT: ${{ secrets.AZURE_TRUSTED_SIGNING_ENDPOINT }}
+      AZURE_TRUSTED_SIGNING_ACCOUNT_NAME: ${{ secrets.AZURE_TRUSTED_SIGNING_ACCOUNT_NAME }}
+      AZURE_TRUSTED_SIGNING_CERTIFICATE_PROFILE_NAME: ${{ secrets.AZURE_TRUSTED_SIGNING_CERTIFICATE_PROFILE_NAME }}
+      WINDOWS_SIGNING_PUBLISHER_NAME: ${{ secrets.WINDOWS_SIGNING_PUBLISHER_NAME }}
+      WINDOWS_SIGNING_TIMESTAMP_RFC3161: ${{ vars.WINDOWS_SIGNING_TIMESTAMP_RFC3161 || 'http://timestamp.acs.microsoft.com' }}
 
     steps:
       - name: Check out repository
@@ -59,6 +73,11 @@ jobs:
 
       - name: Build Windows application
         run: npm run build:win
+
+      - name: Verify signed executable before publishing
+        if: env.WINDOWS_SIGNING_REQUIRED == 'true'
+        shell: pwsh
+        run: ./scripts/verify_windows_signature.ps1
 
       - name: Verify Windows ZIP contents and generate checksum
         run: python scripts/verify_win_zip.py
