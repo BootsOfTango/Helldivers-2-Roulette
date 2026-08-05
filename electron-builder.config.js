@@ -76,7 +76,7 @@ module.exports = {
     buildResources: 'build',
   },
   win,
-  artifactName: 'Helldivers-2-Chaos-Roulette-v${version}-win-${arch}.${ext}',
+  artifactName: 'Helldivers-2-Roulette-Windows.${ext}',
   extraFiles: [
     {
       from: 'README-FIRST.txt',
