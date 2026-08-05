@@ -56,6 +56,8 @@ function createMainWindow() {
     }
   });
 
+  if (app.isPackaged) mainWindow.setMenu(null);
+
   mainWindow.once('ready-to-show', () => mainWindow.show());
 
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
