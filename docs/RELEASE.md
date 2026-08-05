@@ -12,6 +12,7 @@ Use this checklist before publishing a Windows ZIP release.
 - [ ] Test upgrades by opening a save created by the previous released build.
 - [ ] Create the matching version tag, such as `v1.1.0`.
 - [ ] Inspect the published ZIP from the GitHub Release before announcing it.
+- [ ] Complete the Windows owner-verification steps in `docs/FINAL_TEST_REPORT.md`, including launch from Downloads, Desktop, Documents, paths with spaces, offline mode, corruption recovery, upgrade survival, external links, logs, screenshots, and checksum comparison.
 
 ## Starting a release
 
